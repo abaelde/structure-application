@@ -13,10 +13,11 @@ structure-application/
 │   └── __init__.py
 ├── structures/                    # Moteur d'application des programmes
 │   ├── structure_loader.py       # Chargement depuis Excel (ProgramLoader)
-│   ├── structure_engine.py       # Logique d'application (sequential/parallel)
+│   ├── structure_engine.py       # Logique d'application et matching de sections
 │   └── __init__.py
 ├── bordereau_exemple.csv         # Données des polices
 ├── program_config.xlsx           # Configuration du programme (Excel)
+├── create_program_config.py      # Script de création de configuration
 ├── main.py                       # Point d'entrée principal
 └── README.md                     # Documentation
 ```
@@ -46,17 +47,25 @@ Le programme définit :
 
 ### 4. Structures
 Les structures sont les éléments qui composent un programme. Chaque structure :
-- Utilise un produit de base (quote_share ou excess_of_loss)
-- A des paramètres spécifiques (session_rate, priority, limit)
-- Peut avoir des conditions d'application
+- Est définie par son nom, son ordre d'application et le type de produit utilisé
+- Possède plusieurs **sections** qui définissent les paramètres et conditions d'application
 
-### 5. Conditions d'application
-Les structures peuvent avoir des conditions basées sur les métadonnées du bordereau :
-- **dimension** : Le champ du bordereau à vérifier (ex: localisation, industrie)
-- **value** : La valeur exacte requise (opérateur = equals uniquement)
+### 5. Sections
+Les sections sont les instanciations concrètes d'une structure avec :
+- **Paramètres** : session_rate (pour quote_share), priority et limit (pour excess_of_loss)
+- **Conditions** : Valeurs spécifiques pour les dimensions (localisation, industrie, etc.)
 
-**Important** : Si une structure doit s'appliquer à plusieurs valeurs (ex: Paris ET Lyon), 
-on crée **plusieurs lignes de conditions** avec une valeur unique par ligne.
+#### Logique de matching
+Pour chaque police et chaque structure :
+1. Le système cherche toutes les sections dont les conditions matchent la police
+2. Si plusieurs sections matchent, la **plus spécifique** est choisie (celle avec le plus de conditions)
+3. Si aucune section ne matche, la structure n'est pas appliquée
+
+**Exemple :**
+- Section 1 : session_rate=30%, localisation=NULL → S'applique partout (générique)
+- Section 2 : session_rate=40%, localisation=Paris → S'applique uniquement à Paris (spécifique)
+
+Pour une police à Paris, la Section 2 sera choisie car elle est plus spécifique.
 
 ## Configuration Excel
 
@@ -70,26 +79,27 @@ Définit le programme principal (une seule ligne).
 | PROGRAM_2024 | sequential |
 
 ### Feuille "structures"
-Définit les structures du programme.
+Définit les structures du programme (nom, ordre, type de produit).
 
-| structure_name | order | product_type    | session_rate | priority | limit   |
-|----------------|-------|-----------------|--------------|----------|---------|
-| QS_30_PARIS    | 1     | quote_share     | 0.30         | -        | -       |
-| XOL_1M_xs_500K | 2     | excess_of_loss  | -            | 500000   | 1000000 |
-| QS_20_TECH     | 3     | quote_share     | 0.20         | -        | -       |
+| structure_name | order | product_type    |
+|----------------|-------|-----------------|
+| QS_GENERAL     | 1     | quote_share     |
+| XOL_LARGE      | 2     | excess_of_loss  |
 
-### Feuille "conditions"
-Définit les conditions pour chaque structure (une valeur par ligne).
+### Feuille "sections"
+Définit les sections de chaque structure avec paramètres et conditions.
 
-| structure_name | dimension    | value       |
-|----------------|--------------|-------------|
-| QS_30_PARIS    | localisation | Paris       |
-| XOL_1M_xs_500K | localisation | Paris       |
-| QS_20_TECH     | localisation | Lyon        |
-| QS_20_TECH     | industrie    | Technologie |
+| structure_name | session_rate | priority | limit   | localisation | industrie |
+|----------------|--------------|----------|---------|--------------|-----------|
+| QS_GENERAL     | 0.30         | -        | -       | -            | -         |
+| QS_GENERAL     | 0.40         | -        | -       | Paris        | -         |
+| XOL_LARGE      | -            | 500000   | 1000000 | Paris        | -         |
 
-**Note** : Pour QS_20_TECH, il y a 2 lignes de conditions car la structure nécessite 
-`localisation=Lyon` **ET** `industrie=Technologie`.
+**Notes importantes :**
+- Les colonnes de dimensions (localisation, industrie) sont détectées automatiquement
+- Une valeur vide (NaN) dans une colonne de dimension signifie "pas de condition sur cette dimension"
+- Plusieurs sections peuvent exister pour la même structure avec différentes combinaisons de conditions
+- Le système choisit automatiquement la section la plus spécifique (avec le plus de conditions matchées)
 
 ## Utilisation
 
@@ -97,32 +107,59 @@ Définit les conditions pour chaque structure (une valeur par ligne).
 # Installer les dépendances
 uv sync
 
+# Créer/recréer le fichier de configuration (optionnel)
+uv run python create_program_config.py
+
 # Exécuter le système
 uv run python main.py
 ```
 
+### Créer une nouvelle configuration
+
+Le script `create_program_config.py` montre comment créer un fichier de configuration programmatiquement. 
+Vous pouvez le modifier pour créer vos propres programmes ou éditer directement le fichier Excel `program_config.xlsx`.
+
 ## Exemple de résultat
 
-**PROGRAM_2024 (sequential)** avec 3 structures :
+**PROGRAM_2024 (sequential)** avec 2 structures :
 
-### Police POL-2024-001 (Paris, Construction, 500K€)
-1. **QS_30_PARIS** ✓ Appliquée : 500K€ × 30% = 150K€ cédés
-2. **XOL_1M_xs_500K** ✓ Appliquée : sur 350K€ restants → 0€ cédé (sous la priorité)
-3. **QS_20_TECH** ✗ Non appliquée : condition industrie=Technologie non remplie
+### Structure QS_GENERAL (quote_share)
+- Section 1 : 30% sans condition (défaut)
+- Section 2 : 40% pour localisation=Paris (spécifique)
 
-**Total cédé : 150K€**
+### Structure XOL_LARGE (excess_of_loss)
+- Section 1 : 1M xs 500K pour localisation=Paris
 
-### Police POL-2024-002 (Lyon, Technologie, 750K€)
-1. **QS_30_PARIS** ✗ Non appliquée : condition localisation=Paris non remplie
-2. **XOL_1M_xs_500K** ✗ Non appliquée : condition localisation=Paris non remplie
-3. **QS_20_TECH** ✓ Appliquée : 750K€ × 20% = 150K€ cédés
+### Application sur les polices
 
-**Total cédé : 150K€**
+**Police POL-2024-001 (Paris, Construction, 500K€)**
+1. **QS_GENERAL** ✓ Section matchée : localisation=Paris (40%)
+   - 500K€ × 40% = **200K€ cédés**
+2. **XOL_LARGE** ✓ Section matchée : localisation=Paris
+   - Sur 300K€ restants, 0€ cédé (sous la priorité de 500K)
+
+**Total : 200K€ cédés, 300K€ retenus**
+
+**Police POL-2024-002 (Lyon, Technologie, 750K€)**
+1. **QS_GENERAL** ✓ Section matchée : All (no conditions) (30%)
+   - 750K€ × 30% = **225K€ cédés**
+2. **XOL_LARGE** ✗ Aucune section ne matche
+
+**Total : 225K€ cédés, 525K€ retenus**
+
+## Avantages du modèle Sections
+
+1. **Flexibilité** : Une même structure peut avoir des paramètres différents selon les conditions
+2. **Simplicité** : Pas besoin de créer des structures différentes pour chaque variation
+3. **Priorité automatique** : Le système choisit automatiquement la section la plus spécifique
+4. **Extensibilité** : Ajout facile de nouvelles dimensions sans changer le code
+5. **Modèle relationnel** : Plus proche d'une base de données relationnelle classique
 
 ## Nomenclature
 
 - **Program** : Le programme global (un par fichier)
 - **Structure** : Un élément du programme utilisant un produit de base
+- **Section** : Instance d'une structure avec paramètres et conditions spécifiques
 - **Product** : Les building blocks (quote_share, excess_of_loss)
-- **Dimension** : Le champ du bordereau utilisé dans une condition
+- **Dimension** : Colonne du bordereau utilisée pour le matching (ex: localisation, industrie)
 - **Session rate** : Le taux de cession pour une quote-share

@@ -1,34 +1,48 @@
 import pandas as pd
-from typing import Dict, Any
+import numpy as np
+from typing import Dict, Any, Optional
 from products import quote_share, excess_of_loss
 
 
-def check_conditions(policy_data: Dict[str, Any], conditions: list) -> bool:
-    if not conditions:
-        return True
+def match_section(policy_data: Dict[str, Any], sections: list, dimension_columns: list) -> Optional[Dict[str, Any]]:
+    matched_sections = []
     
-    for condition in conditions:
-        dimension = condition["dimension"]
-        value = condition["value"]
+    for section in sections:
+        matches = True
+        specificity = 0
         
-        policy_value = policy_data.get(dimension)
+        for dimension in dimension_columns:
+            section_value = section.get(dimension)
+            
+            if pd.notna(section_value):
+                policy_value = policy_data.get(dimension)
+                if policy_value != section_value:
+                    matches = False
+                    break
+                specificity += 1
         
-        if policy_value != value:
-            return False
+        if matches:
+            matched_sections.append((section, specificity))
     
-    return True
+    if not matched_sections:
+        return None
+    
+    matched_sections.sort(key=lambda x: x[1], reverse=True)
+    return matched_sections[0][0]
 
 
-def apply_structure(exposure: float, structure: Dict[str, Any]) -> float:
-    product_type = structure["product_type"]
-    
+def apply_section(exposure: float, section: Dict[str, Any], product_type: str) -> float:
     if product_type == "quote_share":
-        session_rate = structure["session_rate"]
+        session_rate = section["session_rate"]
+        if pd.isna(session_rate):
+            raise ValueError("session_rate is required for quote_share")
         return quote_share(exposure, session_rate)
     
     elif product_type == "excess_of_loss":
-        priority = structure["priority"]
-        limit = structure["limit"]
+        priority = section["priority"]
+        limit = section["limit"]
+        if pd.isna(priority) or pd.isna(limit):
+            raise ValueError("priority and limit are required for excess_of_loss")
         return excess_of_loss(exposure, priority, limit)
     
     else:
@@ -39,6 +53,7 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
     exposure = policy_data.get("exposition")
     mode = program["mode"]
     structures = program["structures"]
+    dimension_columns = program["dimension_columns"]
     
     total_ceded = 0.0
     structures_detail = []
@@ -46,46 +61,54 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
     if mode == "sequential":
         remaining_exposure = exposure
         for structure in structures:
-            if not check_conditions(policy_data, structure["conditions"]):
+            matched_section = match_section(policy_data, structure["sections"], dimension_columns)
+            
+            if matched_section is None:
                 structures_detail.append({
-                    "structure_name": structure.get("structure_name"),
+                    "structure_name": structure["structure_name"],
                     "product_type": structure["product_type"],
                     "input_exposure": remaining_exposure,
                     "ceded": 0.0,
-                    "applied": False
+                    "applied": False,
+                    "section": None
                 })
                 continue
             
-            ceded = apply_structure(remaining_exposure, structure)
+            ceded = apply_section(remaining_exposure, matched_section, structure["product_type"])
             structures_detail.append({
-                "structure_name": structure.get("structure_name"),
+                "structure_name": structure["structure_name"],
                 "product_type": structure["product_type"],
                 "input_exposure": remaining_exposure,
                 "ceded": ceded,
-                "applied": True
+                "applied": True,
+                "section": matched_section
             })
             total_ceded += ceded
             remaining_exposure -= ceded
     
     elif mode == "parallel":
         for structure in structures:
-            if not check_conditions(policy_data, structure["conditions"]):
+            matched_section = match_section(policy_data, structure["sections"], dimension_columns)
+            
+            if matched_section is None:
                 structures_detail.append({
-                    "structure_name": structure.get("structure_name"),
+                    "structure_name": structure["structure_name"],
                     "product_type": structure["product_type"],
                     "input_exposure": exposure,
                     "ceded": 0.0,
-                    "applied": False
+                    "applied": False,
+                    "section": None
                 })
                 continue
             
-            ceded = apply_structure(exposure, structure)
+            ceded = apply_section(exposure, matched_section, structure["product_type"])
             structures_detail.append({
-                "structure_name": structure.get("structure_name"),
+                "structure_name": structure["structure_name"],
                 "product_type": structure["product_type"],
                 "input_exposure": exposure,
                 "ceded": ceded,
-                "applied": True
+                "applied": True,
+                "section": matched_section
             })
             total_ceded += ceded
     
