@@ -8,18 +8,19 @@ Système d'application de programmes de réassurance sur des bordereaux.
 
 ```
 structure-application/
-├── products/                      # Building blocks de réassurance
-│   ├── base_products.py          # quote_share & excess_of_loss
+├── products/                           # Building blocks de réassurance
+│   ├── base_products.py               # quote_share & excess_of_loss
 │   └── __init__.py
-├── structures/                    # Moteur d'application des programmes
-│   ├── structure_loader.py       # Chargement depuis Excel (ProgramLoader)
-│   ├── structure_engine.py       # Logique d'application et matching de sections
+├── structures/                         # Moteur d'application des programmes
+│   ├── structure_loader.py            # Chargement depuis Excel (ProgramLoader)
+│   ├── structure_engine.py            # Logique d'application et matching de sections
 │   └── __init__.py
-├── bordereau_exemple.csv         # Données des polices
-├── program_config.xlsx           # Configuration du programme (Excel)
-├── create_program_config.py      # Script de création de configuration
-├── main.py                       # Point d'entrée principal
-└── README.md                     # Documentation
+├── bordereau_exemple.csv              # Données des polices
+├── program_config.xlsx                # Configuration du programme (Excel)
+├── create_program_config.py           # Script de création de configuration
+├── PROGRAM_SPECIFICATION_GUIDE.md     # Guide de spécification des programmes
+├── main.py                            # Point d'entrée principal
+└── README.md                          # Documentation
 ```
 
 ## Concepts
@@ -116,8 +117,21 @@ uv run python main.py
 
 ### Créer une nouvelle configuration
 
+**Option 1 : Avec Cursor/LLM**
+Utilisez le fichier `PROGRAM_SPECIFICATION_GUIDE.md` comme référence. Décrivez simplement ce que vous voulez en langage naturel, et Cursor générera automatiquement le code Python pour créer la configuration.
+
+Exemple :
+```
+"Crée un programme avec une quote-share de 30% par défaut et 40% pour Paris,
+suivi d'un XoL de 1M xs 500K uniquement pour Paris"
+```
+
+**Option 2 : Script Python**
 Le script `create_program_config.py` montre comment créer un fichier de configuration programmatiquement. 
-Vous pouvez le modifier pour créer vos propres programmes ou éditer directement le fichier Excel `program_config.xlsx`.
+Vous pouvez le modifier pour créer vos propres programmes.
+
+**Option 3 : Excel direct**
+Éditez directement le fichier Excel `program_config.xlsx`.
 
 ## Exemple de résultat
 
@@ -154,6 +168,23 @@ Vous pouvez le modifier pour créer vos propres programmes ou éditer directemen
 3. **Priorité automatique** : Le système choisit automatiquement la section la plus spécifique
 4. **Extensibilité** : Ajout facile de nouvelles dimensions sans changer le code
 5. **Modèle relationnel** : Plus proche d'une base de données relationnelle classique
+
+## Création de programmes avec Cursor
+
+Le fichier `PROGRAM_SPECIFICATION_GUIDE.md` contient la spécification complète du format de données et des exemples de traduction.
+
+**Comment l'utiliser :**
+1. Ouvrez le fichier `PROGRAM_SPECIFICATION_GUIDE.md`
+2. Décrivez votre besoin en langage naturel à Cursor
+3. Cursor utilisera automatiquement le guide pour générer le code Python correct
+4. Exécutez le script généré pour créer votre fichier Excel
+
+**Exemples de demandes :**
+- "Crée un programme avec 25% de cession par défaut, 30% pour Paris et 35% pour Lyon"
+- "Je veux un XoL de 800K xs 400K qui s'applique uniquement aux industries de technologie"
+- "Programme en parallèle : 20% quote-share + XoL 500K xs 300K sur toutes les polices"
+
+Le guide contient des patterns courants, des exemples de traduction et toutes les règles de validation.
 
 ## Nomenclature
 

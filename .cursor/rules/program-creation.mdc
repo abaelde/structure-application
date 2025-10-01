@@ -1,0 +1,33 @@
+---
+description: Guide for creating reinsurance program configurations
+---
+
+# Program Creation Guide
+
+When the user asks to create or modify a reinsurance program configuration, refer to [PROGRAM_SPECIFICATION_GUIDE.md](mdc:PROGRAM_SPECIFICATION_GUIDE.md) for the complete specification format.
+
+## Key Points
+
+### Data Model
+- **Program** (1 row): program_name, mode (sequential/parallel)
+- **Structures** (n rows): structure_name, order, product_type (quote_share/excess_of_loss)
+- **Sections** (n rows): structure_name, parameters, + dimension columns
+
+### Parameters
+- **Quote-share**: session_rate (0-1)
+- **Excess of Loss**: priority, limit (positive numbers)
+
+### Section Matching
+- Empty dimension values = no condition (applies everywhere)
+- Non-empty dimension values = specific condition
+- Most specific section wins (most conditions matched)
+
+### Output Format
+Create Python script using pandas to generate Excel file with three sheets:
+1. `program`: Program configuration
+2. `structures`: Structure definitions  
+3. `sections`: Parameter sets with conditions
+
+Always use `np.nan` for empty values in Python, not `None`.
+
+See [PROGRAM_SPECIFICATION_GUIDE.md](mdc:PROGRAM_SPECIFICATION_GUIDE.md) for complete examples and patterns.
