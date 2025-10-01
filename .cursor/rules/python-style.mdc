@@ -1,0 +1,14 @@
+---
+alwaysApply: true
+---
+
+# Règles de Style Python
+
+## Langue
+Tout le code doit être écrit en anglais : noms de variables, noms de fonctions, commentaires, documentation, messages d'erreur, etc. Seules les interactions avec l'utilisateur (dans les conversations) peuvent être en français.
+
+## Docstrings
+Ne pas ajouter de docstrings sur les fonctions Python. Le code doit être suffisamment clair et explicite sans documentation extensive.
+
+## Manipulation de données
+Toujours utiliser pandas pour la manipulation de données (lecture de CSV, transformation, agrégation, etc.).
