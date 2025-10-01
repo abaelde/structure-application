@@ -1,41 +1,54 @@
-def quote_part(exposition: float, taux_cession: float) -> float:
-    if not 0 <= taux_cession <= 1:
-        raise ValueError("Le taux de cession doit être entre 0 et 1")
-    
-    return exposition * taux_cession
-
-
-def excess_of_loss(exposition: float, priorite: float, portee: float) -> float:
-    if priorite < 0 or portee < 0:
-        raise ValueError("La priorité et la portée doivent être positives")
-    
-    # Si l'exposition est sous la priorité, rien n'est cédé
-    if exposition <= priorite:
-        return 0.0
-    
-    # Calcul de la part au-dessus de la priorité
-    montant_au_dessus_priorite = exposition - priorite
-    
-    # Le montant cédé est plafonné par la portée
-    return min(montant_au_dessus_priorite, portee)
+import pandas as pd
+from structures import ProgramLoader, apply_program_to_bordereau
 
 
 def main():
-    print("=== Système de réassurance ===\n")
+    print("=== Reinsurance Program Application System ===\n")
     
-    # Exemple avec quote-part
-    exposition_exemple = 1000000.0
-    print(f"Exposition: {exposition_exemple:,.2f} €")
+    bordereau_df = pd.read_csv("bordereau_exemple.csv")
+    print("Bordereau loaded:")
+    print(bordereau_df)
+    print()
     
-    print("\n--- Quote-part 30% ---")
-    cession_qp = quote_part(exposition_exemple, 0.30)
-    print(f"Cédé au réassureur: {cession_qp:,.2f} €")
-    print(f"Conservé: {exposition_exemple - cession_qp:,.2f} €")
+    loader = ProgramLoader("program_config.xlsx")
+    program = loader.get_program()
     
-    print("\n--- Excess of Loss (1M xs 500K) ---")
-    cession_xol = excess_of_loss(exposition_exemple, 500000, 1000000)
-    print(f"Cédé au réassureur: {cession_xol:,.2f} €")
-    print(f"Conservé: {exposition_exemple - cession_xol:,.2f} €")
+    print(f"Program: {program['name']}")
+    print(f"Mode: {program['mode']}")
+    print(f"Number of structures: {len(program['structures'])}\n")
+    
+    print("=" * 80)
+    print(f"Applying program: {program['name']} ({program['mode']} mode)")
+    print("=" * 80)
+    
+    print("\nStructures in program:")
+    for i, struct in enumerate(program['structures'], 1):
+        print(f"  {i}. {struct['structure_name']} ({struct['product_type']})")
+        if struct['conditions']:
+            conditions_str = ', '.join([f"{c['dimension']}={c['value']}" for c in struct['conditions']])
+            print(f"     Conditions: {conditions_str}")
+        else:
+            print(f"     Conditions: None (applies to all)")
+    
+    results = apply_program_to_bordereau(bordereau_df, program)
+    
+    print("\n\nResults Summary:")
+    print(results[["policy_number", "exposure", "ceded", "retained"]])
+    
+    print("\n\nDetailed breakdown by policy:")
+    for _, row in results.iterrows():
+        print(f"\n{'=' * 80}")
+        print(f"Policy: {row['policy_number']}")
+        print(f"Total exposure: {row['exposure']:,.2f}")
+        print(f"Total ceded: {row['ceded']:,.2f}")
+        print(f"Total retained: {row['retained']:,.2f}")
+        print(f"\nStructures applied:")
+        
+        for struct in row["structures_detail"]:
+            status = "✓ Applied" if struct.get('applied', False) else "✗ Not applied"
+            print(f"  {status} - {struct['structure_name']} ({struct['product_type']})")
+            print(f"    Input exposure: {struct['input_exposure']:,.2f}")
+            print(f"    Ceded: {struct['ceded']:,.2f}")
 
 
 if __name__ == "__main__":
