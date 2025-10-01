@@ -29,8 +29,14 @@ structure-application/
 Fichier CSV contenant les polices d'assurance avec :
 - `numero_police` : Identifiant unique
 - `nom_assure` : Nom de l'assuré
-- `localisation` : Localisation géographique
-- `industrie` : Secteur d'activité
+- `country` : Pays
+- `region` : Région (APAC, EMEA, Americas, etc.)
+- `product_type_1`, `product_type_2`, `product_type_3` : Hiérarchie des types de produits
+- `currency` : Devise
+- `line_of_business` : Ligne de business
+- `industry` : Industrie
+- `sic_code` : Code SIC
+- `include` : Champ libre pour conditions spéciales
 - `exposition` : Valeur d'exposition
 
 ### 2. Produits de base
@@ -146,20 +152,28 @@ Vous pouvez le modifier pour créer vos propres programmes.
 
 ### Application sur les polices
 
-**Police POL-2024-001 (Paris, Construction, 500K€)**
-1. **QS_GENERAL** ✓ Section matchée : localisation=Paris (40%)
+**Police POL-2024-001 (France, EMEA, Construction, 500K€)**
+1. **QS_GENERAL** ✓ Section matchée : country=France (40%)
    - 500K€ × 40% = **200K€ cédés**
-2. **XOL_LARGE** ✓ Section matchée : localisation=Paris
+2. **XOL_LARGE** ✓ Section matchée : country=France
    - Sur 300K€ restants, 0€ cédé (sous la priorité de 500K)
 
 **Total : 200K€ cédés, 300K€ retenus**
 
-**Police POL-2024-002 (Lyon, Technologie, 750K€)**
+**Police POL-2024-002 (France, EMEA, Technology, 750K€)**
+1. **QS_GENERAL** ✓ Section matchée : country=France (40%)
+   - 750K€ × 40% = **300K€ cédés**
+2. **XOL_LARGE** ✓ Section matchée : country=France
+   - Sur 450K€ restants, 0€ cédé (sous la priorité de 500K)
+
+**Total : 300K€ cédés, 450K€ retenus**
+
+**Police POL-2024-003 (Singapore, APAC, Manufacturing, 1.2M€)**
 1. **QS_GENERAL** ✓ Section matchée : All (no conditions) (30%)
-   - 750K€ × 30% = **225K€ cédés**
+   - 1.2M€ × 30% = **360K€ cédés**
 2. **XOL_LARGE** ✗ Aucune section ne matche
 
-**Total : 225K€ cédés, 525K€ retenus**
+**Total : 360K€ cédés, 840K€ retenus**
 
 ## Avantages du modèle Sections
 
@@ -180,9 +194,10 @@ Le fichier `PROGRAM_SPECIFICATION_GUIDE.md` contient la spécification complète
 4. Exécutez le script généré pour créer votre fichier Excel
 
 **Exemples de demandes :**
-- "Crée un programme avec 25% de cession par défaut, 30% pour Paris et 35% pour Lyon"
+- "Crée un programme avec 25% de cession par défaut, 30% pour la France et 35% pour EMEA"
 - "Je veux un XoL de 800K xs 400K qui s'applique uniquement aux industries de technologie"
 - "Programme en parallèle : 20% quote-share + XoL 500K xs 300K sur toutes les polices"
+- "30% pour Property, 35% pour Commercial Property, 40% pour Commercial Fire"
 
 Le guide contient des patterns courants, des exemples de traduction et toutes les règles de validation.
 
@@ -192,5 +207,5 @@ Le guide contient des patterns courants, des exemples de traduction et toutes le
 - **Structure** : Un élément du programme utilisant un produit de base
 - **Section** : Instance d'une structure avec paramètres et conditions spécifiques
 - **Product** : Les building blocks (quote_share, excess_of_loss)
-- **Dimension** : Colonne du bordereau utilisée pour le matching (ex: localisation, industrie)
+- **Dimension** : Colonne du bordereau utilisée pour le matching (ex: country, region, industry)
 - **Session rate** : Le taux de cession pour une quote-share

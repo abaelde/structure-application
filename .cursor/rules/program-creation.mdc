@@ -17,6 +17,10 @@ When the user asks to create or modify a reinsurance program configuration, refe
 - **Quote-share**: session_rate (0-1)
 - **Excess of Loss**: priority, limit (positive numbers)
 
+### Standard Dimensions
+- `country`, `region`, `product_type_1`, `product_type_2`, `product_type_3`
+- `currency`, `line_of_business`, `industry`, `sic_code`, `include`
+
 ### Section Matching
 - Empty dimension values = no condition (applies everywhere)
 - Non-empty dimension values = specific condition

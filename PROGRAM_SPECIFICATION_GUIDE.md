@@ -66,7 +66,7 @@ Defines parameter sets and conditions for each structure.
 
 **Dynamic Columns (Dimensions):**
 - Any additional columns are automatically detected as dimensions
-- Common dimensions: `localisation`, `industrie`, `product_line`, etc.
+- Standard dimensions: `country`, `region`, `product_type_1`, `product_type_2`, `product_type_3`, `currency`, `line_of_business`, `industry`, `sic_code`, `include`
 - Empty/NaN values mean "no condition on this dimension"
 - Non-empty values create specific conditions
 
@@ -80,12 +80,12 @@ Defines parameter sets and conditions for each structure.
 
 **Example:**
 ```
-structure_name | session_rate | priority | limit   | localisation | industrie
-QS_GENERAL     | 0.30         | NaN      | NaN     | NaN          | NaN
-QS_GENERAL     | 0.40         | NaN      | NaN     | Paris        | NaN
-QS_GENERAL     | 0.50         | NaN      | NaN     | Paris        | Technology
-XOL_LARGE      | NaN          | 500000   | 1000000 | Paris        | NaN
-XOL_LARGE      | NaN          | 300000   | 800000  | Lyon         | NaN
+structure_name | session_rate | priority | limit   | country | region | industry
+QS_GENERAL     | 0.30         | NaN      | NaN     | NaN     | NaN    | NaN
+QS_GENERAL     | 0.40         | NaN      | NaN     | France  | NaN    | NaN
+QS_GENERAL     | 0.50         | NaN      | NaN     | France  | EMEA   | Technology
+XOL_LARGE      | NaN          | 500000   | 1000000 | France  | NaN    | NaN
+XOL_LARGE      | NaN          | 300000   | 800000  | Germany | EMEA   | NaN
 ```
 
 ---
@@ -98,15 +98,15 @@ For each policy and each structure:
 3. If no section matches, the structure is not applied
 
 **Example:**
-Policy: `{localisation: "Paris", industrie: "Technology"}`
+Policy: `{country: "France", region: "EMEA", industry: "Technology"}`
 
 Available sections for QS_GENERAL:
 - Section A: no conditions (specificity=0) ✓ matches
-- Section B: localisation="Paris" (specificity=1) ✓ matches
-- Section C: localisation="Paris", industrie="Technology" (specificity=2) ✓ matches
-- Section D: localisation="Lyon" (specificity=1) ✗ doesn't match
+- Section B: country="France" (specificity=1) ✓ matches
+- Section C: country="France", region="EMEA", industry="Technology" (specificity=3) ✓ matches
+- Section D: country="Germany" (specificity=1) ✗ doesn't match
 
-**Winner: Section C** (most specific with 2 conditions)
+**Winner: Section C** (most specific with 3 conditions)
 
 ---
 
@@ -114,26 +114,26 @@ Available sections for QS_GENERAL:
 
 ### Pattern 1: Global default with regional overrides
 ```
-# Quote-share: 20% default, 30% for Paris, 40% for high-risk
-structure_name | session_rate | localisation | risk_category
-QS_BASE        | 0.20         | NaN          | NaN
-QS_BASE        | 0.30         | Paris        | NaN
-QS_BASE        | 0.40         | NaN          | high
+# Quote-share: 20% default, 30% for France, 40% for EMEA
+structure_name | session_rate | country | region
+QS_BASE        | 0.20         | NaN     | NaN
+QS_BASE        | 0.30         | France  | NaN
+QS_BASE        | 0.40         | NaN     | EMEA
 ```
 
 ### Pattern 2: Regional excess of loss
 ```
 # Different XoL parameters per region
-structure_name | priority | limit   | localisation
-XOL_REGIONAL   | 500000   | 1000000 | France
-XOL_REGIONAL   | 300000   | 800000  | Germany
-XOL_REGIONAL   | 1000000  | 2000000 | USA
+structure_name | priority | limit   | region
+XOL_REGIONAL   | 500000   | 1000000 | EMEA
+XOL_REGIONAL   | 300000   | 800000  | APAC
+XOL_REGIONAL   | 1000000  | 2000000 | Americas
 ```
 
 ### Pattern 3: Industry-specific structures
 ```
 # Different treatments per industry
-structure_name | session_rate | priority | limit   | industrie
+structure_name | session_rate | priority | limit   | industry
 QS_INDUSTRY    | 0.25         | NaN      | NaN     | Construction
 QS_INDUSTRY    | 0.35         | NaN      | NaN     | Technology
 XOL_INDUSTRY   | NaN          | 400000   | 900000  | Manufacturing
@@ -141,13 +141,43 @@ XOL_INDUSTRY   | NaN          | 400000   | 900000  | Manufacturing
 
 ### Pattern 4: Complex multi-dimensional
 ```
-# Combination of location and industry
-structure_name | session_rate | localisation | industrie
-QS_COMPLEX     | 0.20         | NaN          | NaN
-QS_COMPLEX     | 0.30         | Paris        | NaN
-QS_COMPLEX     | 0.25         | Lyon         | NaN
-QS_COMPLEX     | 0.35         | Paris        | Technology
-QS_COMPLEX     | 0.40         | Paris        | Finance
+# Combination of country, region and industry
+structure_name | session_rate | country | region | industry
+QS_COMPLEX     | 0.20         | NaN     | NaN    | NaN
+QS_COMPLEX     | 0.30         | France  | NaN    | NaN
+QS_COMPLEX     | 0.25         | Germany | EMEA   | NaN
+QS_COMPLEX     | 0.35         | France  | EMEA   | Technology
+QS_COMPLEX     | 0.40         | France  | EMEA   | Finance
+```
+
+### Pattern 5: Product type hierarchy
+```
+# Different rates by product type levels
+structure_name | session_rate | product_type_1 | product_type_2 | product_type_3
+QS_PRODUCT     | 0.20         | NaN            | NaN            | NaN
+QS_PRODUCT     | 0.30         | Property       | NaN            | NaN
+QS_PRODUCT     | 0.35         | Property       | Commercial     | NaN
+QS_PRODUCT     | 0.40         | Property       | Commercial     | Fire
+```
+
+### Pattern 6: Currency-specific
+```
+# Different parameters by currency
+structure_name | session_rate | currency
+QS_CURRENCY    | 0.25         | NaN
+QS_CURRENCY    | 0.30         | EUR
+QS_CURRENCY    | 0.35         | USD
+QS_CURRENCY    | 0.20         | SGD
+```
+
+### Pattern 7: Include field usage
+```
+# Special handling using include field
+structure_name | session_rate | include
+QS_SPECIAL     | 0.20         | NaN
+QS_SPECIAL     | 0.40         | Premium
+QS_SPECIAL     | 0.15         | Standard
+QS_SPECIAL     | 0.50         | High-Risk
 ```
 
 ---
@@ -174,7 +204,7 @@ XOL_1M_500K: priority=500000, limit=1000000, all dimensions=NaN
 
 ### Example 2: Regional variations
 **User Request:**
-"I need a quote-share that's 25% for most policies, but 35% for Paris and 40% for Lyon. Then an XoL of 800K xs 400K only for Paris."
+"I need a quote-share that's 25% for most policies, but 35% for France and 40% for EMEA region. Then an XoL of 800K xs 400K only for France."
 
 **Translation:**
 ```python
@@ -183,13 +213,13 @@ program_name="REGIONAL_2024", mode="sequential"
 
 # Structures sheet
 QS_REGIONAL, order=1, product_type="quote_share"
-XOL_PARIS, order=2, product_type="excess_of_loss"
+XOL_FRANCE, order=2, product_type="excess_of_loss"
 
 # Sections sheet
-QS_REGIONAL: session_rate=0.25, localisation=NaN
-QS_REGIONAL: session_rate=0.35, localisation="Paris"
-QS_REGIONAL: session_rate=0.40, localisation="Lyon"
-XOL_PARIS: priority=400000, limit=800000, localisation="Paris"
+QS_REGIONAL: session_rate=0.25, country=NaN, region=NaN
+QS_REGIONAL: session_rate=0.35, country="France", region=NaN
+QS_REGIONAL: session_rate=0.40, country=NaN, region="EMEA"
+XOL_FRANCE: priority=400000, limit=800000, country="France"
 ```
 
 ### Example 3: Parallel structures
@@ -223,9 +253,47 @@ program_name="INDUSTRY_2024", mode="sequential"
 QS_INDUSTRY, order=1, product_type="quote_share"
 
 # Sections sheet
-QS_INDUSTRY: session_rate=0.20, industrie=NaN  # Default
-QS_INDUSTRY: session_rate=0.30, industrie="Technology"
-QS_INDUSTRY: session_rate=0.25, industrie="Construction"
+QS_INDUSTRY: session_rate=0.20, industry=NaN  # Default
+QS_INDUSTRY: session_rate=0.30, industry="Technology"
+QS_INDUSTRY: session_rate=0.25, industry="Construction"
+```
+
+### Example 5: Product type hierarchy
+**User Request:**
+"20% for all Property, 30% for Commercial Property, 35% for Commercial Fire, and 15% for everything else"
+
+**Translation:**
+```python
+# Program sheet
+program_name="PRODUCT_2024", mode="sequential"
+
+# Structures sheet
+QS_PRODUCT, order=1, product_type="quote_share"
+
+# Sections sheet
+QS_PRODUCT: session_rate=0.15, product_type_1=NaN  # Default
+QS_PRODUCT: session_rate=0.20, product_type_1="Property"
+QS_PRODUCT: session_rate=0.30, product_type_1="Property", product_type_2="Commercial"
+QS_PRODUCT: session_rate=0.35, product_type_1="Property", product_type_2="Commercial", product_type_3="Fire"
+```
+
+### Example 6: Multi-dimensional complex
+**User Request:**
+"25% default, 30% for France, 35% for EMEA Technology, 40% for France EMEA Technology"
+
+**Translation:**
+```python
+# Program sheet
+program_name="COMPLEX_2024", mode="sequential"
+
+# Structures sheet
+QS_COMPLEX, order=1, product_type="quote_share"
+
+# Sections sheet
+QS_COMPLEX: session_rate=0.25, country=NaN, region=NaN, industry=NaN  # Default
+QS_COMPLEX: session_rate=0.30, country="France", region=NaN, industry=NaN
+QS_COMPLEX: session_rate=0.35, country=NaN, region="EMEA", industry="Technology"
+QS_COMPLEX: session_rate=0.40, country="France", region="EMEA", industry="Technology"
 ```
 
 ---
@@ -257,10 +325,18 @@ sections_data = {
     "session_rate": [0.30, 0.40, np.nan],
     "priority": [np.nan, np.nan, 500000],
     "limit": [np.nan, np.nan, 1000000],
-    # Add dimension columns here
-    "localisation": [np.nan, "Paris", "Paris"],
-    "industrie": [np.nan, np.nan, np.nan],
-    # Add more dimensions as needed
+    # Standard dimension columns
+    "country": [np.nan, "France", "France"],
+    "region": [np.nan, np.nan, np.nan],
+    "product_type_1": [np.nan, np.nan, np.nan],
+    "product_type_2": [np.nan, np.nan, np.nan],
+    "product_type_3": [np.nan, np.nan, np.nan],
+    "currency": [np.nan, np.nan, np.nan],
+    "line_of_business": [np.nan, np.nan, np.nan],
+    "industry": [np.nan, np.nan, np.nan],
+    "sic_code": [np.nan, np.nan, np.nan],
+    "include": [np.nan, np.nan, np.nan],
+    # Add more custom dimensions as needed
 }
 
 # 4. Create DataFrames

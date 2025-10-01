@@ -6,8 +6,8 @@ This demonstrates how to create a program from natural language specification.
 USER REQUEST:
 "I want a program with:
 - 25% quote-share by default
-- 30% quote-share for Paris
-- 35% quote-share for Lyon
+- 30% quote-share for France
+- 35% quote-share for EMEA region
 - XoL of 800K xs 400K only for Technology industry"
 """
 
@@ -30,8 +30,16 @@ sections_data = {
     "session_rate": [0.25, 0.30, 0.35, np.nan],
     "priority": [np.nan, np.nan, np.nan, 400000],
     "limit": [np.nan, np.nan, np.nan, 800000],
-    "localisation": [np.nan, "Paris", "Lyon", np.nan],
-    "industrie": [np.nan, np.nan, np.nan, "Technologie"]
+    "country": [np.nan, "France", np.nan, np.nan],
+    "region": [np.nan, np.nan, "EMEA", np.nan],
+    "product_type_1": [np.nan, np.nan, np.nan, np.nan],
+    "product_type_2": [np.nan, np.nan, np.nan, np.nan],
+    "product_type_3": [np.nan, np.nan, np.nan, np.nan],
+    "currency": [np.nan, np.nan, np.nan, np.nan],
+    "line_of_business": [np.nan, np.nan, np.nan, np.nan],
+    "industry": [np.nan, np.nan, np.nan, "Technology"],
+    "sic_code": [np.nan, np.nan, np.nan, np.nan],
+    "include": [np.nan, np.nan, np.nan, np.nan]
 }
 
 program_df = pd.DataFrame(program_data)
@@ -61,16 +69,16 @@ print("\n" + "=" * 80)
 print("EXPECTED BEHAVIOR")
 print("=" * 80)
 print("""
-Policy in Paris, Construction:
-  → QS_REGIONAL: 30% (localisation=Paris section)
-  → XOL_TECH: Not applied (industry != Technologie)
+Policy in France, EMEA, Construction:
+  → QS_REGIONAL: 30% (country=France section - most specific)
+  → XOL_TECH: Not applied (industry != Technology)
 
-Policy in Lyon, Technologie:
-  → QS_REGIONAL: 35% (localisation=Lyon section)
-  → XOL_TECH: 800K xs 400K applied (industrie=Technologie)
+Policy in Germany, EMEA, Technology:
+  → QS_REGIONAL: 35% (region=EMEA section)
+  → XOL_TECH: 800K xs 400K applied (industry=Technology)
 
-Policy in Marseille, Construction:
+Policy in Singapore, APAC, Manufacturing:
   → QS_REGIONAL: 25% (default section, no conditions)
-  → XOL_TECH: Not applied (industry != Technologie)
+  → XOL_TECH: Not applied (industry != Technology)
 """)
 

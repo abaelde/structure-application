@@ -1,4 +1,5 @@
-numero_police,nom_assure,localisation,industrie,exposition
-POL-2024-001,Entreprise Dupont SAS,Paris,Construction,500000.00
-POL-2024-002,Société Martin & Fils,Lyon,Technologie,750000.00
+numero_police,nom_assure,country,region,product_type_1,product_type_2,product_type_3,currency,line_of_business,industry,sic_code,include,exposition
+POL-2024-001,Entreprise Dupont SAS,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,500000.00
+POL-2024-002,Société Martin & Fils,France,EMEA,Property,Commercial,Fire,EUR,Property,Technology,7371,Premium,750000.00
+POL-2024-003,Global Corp Ltd,Singapore,APAC,Property,Commercial,Fire,SGD,Property,Manufacturing,3561,Standard,1200000.00
 

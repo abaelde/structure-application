@@ -17,8 +17,16 @@ sections_data = {
     "session_rate": [0.30, 0.40, np.nan],
     "priority": [np.nan, np.nan, 500000],
     "limit": [np.nan, np.nan, 1000000],
-    "localisation": [np.nan, "Paris", "Paris"],
-    "industrie": [np.nan, np.nan, np.nan]
+    "country": [np.nan, "France", "France"],
+    "region": [np.nan, np.nan, np.nan],
+    "product_type_1": [np.nan, np.nan, np.nan],
+    "product_type_2": [np.nan, np.nan, np.nan],
+    "product_type_3": [np.nan, np.nan, np.nan],
+    "currency": [np.nan, np.nan, np.nan],
+    "line_of_business": [np.nan, np.nan, np.nan],
+    "industry": [np.nan, np.nan, np.nan],
+    "sic_code": [np.nan, np.nan, np.nan],
+    "include": [np.nan, np.nan, np.nan]
 }
 
 program_df = pd.DataFrame(program_data)
@@ -52,15 +60,15 @@ This configuration creates a sequential program with:
 
 1. QS_GENERAL (Quote Share):
    - Section 1: 30% for all policies (no conditions)
-   - Section 2: 40% for policies in Paris (localisation=Paris)
-   → Most specific section wins: Paris policies get 40%, others get 30%
+   - Section 2: 40% for policies in France (country=France)
+   → Most specific section wins: France policies get 40%, others get 30%
 
 2. XOL_LARGE (Excess of Loss):
-   - Section 1: 1M xs 500K for policies in Paris only
-   → Applied only to Paris policies
+   - Section 1: 1M xs 500K for policies in France only
+   → Applied only to France policies
 
 The system automatically:
-- Detects dimension columns (localisation, industrie)
+- Detects dimension columns (country, region, product_type_1, etc.)
 - Matches the most specific section for each policy
 - Applies structures sequentially (output of one → input of next)
 """)
