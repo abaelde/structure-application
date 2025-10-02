@@ -37,7 +37,7 @@ def demo_organized_examples():
             loader = ProgramLoader(program_path)
             program = loader.get_program()
             print(f"   ✓ Programme chargé: {program['name']}")
-            print(f"   ✓ Mode: {program['mode']}")
+            print(f"   ✓ Logique: Ordre-based (nouvelle)")
             print(f"   ✓ Structures: {len(program['structures'])}")
         else:
             print(f"   ⚠️  Fichier non trouvé: {program_path}")

@@ -15,8 +15,7 @@ import pandas as pd
 import numpy as np
 
 program_data = {
-    "program_name": ["REGIONAL_TECH_2024"],
-    "mode": ["sequential"]
+    "program_name": ["REGIONAL_TECH_2024"]
 }
 
 structures_data = {
@@ -28,8 +27,8 @@ structures_data = {
 sections_data = {
     "structure_name": ["QS_REGIONAL", "QS_REGIONAL", "QS_REGIONAL", "XOL_TECH"],
     "session_rate": [0.25, 0.30, 0.35, np.nan],
-    "priority": [np.nan, np.nan, np.nan, 400000],
-    "limit": [np.nan, np.nan, np.nan, 800000],
+    "priority": [np.nan, np.nan, np.nan, 0.4],  # 0.4 million
+    "limit": [np.nan, np.nan, np.nan, 0.8],     # 0.8 million
     "country": [np.nan, "France", np.nan, np.nan],
     "region": [np.nan, np.nan, "EMEA", np.nan],
     "product_type_1": [np.nan, np.nan, np.nan, np.nan],
@@ -75,7 +74,7 @@ Policy in France, EMEA, Construction:
 
 Policy in Germany, EMEA, Technology:
   → QS_REGIONAL: 35% (region=EMEA section)
-  → XOL_TECH: 800K xs 400K applied (industry=Technology)
+  → XOL_TECH: 0.8M xs 0.4M applied (industry=Technology)
 
 Policy in Singapore, APAC, Manufacturing:
   → QS_REGIONAL: 25% (default section, no conditions)

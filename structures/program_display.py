@@ -19,12 +19,10 @@ def display_program(program: Dict[str, Any]) -> None:
     
     # Informations générales du programme
     print(f"📋 Nom du programme: {program['name']}")
-    print(f"🔄 Mode d'exécution: {program['mode'].upper()}")
-    
-    if program['mode'] == 'sequential':
-        print("   → Les structures s'appliquent en séquence (output → input)")
-    else:
-        print("   → Toutes les structures s'appliquent en parallèle sur l'exposition originale")
+    print(f"🔄 Mode d'exécution: ORDRE-BASED (nouvelle logique)")
+    print("   → Les structures s'appliquent selon leur ordre défini")
+    print("   → Quote Share réduit l'exposition restante")
+    print("   → Excess of Loss s'applique sur l'exposition restante (empilés)")
     
     print(f"📊 Nombre de structures: {len(program['structures'])}")
     print(f"🎯 Dimensions de matching: {len(program['dimension_columns'])}")
@@ -95,7 +93,7 @@ def display_program_summary(program: Dict[str, Any]) -> None:
     Args:
         program: Dictionnaire contenant la configuration du programme
     """
-    print(f"📋 {program['name']} ({program['mode']}) - {len(program['structures'])} structures")
+    print(f"📋 {program['name']} (ordre-based) - {len(program['structures'])} structures")
     
     for structure in program['structures']:
         product_type = structure['product_type']

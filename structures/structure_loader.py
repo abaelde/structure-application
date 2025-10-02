@@ -42,7 +42,6 @@ class ProgramLoader:
         
         self.program = {
             "name": program_name,
-            "mode": program_row["mode"],
             "structures": program_structures,
             "dimension_columns": self.dimension_columns
         }

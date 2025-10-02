@@ -52,33 +52,20 @@ def apply_section(exposure: float, section: Dict[str, Any], product_type: str) -
 
 def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[str, Any]:
     exposure = policy_data.get("exposition")
-    mode = program["mode"]
     structures = program["structures"]
     dimension_columns = program["dimension_columns"]
     
+    # Trier les structures par ordre
+    sorted_structures = sorted(structures, key=lambda x: x["order"])
+    
     total_ceded = 0.0
     structures_detail = []
+    remaining_exposure = exposure
     
-    if mode == "sequential":
-        remaining_exposure = exposure
-        for structure in structures:
-            matched_section = match_section(policy_data, structure["sections"], dimension_columns)
-            
-            if matched_section is None:
-                structures_detail.append({
-                    "structure_name": structure["structure_name"],
-                    "product_type": structure["product_type"],
-                    "claim_basis": structure.get("claim_basis"),
-                    "inception_date": structure.get("inception_date"),
-                    "expiry_date": structure.get("expiry_date"),
-                    "input_exposure": remaining_exposure,
-                    "ceded": 0.0,
-                    "applied": False,
-                    "section": None
-                })
-                continue
-            
-            ceded = apply_section(remaining_exposure, matched_section, structure["product_type"])
+    for structure in sorted_structures:
+        matched_section = match_section(policy_data, structure["sections"], dimension_columns)
+        
+        if matched_section is None:
             structures_detail.append({
                 "structure_name": structure["structure_name"],
                 "product_type": structure["product_type"],
@@ -86,47 +73,45 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
                 "inception_date": structure.get("inception_date"),
                 "expiry_date": structure.get("expiry_date"),
                 "input_exposure": remaining_exposure,
-                "ceded": ceded,
-                "applied": True,
-                "section": matched_section
+                "ceded": 0.0,
+                "applied": False,
+                "section": None
             })
-            total_ceded += ceded
+            continue
+        
+        # Déterminer l'exposition d'entrée selon le type de produit
+        if structure["product_type"] == "quote_share":
+            # Quote Share s'applique sur l'exposition restante
+            input_exposure = remaining_exposure
+        elif structure["product_type"] == "excess_of_loss":
+            # Excess of Loss s'applique sur l'exposition restante (après les Quote Share)
+            # Si pas de Quote Share appliqué, utiliser l'exposition originale
+            input_exposure = remaining_exposure
+        else:
+            raise ValueError(f"Unknown product type: {structure['product_type']}")
+        
+        ceded = apply_section(input_exposure, matched_section, structure["product_type"])
+        
+        structures_detail.append({
+            "structure_name": structure["structure_name"],
+            "product_type": structure["product_type"],
+            "claim_basis": structure.get("claim_basis"),
+            "inception_date": structure.get("inception_date"),
+            "expiry_date": structure.get("expiry_date"),
+            "input_exposure": input_exposure,
+            "ceded": ceded,
+            "applied": True,
+            "section": matched_section
+        })
+        
+        total_ceded += ceded
+        
+        # Mettre à jour l'exposition restante
+        if structure["product_type"] == "quote_share":
+            # Quote Share réduit l'exposition restante
             remaining_exposure -= ceded
-    
-    elif mode == "parallel":
-        for structure in structures:
-            matched_section = match_section(policy_data, structure["sections"], dimension_columns)
-            
-            if matched_section is None:
-                structures_detail.append({
-                    "structure_name": structure["structure_name"],
-                    "product_type": structure["product_type"],
-                    "claim_basis": structure.get("claim_basis"),
-                    "inception_date": structure.get("inception_date"),
-                    "expiry_date": structure.get("expiry_date"),
-                    "input_exposure": exposure,
-                    "ceded": 0.0,
-                    "applied": False,
-                    "section": None
-                })
-                continue
-            
-            ceded = apply_section(exposure, matched_section, structure["product_type"])
-            structures_detail.append({
-                "structure_name": structure["structure_name"],
-                "product_type": structure["product_type"],
-                "claim_basis": structure.get("claim_basis"),
-                "inception_date": structure.get("inception_date"),
-                "expiry_date": structure.get("expiry_date"),
-                "input_exposure": exposure,
-                "ceded": ceded,
-                "applied": True,
-                "section": matched_section
-            })
-            total_ceded += ceded
-    
-    else:
-        raise ValueError(f"Unknown mode: {mode}")
+        # Pour les Excess of Loss, on ne réduit pas l'exposition restante
+        # car ils sont empilés et calculent sur la même base
     
     return {
         "policy_number": policy_data.get("numero_police"),

@@ -1,12 +1,12 @@
 """
-Création de deux programmes simples pour comparer les modes séquentiel et parallèle
+Création de programmes simples avec la nouvelle logique basée sur l'ordre
 
-Programme 1 (SÉQUENTIEL): QS_30% puis XOL_500K_1M
-- Le quota share s'applique d'abord sur l'exposition totale
-- L'excess of loss s'applique ensuite sur l'exposition restante
+Programme 1: QS_30% puis XOL_500K_1M
+- Le quota share s'applique d'abord sur l'exposition totale (order=1)
+- L'excess of loss s'applique ensuite sur l'exposition restante (order=2)
 
-Programme 2 (PARALLÈLE): QS_30% et XOL_500K_1M simultanés
-- Les deux structures s'appliquent sur l'exposition originale
+Programme 2: Même configuration (pour compatibilité)
+- Maintenant les deux programmes donnent le même résultat car la logique est basée sur l'ordre
 """
 
 import sys
@@ -17,27 +17,26 @@ import pandas as pd
 import numpy as np
 
 # =============================================================================
-# PROGRAMME 1: SÉQUENTIEL
+# PROGRAMME 1: SIMPLE
 # =============================================================================
 
-print("Création du programme SÉQUENTIEL...")
+print("Création du programme SIMPLE...")
 
 program_sequential_data = {
-    "program_name": ["SIMPLE_SEQUENTIAL_2024"],
-    "mode": ["sequential"]
+    "program_name": ["SIMPLE_SEQUENTIAL_2024"]
 }
 
 structures_sequential_data = {
-    "structure_name": ["QS_30", "XOL_500K_1M"],
+    "structure_name": ["QS_30", "XOL_0.5M_1M"],
     "order": [1, 2],
     "product_type": ["quote_share", "excess_of_loss"]
 }
 
 sections_sequential_data = {
-    "structure_name": ["QS_30", "XOL_500K_1M"],
+    "structure_name": ["QS_30", "XOL_0.5M_1M"],
     "session_rate": [0.30, np.nan],
-    "priority": [np.nan, 500000],
-    "limit": [np.nan, 1000000],
+    "priority": [np.nan, 0.5],  # 0.5 million
+    "limit": [np.nan, 1.0],     # 1.0 million
     "country": [np.nan, np.nan],
     "region": [np.nan, np.nan],
     "product_type_1": [np.nan, np.nan],
@@ -62,27 +61,26 @@ with pd.ExcelWriter("examples/programs/program_simple_sequential.xlsx", engine="
 print("✓ Programme séquentiel créé: examples/programs/program_simple_sequential.xlsx")
 
 # =============================================================================
-# PROGRAMME 2: PARALLÈLE
+# PROGRAMME 2: SIMPLE (COMPATIBILITÉ)
 # =============================================================================
 
-print("\nCréation du programme PARALLÈLE...")
+print("\nCréation du programme SIMPLE (compatibilité)...")
 
 program_parallel_data = {
-    "program_name": ["SIMPLE_PARALLEL_2024"],
-    "mode": ["parallel"]
+    "program_name": ["SIMPLE_PARALLEL_2024"]
 }
 
 structures_parallel_data = {
-    "structure_name": ["QS_30", "XOL_500K_1M"],
+    "structure_name": ["QS_30", "XOL_0.5M_1M"],
     "order": [1, 2],
     "product_type": ["quote_share", "excess_of_loss"]
 }
 
 sections_parallel_data = {
-    "structure_name": ["QS_30", "XOL_500K_1M"],
+    "structure_name": ["QS_30", "XOL_0.5M_1M"],
     "session_rate": [0.30, np.nan],
-    "priority": [np.nan, 500000],
-    "limit": [np.nan, 1000000],
+    "priority": [np.nan, 0.5],  # 0.5 million
+    "limit": [np.nan, 1.0],     # 1.0 million
     "country": [np.nan, np.nan],
     "region": [np.nan, np.nan],
     "product_type_1": [np.nan, np.nan],
@@ -141,27 +139,22 @@ print(sections_parallel_df)
 # =============================================================================
 
 print("\n" + "=" * 80)
-print("COMPARAISON DES COMPORTEMENTS")
+print("NOUVELLE LOGIQUE BASÉE SUR L'ORDRE")
 print("=" * 80)
 
 print("""
-Exemple avec une police de 1,000,000 d'exposition:
+Exemple avec une police de 1M d'exposition:
 
-MODE SÉQUENTIEL:
-1. QS_30% s'applique sur 1,000,000 → 300,000 cédé, 700,000 restant
-2. XOL_500K_1M s'applique sur 700,000 restant → 200,000 cédé (700K - 500K)
-   Total cédé: 500,000 (300K + 200K)
-   Total retenu: 500,000
+NOUVELLE LOGIQUE (ORDRE-BASED):
+1. QS_30% (order=1) s'applique sur 1M → 0.3M cédé, 0.7M restant
+2. XOL_0.5M_1M (order=2) s'applique sur 0.7M restant → 0.2M cédé (0.7M - 0.5M)
+   Total cédé: 0.5M (0.3M + 0.2M)
+   Total retenu: 0.5M
 
-MODE PARALLÈLE:
-1. QS_30% s'applique sur 1,000,000 → 300,000 cédé
-2. XOL_500K_1M s'applique sur 1,000,000 → 500,000 cédé (1M - 500K)
-   Total cédé: 800,000 (300K + 500K)
-   Total retenu: 200,000
-
-DIFFÉRENCE CLÉE:
-- Séquentiel: L'XOL s'applique sur l'exposition restante après le QS
-- Parallèle: L'XOL s'applique sur l'exposition originale
+PRINCIPE:
+- Quote Share (order=1): Réduit l'exposition restante
+- Excess of Loss (order=2): S'applique sur l'exposition restante après les Quote Share
+- Les deux programmes donnent maintenant le même résultat car la logique est basée sur l'ordre
 """)
 
 print("\n✓ Les deux programmes sont prêts pour les tests !")

@@ -21,8 +21,7 @@ print("Création du programme Aviation Old Republic 2024...")
 # =============================================================================
 
 program_data = {
-    "program_name": ["AVIATION_OLD_REPUBLIC_2024"],
-    "mode": ["sequential"]  # Risk attaching = mode séquentiel
+    "program_name": ["AVIATION_OLD_REPUBLIC_2024"]
 }
 
 # =============================================================================
@@ -42,8 +41,8 @@ structures_data = {
 sections_data = {
     "structure_name": ["XOL_1", "XOL_2", "XOL_3"],
     "session_rate": [np.nan, np.nan, np.nan],  # XOL n'utilise pas session_rate
-    "priority": [3000000, 11750000, 21750000],  # Priorités en dollars
-    "limit": [8750000, 10000000, 23250000],     # Limites en dollars
+    "priority": [3.0, 11.75, 21.75],           # Priorités en millions
+    "limit": [8.75, 10.0, 23.25],              # Limites en millions
     # Conditions géographiques
     "country": ["United States", "United States", "United States"],
     "region": [np.nan, np.nan, np.nan],
@@ -61,8 +60,8 @@ sections_data = {
 sections_canada_data = {
     "structure_name": ["XOL_1", "XOL_2", "XOL_3"],
     "session_rate": [np.nan, np.nan, np.nan],
-    "priority": [3000000, 11750000, 21750000],
-    "limit": [8750000, 10000000, 23250000],
+    "priority": [3.0, 11.75, 21.75],           # Priorités en millions
+    "limit": [8.75, 10.0, 23.25],              # Limites en millions
     "country": ["Canada", "Canada", "Canada"],
     "region": [np.nan, np.nan, np.nan],
     "product_type_1": [np.nan, np.nan, np.nan],
@@ -141,25 +140,27 @@ print("=" * 80)
 
 print("""
 Programme: Aviation Old Republic 2024
-Mode: Sequential (Risk Attaching)
+Logique: Ordre-based (nouvelle)
 Géographie: United States et Canada
 
-Structures XOL (en mode séquentiel):
-1. XOL_1: 8.75M xs 3M (pour US et Canada)
-2. XOL_2: 10M xs 11.75M (pour US et Canada)  
-3. XOL_3: 23.25M xs 21.75M (pour US et Canada)
+Structures XOL (empilées selon l'ordre):
+1. XOL_1 (order=1): 8.75M xs 3M (pour US et Canada)
+2. XOL_2 (order=2): 10M xs 11.75M (pour US et Canada)  
+3. XOL_3 (order=3): 23.25M xs 21.75M (pour US et Canada)
 
-Comportement séquentiel:
-- XOL_1 s'applique d'abord sur l'exposition totale
-- XOL_2 s'applique sur l'exposition restante après XOL_1
-- XOL_3 s'applique sur l'exposition restante après XOL_2
+Comportement avec la nouvelle logique:
+- Toutes les couches XOL s'appliquent sur l'exposition restante (empilées)
+- Chaque couche calcule sa part selon sa priorité et limite
+- Les sections s'appliquent en parallèle selon les conditions (US vs Canada)
 
 Exemple avec une police de 50M d'exposition:
 1. XOL_1: 8.75M cédé (50M - 3M = 47M, limité à 8.75M)
-2. XOL_2: 10M cédé (47M - 8.75M = 38.25M restant, 38.25M - 11.75M = 26.5M, limité à 10M)
-3. XOL_3: 23.25M cédé (26.5M - 10M = 16.5M restant, 16.5M - 21.75M = négatif, donc 0 cédé)
-   Total cédé: 18.75M (8.75M + 10M + 0M)
-   Total retenu: 31.25M
+2. XOL_2: 10M cédé (50M - 11.75M = 38.25M, limité à 10M)
+3. XOL_3: 23.25M cédé (50M - 21.75M = 28.25M, limité à 23.25M)
+   Total cédé: 42M (8.75M + 10M + 23.25M)
+   Total retenu: 8M
+
+Note: Chaque couche XOL calcule sur la perte brute totale (50M), car elles sont empilées.
 """)
 
 print("\n✓ Le programme Aviation Old Republic 2024 est prêt !")

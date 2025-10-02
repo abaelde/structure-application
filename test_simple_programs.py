@@ -11,7 +11,7 @@ from structures.program_display import display_program
 # Créer un bordereau de test simple
 test_bordereau = pd.DataFrame({
     "numero_police": ["POL001", "POL002", "POL003"],
-    "exposition": [1000000, 2000000, 500000],
+    "exposition": [1.0, 2.0, 0.5],  # En millions
     "country": ["France", "Germany", "France"],
     "region": ["EMEA", "EMEA", "APAC"]
 })
@@ -38,13 +38,13 @@ try:
     
     print("Résultats séquentiel:")
     for _, row in results_sequential.iterrows():
-        print(f"\nPolice {row['policy_number']} (Exposition: {row['exposure']:,.0f}):")
-        print(f"  Total cédé: {row['ceded']:,.0f}")
-        print(f"  Total retenu: {row['retained']:,.0f}")
+        print(f"\nPolice {row['policy_number']} (Exposition: {row['exposure']:.1f}M):")
+        print(f"  Total cédé: {row['ceded']:.1f}M")
+        print(f"  Total retenu: {row['retained']:.1f}M")
         
         for detail in row['structures_detail']:
             if detail['applied']:
-                print(f"  - {detail['structure_name']}: {detail['ceded']:,.0f} cédé (sur {detail['input_exposure']:,.0f})")
+                print(f"  - {detail['structure_name']}: {detail['ceded']:.1f}M cédé (sur {detail['input_exposure']:.1f}M)")
             else:
                 print(f"  - {detail['structure_name']}: Non appliqué")
 
@@ -71,13 +71,13 @@ try:
     
     print("Résultats parallèle:")
     for _, row in results_parallel.iterrows():
-        print(f"\nPolice {row['policy_number']} (Exposition: {row['exposure']:,.0f}):")
-        print(f"  Total cédé: {row['ceded']:,.0f}")
-        print(f"  Total retenu: {row['retained']:,.0f}")
+        print(f"\nPolice {row['policy_number']} (Exposition: {row['exposure']:.1f}M):")
+        print(f"  Total cédé: {row['ceded']:.1f}M")
+        print(f"  Total retenu: {row['retained']:.1f}M")
         
         for detail in row['structures_detail']:
             if detail['applied']:
-                print(f"  - {detail['structure_name']}: {detail['ceded']:,.0f} cédé (sur {detail['input_exposure']:,.0f})")
+                print(f"  - {detail['structure_name']}: {detail['ceded']:.1f}M cédé (sur {detail['input_exposure']:.1f}M)")
             else:
                 print(f"  - {detail['structure_name']}: Non appliqué")
 
@@ -101,7 +101,7 @@ if 'results_sequential' in locals() and 'results_parallel' in locals():
     
     print(comparison.to_string(index=False))
     
-    print(f"\nDifférence moyenne cédé: {comparison['Différence_Cédé'].mean():,.0f}")
-    print(f"Différence maximale cédé: {comparison['Différence_Cédé'].max():,.0f}")
+    print(f"\nDifférence moyenne cédé: {comparison['Différence_Cédé'].mean():.1f}M")
+    print(f"Différence maximale cédé: {comparison['Différence_Cédé'].max():.1f}M")
 
 print("\n✓ Tests terminés !")
