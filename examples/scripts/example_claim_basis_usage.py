@@ -2,6 +2,10 @@
 Exemple d'utilisation pratique de la logique claim_basis
 """
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+
 import pandas as pd
 from structures.treaty_manager import TreatyManager
 from structures.structure_engine import apply_treaty_manager_to_bordereau
@@ -13,9 +17,9 @@ def example_claim_basis_usage():
     # 1. Charger les traités multi-années
     print("1. Chargement des traités...")
     treaty_paths = {
-        "2023": "treaty_2023.xlsx",
-        "2024": "treaty_2024.xlsx", 
-        "2025": "treaty_2025.xlsx"
+        "2023": "examples/treaties/treaty_2023.xlsx",
+        "2024": "examples/treaties/treaty_2024.xlsx", 
+        "2025": "examples/treaties/treaty_2025.xlsx"
     }
     
     treaty_manager = TreatyManager(treaty_paths)
@@ -23,7 +27,7 @@ def example_claim_basis_usage():
     
     # 2. Charger le bordereau
     print("\n2. Chargement du bordereau...")
-    bordereau_df = pd.read_csv("bordereau_multi_year_test.csv")
+    bordereau_df = pd.read_csv("examples/bordereaux/bordereau_multi_year_test.csv")
     print(f"   ✓ {len(bordereau_df)} polices chargées")
     
     # 3. Calcul "as of now" en mi-2025

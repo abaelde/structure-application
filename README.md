@@ -14,12 +14,33 @@ structure-application/
 ├── structures/                         # Moteur d'application des programmes
 │   ├── structure_loader.py            # Chargement depuis Excel (ProgramLoader)
 │   ├── structure_engine.py            # Logique d'application et matching de sections
+│   ├── treaty_manager.py              # Gestionnaire de traités multi-années
+│   ├── program_display.py             # Affichage des programmes
 │   └── __init__.py
-├── bordereau_exemple.csv              # Données des polices
+├── examples/                           # Exemples et démonstrations
+│   ├── README.md                      # Documentation des exemples
+│   ├── bordereaux/                    # Exemples de bordereaux
+│   │   ├── bordereau_exemple.csv      # Bordereau de base
+│   │   └── bordereau_multi_year_test.csv # Test claim_basis
+│   ├── programs/                      # Exemples de programmes
+│   │   ├── program_simple_sequential.xlsx
+│   │   ├── program_simple_parallel.xlsx
+│   │   └── program_simple_*_updated.xlsx
+│   ├── treaties/                      # Traités multi-années
+│   │   ├── treaty_2023.xlsx
+│   │   ├── treaty_2024.xlsx
+│   │   └── treaty_2025.xlsx
+│   └── scripts/                       # Scripts d'exemple
+│       ├── create_simple_programs.py
+│       ├── create_program_config.py
+│       └── example_claim_basis_usage.py
 ├── program_config.xlsx                # Configuration du programme (Excel)
-├── create_program_config.py           # Script de création de configuration
 ├── PROGRAM_SPECIFICATION_GUIDE.md     # Guide de spécification des programmes
+├── CLAIM_BASIS_GUIDE.md               # Guide de la logique claim_basis
 ├── main.py                            # Point d'entrée principal
+├── test_simple_programs.py            # Tests des programmes simples
+├── test_new_fields.py                 # Tests des nouveaux champs
+├── demo_organized_examples.py         # Démonstration de l'organisation
 └── README.md                          # Documentation
 ```
 
@@ -38,6 +59,8 @@ Fichier CSV contenant les polices d'assurance avec :
 - `sic_code` : Code SIC
 - `include` : Champ libre pour conditions spéciales
 - `exposition` : Valeur d'exposition
+- `inception_date` : Date de souscription de la police
+- `expiry_date` : Date d'expiration de la police
 
 ### 2. Produits de base
 - **Quote-share** : Application d'un pourcentage de cession (session_rate) sur l'exposition
@@ -56,6 +79,8 @@ Le programme définit :
 Les structures sont les éléments qui composent un programme. Chaque structure :
 - Est définie par son nom, son ordre d'application et le type de produit utilisé
 - Possède plusieurs **sections** qui définissent les paramètres et conditions d'application
+- Peut avoir un **claim_basis** : "risk_attaching" ou "loss_occurring"
+- A des dates de validité : `inception_date` et `expiry_date`
 
 ### 5. Sections
 Les sections sont les instanciations concrètes d'une structure avec :
@@ -73,6 +98,45 @@ Pour chaque police et chaque structure :
 - Section 2 : session_rate=40%, localisation=Paris → S'applique uniquement à Paris (spécifique)
 
 Pour une police à Paris, la Section 2 sera choisie car elle est plus spécifique.
+
+## Logique Claim Basis
+
+Le système implémente la logique **claim_basis** qui détermine quel traité appliquer selon la date de la loss et la date de souscription de la police.
+
+### Types de Claim Basis
+
+#### `risk_attaching`
+- **Règle** : Utilise le traité qui était en vigueur lors de la **souscription** de la police
+- **Date de référence** : `inception_date` de la police
+- **Exemple** : Police souscrite en 2023 → Applique le traité de 2023, même si la loss survient en 2025
+
+#### `loss_occurring`
+- **Règle** : Utilise le traité qui est en vigueur au moment de la **loss**
+- **Date de référence** : Date de calcul "as of now"
+- **Exemple** : Loss en 2025 → Applique le traité de 2025, même si la police a été souscrite en 2023
+
+### Utilisation avec TreatyManager
+
+```python
+from structures.treaty_manager import TreatyManager
+from structures.structure_engine import apply_treaty_manager_to_bordereau
+
+# Charger les traités multi-années
+treaty_paths = {
+    "2023": "examples/treaties/treaty_2023.xlsx",
+    "2024": "examples/treaties/treaty_2024.xlsx", 
+    "2025": "examples/treaties/treaty_2025.xlsx"
+}
+
+treaty_manager = TreatyManager(treaty_paths)
+
+# Calcul "as of now"
+results = apply_treaty_manager_to_bordereau(
+    bordereau_df, treaty_manager, "2025-06-15"
+)
+```
+
+Pour plus de détails, consultez le [Guide Claim Basis](CLAIM_BASIS_GUIDE.md).
 
 ## Configuration Excel
 
@@ -115,11 +179,35 @@ Définit les sections de chaque structure avec paramètres et conditions.
 uv sync
 
 # Créer/recréer le fichier de configuration (optionnel)
-uv run python create_program_config.py
+uv run python examples/scripts/create_program_config.py
 
 # Exécuter le système
 uv run python main.py
 ```
+
+## Exemples et Démonstrations
+
+Le dossier `examples/` contient tous les exemples organisés par catégorie :
+
+### Tests rapides
+```bash
+# Test des programmes simples
+uv run python test_simple_programs.py
+
+# Test de la logique claim_basis
+uv run python examples/scripts/example_claim_basis_usage.py
+
+# Démonstration de l'organisation
+uv run python demo_organized_examples.py
+```
+
+### Structure des exemples
+- **`examples/bordereaux/`** : Exemples de bordereaux avec les nouveaux champs
+- **`examples/programs/`** : Programmes simples (séquentiel/parallèle)
+- **`examples/treaties/`** : Traités multi-années pour claim_basis
+- **`examples/scripts/`** : Scripts de démonstration et d'exemple
+
+Consultez [examples/README.md](examples/README.md) pour plus de détails.
 
 ### Créer une nouvelle configuration
 

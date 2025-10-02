@@ -9,6 +9,10 @@ Programme 2 (PARALLÈLE): QS_30% et XOL_500K_1M simultanés
 - Les deux structures s'appliquent sur l'exposition originale
 """
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+
 import pandas as pd
 import numpy as np
 
@@ -50,12 +54,12 @@ program_sequential_df = pd.DataFrame(program_sequential_data)
 structures_sequential_df = pd.DataFrame(structures_sequential_data)
 sections_sequential_df = pd.DataFrame(sections_sequential_data)
 
-with pd.ExcelWriter("program_simple_sequential.xlsx", engine="openpyxl") as writer:
+with pd.ExcelWriter("examples/programs/program_simple_sequential.xlsx", engine="openpyxl") as writer:
     program_sequential_df.to_excel(writer, sheet_name="program", index=False)
     structures_sequential_df.to_excel(writer, sheet_name="structures", index=False)
     sections_sequential_df.to_excel(writer, sheet_name="sections", index=False)
 
-print("✓ Programme séquentiel créé: program_simple_sequential.xlsx")
+print("✓ Programme séquentiel créé: examples/programs/program_simple_sequential.xlsx")
 
 # =============================================================================
 # PROGRAMME 2: PARALLÈLE
@@ -95,12 +99,12 @@ program_parallel_df = pd.DataFrame(program_parallel_data)
 structures_parallel_df = pd.DataFrame(structures_parallel_data)
 sections_parallel_df = pd.DataFrame(sections_parallel_data)
 
-with pd.ExcelWriter("program_simple_parallel.xlsx", engine="openpyxl") as writer:
+with pd.ExcelWriter("examples/programs/program_simple_parallel.xlsx", engine="openpyxl") as writer:
     program_parallel_df.to_excel(writer, sheet_name="program", index=False)
     structures_parallel_df.to_excel(writer, sheet_name="structures", index=False)
     sections_parallel_df.to_excel(writer, sheet_name="sections", index=False)
 
-print("✓ Programme parallèle créé: program_simple_parallel.xlsx")
+print("✓ Programme parallèle créé: examples/programs/program_simple_parallel.xlsx")
 
 # =============================================================================
 # AFFICHAGE DES DÉTAILS

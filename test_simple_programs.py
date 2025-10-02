@@ -28,7 +28,7 @@ print("TEST DU PROGRAMME SÉQUENTIEL")
 print("=" * 80)
 
 try:
-    loader_sequential = ProgramLoader("program_simple_sequential.xlsx")
+    loader_sequential = ProgramLoader("examples/programs/program_simple_sequential.xlsx")
     program_sequential = loader_sequential.get_program()
     
     # Afficher la configuration du programme
@@ -61,7 +61,7 @@ print("TEST DU PROGRAMME PARALLÈLE")
 print("=" * 80)
 
 try:
-    loader_parallel = ProgramLoader("program_simple_parallel.xlsx")
+    loader_parallel = ProgramLoader("examples/programs/program_simple_parallel.xlsx")
     program_parallel = loader_parallel.get_program()
     
     # Afficher la configuration du programme

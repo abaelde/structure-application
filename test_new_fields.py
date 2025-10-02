@@ -14,7 +14,7 @@ def test_new_fields():
     print("=" * 60)
     
     # Charger le programme mis à jour
-    loader = ProgramLoader("program_simple_parallel_updated.xlsx")
+    loader = ProgramLoader("examples/programs/program_simple_parallel_updated.xlsx")
     program = loader.get_program()
     
     print("📋 Configuration du programme:")
