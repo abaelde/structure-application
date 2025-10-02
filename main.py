@@ -1,5 +1,6 @@
 import pandas as pd
 from structures import ProgramLoader, apply_program_to_bordereau
+from structures.program_display import display_program
 
 
 def format_section_conditions(section, dimension_columns):
@@ -23,31 +24,8 @@ def main():
     program = loader.get_program()
     dimension_columns = program['dimension_columns']
     
-    print(f"Program: {program['name']}")
-    print(f"Mode: {program['mode']}")
-    print(f"Number of structures: {len(program['structures'])}\n")
-    
-    print("=" * 80)
-    print(f"Program structure: {program['name']} ({program['mode']} mode)")
-    print("=" * 80)
-    
-    print("\nStructures and their sections:")
-    for i, struct in enumerate(program['structures'], 1):
-        print(f"\n{i}. {struct['structure_name']} ({struct['product_type']})")
-        print(f"   Sections defined:")
-        for j, section in enumerate(struct['sections'], 1):
-            conditions_str = format_section_conditions(section, dimension_columns)
-            
-            params = []
-            if pd.notna(section.get('session_rate')):
-                params.append(f"rate={section['session_rate']:.0%}")
-            if pd.notna(section.get('priority')):
-                params.append(f"priority={section['priority']:,.0f}")
-            if pd.notna(section.get('limit')):
-                params.append(f"limit={section['limit']:,.0f}")
-            params_str = ", ".join(params)
-            
-            print(f"      {j}) {params_str} | Conditions: {conditions_str}")
+    # Afficher la configuration du programme de manière user-friendly
+    display_program(program)
     
     results = apply_program_to_bordereau(bordereau_df, program)
     
