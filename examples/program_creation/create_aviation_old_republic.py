@@ -9,7 +9,7 @@ Programme risk attaching avec 3 structures excess of loss pour United States et 
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
 import pandas as pd
 import numpy as np
@@ -104,7 +104,7 @@ sections_df = pd.DataFrame(sections_combined_data)
 # GÉNÉRATION DU FICHIER EXCEL
 # =============================================================================
 
-output_file = "examples/programs/aviation_old_republic_2024.xlsx"
+output_file = "../programs/aviation_old_republic_2024.xlsx"
 
 with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
     program_df.to_excel(writer, sheet_name="program", index=False)

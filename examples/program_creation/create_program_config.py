@@ -1,9 +1,12 @@
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
 import pandas as pd
 import numpy as np
 
 program_data = {
-    "program_name": ["PROGRAM_2024"],
-    "mode": ["sequential"]
+    "program_name": ["PROGRAM_2024"]
 }
 
 structures_data = {
@@ -15,8 +18,8 @@ structures_data = {
 sections_data = {
     "structure_name": ["QS_GENERAL", "QS_GENERAL", "XOL_LARGE"],
     "session_rate": [0.30, 0.40, np.nan],
-    "priority": [np.nan, np.nan, 500000],
-    "limit": [np.nan, np.nan, 1000000],
+    "priority": [np.nan, np.nan, 0.5],  # 0.5 million
+    "limit": [np.nan, np.nan, 1.0],     # 1.0 million
     "country": [np.nan, "France", "France"],
     "region": [np.nan, np.nan, np.nan],
     "product_type_1": [np.nan, np.nan, np.nan],
@@ -33,12 +36,12 @@ program_df = pd.DataFrame(program_data)
 structures_df = pd.DataFrame(structures_data)
 sections_df = pd.DataFrame(sections_data)
 
-with pd.ExcelWriter("program_config.xlsx", engine="openpyxl") as writer:
+with pd.ExcelWriter("../programs/program_config.xlsx", engine="openpyxl") as writer:
     program_df.to_excel(writer, sheet_name="program", index=False)
     structures_df.to_excel(writer, sheet_name="structures", index=False)
     sections_df.to_excel(writer, sheet_name="sections", index=False)
 
-print("✓ Excel file 'program_config.xlsx' created successfully!")
+print("✓ Excel file 'examples/programs/program_config.xlsx' created successfully!")
 print("\n" + "=" * 80)
 print("PROGRAM CONFIGURATION")
 print("=" * 80)
@@ -64,12 +67,12 @@ This configuration creates a sequential program with:
    → Most specific section wins: France policies get 40%, others get 30%
 
 2. XOL_LARGE (Excess of Loss):
-   - Section 1: 1M xs 500K for policies in France only
+   - Section 1: 1M xs 0.5M for policies in France only
    → Applied only to France policies
 
 The system automatically:
 - Detects dimension columns (country, region, product_type_1, etc.)
 - Matches the most specific section for each policy
-- Applies structures sequentially (output of one → input of next)
+- Applies structures in order (Quote Share reduces exposure, then XOL applies)
 """)
 
