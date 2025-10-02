@@ -17,7 +17,7 @@ class ProgramLoader:
         program_row = program_df.iloc[0]
         program_name = program_row["program_name"]
         
-        param_columns = ["structure_name", "session_rate", "priority", "limit"]
+        param_columns = ["structure_name", "session_rate", "priority", "limit", "claim_basis", "inception_date", "expiry_date"]
         self.dimension_columns = [col for col in sections_df.columns if col not in param_columns]
         
         program_structures = []
@@ -32,6 +32,9 @@ class ProgramLoader:
                 "structure_name": structure_name,
                 "order": structure_row["order"],
                 "product_type": structure_row["product_type"],
+                "claim_basis": structure_row.get("claim_basis"),
+                "inception_date": structure_row.get("inception_date"),
+                "expiry_date": structure_row.get("expiry_date"),
                 "sections": structure_sections
             })
         

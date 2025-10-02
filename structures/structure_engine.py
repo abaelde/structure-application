@@ -67,6 +67,9 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
                 structures_detail.append({
                     "structure_name": structure["structure_name"],
                     "product_type": structure["product_type"],
+                    "claim_basis": structure.get("claim_basis"),
+                    "inception_date": structure.get("inception_date"),
+                    "expiry_date": structure.get("expiry_date"),
                     "input_exposure": remaining_exposure,
                     "ceded": 0.0,
                     "applied": False,
@@ -78,6 +81,9 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
             structures_detail.append({
                 "structure_name": structure["structure_name"],
                 "product_type": structure["product_type"],
+                "claim_basis": structure.get("claim_basis"),
+                "inception_date": structure.get("inception_date"),
+                "expiry_date": structure.get("expiry_date"),
                 "input_exposure": remaining_exposure,
                 "ceded": ceded,
                 "applied": True,
@@ -94,6 +100,9 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
                 structures_detail.append({
                     "structure_name": structure["structure_name"],
                     "product_type": structure["product_type"],
+                    "claim_basis": structure.get("claim_basis"),
+                    "inception_date": structure.get("inception_date"),
+                    "expiry_date": structure.get("expiry_date"),
                     "input_exposure": exposure,
                     "ceded": 0.0,
                     "applied": False,
@@ -105,6 +114,9 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
             structures_detail.append({
                 "structure_name": structure["structure_name"],
                 "product_type": structure["product_type"],
+                "claim_basis": structure.get("claim_basis"),
+                "inception_date": structure.get("inception_date"),
+                "expiry_date": structure.get("expiry_date"),
                 "input_exposure": exposure,
                 "ceded": ceded,
                 "applied": True,
@@ -120,6 +132,8 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
         "exposure": exposure,
         "ceded": total_ceded,
         "retained": exposure - total_ceded,
+        "policy_inception_date": policy_data.get("inception_date"),
+        "policy_expiry_date": policy_data.get("expiry_date"),
         "structures_detail": structures_detail
     }
 
