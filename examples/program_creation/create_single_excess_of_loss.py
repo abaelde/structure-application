@@ -1,8 +1,8 @@
 """
-Création d'un programme simple avec quota share
+Création d'un programme simple avec excess of loss
 
-Programme: Single Cote à Cher
-- Un seul quota share de 30% appliqué à toutes les polices
+Programme: Single Excess of Loss
+- Un seul excess of loss de 1M xs 0.5M appliqué à toutes les polices
 """
 
 import sys
@@ -13,26 +13,26 @@ import pandas as pd
 import numpy as np
 
 # =============================================================================
-# PROGRAMME: SINGLE COTE À CHER
+# PROGRAMME: SINGLE EXCESS OF LOSS
 # =============================================================================
 
-print("Création du programme Single Cote à Cher...")
+print("Création du programme Single Excess of Loss...")
 
 program_data = {
-    "program_name": ["SINGLE_COTE_A_CHER_2024"]
+    "program_name": ["SINGLE_EXCESS_OF_LOSS_2024"]
 }
 
 structures_data = {
-    "structure_name": ["QS_30"],
+    "structure_name": ["XOL_0.5M_1M"],
     "order": [1],
-    "product_type": ["quote_share"]
+    "product_type": ["excess_of_loss"]
 }
 
 sections_data = {
-    "structure_name": ["QS_30"],
-    "session_rate": [0.30],  # 30% de cession
-    "priority": [np.nan],
-    "limit": [np.nan],
+    "structure_name": ["XOL_0.5M_1M"],
+    "session_rate": [np.nan],
+    "priority": [0.5],  # 0.5 million
+    "limit": [1.0],     # 1.0 million
     "country": [np.nan],
     "region": [np.nan],
     "product_type_1": [np.nan],
@@ -53,19 +53,18 @@ sections_df = pd.DataFrame(sections_data)
 output_dir = "../programs"
 os.makedirs(output_dir, exist_ok=True)
 
-with pd.ExcelWriter("../programs/single_cote_a_cher.xlsx", engine="openpyxl") as writer:
+with pd.ExcelWriter("../programs/single_excess_of_loss.xlsx", engine="openpyxl") as writer:
     program_df.to_excel(writer, sheet_name="program", index=False)
     structures_df.to_excel(writer, sheet_name="structures", index=False)
     sections_df.to_excel(writer, sheet_name="sections", index=False)
 
-print("✓ Programme Single Cote à Cher créé: examples/programs/single_cote_a_cher.xlsx")
-
+print("✓ Programme Single Excess of Loss créé: examples/programs/single_excess_of_loss.xlsx")
 # =============================================================================
 # AFFICHAGE DES DÉTAILS
 # =============================================================================
 
 print("\n" + "=" * 80)
-print("PROGRAMME SINGLE COTE À CHER")
+print("PROGRAMME SINGLE EXCESS OF LOSS")
 print("=" * 80)
 
 print("\nProgram:")
@@ -88,15 +87,21 @@ print("=" * 80)
 print("""
 Exemple avec une police de 1M d'exposition:
 
-PROGRAMME SINGLE COTE À CHER:
-1. QS_30% s'applique sur 1M → 0.3M cédé, 0.7M retenu
-   Total cédé: 0.3M
-   Total retenu: 0.7M
+PROGRAMME SINGLE EXCESS OF LOSS:
+1. XOL_0.5M_1M s'applique sur 1M → 0.5M cédé (1M - 0.5M = 0.5M, limité à 1M)
+   Total cédé: 0.5M
+   Total retenu: 0.5M
+
+Exemple avec une police de 2M d'exposition:
+1. XOL_0.5M_1M s'applique sur 2M → 1M cédé (2M - 0.5M = 1.5M, limité à 1M)
+   Total cédé: 1M
+   Total retenu: 1M
 
 PRINCIPE:
-- Un seul quota share de 30% appliqué à toutes les polices
+- Un seul excess of loss de 1M xs 0.5M appliqué à toutes les polices
 - Pas de conditions géographiques ou autres
-- Simple et efficace pour tester la logique de base
+- Simple et efficace pour tester la logique XOL de base
 """)
 
-print("\n✓ Le programme Single Cote à Cher est prêt !")
+print("\n✓ Le programme Single Excess of Loss est prêt !")
+

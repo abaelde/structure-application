@@ -11,9 +11,9 @@ Ce dossier contient les scripts Python pour créer les programmes de réassuranc
 ## Scripts disponibles
 
 ### Scripts de création
-- `create_simple_programs.py` - Crée les programmes simples (QS + XOL)
-- `create_aviation_old_republic.py` - Crée le programme aviation avec 3 couches XOL
-- `create_program_config.py` - Crée un programme de base avec conditions géographiques
+- `create_single_quota_share.py` - Crée un programme simple avec quota share (30%)
+- `create_single_excess_of_loss.py` - Crée un programme simple avec excess of loss (1M xs 0.5M)
+- `create_aviation_old_republic.py` - Crée le programme aviation avec 3 couches XOL empilées
 
 ### Script maître
 - `regenerate_all_programs.py` - Régénère tous les programmes d'un coup
@@ -29,9 +29,9 @@ python regenerate_all_programs.py
 ### Créer un programme spécifique
 ```bash
 cd examples/program_creation
-python create_simple_programs.py
+python create_single_quota_share.py
+python create_single_excess_of_loss.py
 python create_aviation_old_republic.py
-python create_program_config.py
 ```
 
 ## Structure des programmes créés
@@ -52,7 +52,6 @@ Tous les montants sont exprimés en millions pour la lisibilité :
 ## Fichiers générés
 
 Les programmes sont créés dans `examples/programs/` :
-- `program_simple_sequential.xlsx`
-- `program_simple_parallel.xlsx`
-- `aviation_old_republic_2024.xlsx`
-- `program_config.xlsx`
+- `single_cote_a_cher.xlsx` - Programme simple avec quota share 30%
+- `single_excess_of_loss.xlsx` - Programme simple avec XOL 1M xs 0.5M
+- `aviation_old_republic_2024.xlsx` - Programme aviation avec 3 couches XOL empilées

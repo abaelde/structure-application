@@ -17,6 +17,9 @@ def regenerate_all_programs():
     script_dir = os.path.dirname(__file__)
     creation_scripts = glob.glob(os.path.join(script_dir, "create_*.py"))
     
+    # Exclure le script de régénération lui-même
+    creation_scripts = [s for s in creation_scripts if not s.endswith("regenerate_all_programs.py")]
+    
     if not creation_scripts:
         print("❌ Aucun script de création trouvé")
         return
