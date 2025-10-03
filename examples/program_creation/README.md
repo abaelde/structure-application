@@ -14,7 +14,7 @@ Ce dossier contient les scripts Python pour créer les programmes de réassuranc
 - `create_single_quota_share.py` - Crée un programme simple avec quota share (30%)
 - `create_single_excess_of_loss.py` - Crée un programme simple avec excess of loss (1M xs 0.5M)
 - `create_aviation_old_republic.py` - Crée le programme aviation avec 3 couches XOL empilées
-- `create_aviation_complex_multi_currency.py` - Crée un programme aviation complexe avec 6 couches XOL multi-devises
+- `create_aviation_AXA_XL.py` - Crée un programme aviation complexe avec 6 couches XOL multi-devises
 
 ### Script maître
 - `regenerate_all_programs.py` - Régénère tous les programmes d'un coup
@@ -33,7 +33,7 @@ cd examples/program_creation
 python create_single_quota_share.py
 python create_single_excess_of_loss.py
 python create_aviation_old_republic.py
-python create_aviation_complex_multi_currency.py
+python create_aviation_AXA_XL.py
 ```
 
 ## Structure des programmes créés
@@ -51,10 +51,18 @@ Tous les montants sont exprimés en millions pour la lisibilité :
 - Limite 1.0 = 1,000,000
 - Exposition 2.0 = 2,000,000
 
+## Claim Basis
+
+Tous les programmes incluent maintenant le champ `claim_basis` dans la feuille "structures" :
+- **`risk_attaching`** : Le traité s'applique selon l'année de souscription de la police
+- **`loss_occurring`** : Le traité s'applique selon l'année de survenance du sinistre
+
+Pour les programmes actuels, tous les structures utilisent `risk_attaching`.
+
 ## Fichiers générés
 
 Les programmes sont créés dans `examples/programs/` :
 - `single_quota_share.xlsx` - Programme simple avec quota share 30%
 - `single_excess_of_loss.xlsx` - Programme simple avec XOL 1M xs 0.5M
 - `aviation_old_republic_2024.xlsx` - Programme aviation avec 3 couches XOL empilées
-- `aviation_complex_multi_currency_2024.xlsx` - Programme aviation complexe avec 6 couches XOL multi-devises
+- `aviation_axa_xl_2024.xlsx` - Programme aviation complexe avec 6 couches XOL multi-devises

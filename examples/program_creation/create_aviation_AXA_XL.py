@@ -51,7 +51,7 @@ LAYER_VALUES_GBP = {
 # =============================================================================
 
 program_data = {
-    "program_name": ["AVIATION_COMPLEX_MULTI_CURRENCY_2024"]
+    "program_name": ["AVIATION_AXA_XL_2024"]
 }
 
 # =============================================================================
@@ -62,7 +62,9 @@ structures_data = {
     "structure_name": ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"],
     "order": [1, 2, 3, 4, 5, 6],
     "product_type": ["excess_of_loss", "excess_of_loss", "excess_of_loss", 
-                    "excess_of_loss", "excess_of_loss", "excess_of_loss"]
+                    "excess_of_loss", "excess_of_loss", "excess_of_loss"],
+    "claim_basis": ["risk_attaching", "risk_attaching", "risk_attaching", 
+                   "risk_attaching", "risk_attaching", "risk_attaching"]
 }
 
 # =============================================================================
@@ -145,7 +147,7 @@ sections_df = pd.DataFrame(sections_data)
 output_dir = "../programs"
 os.makedirs(output_dir, exist_ok=True)
 
-output_file = os.path.join(output_dir, "aviation_complex_multi_currency_2024.xlsx")
+output_file = os.path.join(output_dir, "aviation_axa_xl_2024.xlsx")
 
 with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
     program_df.to_excel(writer, sheet_name="program", index=False)
@@ -159,7 +161,7 @@ print(f"✓ Programme créé: {output_file}")
 # =============================================================================
 
 print("\n" + "=" * 80)
-print("PROGRAMME AVIATION COMPLEX MULTI-CURRENCY 2024")
+print("PROGRAMME AVIATION AXA XL 2024")
 print("=" * 80)
 
 print("\nProgram:")
@@ -184,7 +186,7 @@ print("RÉSUMÉ DU PROGRAMME")
 print("=" * 80)
 
 print("""
-Programme: Aviation Complex Multi-Currency 2024
+Programme: Aviation AXA XL 2024
 Logique: Ordre-based (nouvelle)
 Devises: USD, CAD, EUR, AUD (valeurs identiques) + GBP (valeurs spécifiques)
 
@@ -218,7 +220,7 @@ Exemple avec une police de 100M USD:
 Note: Chaque couche XOL calcule sur la perte brute totale (100M), car elles sont empilées.
 """)
 
-print("\n✓ Le programme Aviation Complex Multi-Currency 2024 est prêt !")
+print("\n✓ Le programme Aviation AXA XL 2024 est prêt !")
 print("\nPour modifier les valeurs:")
 print("1. Éditez les dictionnaires LAYER_VALUES_COMMON et LAYER_VALUES_GBP")
 print("2. Relancez ce script pour régénérer le fichier Excel")

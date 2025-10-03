@@ -31,7 +31,8 @@ program_data = {
 structures_data = {
     "structure_name": ["XOL_1", "XOL_2", "XOL_3"],
     "order": [1, 2, 3],
-    "product_type": ["excess_of_loss", "excess_of_loss", "excess_of_loss"]
+    "product_type": ["excess_of_loss", "excess_of_loss", "excess_of_loss"],
+    "claim_basis": ["risk_attaching", "risk_attaching", "risk_attaching"]
 }
 
 # =============================================================================
