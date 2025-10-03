@@ -1,26 +1,26 @@
 ---
 alwaysApply: true
-description: Règle pour l'implémentation des montants en millions dans les données
+description: Rule for implementing amounts in millions in data
 ---
 
-# Règle des Montants en Millions
+# Amounts in Millions Rule
 
-## Principe
-Tous les montants doivent être implémentés en **millions** dans les données d'entrée et les bordereaux.
+## Principle
+All amounts must be implemented in **millions** in input data and bordereaux.
 
 ## Application
-- **Dans les bordereaux CSV** : Les montants doivent être saisis directement en millions (ex: 2 pour 2 millions)
-- **Dans les paramètres d'entrée** : Les montants de création de programmes doivent être en millions
-- **Dans les fichiers de configuration** : Tous les montants doivent être exprimés en millions
+- **In CSV bordereaux**: Amounts must be entered directly in millions (e.g.: 2 for 2 million)
+- **In input parameters**: Program creation amounts must be in millions
+- **In configuration files**: All amounts must be expressed in millions
 
-## Exemples
-- ✅ Correct : `2` (pour représenter 2 millions)
-- ❌ Incorrect : `2000000` (pour représenter 2 millions)
+## Examples
+- ✅ Correct: `2` (to represent 2 million)
+- ❌ Incorrect: `2000000` (to represent 2 million)
 
 ## Important
-Cette règle s'applique **uniquement aux données d'entrée et aux bordereaux**. Elle ne doit **PAS** être appliquée à la logique de calcul interne du système, qui peut continuer à travailler avec les unités appropriées selon les besoins du calcul.
+This rule applies **only to input data and bordereaux**. It must **NOT** be applied to the internal calculation logic of the system, which can continue to work with appropriate units according to calculation needs.
 
-## Fichiers concernés
-- [examples/bordereaux/](mdc:examples/bordereaux/) - Tous les fichiers CSV de bordereaux
-- [examples/program_creation/](mdc:examples/program_creation/) - Scripts de création de programmes
-- [program_config.xlsx](mdc:program_config.xlsx) - Configuration des programmes
+## Affected Files
+- [examples/bordereaux/](mdc:examples/bordereaux/) - All CSV bordereau files
+- [examples/program_creation/](mdc:examples/program_creation/) - Program creation scripts
+- [program_config.xlsx](mdc:program_config.xlsx) - Program configuration
