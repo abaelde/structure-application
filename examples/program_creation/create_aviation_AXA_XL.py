@@ -50,7 +50,7 @@ LAYER_VALUES_GBP = {
 # Cession Rate Values (pourcentage cédé au réassureur)
 CESSION_RATE_VALUES = {
     "QS_1": 0.25,  # 25% cédé (rétention 75%)
-    "XOL_1": np.nan,  # XOL n'utilise pas cession_rate
+    "XOL_1": np.nan,  # XOL n'utilise pas cession_PCT
     "XOL_2": np.nan,
     "XOL_3": np.nan,
     "XOL_4": np.nan,
@@ -100,7 +100,7 @@ COMMON_CURRENCIES = ["USD", "CAD", "EUR", "AUD"]
 # Initialiser les listes pour les sections
 sections_data = {
     "structure_name": [],
-    "cession_rate": [],
+    "cession_PCT": [],
     "attachment_point_100": [],
     "limit_occurrence_100": [],
     "reinsurer_share": [],
@@ -121,7 +121,7 @@ cession_rate_qs = CESSION_RATE_VALUES["QS_1"]
 reinsurer_share_qs = REINSURER_SHARE_VALUES["QS_1"]
 for currency in COMMON_CURRENCIES + ["GBP"]:
     sections_data["structure_name"].append("QS_1")
-    sections_data["cession_rate"].append(cession_rate_qs)  # 25% cédé
+    sections_data["cession_PCT"].append(cession_rate_qs)  # 25% cédé
     sections_data["attachment_point_100"].append(np.nan)  # Quota Share n'utilise pas attachment_point_100
     sections_data["limit_occurrence_100"].append(np.nan)  # Quota Share n'utilise pas limit_occurrence_100
     sections_data["reinsurer_share"].append(reinsurer_share_qs)  # 1.65% du réassureur
@@ -138,13 +138,13 @@ for currency in COMMON_CURRENCIES + ["GBP"]:
 
 # Créer les sections pour les devises communes (USD, CAD, EUR, AUD) - structures XOL
 for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
-    attachment_point_100, limit_occurrence_100 = LAYER_VALUES_COMMON[layer_name]
-    cession_rate = CESSION_RATE_VALUES[layer_name]
+    limit_occurrence_100, attachment_point_100 = LAYER_VALUES_COMMON[layer_name]
+    cession_PCT = CESSION_RATE_VALUES[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
     for currency in COMMON_CURRENCIES:
         sections_data["structure_name"].append(layer_name)
-        sections_data["cession_rate"].append(cession_rate)  # Utilise la valeur du dictionnaire
+        sections_data["cession_PCT"].append(cession_PCT)  # Utilise la valeur du dictionnaire
         sections_data["attachment_point_100"].append(attachment_point_100)
         sections_data["limit_occurrence_100"].append(limit_occurrence_100)
         sections_data["reinsurer_share"].append(reinsurer_share)
@@ -161,12 +161,12 @@ for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
 
 # Créer les sections pour GBP (valeurs spécifiques) - structures XOL
 for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
-    attachment_point_100, limit_occurrence_100 = LAYER_VALUES_GBP[layer_name]
-    cession_rate = CESSION_RATE_VALUES[layer_name]
+    limit_occurrence_100, attachment_point_100 = LAYER_VALUES_GBP[layer_name]
+    cession_PCT = CESSION_RATE_VALUES[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
     sections_data["structure_name"].append(layer_name)
-    sections_data["cession_rate"].append(cession_rate)  # Utilise la valeur du dictionnaire
+    sections_data["cession_PCT"].append(cession_PCT)  # Utilise la valeur du dictionnaire
     sections_data["attachment_point_100"].append(attachment_point_100)
     sections_data["limit_occurrence_100"].append(limit_occurrence_100)
     sections_data["reinsurer_share"].append(reinsurer_share)

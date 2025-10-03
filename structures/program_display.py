@@ -67,8 +67,8 @@ def _display_section(section: Dict[str, Any], dimension_columns: list, indent: s
         indent: Indentation pour l'affichage
     """
     # Paramètres du produit
-    if pd.notna(section.get('cession_rate')):
-        print(f"{indent}💰 Taux de cession: {section['cession_rate']:.1%}")
+    if pd.notna(section.get('cession_PCT')):
+        print(f"{indent}💰 Taux de cession: {section['cession_PCT']:.1%}")
     
     if pd.notna(section.get('attachment_point_100')) and pd.notna(section.get('limit_occurrence_100')):
         print(f"{indent}🛡️  Excess of Loss: {section['limit_occurrence_100']:,.0f} xs {section['attachment_point_100']:,.0f}")
@@ -103,8 +103,8 @@ def display_program_summary(program: Dict[str, Any]) -> None:
             # Afficher les taux de cession
             rates = []
             for section in structure['sections']:
-                if pd.notna(section.get('cession_rate')):
-                    rates.append(f"{section['cession_rate']:.1%}")
+                if pd.notna(section.get('cession_PCT')):
+                    rates.append(f"{section['cession_PCT']:.1%}")
             rates_str = ", ".join(set(rates)) if rates else "N/A"
             print(f"   🔧 {structure['structure_name']}: QS {rates_str}")
             

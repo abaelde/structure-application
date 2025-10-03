@@ -63,7 +63,7 @@ Fichier CSV contenant les polices d'assurance avec :
 - `expiry_date` : Date d'expiration de la police
 
 ### 2. Produits de base
-- **Quote-share** : Application d'un pourcentage de cession (cession_rate) sur l'exposition
+- **Quote-share** : Application d'un pourcentage de cession (cession_PCT) sur l'exposition
 - **Excess of Loss (XoL)** : Couverture au-dessus d'une priorité (attachment_point_100) jusqu'à une limite (limit_occurrence_100)
 
 ### 3. Program
@@ -84,7 +84,7 @@ Les structures sont les éléments qui composent un programme. Chaque structure 
 
 ### 5. Sections
 Les sections sont les instanciations concrètes d'une structure avec :
-- **Paramètres** : cession_rate (pour quote_share), attachment_point_100 et limit_occurrence_100 (pour excess_of_loss)
+- **Paramètres** : cession_PCT (pour quote_share), attachment_point_100 et limit_occurrence_100 (pour excess_of_loss)
 - **Conditions** : Valeurs spécifiques pour les dimensions (localisation, industrie, etc.)
 
 #### Logique de matching
@@ -94,8 +94,8 @@ Pour chaque police et chaque structure :
 3. Si aucune section ne matche, la structure n'est pas appliquée
 
 **Exemple :**
-- Section 1 : cession_rate=30%, localisation=NULL → S'applique partout (générique)
-- Section 2 : cession_rate=40%, localisation=Paris → S'applique uniquement à Paris (spécifique)
+- Section 1 : cession_PCT=30%, localisation=NULL → S'applique partout (générique)
+- Section 2 : cession_PCT=40%, localisation=Paris → S'applique uniquement à Paris (spécifique)
 
 Pour une police à Paris, la Section 2 sera choisie car elle est plus spécifique.
 
@@ -160,7 +160,7 @@ Définit les structures du programme (nom, ordre, type de produit).
 ### Feuille "sections"
 Définit les sections de chaque structure avec paramètres et conditions.
 
-| structure_name | cession_rate | attachment_point_100 | limit_occurrence_100   | localisation | industrie |
+| structure_name | cession_PCT | attachment_point_100 | limit_occurrence_100   | localisation | industrie |
 |----------------|--------------|----------|---------|--------------|-----------|
 | QS_GENERAL     | 0.30         | -        | -       | -            | -         |
 | QS_GENERAL     | 0.40         | -        | -       | Paris        | -         |

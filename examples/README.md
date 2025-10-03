@@ -74,7 +74,7 @@ uv run python examples/scripts/create_program_config.py
 
 ### Feuille "sections"
 - `structure_name` : Référence vers la structure
-- `cession_rate` : Taux de cession (pour quote_share)
+- `cession_PCT` : Taux de cession (pour quote_share)
 - `attachment_point_100` : Priorité (pour excess_of_loss)
 - `limit_occurrence_100` : Limite (pour excess_of_loss)
 - Colonnes de dimensions pour le matching

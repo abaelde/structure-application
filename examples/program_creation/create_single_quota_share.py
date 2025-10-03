@@ -30,7 +30,7 @@ structures_data = {
 
 sections_data = {
     "structure_name": ["QS_30"],
-    "cession_rate": [0.30],  # 30% de cession
+    "cession_PCT": [0.30],  # 30% de cession
     "attachment_point_100": [np.nan],
     "limit_occurrence_100": [np.nan],
     "country": [np.nan],
