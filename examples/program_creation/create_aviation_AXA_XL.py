@@ -26,7 +26,7 @@ print("Création du programme Aviation Complex Multi-Currency...")
 # =============================================================================
 
 # Définir les valeurs pour chaque layer (en millions)
-# Format: (priority, limit)
+# Format: (attachment_point_100, limit_occurrence_100)
 # Les valeurs sont identiques pour USD, CAD, EUR, AUD
 LAYER_VALUES_COMMON = {
     "XOL_1": (65, 0),   
@@ -47,8 +47,20 @@ LAYER_VALUES_GBP = {
     "XOL_6": (100, 276.666666),
 }
 
-# Reinsurer Share Values
+# Cession Rate Values (pourcentage cédé au réassureur)
+CESSION_RATE_VALUES = {
+    "QS_1": 0.25,  # 25% cédé (rétention 75%)
+    "XOL_1": np.nan,  # XOL n'utilise pas cession_rate
+    "XOL_2": np.nan,
+    "XOL_3": np.nan,
+    "XOL_4": np.nan,
+    "XOL_5": np.nan,
+    "XOL_6": np.nan,
+}
+
+# Reinsurer Share Values (part du réassureur dans la cession)
 REINSURER_SHARE_VALUES = {
+    "QS_1": 0.0165,  # 1.65% du réassureur dans la cession de 25%
     "XOL_1": 0.05,   
     "XOL_2": 0.05,   
     "XOL_3": 0.05,   
@@ -71,8 +83,8 @@ program_data = {
 
 structures_data = {
     "structure_name": ["QS_1", "XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"],
-    "order": [0, 1, 2, 3, 4, 5, 6],
-    "product_type": ["quota_share", "excess_of_loss", "excess_of_loss", "excess_of_loss", 
+    "contract_order": [0, 1, 2, 3, 4, 5, 6],
+    "type_of_participation": ["quota_share", "excess_of_loss", "excess_of_loss", "excess_of_loss", 
                     "excess_of_loss", "excess_of_loss", "excess_of_loss"],
     "claim_basis": ["risk_attaching", "risk_attaching", "risk_attaching", "risk_attaching", 
                    "risk_attaching", "risk_attaching", "risk_attaching"]
@@ -89,8 +101,8 @@ COMMON_CURRENCIES = ["USD", "CAD", "EUR", "AUD"]
 sections_data = {
     "structure_name": [],
     "cession_rate": [],
-    "priority": [],
-    "limit": [],
+    "attachment_point_100": [],
+    "limit_occurrence_100": [],
     "reinsurer_share": [],
     "country": [],
     "region": [],
@@ -105,12 +117,14 @@ sections_data = {
 }
 
 # Créer les sections pour la structure Quota Share (QS_1) - toutes devises
+cession_rate_qs = CESSION_RATE_VALUES["QS_1"]
+reinsurer_share_qs = REINSURER_SHARE_VALUES["QS_1"]
 for currency in COMMON_CURRENCIES + ["GBP"]:
     sections_data["structure_name"].append("QS_1")
-    sections_data["cession_rate"].append(0.0165)  # 1.65% reinsurer_share
-    sections_data["priority"].append(np.nan)  # Quota Share n'utilise pas priority
-    sections_data["limit"].append(np.nan)  # Quota Share n'utilise pas limit
-    sections_data["reinsurer_share"].append(0.0165)  # 1.65%
+    sections_data["cession_rate"].append(cession_rate_qs)  # 25% cédé
+    sections_data["attachment_point_100"].append(np.nan)  # Quota Share n'utilise pas attachment_point_100
+    sections_data["limit_occurrence_100"].append(np.nan)  # Quota Share n'utilise pas limit_occurrence_100
+    sections_data["reinsurer_share"].append(reinsurer_share_qs)  # 1.65% du réassureur
     sections_data["country"].append(np.nan)
     sections_data["region"].append(np.nan)
     sections_data["product_type_1"].append(np.nan)
@@ -124,14 +138,15 @@ for currency in COMMON_CURRENCIES + ["GBP"]:
 
 # Créer les sections pour les devises communes (USD, CAD, EUR, AUD) - structures XOL
 for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
-    priority, limit = LAYER_VALUES_COMMON[layer_name]
+    attachment_point_100, limit_occurrence_100 = LAYER_VALUES_COMMON[layer_name]
+    cession_rate = CESSION_RATE_VALUES[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
     for currency in COMMON_CURRENCIES:
         sections_data["structure_name"].append(layer_name)
-        sections_data["cession_rate"].append(np.nan)  # XOL n'utilise pas cession_rate
-        sections_data["priority"].append(priority)
-        sections_data["limit"].append(limit)
+        sections_data["cession_rate"].append(cession_rate)  # Utilise la valeur du dictionnaire
+        sections_data["attachment_point_100"].append(attachment_point_100)
+        sections_data["limit_occurrence_100"].append(limit_occurrence_100)
         sections_data["reinsurer_share"].append(reinsurer_share)
         sections_data["country"].append(np.nan)  # Pas de restriction géographique
         sections_data["region"].append(np.nan)
@@ -146,13 +161,14 @@ for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
 
 # Créer les sections pour GBP (valeurs spécifiques) - structures XOL
 for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
-    priority, limit = LAYER_VALUES_GBP[layer_name]
+    attachment_point_100, limit_occurrence_100 = LAYER_VALUES_GBP[layer_name]
+    cession_rate = CESSION_RATE_VALUES[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
     sections_data["structure_name"].append(layer_name)
-    sections_data["cession_rate"].append(np.nan)
-    sections_data["priority"].append(priority)
-    sections_data["limit"].append(limit)
+    sections_data["cession_rate"].append(cession_rate)  # Utilise la valeur du dictionnaire
+    sections_data["attachment_point_100"].append(attachment_point_100)
+    sections_data["limit_occurrence_100"].append(limit_occurrence_100)
     sections_data["reinsurer_share"].append(reinsurer_share)
     sections_data["country"].append(np.nan)
     sections_data["region"].append(np.nan)
@@ -226,20 +242,20 @@ Devises: USD, CAD, EUR, AUD, GBP
 Structures (empilées selon l'ordre):
 """)
 
-print("0. QS_1 (order=0):")
-print("   - Toutes devises: Quota Share 1.65% (rétention 75%)")
+print("0. QS_1 (contract_order=0):")
+print("   - Toutes devises: Quota Share 25% cédé, 1.65% reinsurer share (rétention 75%)")
 
 for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], 1):
     priority_common, limit_common = LAYER_VALUES_COMMON[layer]
     priority_gbp, limit_gbp = LAYER_VALUES_GBP[layer]
-    print(f"{i}. {layer} (order={i}):")
+    print(f"{i}. {layer} (contract_order={i}):")
     print(f"   - USD/CAD/EUR/AUD: {limit_common}M xs {priority_common}M")
     print(f"   - GBP: {limit_gbp}M xs {priority_gbp}M")
 
 
 print("\n✓ Le programme Aviation AXA XL 2024 est prêt !")
 print("\nPour modifier les valeurs:")
-print("1. Pour le Quota Share: modifiez la valeur 0.0165 dans les sections QS_1")
-print("2. Éditez les dictionnaires LAYER_VALUES_COMMON et LAYER_VALUES_GBP pour les XOL")
-print("3. Éditez le dictionnaire REINSURER_SHARE_VALUES pour ajuster les pourcentages de réassurance XOL")
+print("1. Éditez le dictionnaire CESSION_RATE_VALUES pour ajuster les pourcentages de cession")
+print("2. Éditez le dictionnaire REINSURER_SHARE_VALUES pour ajuster les parts du réassureur")
+print("3. Éditez les dictionnaires LAYER_VALUES_COMMON et LAYER_VALUES_GBP pour les XOL")
 print("4. Relancez ce script pour régénérer le fichier Excel")

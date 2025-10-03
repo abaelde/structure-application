@@ -64,7 +64,7 @@ Fichier CSV contenant les polices d'assurance avec :
 
 ### 2. Produits de base
 - **Quote-share** : Application d'un pourcentage de cession (cession_rate) sur l'exposition
-- **Excess of Loss (XoL)** : Couverture au-dessus d'une priorité (priority) jusqu'à une limite (limit)
+- **Excess of Loss (XoL)** : Couverture au-dessus d'une priorité (attachment_point_100) jusqu'à une limite (limit_occurrence_100)
 
 ### 3. Program
 Un fichier de configuration contient **un seul programme** qui est constitué de **plusieurs structures**.
@@ -84,7 +84,7 @@ Les structures sont les éléments qui composent un programme. Chaque structure 
 
 ### 5. Sections
 Les sections sont les instanciations concrètes d'une structure avec :
-- **Paramètres** : cession_rate (pour quote_share), priority et limit (pour excess_of_loss)
+- **Paramètres** : cession_rate (pour quote_share), attachment_point_100 et limit_occurrence_100 (pour excess_of_loss)
 - **Conditions** : Valeurs spécifiques pour les dimensions (localisation, industrie, etc.)
 
 #### Logique de matching
@@ -152,7 +152,7 @@ Définit le programme principal (une seule ligne).
 ### Feuille "structures"
 Définit les structures du programme (nom, ordre, type de produit).
 
-| structure_name | order | product_type    |
+| structure_name | contract_order | type_of_participation    |
 |----------------|-------|-----------------|
 | QS_GENERAL     | 1     | quote_share     |
 | XOL_LARGE      | 2     | excess_of_loss  |
@@ -160,7 +160,7 @@ Définit les structures du programme (nom, ordre, type de produit).
 ### Feuille "sections"
 Définit les sections de chaque structure avec paramètres et conditions.
 
-| structure_name | cession_rate | priority | limit   | localisation | industrie |
+| structure_name | cession_rate | attachment_point_100 | limit_occurrence_100   | localisation | industrie |
 |----------------|--------------|----------|---------|--------------|-----------|
 | QS_GENERAL     | 0.30         | -        | -       | -            | -         |
 | QS_GENERAL     | 0.40         | -        | -       | Paris        | -         |

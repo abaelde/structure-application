@@ -32,22 +32,22 @@ def match_section(policy_data: Dict[str, Any], sections: list, dimension_columns
     return matched_sections[0][0]
 
 
-def apply_section(exposure: float, section: Dict[str, Any], product_type: str) -> float:
-    if product_type == "quote_share":
+def apply_section(exposure: float, section: Dict[str, Any], type_of_participation: str) -> float:
+    if type_of_participation == "quote_share":
         cession_rate = section["cession_rate"]
         if pd.isna(cession_rate):
             raise ValueError("cession_rate is required for quote_share")
         return quote_share(exposure, cession_rate)
     
-    elif product_type == "excess_of_loss":
-        priority = section["priority"]
-        limit = section["limit"]
-        if pd.isna(priority) or pd.isna(limit):
-            raise ValueError("priority and limit are required for excess_of_loss")
-        return excess_of_loss(exposure, priority, limit)
+    elif type_of_participation == "excess_of_loss":
+        attachment_point_100 = section["attachment_point_100"]
+        limit_occurrence_100 = section["limit_occurrence_100"]
+        if pd.isna(attachment_point_100) or pd.isna(limit_occurrence_100):
+            raise ValueError("attachment_point_100 and limit_occurrence_100 are required for excess_of_loss")
+        return excess_of_loss(exposure, attachment_point_100, limit_occurrence_100)
     
     else:
-        raise ValueError(f"Unknown product type: {product_type}")
+        raise ValueError(f"Unknown product type: {type_of_participation}")
 
 
 def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[str, Any]:
@@ -56,7 +56,7 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
     dimension_columns = program["dimension_columns"]
     
     # Trier les structures par ordre
-    sorted_structures = sorted(structures, key=lambda x: x["order"])
+    sorted_structures = sorted(structures, key=lambda x: x["contract_order"])
     
     total_ceded = 0.0
     structures_detail = []
@@ -68,7 +68,7 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
         if matched_section is None:
             structures_detail.append({
                 "structure_name": structure["structure_name"],
-                "product_type": structure["product_type"],
+                "type_of_participation": structure["type_of_participation"],
                 "claim_basis": structure.get("claim_basis"),
                 "inception_date": structure.get("inception_date"),
                 "expiry_date": structure.get("expiry_date"),
@@ -80,21 +80,21 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
             continue
         
         # Déterminer l'exposition d'entrée selon le type de produit
-        if structure["product_type"] == "quote_share":
+        if structure["type_of_participation"] == "quote_share":
             # Quote Share s'applique sur l'exposition restante
             input_exposure = remaining_exposure
-        elif structure["product_type"] == "excess_of_loss":
+        elif structure["type_of_participation"] == "excess_of_loss":
             # Excess of Loss s'applique sur l'exposition restante (après les Quote Share)
             # Si pas de Quote Share appliqué, utiliser l'exposition originale
             input_exposure = remaining_exposure
         else:
-            raise ValueError(f"Unknown product type: {structure['product_type']}")
+            raise ValueError(f"Unknown product type: {structure['type_of_participation']}")
         
-        ceded = apply_section(input_exposure, matched_section, structure["product_type"])
+        ceded = apply_section(input_exposure, matched_section, structure["type_of_participation"])
         
         structures_detail.append({
             "structure_name": structure["structure_name"],
-            "product_type": structure["product_type"],
+            "type_of_participation": structure["type_of_participation"],
             "claim_basis": structure.get("claim_basis"),
             "inception_date": structure.get("inception_date"),
             "expiry_date": structure.get("expiry_date"),
@@ -107,7 +107,7 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
         total_ceded += ceded
         
         # Mettre à jour l'exposition restante
-        if structure["product_type"] == "quote_share":
+        if structure["type_of_participation"] == "quote_share":
             # Quote Share réduit l'exposition restante
             remaining_exposure -= ceded
         # Pour les Excess of Loss, on ne réduit pas l'exposition restante

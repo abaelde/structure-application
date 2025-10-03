@@ -48,7 +48,7 @@ def main():
         
         for struct in row["structures_detail"]:
             status = "✓ Applied" if struct.get('applied', False) else "✗ Not applied"
-            print(f"\n  {status} - {struct['structure_name']} ({struct['product_type']})")
+            print(f"\n  {status} - {struct['structure_name']} ({struct['type_of_participation']})")
             print(f"    Input exposure: {struct['input_exposure']:,.2f}")
             print(f"    Ceded: {struct['ceded']:,.2f}")
             

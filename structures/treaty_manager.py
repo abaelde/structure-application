@@ -94,7 +94,7 @@ class TreatyManager:
                 "structures": [
                     {
                         "name": s["structure_name"],
-                        "type": s["product_type"],
+                        "type": s["type_of_participation"],
                         "claim_basis": s.get("claim_basis"),
                         "inception_date": s.get("inception_date"),
                         "expiry_date": s.get("expiry_date")

@@ -24,15 +24,15 @@ program_data = {
 
 structures_data = {
     "structure_name": ["QS_30"],
-    "order": [1],
-    "product_type": ["quote_share"]
+    "contract_order": [1],
+    "type_of_participation": ["quote_share"]
 }
 
 sections_data = {
     "structure_name": ["QS_30"],
     "cession_rate": [0.30],  # 30% de cession
-    "priority": [np.nan],
-    "limit": [np.nan],
+    "attachment_point_100": [np.nan],
+    "limit_occurrence_100": [np.nan],
     "country": [np.nan],
     "region": [np.nan],
     "product_type_1": [np.nan],

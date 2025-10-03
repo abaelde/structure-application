@@ -24,15 +24,15 @@ program_data = {
 
 structures_data = {
     "structure_name": ["XOL_0.5M_1M"],
-    "order": [1],
-    "product_type": ["excess_of_loss"]
+    "contract_order": [1],
+    "type_of_participation": ["excess_of_loss"]
 }
 
 sections_data = {
     "structure_name": ["XOL_0.5M_1M"],
     "cession_rate": [np.nan],
-    "priority": [0.5],  # 0.5 million
-    "limit": [1.0],     # 1.0 million
+    "attachment_point_100": [0.5],  # 0.5 million
+    "limit_occurrence_100": [1.0],     # 1.0 million
     "country": [np.nan],
     "region": [np.nan],
     "product_type_1": [np.nan],

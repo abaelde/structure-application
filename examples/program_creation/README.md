@@ -67,7 +67,7 @@ Tous les programmes incluent maintenant le champ `reinsurer_share` dans la feuil
 - **Exemple** : Si `reinsurer_share = 0.8`, alors 80% de la part cédée est réassurée, 20% reste en rétention
 - **Modification** : Éditez le dictionnaire `REINSURER_SHARE_VALUES` dans le script Python
 
-Cette colonne est positionnée après `limit` dans la structure des sections.
+Cette colonne est positionnée après `limit_occurrence_100` dans la structure des sections.
 
 ### Exemple de configuration :
 ```python

@@ -17,7 +17,7 @@ class ProgramLoader:
         program_row = program_df.iloc[0]
         program_name = program_row["program_name"]
         
-        param_columns = ["structure_name", "cession_rate", "priority", "limit", "claim_basis", "inception_date", "expiry_date"]
+        param_columns = ["structure_name", "cession_rate", "attachment_point_100", "limit_occurrence_100", "claim_basis", "inception_date", "expiry_date"]
         self.dimension_columns = [col for col in sections_df.columns if col not in param_columns]
         
         program_structures = []
@@ -30,15 +30,15 @@ class ProgramLoader:
             
             program_structures.append({
                 "structure_name": structure_name,
-                "order": structure_row["order"],
-                "product_type": structure_row["product_type"],
+                "contract_order": structure_row["contract_order"],
+                "type_of_participation": structure_row["type_of_participation"],
                 "claim_basis": structure_row.get("claim_basis"),
                 "inception_date": structure_row.get("inception_date"),
                 "expiry_date": structure_row.get("expiry_date"),
                 "sections": structure_sections
             })
         
-        program_structures.sort(key=lambda x: x["order"])
+        program_structures.sort(key=lambda x: x["contract_order"])
         
         self.program = {
             "name": program_name,

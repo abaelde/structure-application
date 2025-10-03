@@ -39,8 +39,8 @@ def display_program(program: Dict[str, Any]) -> None:
     # Affichage des structures
     for i, structure in enumerate(program['structures'], 1):
         print(f"\n🔧 Structure {i}: {structure['structure_name']}")
-        print(f"   📦 Type de produit: {structure['product_type']}")
-        print(f"   📋 Ordre d'exécution: {structure['order']}")
+        print(f"   📦 Type de produit: {structure['type_of_participation']}")
+        print(f"   📋 Ordre d'exécution: {structure['contract_order']}")
         print(f"   📄 Nombre de sections: {len(structure['sections'])}")
         
         # Affichage des sections
@@ -70,8 +70,8 @@ def _display_section(section: Dict[str, Any], dimension_columns: list, indent: s
     if pd.notna(section.get('cession_rate')):
         print(f"{indent}💰 Taux de cession: {section['cession_rate']:.1%}")
     
-    if pd.notna(section.get('priority')) and pd.notna(section.get('limit')):
-        print(f"{indent}🛡️  Excess of Loss: {section['limit']:,.0f} xs {section['priority']:,.0f}")
+    if pd.notna(section.get('attachment_point_100')) and pd.notna(section.get('limit_occurrence_100')):
+        print(f"{indent}🛡️  Excess of Loss: {section['limit_occurrence_100']:,.0f} xs {section['attachment_point_100']:,.0f}")
     
     # Conditions de matching
     conditions = []
@@ -96,10 +96,10 @@ def display_program_summary(program: Dict[str, Any]) -> None:
     print(f"📋 {program['name']} (ordre-based) - {len(program['structures'])} structures")
     
     for structure in program['structures']:
-        product_type = structure['product_type']
+        type_of_participation = structure['type_of_participation']
         sections_count = len(structure['sections'])
         
-        if product_type == 'quote_share':
+        if type_of_participation == 'quote_share':
             # Afficher les taux de cession
             rates = []
             for section in structure['sections']:
@@ -108,12 +108,12 @@ def display_program_summary(program: Dict[str, Any]) -> None:
             rates_str = ", ".join(set(rates)) if rates else "N/A"
             print(f"   🔧 {structure['structure_name']}: QS {rates_str}")
             
-        elif product_type == 'excess_of_loss':
+        elif type_of_participation == 'excess_of_loss':
             # Afficher les paramètres XOL
             xol_params = []
             for section in structure['sections']:
-                if pd.notna(section.get('priority')) and pd.notna(section.get('limit')):
-                    xol_params.append(f"{section['limit']:,.0f}xs{section['priority']:,.0f}")
+                if pd.notna(section.get('attachment_point_100')) and pd.notna(section.get('limit_occurrence_100')):
+                    xol_params.append(f"{section['limit_occurrence_100']:,.0f}xs{section['attachment_point_100']:,.0f}")
             xol_str = ", ".join(set(xol_params)) if xol_params else "N/A"
             print(f"   🔧 {structure['structure_name']}: XOL {xol_str}")
 

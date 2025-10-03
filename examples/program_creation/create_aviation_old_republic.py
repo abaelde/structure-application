@@ -30,8 +30,8 @@ program_data = {
 
 structures_data = {
     "structure_name": ["XOL_1", "XOL_2", "XOL_3"],
-    "order": [1, 2, 3],
-    "product_type": ["excess_of_loss", "excess_of_loss", "excess_of_loss"],
+    "contract_order": [1, 2, 3],
+    "type_of_participation": ["excess_of_loss", "excess_of_loss", "excess_of_loss"],
     "claim_basis": ["risk_attaching", "risk_attaching", "risk_attaching"]
 }
 
@@ -50,8 +50,8 @@ REINSURER_SHARE_VALUES = {
 sections_data = {
     "structure_name": ["XOL_1", "XOL_2", "XOL_3"],
     "cession_rate": [np.nan, np.nan, np.nan],  # XOL n'utilise pas cession_rate
-    "priority": [3.0, 11.75, 21.75],           # Priorités en millions
-    "limit": [8.75, 10.0, 23.25],              # Limites en millions
+    "attachment_point_100": [3.0, 11.75, 21.75],           # Priorités en millions
+    "limit_occurrence_100": [8.75, 10.0, 23.25],              # Limites en millions
     "reinsurer_share": [REINSURER_SHARE_VALUES["XOL_1"], REINSURER_SHARE_VALUES["XOL_2"], REINSURER_SHARE_VALUES["XOL_3"]],
     # Conditions géographiques
     "country": ["United States", "United States", "United States"],
@@ -70,8 +70,8 @@ sections_data = {
 sections_canada_data = {
     "structure_name": ["XOL_1", "XOL_2", "XOL_3"],
     "cession_rate": [np.nan, np.nan, np.nan],
-    "priority": [3.0, 11.75, 21.75],           # Priorités en millions
-    "limit": [8.75, 10.0, 23.25],              # Limites en millions
+    "attachment_point_100": [3.0, 11.75, 21.75],           # Priorités en millions
+    "limit_occurrence_100": [8.75, 10.0, 23.25],              # Limites en millions
     "reinsurer_share": [REINSURER_SHARE_VALUES["XOL_1"], REINSURER_SHARE_VALUES["XOL_2"], REINSURER_SHARE_VALUES["XOL_3"]],
     "country": ["Canada", "Canada", "Canada"],
     "region": [np.nan, np.nan, np.nan],
@@ -89,8 +89,8 @@ sections_canada_data = {
 sections_combined_data = {
     "structure_name": sections_data["structure_name"] + sections_canada_data["structure_name"],
     "cession_rate": sections_data["cession_rate"] + sections_canada_data["cession_rate"],
-    "priority": sections_data["priority"] + sections_canada_data["priority"],
-    "limit": sections_data["limit"] + sections_canada_data["limit"],
+    "attachment_point_100": sections_data["attachment_point_100"] + sections_canada_data["attachment_point_100"],
+    "limit_occurrence_100": sections_data["limit_occurrence_100"] + sections_canada_data["limit_occurrence_100"],
     "reinsurer_share": sections_data["reinsurer_share"] + sections_canada_data["reinsurer_share"],
     "country": sections_data["country"] + sections_canada_data["country"],
     "region": sections_data["region"] + sections_canada_data["region"],
@@ -155,9 +155,9 @@ Programme: Aviation Old Republic 2024
 Géographie: United States et Canada
 
 Structures XOL (empilées selon l'ordre):
-1. XOL_1 (order=1): 8.75M xs 3M (pour US et Canada)
-2. XOL_2 (order=2): 10M xs 11.75M (pour US et Canada)  
-3. XOL_3 (order=3): 23.25M xs 21.75M (pour US et Canada)
+1. XOL_1 (contract_order=1): 8.75M xs 3M (pour US et Canada)
+2. XOL_2 (contract_order=2): 10M xs 11.75M (pour US et Canada)  
+3. XOL_3 (contract_order=3): 23.25M xs 21.75M (pour US et Canada)
 
 """)
 
