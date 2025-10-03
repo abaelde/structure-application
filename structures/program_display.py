@@ -21,7 +21,7 @@ def display_program(program: Dict[str, Any]) -> None:
     print(f"📋 Nom du programme: {program['name']}")
     print(f"🔄 Mode d'exécution: ORDRE-BASED (nouvelle logique)")
     print("   → Les structures s'appliquent selon leur ordre défini")
-    print("   → Quote Share réduit l'exposition restante")
+    print("   → quota Share réduit l'exposition restante")
     print("   → Excess of Loss s'applique sur l'exposition restante (empilés)")
     
     print(f"📊 Nombre de structures: {len(program['structures'])}")
@@ -99,7 +99,7 @@ def display_program_summary(program: Dict[str, Any]) -> None:
         type_of_participation = structure['type_of_participation']
         sections_count = len(structure['sections'])
         
-        if type_of_participation == 'quote_share':
+        if type_of_participation == 'quota_share':
             # Afficher les taux de cession
             rates = []
             for section in structure['sections']:

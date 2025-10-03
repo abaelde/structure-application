@@ -25,7 +25,7 @@ program_data = {
 structures_data = {
     "structure_name": ["QS_30"],
     "contract_order": [1],
-    "type_of_participation": ["quote_share"]
+    "type_of_participation": ["quota_share"]
 }
 
 sections_data = {

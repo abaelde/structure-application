@@ -9,7 +9,7 @@ Système d'application de programmes de réassurance sur des bordereaux.
 ```
 structure-application/
 ├── products/                           # Building blocks de réassurance
-│   ├── base_products.py               # quote_share & excess_of_loss
+│   ├── base_products.py               # quota_share & excess_of_loss
 │   └── __init__.py
 ├── structures/                         # Moteur d'application des programmes
 │   ├── structure_loader.py            # Chargement depuis Excel (ProgramLoader)
@@ -63,7 +63,7 @@ Fichier CSV contenant les polices d'assurance avec :
 - `expiry_date` : Date d'expiration de la police
 
 ### 2. Produits de base
-- **Quote-share** : Application d'un pourcentage de cession (cession_PCT) sur l'exposition
+- **quota-share** : Application d'un pourcentage de cession (cession_PCT) sur l'exposition
 - **Excess of Loss (XoL)** : Couverture au-dessus d'une priorité (attachment_point_100) jusqu'à une limite (limit_occurrence_100)
 
 ### 3. Program
@@ -84,7 +84,7 @@ Les structures sont les éléments qui composent un programme. Chaque structure 
 
 ### 5. Sections
 Les sections sont les instanciations concrètes d'une structure avec :
-- **Paramètres** : cession_PCT (pour quote_share), attachment_point_100 et limit_occurrence_100 (pour excess_of_loss)
+- **Paramètres** : cession_PCT (pour quota_share), attachment_point_100 et limit_occurrence_100 (pour excess_of_loss)
 - **Conditions** : Valeurs spécifiques pour les dimensions (localisation, industrie, etc.)
 
 #### Logique de matching
@@ -154,7 +154,7 @@ Définit les structures du programme (nom, ordre, type de produit).
 
 | structure_name | contract_order | type_of_participation    |
 |----------------|-------|-----------------|
-| QS_GENERAL     | 1     | quote_share     |
+| QS_GENERAL     | 1     | quota_share     |
 | XOL_LARGE      | 2     | excess_of_loss  |
 
 ### Feuille "sections"
@@ -216,7 +216,7 @@ Utilisez le fichier `PROGRAM_SPECIFICATION_GUIDE.md` comme référence. Décrive
 
 Exemple :
 ```
-"Crée un programme avec une quote-share de 30% par défaut et 40% pour Paris,
+"Crée un programme avec une quota-share de 30% par défaut et 40% pour Paris,
 suivi d'un XoL de 1M xs 500K uniquement pour Paris"
 ```
 
@@ -231,7 +231,7 @@ Vous pouvez le modifier pour créer vos propres programmes.
 
 **PROGRAM_2024 (sequential)** avec 2 structures :
 
-### Structure QS_GENERAL (quote_share)
+### Structure QS_GENERAL (quota_share)
 - Section 1 : 30% sans condition (défaut)
 - Section 2 : 40% pour localisation=Paris (spécifique)
 
@@ -284,7 +284,7 @@ Le fichier `PROGRAM_SPECIFICATION_GUIDE.md` contient la spécification complète
 **Exemples de demandes :**
 - "Crée un programme avec 25% de cession par défaut, 30% pour la France et 35% pour EMEA"
 - "Je veux un XoL de 800K xs 400K qui s'applique uniquement aux industries de technologie"
-- "Programme en parallèle : 20% quote-share + XoL 500K xs 300K sur toutes les polices"
+- "Programme en parallèle : 20% quota-share + XoL 500K xs 300K sur toutes les polices"
 - "30% pour Property, 35% pour Commercial Property, 40% pour Commercial Fire"
 
 Le guide contient des patterns courants, des exemples de traduction et toutes les règles de validation.
@@ -294,6 +294,6 @@ Le guide contient des patterns courants, des exemples de traduction et toutes le
 - **Program** : Le programme global (un par fichier)
 - **Structure** : Un élément du programme utilisant un produit de base
 - **Section** : Instance d'une structure avec paramètres et conditions spécifiques
-- **Product** : Les building blocks (quote_share, excess_of_loss)
+- **Product** : Les building blocks (quota_share, excess_of_loss)
 - **Dimension** : Colonne du bordereau utilisée pour le matching (ex: country, region, industry)
-- **cession rate** : Le taux de cession pour une quote-share
+- **cession rate** : Le taux de cession pour une quota-share

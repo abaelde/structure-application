@@ -10,11 +10,11 @@ When the user asks to create or modify a reinsurance program configuration, refe
 
 ### Data Model
 - **Program** (1 row): program_name, mode (sequential/parallel)
-- **Structures** (n rows): structure_name, contract_order, type_of_participation (quote_share/excess_of_loss)
+- **Structures** (n rows): structure_name, contract_order, type_of_participation (quota_share/excess_of_loss)
 - **Sections** (n rows): structure_name, parameters, + dimension columns
 
 ### Parameters
-- **Quote-share**: cession_PCT (0-1)
+- **quota-share**: cession_PCT (0-1)
 - **Excess of Loss**: attachment_point_100, limit_occurrence_100 (positive numbers)
 
 ### Standard Dimensions

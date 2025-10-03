@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from typing import Dict, Any, Optional
-from products import quote_share, excess_of_loss
+from products import quota_share, excess_of_loss
 from .treaty_manager import TreatyManager
 
 
@@ -32,22 +32,35 @@ def match_section(policy_data: Dict[str, Any], sections: list, dimension_columns
     return matched_sections[0][0]
 
 
-def apply_section(exposure: float, section: Dict[str, Any], type_of_participation: str) -> float:
-    if type_of_participation == "quote_share":
+def apply_section(exposure: float, section: Dict[str, Any], type_of_participation: str) -> Dict[str, float]:
+    if type_of_participation == "quota_share":
         cession_PCT = section["cession_PCT"]
         if pd.isna(cession_PCT):
-            raise ValueError("cession_PCT is required for quote_share")
-        return quote_share(exposure, cession_PCT)
+            raise ValueError("cession_PCT is required for quota_share")
+        gross_ceded = quota_share(exposure, cession_PCT)
     
     elif type_of_participation == "excess_of_loss":
         attachment_point_100 = section["attachment_point_100"]
         limit_occurrence_100 = section["limit_occurrence_100"]
         if pd.isna(attachment_point_100) or pd.isna(limit_occurrence_100):
             raise ValueError("attachment_point_100 and limit_occurrence_100 are required for excess_of_loss")
-        return excess_of_loss(exposure, attachment_point_100, limit_occurrence_100)
+        gross_ceded = excess_of_loss(exposure, attachment_point_100, limit_occurrence_100)
     
     else:
         raise ValueError(f"Unknown product type: {type_of_participation}")
+    
+    # Appliquer le reinsurer_share pour obtenir la net exposure
+    reinsurer_share = section.get("reinsurer_share", 1.0)
+    if pd.isna(reinsurer_share):
+        reinsurer_share = 1.0
+    
+    net_ceded = gross_ceded * reinsurer_share
+    
+    return {
+        "gross_ceded": gross_ceded,
+        "net_ceded": net_ceded,
+        "reinsurer_share": reinsurer_share
+    }
 
 
 def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[str, Any]:
@@ -58,7 +71,8 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
     # Trier les structures par ordre
     sorted_structures = sorted(structures, key=lambda x: x["contract_order"])
     
-    total_ceded = 0.0
+    total_gross_ceded = 0.0
+    total_net_ceded = 0.0
     structures_detail = []
     remaining_exposure = exposure
     
@@ -73,24 +87,26 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
                 "inception_date": structure.get("inception_date"),
                 "expiry_date": structure.get("expiry_date"),
                 "input_exposure": remaining_exposure,
-                "ceded": 0.0,
+                "gross_ceded": 0.0,
+                "net_ceded": 0.0,
+                "reinsurer_share": 0.0,
                 "applied": False,
                 "section": None
             })
             continue
         
         # Déterminer l'exposition d'entrée selon le type de produit
-        if structure["type_of_participation"] == "quote_share":
-            # Quote Share s'applique sur l'exposition restante
+        if structure["type_of_participation"] == "quota_share":
+            # Quota Share s'applique sur l'exposition restante
             input_exposure = remaining_exposure
         elif structure["type_of_participation"] == "excess_of_loss":
-            # Excess of Loss s'applique sur l'exposition restante (après les Quote Share)
-            # Si pas de Quote Share appliqué, utiliser l'exposition originale
+            # Excess of Loss s'applique sur l'exposition restante (après les Quota Share)
+            # Si pas de Quota Share appliqué, utiliser l'exposition originale
             input_exposure = remaining_exposure
         else:
             raise ValueError(f"Unknown product type: {structure['type_of_participation']}")
         
-        ceded = apply_section(input_exposure, matched_section, structure["type_of_participation"])
+        ceded_result = apply_section(input_exposure, matched_section, structure["type_of_participation"])
         
         structures_detail.append({
             "structure_name": structure["structure_name"],
@@ -99,25 +115,29 @@ def apply_program(policy_data: Dict[str, Any], program: Dict[str, Any]) -> Dict[
             "inception_date": structure.get("inception_date"),
             "expiry_date": structure.get("expiry_date"),
             "input_exposure": input_exposure,
-            "ceded": ceded,
+            "gross_ceded": ceded_result["gross_ceded"],
+            "net_ceded": ceded_result["net_ceded"],
+            "reinsurer_share": ceded_result["reinsurer_share"],
             "applied": True,
             "section": matched_section
         })
         
-        total_ceded += ceded
+        total_gross_ceded += ceded_result["gross_ceded"]
+        total_net_ceded += ceded_result["net_ceded"]
         
         # Mettre à jour l'exposition restante
-        if structure["type_of_participation"] == "quote_share":
-            # Quote Share réduit l'exposition restante
-            remaining_exposure -= ceded
+        if structure["type_of_participation"] == "quota_share":
+            # Quota Share réduit l'exposition restante
+            remaining_exposure -= ceded_result["gross_ceded"]
         # Pour les Excess of Loss, on ne réduit pas l'exposition restante
         # car ils sont empilés et calculent sur la même base
     
     return {
         "policy_number": policy_data.get("numero_police"),
         "exposure": exposure,
-        "ceded": total_ceded,
-        "retained": exposure - total_ceded,
+        "gross_ceded": total_gross_ceded,
+        "net_ceded": total_net_ceded,
+        "retained": exposure - total_gross_ceded,
         "policy_inception_date": policy_data.get("inception_date"),
         "policy_expiry_date": policy_data.get("expiry_date"),
         "structures_detail": structures_detail
@@ -132,7 +152,55 @@ def apply_program_to_bordereau(bordereau_df: pd.DataFrame, program: Dict[str, An
         result = apply_program(policy_data, program)
         results.append(result)
     
-    return pd.DataFrame(results)
+    # Créer un DataFrame avec les résultats détaillés
+    results_df = pd.DataFrame(results)
+    
+    # Ajouter la colonne "Net Exposure" au bordereau original
+    bordereau_with_net = bordereau_df.copy()
+    bordereau_with_net["Net_Exposure"] = results_df["net_ceded"]
+    
+    return bordereau_with_net, results_df
+
+
+def generate_detailed_report(results_df: pd.DataFrame, output_file: str = "detailed_report.txt"):
+    """
+    Génère un rapport détaillé de l'application des structures
+    """
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write("=" * 80 + "\n")
+        f.write("RAPPORT DÉTAILLÉ D'APPLICATION DES STRUCTURES\n")
+        f.write("=" * 80 + "\n\n")
+        
+        for _, policy_result in results_df.iterrows():
+            f.write(f"POLICE: {policy_result['policy_number']}\n")
+            f.write(f"Exposition initiale: {policy_result['exposure']:,.2f}\n")
+            f.write(f"Total cédé (gross): {policy_result['gross_ceded']:,.2f}\n")
+            f.write(f"Total cédé (net): {policy_result['net_ceded']:,.2f}\n")
+            f.write(f"Rétention: {policy_result['retained']:,.2f}\n")
+            f.write("-" * 60 + "\n")
+            
+            for i, struct in enumerate(policy_result["structures_detail"], 1):
+                status = "✓ APPLIQUÉE" if struct.get('applied', False) else "✗ NON APPLIQUÉE"
+                f.write(f"\n{i}. {struct['structure_name']} ({struct['type_of_participation']}) - {status}\n")
+                f.write(f"   Exposition d'entrée: {struct['input_exposure']:,.2f}\n")
+                
+                if struct.get('applied', False):
+                    f.write(f"   Cédé (gross): {struct['gross_ceded']:,.2f}\n")
+                    f.write(f"   Cédé (net): {struct['net_ceded']:,.2f}\n")
+                    f.write(f"   Reinsurer Share: {struct['reinsurer_share']:.4f} ({struct['reinsurer_share']*100:.2f}%)\n")
+                    
+                    if struct.get('section'):
+                        section = struct['section']
+                        f.write(f"   Section appliquée:\n")
+                        for key, value in section.items():
+                            if pd.notna(value) and key not in ['structure_name']:
+                                f.write(f"     {key}: {value}\n")
+                else:
+                    f.write(f"   Raison: Aucune section correspondante trouvée\n")
+            
+            f.write("\n" + "=" * 80 + "\n\n")
+    
+    print(f"✓ Rapport détaillé généré: {output_file}")
 
 
 def apply_treaty_with_claim_basis(policy_data: Dict[str, Any], treaty_manager: TreatyManager, 

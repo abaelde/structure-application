@@ -41,7 +41,7 @@ python create_aviation_AXA_XL.py
 Tous les programmes suivent la nouvelle logique **ordre-based** :
 - **Structures** : Appliquées séquentiellement selon leur ordre
 - **Sections** : Appliquées en parallèle selon les conditions de matching
-- **Quote Share** : Réduit l'exposition restante
+- **quota Share** : Réduit l'exposition restante
 - **Excess of Loss** : S'applique sur l'exposition restante (empilés)
 
 ## Valeurs en millions

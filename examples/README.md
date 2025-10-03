@@ -67,14 +67,14 @@ uv run python examples/scripts/create_program_config.py
 ### Feuille "structures"
 - `structure_name` : Nom de la structure
 - `contract_order` : Ordre d'application
-- `type_of_participation` : "quote_share" ou "excess_of_loss"
+- `type_of_participation` : "quota_share" ou "excess_of_loss"
 - `claim_basis` : "risk_attaching" ou "loss_occurring"
 - `inception_date` : Date de début de la structure
 - `expiry_date` : Date de fin de la structure
 
 ### Feuille "sections"
 - `structure_name` : Référence vers la structure
-- `cession_PCT` : Taux de cession (pour quote_share)
+- `cession_PCT` : Taux de cession (pour quota_share)
 - `attachment_point_100` : Priorité (pour excess_of_loss)
 - `limit_occurrence_100` : Limite (pour excess_of_loss)
 - Colonnes de dimensions pour le matching

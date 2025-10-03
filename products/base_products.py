@@ -1,4 +1,4 @@
-def quote_share(exposure: float, cession_PCT: float) -> float:
+def quota_share(exposure: float, cession_PCT: float) -> float:
     if not 0 <= cession_PCT <= 1:
         raise ValueError("Cession rate must be between 0 and 1")
     
