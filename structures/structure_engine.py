@@ -34,10 +34,10 @@ def match_section(policy_data: Dict[str, Any], sections: list, dimension_columns
 
 def apply_section(exposure: float, section: Dict[str, Any], product_type: str) -> float:
     if product_type == "quote_share":
-        session_rate = section["session_rate"]
-        if pd.isna(session_rate):
-            raise ValueError("session_rate is required for quote_share")
-        return quote_share(exposure, session_rate)
+        cession_rate = section["cession_rate"]
+        if pd.isna(cession_rate):
+            raise ValueError("cession_rate is required for quote_share")
+        return quote_share(exposure, cession_rate)
     
     elif product_type == "excess_of_loss":
         priority = section["priority"]

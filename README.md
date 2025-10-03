@@ -63,7 +63,7 @@ Fichier CSV contenant les polices d'assurance avec :
 - `expiry_date` : Date d'expiration de la police
 
 ### 2. Produits de base
-- **Quote-share** : Application d'un pourcentage de cession (session_rate) sur l'exposition
+- **Quote-share** : Application d'un pourcentage de cession (cession_rate) sur l'exposition
 - **Excess of Loss (XoL)** : Couverture au-dessus d'une priorité (priority) jusqu'à une limite (limit)
 
 ### 3. Program
@@ -84,7 +84,7 @@ Les structures sont les éléments qui composent un programme. Chaque structure 
 
 ### 5. Sections
 Les sections sont les instanciations concrètes d'une structure avec :
-- **Paramètres** : session_rate (pour quote_share), priority et limit (pour excess_of_loss)
+- **Paramètres** : cession_rate (pour quote_share), priority et limit (pour excess_of_loss)
 - **Conditions** : Valeurs spécifiques pour les dimensions (localisation, industrie, etc.)
 
 #### Logique de matching
@@ -94,8 +94,8 @@ Pour chaque police et chaque structure :
 3. Si aucune section ne matche, la structure n'est pas appliquée
 
 **Exemple :**
-- Section 1 : session_rate=30%, localisation=NULL → S'applique partout (générique)
-- Section 2 : session_rate=40%, localisation=Paris → S'applique uniquement à Paris (spécifique)
+- Section 1 : cession_rate=30%, localisation=NULL → S'applique partout (générique)
+- Section 2 : cession_rate=40%, localisation=Paris → S'applique uniquement à Paris (spécifique)
 
 Pour une police à Paris, la Section 2 sera choisie car elle est plus spécifique.
 
@@ -160,7 +160,7 @@ Définit les structures du programme (nom, ordre, type de produit).
 ### Feuille "sections"
 Définit les sections de chaque structure avec paramètres et conditions.
 
-| structure_name | session_rate | priority | limit   | localisation | industrie |
+| structure_name | cession_rate | priority | limit   | localisation | industrie |
 |----------------|--------------|----------|---------|--------------|-----------|
 | QS_GENERAL     | 0.30         | -        | -       | -            | -         |
 | QS_GENERAL     | 0.40         | -        | -       | Paris        | -         |
@@ -296,4 +296,4 @@ Le guide contient des patterns courants, des exemples de traduction et toutes le
 - **Section** : Instance d'une structure avec paramètres et conditions spécifiques
 - **Product** : Les building blocks (quote_share, excess_of_loss)
 - **Dimension** : Colonne du bordereau utilisée pour le matching (ex: country, region, industry)
-- **Session rate** : Le taux de cession pour une quote-share
+- **cession rate** : Le taux de cession pour une quote-share

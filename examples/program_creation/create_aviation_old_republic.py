@@ -49,7 +49,7 @@ REINSURER_SHARE_VALUES = {
 
 sections_data = {
     "structure_name": ["XOL_1", "XOL_2", "XOL_3"],
-    "session_rate": [np.nan, np.nan, np.nan],  # XOL n'utilise pas session_rate
+    "cession_rate": [np.nan, np.nan, np.nan],  # XOL n'utilise pas cession_rate
     "priority": [3.0, 11.75, 21.75],           # Priorités en millions
     "limit": [8.75, 10.0, 23.25],              # Limites en millions
     "reinsurer_share": [REINSURER_SHARE_VALUES["XOL_1"], REINSURER_SHARE_VALUES["XOL_2"], REINSURER_SHARE_VALUES["XOL_3"]],
@@ -69,7 +69,7 @@ sections_data = {
 # Ajouter les sections pour le Canada
 sections_canada_data = {
     "structure_name": ["XOL_1", "XOL_2", "XOL_3"],
-    "session_rate": [np.nan, np.nan, np.nan],
+    "cession_rate": [np.nan, np.nan, np.nan],
     "priority": [3.0, 11.75, 21.75],           # Priorités en millions
     "limit": [8.75, 10.0, 23.25],              # Limites en millions
     "reinsurer_share": [REINSURER_SHARE_VALUES["XOL_1"], REINSURER_SHARE_VALUES["XOL_2"], REINSURER_SHARE_VALUES["XOL_3"]],
@@ -88,7 +88,7 @@ sections_canada_data = {
 # Combiner les sections US et Canada
 sections_combined_data = {
     "structure_name": sections_data["structure_name"] + sections_canada_data["structure_name"],
-    "session_rate": sections_data["session_rate"] + sections_canada_data["session_rate"],
+    "cession_rate": sections_data["cession_rate"] + sections_canada_data["cession_rate"],
     "priority": sections_data["priority"] + sections_canada_data["priority"],
     "limit": sections_data["limit"] + sections_canada_data["limit"],
     "reinsurer_share": sections_data["reinsurer_share"] + sections_canada_data["reinsurer_share"],

@@ -30,7 +30,7 @@ structures_data = {
 
 sections_data = {
     "structure_name": ["XOL_0.5M_1M"],
-    "session_rate": [np.nan],
+    "cession_rate": [np.nan],
     "priority": [0.5],  # 0.5 million
     "limit": [1.0],     # 1.0 million
     "country": [np.nan],

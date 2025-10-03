@@ -1,13 +1,14 @@
 """
 Création du programme Aviation Complex Multi-Currency
 
-Programme aviation avec 6 layers excess of loss, chacun défini pour 5 devises:
+Programme aviation avec 1 structure Quota Share + 6 layers excess of loss, chacun défini pour 5 devises:
 - USD, CAD, EUR, AUD (valeurs identiques)
 - GBP (valeurs spécifiques)
 
 Structure:
+- 1 structure Quota Share (QS_1) avec rétention 75% et reinsurer_share 1.65%
 - 6 layers XOL empilés (XOL_1 à XOL_6)
-- Chaque layer a des sections pour USD, CAD, EUR, AUD et GBP
+- Chaque structure a des sections pour USD, CAD, EUR, AUD et GBP
 - Priorités et limites définies par devise
 """
 
@@ -65,15 +66,15 @@ program_data = {
 }
 
 # =============================================================================
-# DÉFINITION DES STRUCTURES (6 layers XOL)
+# DÉFINITION DES STRUCTURES (1 Quota Share + 6 layers XOL)
 # =============================================================================
 
 structures_data = {
-    "structure_name": ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"],
-    "order": [1, 2, 3, 4, 5, 6],
-    "product_type": ["excess_of_loss", "excess_of_loss", "excess_of_loss", 
+    "structure_name": ["QS_1", "XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"],
+    "order": [0, 1, 2, 3, 4, 5, 6],
+    "product_type": ["quota_share", "excess_of_loss", "excess_of_loss", "excess_of_loss", 
                     "excess_of_loss", "excess_of_loss", "excess_of_loss"],
-    "claim_basis": ["risk_attaching", "risk_attaching", "risk_attaching", 
+    "claim_basis": ["risk_attaching", "risk_attaching", "risk_attaching", "risk_attaching", 
                    "risk_attaching", "risk_attaching", "risk_attaching"]
 }
 
@@ -87,7 +88,7 @@ COMMON_CURRENCIES = ["USD", "CAD", "EUR", "AUD"]
 # Initialiser les listes pour les sections
 sections_data = {
     "structure_name": [],
-    "session_rate": [],
+    "cession_rate": [],
     "priority": [],
     "limit": [],
     "reinsurer_share": [],
@@ -103,14 +104,32 @@ sections_data = {
     "include": []
 }
 
-# Créer les sections pour les devises communes (USD, CAD, EUR, AUD)
+# Créer les sections pour la structure Quota Share (QS_1) - toutes devises
+for currency in COMMON_CURRENCIES + ["GBP"]:
+    sections_data["structure_name"].append("QS_1")
+    sections_data["cession_rate"].append(0.0165)  # 1.65% reinsurer_share
+    sections_data["priority"].append(np.nan)  # Quota Share n'utilise pas priority
+    sections_data["limit"].append(np.nan)  # Quota Share n'utilise pas limit
+    sections_data["reinsurer_share"].append(0.0165)  # 1.65%
+    sections_data["country"].append(np.nan)
+    sections_data["region"].append(np.nan)
+    sections_data["product_type_1"].append(np.nan)
+    sections_data["product_type_2"].append(np.nan)
+    sections_data["product_type_3"].append(np.nan)
+    sections_data["currency"].append(currency)
+    sections_data["line_of_business"].append(np.nan)
+    sections_data["industry"].append(np.nan)
+    sections_data["sic_code"].append(np.nan)
+    sections_data["include"].append(np.nan)
+
+# Créer les sections pour les devises communes (USD, CAD, EUR, AUD) - structures XOL
 for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
     priority, limit = LAYER_VALUES_COMMON[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
     for currency in COMMON_CURRENCIES:
         sections_data["structure_name"].append(layer_name)
-        sections_data["session_rate"].append(np.nan)  # XOL n'utilise pas session_rate
+        sections_data["cession_rate"].append(np.nan)  # XOL n'utilise pas cession_rate
         sections_data["priority"].append(priority)
         sections_data["limit"].append(limit)
         sections_data["reinsurer_share"].append(reinsurer_share)
@@ -125,13 +144,13 @@ for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
         sections_data["sic_code"].append(np.nan)
         sections_data["include"].append(np.nan)
 
-# Créer les sections pour GBP (valeurs spécifiques)
+# Créer les sections pour GBP (valeurs spécifiques) - structures XOL
 for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
     priority, limit = LAYER_VALUES_GBP[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
     sections_data["structure_name"].append(layer_name)
-    sections_data["session_rate"].append(np.nan)
+    sections_data["cession_rate"].append(np.nan)
     sections_data["priority"].append(priority)
     sections_data["limit"].append(limit)
     sections_data["reinsurer_share"].append(reinsurer_share)
@@ -202,10 +221,13 @@ print("=" * 80)
 
 print("""
 Programme: Aviation AXA XL 2024
-Devises: USD, CAD, EUR, AUD (valeurs identiques) + GBP (valeurs spécifiques)
+Devises: USD, CAD, EUR, AUD, GBP
 
-Structures XOL (empilées selon l'ordre):
+Structures (empilées selon l'ordre):
 """)
+
+print("0. QS_1 (order=0):")
+print("   - Toutes devises: Quota Share 1.65% (rétention 75%)")
 
 for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], 1):
     priority_common, limit_common = LAYER_VALUES_COMMON[layer]
@@ -217,6 +239,7 @@ for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]
 
 print("\n✓ Le programme Aviation AXA XL 2024 est prêt !")
 print("\nPour modifier les valeurs:")
-print("1. Éditez les dictionnaires LAYER_VALUES_COMMON et LAYER_VALUES_GBP")
-print("2. Éditez le dictionnaire REINSURER_SHARE_VALUES pour ajuster les pourcentages de réassurance")
-print("3. Relancez ce script pour régénérer le fichier Excel")
+print("1. Pour le Quota Share: modifiez la valeur 0.0165 dans les sections QS_1")
+print("2. Éditez les dictionnaires LAYER_VALUES_COMMON et LAYER_VALUES_GBP pour les XOL")
+print("3. Éditez le dictionnaire REINSURER_SHARE_VALUES pour ajuster les pourcentages de réassurance XOL")
+print("4. Relancez ce script pour régénérer le fichier Excel")

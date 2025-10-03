@@ -14,7 +14,7 @@ When the user asks to create or modify a reinsurance program configuration, refe
 - **Sections** (n rows): structure_name, parameters, + dimension columns
 
 ### Parameters
-- **Quote-share**: session_rate (0-1)
+- **Quote-share**: cession_rate (0-1)
 - **Excess of Loss**: priority, limit (positive numbers)
 
 ### Standard Dimensions
