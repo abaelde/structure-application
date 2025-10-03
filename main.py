@@ -83,6 +83,11 @@ def main():
     
     # Générer le rapport détaillé
     generate_detailed_report(results, "detailed_report.txt")
+    
+    # Sauvegarder le bordereau avec Net Exposure
+    output_bordereau_file = "bordereau_with_net_exposure.csv"
+    bordereau_with_net.to_csv(output_bordereau_file, index=False)
+    print(f"✓ Bordereau avec Net Exposure sauvegardé: {output_bordereau_file}")
 
 
 if __name__ == "__main__":

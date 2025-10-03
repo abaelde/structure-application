@@ -1,0 +1,26 @@
+---
+alwaysApply: true
+description: Règle pour l'implémentation des montants en millions dans les données
+---
+
+# Règle des Montants en Millions
+
+## Principe
+Tous les montants doivent être implémentés en **millions** dans les données d'entrée et les bordereaux.
+
+## Application
+- **Dans les bordereaux CSV** : Les montants doivent être saisis directement en millions (ex: 2 pour 2 millions)
+- **Dans les paramètres d'entrée** : Les montants de création de programmes doivent être en millions
+- **Dans les fichiers de configuration** : Tous les montants doivent être exprimés en millions
+
+## Exemples
+- ✅ Correct : `2` (pour représenter 2 millions)
+- ❌ Incorrect : `2000000` (pour représenter 2 millions)
+
+## Important
+Cette règle s'applique **uniquement aux données d'entrée et aux bordereaux**. Elle ne doit **PAS** être appliquée à la logique de calcul interne du système, qui peut continuer à travailler avec les unités appropriées selon les besoins du calcul.
+
+## Fichiers concernés
+- [examples/bordereaux/](mdc:examples/bordereaux/) - Tous les fichiers CSV de bordereaux
+- [examples/program_creation/](mdc:examples/program_creation/) - Scripts de création de programmes
+- [program_config.xlsx](mdc:program_config.xlsx) - Configuration des programmes
