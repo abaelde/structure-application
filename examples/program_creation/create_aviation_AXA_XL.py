@@ -46,6 +46,16 @@ LAYER_VALUES_GBP = {
     "XOL_6": (100, 276.666666),
 }
 
+# Reinsurer Share Values
+REINSURER_SHARE_VALUES = {
+    "XOL_1": 0.05,   
+    "XOL_2": 0.05,   
+    "XOL_3": 0.05,   
+    "XOL_4": 0.05,
+    "XOL_5": 0.05,
+    "XOL_6": 0.05,
+}
+
 # =============================================================================
 # DÉFINITION DU PROGRAMME
 # =============================================================================
@@ -80,6 +90,7 @@ sections_data = {
     "session_rate": [],
     "priority": [],
     "limit": [],
+    "reinsurer_share": [],
     "country": [],
     "region": [],
     "product_type_1": [],
@@ -95,12 +106,14 @@ sections_data = {
 # Créer les sections pour les devises communes (USD, CAD, EUR, AUD)
 for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
     priority, limit = LAYER_VALUES_COMMON[layer_name]
+    reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
     for currency in COMMON_CURRENCIES:
         sections_data["structure_name"].append(layer_name)
         sections_data["session_rate"].append(np.nan)  # XOL n'utilise pas session_rate
         sections_data["priority"].append(priority)
         sections_data["limit"].append(limit)
+        sections_data["reinsurer_share"].append(reinsurer_share)
         sections_data["country"].append(np.nan)  # Pas de restriction géographique
         sections_data["region"].append(np.nan)
         sections_data["product_type_1"].append(np.nan)
@@ -115,11 +128,13 @@ for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
 # Créer les sections pour GBP (valeurs spécifiques)
 for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
     priority, limit = LAYER_VALUES_GBP[layer_name]
+    reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
     sections_data["structure_name"].append(layer_name)
     sections_data["session_rate"].append(np.nan)
     sections_data["priority"].append(priority)
     sections_data["limit"].append(limit)
+    sections_data["reinsurer_share"].append(reinsurer_share)
     sections_data["country"].append(np.nan)
     sections_data["region"].append(np.nan)
     sections_data["product_type_1"].append(np.nan)
@@ -187,7 +202,6 @@ print("=" * 80)
 
 print("""
 Programme: Aviation AXA XL 2024
-Logique: Ordre-based (nouvelle)
 Devises: USD, CAD, EUR, AUD (valeurs identiques) + GBP (valeurs spécifiques)
 
 Structures XOL (empilées selon l'ordre):
@@ -200,27 +214,9 @@ for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]
     print(f"   - USD/CAD/EUR/AUD: {limit_common}M xs {priority_common}M")
     print(f"   - GBP: {limit_gbp}M xs {priority_gbp}M")
 
-print("""
-Comportement avec la nouvelle logique:
-- Les 6 couches XOL s'appliquent sur l'exposition restante (empilées)
-- Chaque couche calcule sa part selon sa priorité et limite
-- Les sections s'appliquent selon la devise de la police
-- Les couches sont empilées: XOL_1 → XOL_2 → XOL_3 → XOL_4 → XOL_5 → XOL_6
-
-Exemple avec une police de 100M USD:
-1. XOL_1: 2M cédé (100M - 1M = 99M, limité à 2M)
-2. XOL_2: 5M cédé (100M - 3M = 97M, limité à 5M)
-3. XOL_3: 10M cédé (100M - 8M = 92M, limité à 10M)
-4. XOL_4: 15M cédé (100M - 18M = 82M, limité à 15M)
-5. XOL_5: 20M cédé (100M - 33M = 67M, limité à 20M)
-6. XOL_6: 25M cédé (100M - 53M = 47M, limité à 25M)
-   Total cédé: 77M
-   Total retenu: 23M
-
-Note: Chaque couche XOL calcule sur la perte brute totale (100M), car elles sont empilées.
-""")
 
 print("\n✓ Le programme Aviation AXA XL 2024 est prêt !")
 print("\nPour modifier les valeurs:")
 print("1. Éditez les dictionnaires LAYER_VALUES_COMMON et LAYER_VALUES_GBP")
-print("2. Relancez ce script pour régénérer le fichier Excel")
+print("2. Éditez le dictionnaire REINSURER_SHARE_VALUES pour ajuster les pourcentages de réassurance")
+print("3. Relancez ce script pour régénérer le fichier Excel")

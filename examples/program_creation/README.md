@@ -59,6 +59,25 @@ Tous les programmes incluent maintenant le champ `claim_basis` dans la feuille "
 
 Pour les programmes actuels, tous les structures utilisent `risk_attaching`.
 
+## Reinsurer Share
+
+Tous les programmes incluent maintenant le champ `reinsurer_share` dans la feuille "sections" :
+- **Configuration** : Défini dans le dictionnaire `REINSURER_SHARE_VALUES` pour chaque structure
+- **Utilisation** : Permet de définir le pourcentage de la part cédée qui est effectivement réassurée
+- **Exemple** : Si `reinsurer_share = 0.8`, alors 80% de la part cédée est réassurée, 20% reste en rétention
+- **Modification** : Éditez le dictionnaire `REINSURER_SHARE_VALUES` dans le script Python
+
+Cette colonne est positionnée après `limit` dans la structure des sections.
+
+### Exemple de configuration :
+```python
+REINSURER_SHARE_VALUES = {
+    "XOL_1": 1.0,   # 100% réassuré
+    "XOL_2": 0.8,   # 80% réassuré, 20% en rétention
+    "XOL_3": 1.0,   # 100% réassuré
+}
+```
+
 ## Fichiers générés
 
 Les programmes sont créés dans `examples/programs/` :

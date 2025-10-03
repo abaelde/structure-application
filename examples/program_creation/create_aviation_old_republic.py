@@ -35,6 +35,14 @@ structures_data = {
     "claim_basis": ["risk_attaching", "risk_attaching", "risk_attaching"]
 }
 
+# Reinsurer Share Values
+# Définir le pourcentage de réassurance pour chaque structure
+REINSURER_SHARE_VALUES = {
+    "XOL_1": 1.0,   # 100% réassuré
+    "XOL_2": 1.0,   # 100% réassuré
+    "XOL_3": 1.0,   # 100% réassuré
+}
+
 # =============================================================================
 # DÉFINITION DES SECTIONS
 # =============================================================================
@@ -44,6 +52,7 @@ sections_data = {
     "session_rate": [np.nan, np.nan, np.nan],  # XOL n'utilise pas session_rate
     "priority": [3.0, 11.75, 21.75],           # Priorités en millions
     "limit": [8.75, 10.0, 23.25],              # Limites en millions
+    "reinsurer_share": [REINSURER_SHARE_VALUES["XOL_1"], REINSURER_SHARE_VALUES["XOL_2"], REINSURER_SHARE_VALUES["XOL_3"]],
     # Conditions géographiques
     "country": ["United States", "United States", "United States"],
     "region": [np.nan, np.nan, np.nan],
@@ -63,6 +72,7 @@ sections_canada_data = {
     "session_rate": [np.nan, np.nan, np.nan],
     "priority": [3.0, 11.75, 21.75],           # Priorités en millions
     "limit": [8.75, 10.0, 23.25],              # Limites en millions
+    "reinsurer_share": [REINSURER_SHARE_VALUES["XOL_1"], REINSURER_SHARE_VALUES["XOL_2"], REINSURER_SHARE_VALUES["XOL_3"]],
     "country": ["Canada", "Canada", "Canada"],
     "region": [np.nan, np.nan, np.nan],
     "product_type_1": [np.nan, np.nan, np.nan],
@@ -81,6 +91,7 @@ sections_combined_data = {
     "session_rate": sections_data["session_rate"] + sections_canada_data["session_rate"],
     "priority": sections_data["priority"] + sections_canada_data["priority"],
     "limit": sections_data["limit"] + sections_canada_data["limit"],
+    "reinsurer_share": sections_data["reinsurer_share"] + sections_canada_data["reinsurer_share"],
     "country": sections_data["country"] + sections_canada_data["country"],
     "region": sections_data["region"] + sections_canada_data["region"],
     "product_type_1": sections_data["product_type_1"] + sections_canada_data["product_type_1"],
@@ -141,7 +152,6 @@ print("=" * 80)
 
 print("""
 Programme: Aviation Old Republic 2024
-Logique: Ordre-based (nouvelle)
 Géographie: United States et Canada
 
 Structures XOL (empilées selon l'ordre):
@@ -149,19 +159,6 @@ Structures XOL (empilées selon l'ordre):
 2. XOL_2 (order=2): 10M xs 11.75M (pour US et Canada)  
 3. XOL_3 (order=3): 23.25M xs 21.75M (pour US et Canada)
 
-Comportement avec la nouvelle logique:
-- Toutes les couches XOL s'appliquent sur l'exposition restante (empilées)
-- Chaque couche calcule sa part selon sa priorité et limite
-- Les sections s'appliquent en parallèle selon les conditions (US vs Canada)
-
-Exemple avec une police de 50M d'exposition:
-1. XOL_1: 8.75M cédé (50M - 3M = 47M, limité à 8.75M)
-2. XOL_2: 10M cédé (50M - 11.75M = 38.25M, limité à 10M)
-3. XOL_3: 23.25M cédé (50M - 21.75M = 28.25M, limité à 23.25M)
-   Total cédé: 42M (8.75M + 10M + 23.25M)
-   Total retenu: 8M
-
-Note: Chaque couche XOL calcule sur la perte brute totale (50M), car elles sont empilées.
 """)
 
 print("\n✓ Le programme Aviation Old Republic 2024 est prêt !")
