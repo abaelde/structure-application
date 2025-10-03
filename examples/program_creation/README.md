@@ -14,6 +14,7 @@ Ce dossier contient les scripts Python pour créer les programmes de réassuranc
 - `create_single_quota_share.py` - Crée un programme simple avec quota share (30%)
 - `create_single_excess_of_loss.py` - Crée un programme simple avec excess of loss (1M xs 0.5M)
 - `create_aviation_old_republic.py` - Crée le programme aviation avec 3 couches XOL empilées
+- `create_aviation_complex_multi_currency.py` - Crée un programme aviation complexe avec 6 couches XOL multi-devises
 
 ### Script maître
 - `regenerate_all_programs.py` - Régénère tous les programmes d'un coup
@@ -32,6 +33,7 @@ cd examples/program_creation
 python create_single_quota_share.py
 python create_single_excess_of_loss.py
 python create_aviation_old_republic.py
+python create_aviation_complex_multi_currency.py
 ```
 
 ## Structure des programmes créés
@@ -52,6 +54,7 @@ Tous les montants sont exprimés en millions pour la lisibilité :
 ## Fichiers générés
 
 Les programmes sont créés dans `examples/programs/` :
-- `single_cote_a_cher.xlsx` - Programme simple avec quota share 30%
+- `single_quota_share.xlsx` - Programme simple avec quota share 30%
 - `single_excess_of_loss.xlsx` - Programme simple avec XOL 1M xs 0.5M
 - `aviation_old_republic_2024.xlsx` - Programme aviation avec 3 couches XOL empilées
+- `aviation_complex_multi_currency_2024.xlsx` - Programme aviation complexe avec 6 couches XOL multi-devises

@@ -1,0 +1,18 @@
+---
+alwaysApply: true
+description: UV dependency management and script execution
+---
+
+# UV Dependency Management
+
+This repository uses **UV** for all dependency management and script execution.
+
+## Key Points:
+- Use `uv` commands instead of `pip`, `pipenv`, or `poetry`
+- Dependencies are managed through [pyproject.toml](mdc:pyproject.toml) and [uv.lock](mdc:uv.lock)
+- To install dependencies: `uv sync`
+- To run scripts: `uv run <script_name>`
+- To add new dependencies: `uv add <package_name>`
+- To run Python files: `uv run python <file.py>`
+
+Always prefer UV over other Python package managers when working with this codebase.

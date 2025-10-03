@@ -1,0 +1,224 @@
+"""
+Création du programme Aviation Complex Multi-Currency
+
+Programme aviation avec 6 layers excess of loss, chacun défini pour 5 devises:
+- USD, CAD, EUR, AUD (valeurs identiques)
+- GBP (valeurs spécifiques)
+
+Structure:
+- 6 layers XOL empilés (XOL_1 à XOL_6)
+- Chaque layer a des sections pour USD, CAD, EUR, AUD et GBP
+- Priorités et limites définies par devise
+"""
+
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
+import pandas as pd
+import numpy as np
+
+print("Création du programme Aviation Complex Multi-Currency...")
+
+# =============================================================================
+# CONFIGURATION DES VALEURS - À MODIFIER SELON VOS BESOINS
+# =============================================================================
+
+# Définir les valeurs pour chaque layer (en millions)
+# Format: (priority, limit)
+# Les valeurs sont identiques pour USD, CAD, EUR, AUD
+LAYER_VALUES_COMMON = {
+    "XOL_1": (65, 0),   
+    "XOL_2": (50, 65),   
+    "XOL_3": (100, 115),  
+    "XOL_4": (100, 215), 
+    "XOL_5": (100, 315), 
+    "XOL_6": (150, 415), 
+}
+
+# Valeurs spécifiques pour GBP (en millions)
+LAYER_VALUES_GBP = {
+    "XOL_1": (43.333333, 23.333333),   
+    "XOL_2": (33.333333, 43.333333),  
+    "XOL_3": (66.666666, 76.666666),   
+    "XOL_4": (66.666666, 143.333333), 
+    "XOL_5": (66.666666, 210),
+    "XOL_6": (100, 276.666666),
+}
+
+# =============================================================================
+# DÉFINITION DU PROGRAMME
+# =============================================================================
+
+program_data = {
+    "program_name": ["AVIATION_COMPLEX_MULTI_CURRENCY_2024"]
+}
+
+# =============================================================================
+# DÉFINITION DES STRUCTURES (6 layers XOL)
+# =============================================================================
+
+structures_data = {
+    "structure_name": ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"],
+    "order": [1, 2, 3, 4, 5, 6],
+    "product_type": ["excess_of_loss", "excess_of_loss", "excess_of_loss", 
+                    "excess_of_loss", "excess_of_loss", "excess_of_loss"]
+}
+
+# =============================================================================
+# DÉFINITION DES SECTIONS
+# =============================================================================
+
+# Devises communes (USD, CAD, EUR, AUD)
+COMMON_CURRENCIES = ["USD", "CAD", "EUR", "AUD"]
+
+# Initialiser les listes pour les sections
+sections_data = {
+    "structure_name": [],
+    "session_rate": [],
+    "priority": [],
+    "limit": [],
+    "country": [],
+    "region": [],
+    "product_type_1": [],
+    "product_type_2": [],
+    "product_type_3": [],
+    "currency": [],
+    "line_of_business": [],
+    "industry": [],
+    "sic_code": [],
+    "include": []
+}
+
+# Créer les sections pour les devises communes (USD, CAD, EUR, AUD)
+for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
+    priority, limit = LAYER_VALUES_COMMON[layer_name]
+    
+    for currency in COMMON_CURRENCIES:
+        sections_data["structure_name"].append(layer_name)
+        sections_data["session_rate"].append(np.nan)  # XOL n'utilise pas session_rate
+        sections_data["priority"].append(priority)
+        sections_data["limit"].append(limit)
+        sections_data["country"].append(np.nan)  # Pas de restriction géographique
+        sections_data["region"].append(np.nan)
+        sections_data["product_type_1"].append(np.nan)
+        sections_data["product_type_2"].append(np.nan)
+        sections_data["product_type_3"].append(np.nan)
+        sections_data["currency"].append(currency)  # Devise spécifique
+        sections_data["line_of_business"].append(np.nan)
+        sections_data["industry"].append(np.nan)
+        sections_data["sic_code"].append(np.nan)
+        sections_data["include"].append(np.nan)
+
+# Créer les sections pour GBP (valeurs spécifiques)
+for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
+    priority, limit = LAYER_VALUES_GBP[layer_name]
+    
+    sections_data["structure_name"].append(layer_name)
+    sections_data["session_rate"].append(np.nan)
+    sections_data["priority"].append(priority)
+    sections_data["limit"].append(limit)
+    sections_data["country"].append(np.nan)
+    sections_data["region"].append(np.nan)
+    sections_data["product_type_1"].append(np.nan)
+    sections_data["product_type_2"].append(np.nan)
+    sections_data["product_type_3"].append(np.nan)
+    sections_data["currency"].append("GBP")
+    sections_data["line_of_business"].append(np.nan)
+    sections_data["industry"].append(np.nan)
+    sections_data["sic_code"].append(np.nan)
+    sections_data["include"].append(np.nan)
+
+# =============================================================================
+# CRÉATION DES DATAFRAMES
+# =============================================================================
+
+program_df = pd.DataFrame(program_data)
+structures_df = pd.DataFrame(structures_data)
+sections_df = pd.DataFrame(sections_data)
+
+# =============================================================================
+# GÉNÉRATION DU FICHIER EXCEL
+# =============================================================================
+
+# Créer le dossier programs s'il n'existe pas
+output_dir = "../programs"
+os.makedirs(output_dir, exist_ok=True)
+
+output_file = os.path.join(output_dir, "aviation_complex_multi_currency_2024.xlsx")
+
+with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
+    program_df.to_excel(writer, sheet_name="program", index=False)
+    structures_df.to_excel(writer, sheet_name="structures", index=False)
+    sections_df.to_excel(writer, sheet_name="sections", index=False)
+
+print(f"✓ Programme créé: {output_file}")
+
+# =============================================================================
+# AFFICHAGE DES DÉTAILS
+# =============================================================================
+
+print("\n" + "=" * 80)
+print("PROGRAMME AVIATION COMPLEX MULTI-CURRENCY 2024")
+print("=" * 80)
+
+print("\nProgram:")
+print(program_df)
+
+print("\nStructures:")
+print(structures_df)
+
+print("\nSections (premières 10 lignes):")
+print(sections_df.head(10))
+
+print(f"\nTotal sections créées: {len(sections_df)}")
+print(f"Répartition par devise:")
+print(sections_df['currency'].value_counts())
+
+# =============================================================================
+# RÉSUMÉ DU PROGRAMME
+# =============================================================================
+
+print("\n" + "=" * 80)
+print("RÉSUMÉ DU PROGRAMME")
+print("=" * 80)
+
+print("""
+Programme: Aviation Complex Multi-Currency 2024
+Logique: Ordre-based (nouvelle)
+Devises: USD, CAD, EUR, AUD (valeurs identiques) + GBP (valeurs spécifiques)
+
+Structures XOL (empilées selon l'ordre):
+""")
+
+for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], 1):
+    priority_common, limit_common = LAYER_VALUES_COMMON[layer]
+    priority_gbp, limit_gbp = LAYER_VALUES_GBP[layer]
+    print(f"{i}. {layer} (order={i}):")
+    print(f"   - USD/CAD/EUR/AUD: {limit_common}M xs {priority_common}M")
+    print(f"   - GBP: {limit_gbp}M xs {priority_gbp}M")
+
+print("""
+Comportement avec la nouvelle logique:
+- Les 6 couches XOL s'appliquent sur l'exposition restante (empilées)
+- Chaque couche calcule sa part selon sa priorité et limite
+- Les sections s'appliquent selon la devise de la police
+- Les couches sont empilées: XOL_1 → XOL_2 → XOL_3 → XOL_4 → XOL_5 → XOL_6
+
+Exemple avec une police de 100M USD:
+1. XOL_1: 2M cédé (100M - 1M = 99M, limité à 2M)
+2. XOL_2: 5M cédé (100M - 3M = 97M, limité à 5M)
+3. XOL_3: 10M cédé (100M - 8M = 92M, limité à 10M)
+4. XOL_4: 15M cédé (100M - 18M = 82M, limité à 15M)
+5. XOL_5: 20M cédé (100M - 33M = 67M, limité à 20M)
+6. XOL_6: 25M cédé (100M - 53M = 47M, limité à 25M)
+   Total cédé: 77M
+   Total retenu: 23M
+
+Note: Chaque couche XOL calcule sur la perte brute totale (100M), car elles sont empilées.
+""")
+
+print("\n✓ Le programme Aviation Complex Multi-Currency 2024 est prêt !")
+print("\nPour modifier les valeurs:")
+print("1. Éditez les dictionnaires LAYER_VALUES_COMMON et LAYER_VALUES_GBP")
+print("2. Relancez ce script pour régénérer le fichier Excel")
