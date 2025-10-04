@@ -38,9 +38,9 @@ structures_data = {
 # Reinsurer Share Values
 # Définir le pourcentage de réassurance pour chaque structure
 REINSURER_SHARE_VALUES = {
-    "XOL_1": 1.0,   # 100% réassuré
-    "XOL_2": 1.0,   # 100% réassuré
-    "XOL_3": 1.0,   # 100% réassuré
+    "XOL_1": 0.1,   # 100% réassuré
+    "XOL_2": 0.1,   # 100% réassuré
+    "XOL_3": 0.0979,   # 100% réassuré
 }
 
 # =============================================================================
