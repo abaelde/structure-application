@@ -19,7 +19,20 @@ import numpy as np
 print("Création du programme Single Quota share...")
 
 program_data = {
-    "program_name": ["SINGLE_QUOTA_SHARE_2024"]
+    "REPROG_ID_PRE": [1],  # Auto-increment key
+    "REPROG_TITLE": ["SINGLE_QUOTA_SHARE_2024"],  # Former program_name
+    "CED_ID_PRE": [None],  # TBD
+    "CED_NAME_PRE": [None],  # TBD
+    "REPROG_ACTIVE_IND": [True],  # Default active
+    "REPROG_COMMENT": [None],  # Optional comments
+    "REPROG_UW_DEPARTMENT_CD": [None],  # UW Department Code
+    "REPROG_UW_DEPARTMENT_NAME": [None],  # UW Department Name
+    "REPROG_UW_DEPARTMENT_LOB_CD": [None],  # UW Department LOB Code
+    "REPROG_UW_DEPARTMENT_LOB_NAME": [None],  # UW Department LOB Name
+    "BUSPAR_CED_REG_CLASS_CD": [None],  # Regulatory Class Code
+    "BUSPAR_CED_REG_CLASS_NAME": [None],  # Regulatory Class Name
+    "REPROG_MAIN_CURRENCY_CD": [None],  # Main Currency Code
+    "REPROG_MANAGEMENT_REPORTING_LOB_CD": [None]  # Management Reporting LOB Code
 }
 
 structures_data = {

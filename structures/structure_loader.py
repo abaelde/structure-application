@@ -15,7 +15,11 @@ class ProgramLoader:
         sections_df = pd.read_excel(self.excel_path, sheet_name="sections")
         
         program_row = program_df.iloc[0]
-        program_name = program_row["program_name"]
+        # Support both old and new data model
+        if "REPROG_TITLE" in program_row:
+            program_name = program_row["REPROG_TITLE"]
+        else:
+            program_name = program_row["program_name"]  # Fallback for old format
         
         param_columns = ["structure_name", "cession_PCT", "attachment_point_100", "limit_occurrence_100", "reinsurer_share", "claim_basis", "inception_date", "expiry_date"]
         self.dimension_columns = [col for col in sections_df.columns if col not in param_columns]
