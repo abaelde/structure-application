@@ -45,7 +45,7 @@ def main():
     bordereau_with_net, results = apply_program_to_bordereau(bordereau_df, program)
 
     print("\n\n" + "=" * 80)
-    print("BORDEREAU WITH NET EXPOSURE")
+    print("BORDEREAU WITH CESSION TO REINSURER")
     print("=" * 80)
     print(bordereau_with_net)
 
@@ -53,7 +53,7 @@ def main():
     print("RESULTS SUMMARY")
     print("=" * 80)
     print(
-        results[["policy_number", "exposure", "gross_ceded", "net_ceded", "retained"]]
+        results[["policy_number", "exposure", "cession_to_layer_100pct", "cession_to_reinsurer", "retained"]]
     )
 
     print("\n")
@@ -61,9 +61,9 @@ def main():
 
     generate_detailed_report(results, program, "detailed_report.txt")
 
-    output_bordereau_file = "bordereau_with_net_exposure.csv"
+    output_bordereau_file = "bordereau_with_cession_to_reinsurer.csv"
     bordereau_with_net.to_csv(output_bordereau_file, index=False)
-    print(f"\n✓ Bordereau with Net Exposure saved: {output_bordereau_file}")
+    print(f"\n✓ Bordereau with Cession to Reinsurer saved: {output_bordereau_file}")
 
 
 if __name__ == "__main__":

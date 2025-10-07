@@ -67,17 +67,17 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
 
     # Display summary statistics for this program
     total_exposure = results["exposure"].sum()
-    total_gross_ceded = results["gross_ceded"].sum()
-    total_net_ceded = results["net_ceded"].sum()
+    total_cession_to_layer_100pct = results["cession_to_layer_100pct"].sum()
+    total_cession_to_reinsurer = results["cession_to_reinsurer"].sum()
     total_retained = results["retained"].sum()
 
     print(f"\n   Summary for {program_name}:")
-    print(f"   - Total exposure:    {total_exposure:,.2f}")
-    print(f"   - Total gross ceded: {total_gross_ceded:,.2f}")
-    print(f"   - Total net ceded:   {total_net_ceded:,.2f}")
-    print(f"   - Total retained:    {total_retained:,.2f}")
+    print(f"   - Total exposure:              {total_exposure:,.2f}")
+    print(f"   - Total cession at layer (100%): {total_cession_to_layer_100pct:,.2f}")
+    print(f"   - Total cession to reinsurer:  {total_cession_to_reinsurer:,.2f}")
+    print(f"   - Total retained:              {total_retained:,.2f}")
     print(
-        f"   - Cession rate:      {(total_net_ceded / total_exposure * 100) if total_exposure > 0 else 0:.2f}%"
+        f"   - Cession rate:                {(total_cession_to_reinsurer / total_exposure * 100) if total_exposure > 0 else 0:.2f}%"
     )
 
     return program_name, bordereau_with_net, results
@@ -144,8 +144,8 @@ def consolidate_all_programs():
         .agg(
             {
                 "exposure": "first",  # Same exposure per policy
-                "gross_ceded": "sum",  # Sum across all cedants
-                "net_ceded": "sum",  # Sum across all cedants
+                "cession_to_layer_100pct": "sum",  # Sum across all cedants
+                "cession_to_reinsurer": "sum",  # Sum across all cedants
                 "retained": "first",  # Take the final retained (from last application)
                 "cedant_program": lambda x: ", ".join(
                     sorted(set(x))
@@ -157,7 +157,7 @@ def consolidate_all_programs():
 
     # Add computed fields
     policy_aggregation["total_ceded_pct"] = (
-        policy_aggregation["net_ceded"] / policy_aggregation["exposure"] * 100
+        policy_aggregation["cession_to_reinsurer"] / policy_aggregation["exposure"] * 100
     )
     policy_aggregation["retained_pct"] = (
         policy_aggregation["retained"] / policy_aggregation["exposure"] * 100
@@ -172,8 +172,8 @@ def consolidate_all_programs():
             [
                 "policy_number",
                 "exposure",
-                "gross_ceded",
-                "net_ceded",
+                "cession_to_layer_100pct",
+                "cession_to_reinsurer",
                 "retained",
                 "total_ceded_pct",
                 "cedant_program",
@@ -187,19 +187,19 @@ def consolidate_all_programs():
     print("=" * 80)
 
     total_exposure = policy_aggregation["exposure"].sum()
-    total_gross_ceded = policy_aggregation["gross_ceded"].sum()
-    total_net_ceded = policy_aggregation["net_ceded"].sum()
+    total_cession_to_layer_100pct = policy_aggregation["cession_to_layer_100pct"].sum()
+    total_cession_to_reinsurer = policy_aggregation["cession_to_reinsurer"].sum()
     total_retained = policy_aggregation["retained"].sum()
 
     print(f"\nTotal across all cedants:")
-    print(f"  Policies:         {len(policy_aggregation)}")
-    print(f"  Cedants:          {len(ready_pairs)}")
-    print(f"  Total exposure:   {total_exposure:,.2f}")
-    print(f"  Total gross ceded: {total_gross_ceded:,.2f}")
-    print(f"  Total net ceded:   {total_net_ceded:,.2f}")
-    print(f"  Total retained:    {total_retained:,.2f}")
+    print(f"  Policies:                      {len(policy_aggregation)}")
+    print(f"  Cedants:                       {len(ready_pairs)}")
+    print(f"  Total exposure:                {total_exposure:,.2f}")
+    print(f"  Total cession at layer (100%): {total_cession_to_layer_100pct:,.2f}")
+    print(f"  Total cession to reinsurer:    {total_cession_to_reinsurer:,.2f}")
+    print(f"  Total retained:                {total_retained:,.2f}")
     print(
-        f"  Overall cession rate: {(total_net_ceded / total_exposure * 100) if total_exposure > 0 else 0:.2f}%"
+        f"  Overall cession rate:          {(total_cession_to_reinsurer / total_exposure * 100) if total_exposure > 0 else 0:.2f}%"
     )
 
     # Statistics by cedant
@@ -213,8 +213,8 @@ def consolidate_all_programs():
             {
                 "policy_number": "count",
                 "exposure": "sum",
-                "gross_ceded": "sum",
-                "net_ceded": "sum",
+                "cession_to_layer_100pct": "sum",
+                "cession_to_reinsurer": "sum",
                 "retained": "sum",
             }
         )
@@ -222,15 +222,15 @@ def consolidate_all_programs():
     )
 
     cedant_stats["cession_rate_pct"] = (
-        cedant_stats["net_ceded"] / cedant_stats["exposure"] * 100
+        cedant_stats["cession_to_reinsurer"] / cedant_stats["exposure"] * 100
     )
     cedant_stats.columns = [
         "Cedant",
         "Program Name",
         "Policies",
         "Exposure",
-        "Gross Ceded",
-        "Net Ceded",
+        "Cession at layer (100%)",
+        "Cession to Reinsurer",
         "Retained",
         "Cession %",
     ]

@@ -80,25 +80,25 @@ def apply_program_to_mapped_bordereau(program_name: str):
     print("RESULTS SUMMARY")
     print("=" * 80)
     print(
-        results[["policy_number", "exposure", "gross_ceded", "net_ceded", "retained"]]
+        results[["policy_number", "exposure", "cession_to_layer_100pct", "cession_to_reinsurer", "retained"]]
     )
     print()
 
     # Statistics
     total_exposure = results["exposure"].sum()
-    total_gross_ceded = results["gross_ceded"].sum()
-    total_net_ceded = results["net_ceded"].sum()
+    total_cession_to_layer_100pct = results["cession_to_layer_100pct"].sum()
+    total_cession_to_reinsurer = results["cession_to_reinsurer"].sum()
     total_retained = results["retained"].sum()
 
     print("=" * 80)
     print("STATISTICS")
     print("=" * 80)
-    print(f"Total exposure:    {total_exposure:,.2f}")
-    print(f"Total gross ceded: {total_gross_ceded:,.2f}")
-    print(f"Total net ceded:   {total_net_ceded:,.2f}")
-    print(f"Total retained:    {total_retained:,.2f}")
+    print(f"Total exposure:              {total_exposure:,.2f}")
+    print(f"Total cession at layer (100%): {total_cession_to_layer_100pct:,.2f}")
+    print(f"Total cession to reinsurer:  {total_cession_to_reinsurer:,.2f}")
+    print(f"Total retained:              {total_retained:,.2f}")
     print(
-        f"Cession rate:      {(total_net_ceded / total_exposure * 100) if total_exposure > 0 else 0:.2f}%"
+        f"Cession rate:                {(total_cession_to_reinsurer / total_exposure * 100) if total_exposure > 0 else 0:.2f}%"
     )
     print()
 

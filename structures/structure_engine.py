@@ -41,7 +41,7 @@ def apply_section(
         cession_PCT = section["CESSION_PCT"]
         if pd.isna(cession_PCT):
             raise ValueError("CESSION_PCT is required for quota_share")
-        gross_ceded = quota_share(exposure, cession_PCT)
+        cession_to_layer_100pct = quota_share(exposure, cession_PCT)
 
     elif type_of_participation == "excess_of_loss":
         attachment_point_100 = section["ATTACHMENT_POINT_100"]
@@ -50,23 +50,23 @@ def apply_section(
             raise ValueError(
                 "ATTACHMENT_POINT_100 and LIMIT_OCCURRENCE_100 are required for excess_of_loss"
             )
-        gross_ceded = excess_of_loss(
+        cession_to_layer_100pct = excess_of_loss(
             exposure, attachment_point_100, limit_occurrence_100
         )
 
     else:
         raise ValueError(f"Unknown product type: {type_of_participation}")
 
-    # Appliquer le SIGNED_SHARE_PCT pour obtenir la net exposure
+    # Appliquer le SIGNED_SHARE_PCT pour obtenir la cession effective au réassureur
     reinsurer_share = section.get("SIGNED_SHARE_PCT", 1.0)
     if pd.isna(reinsurer_share):
         reinsurer_share = 1.0
 
-    net_ceded = gross_ceded * reinsurer_share
+    cession_to_reinsurer = cession_to_layer_100pct * reinsurer_share
 
     return {
-        "gross_ceded": gross_ceded,
-        "net_ceded": net_ceded,
+        "cession_to_layer_100pct": cession_to_layer_100pct,
+        "cession_to_reinsurer": cession_to_reinsurer,
         "reinsurer_share": reinsurer_share,
     }
 
@@ -81,8 +81,8 @@ def apply_program(
     # Trier les structures par ordre
     sorted_structures = sorted(structures, key=lambda x: x["contract_order"])
 
-    total_gross_ceded = 0.0
-    total_net_ceded = 0.0
+    total_cession_to_layer_100pct = 0.0
+    total_cession_to_reinsurer = 0.0
     structures_detail = []
     remaining_exposure = exposure
 
@@ -100,8 +100,8 @@ def apply_program(
                     "inception_date": structure.get("inception_date"),
                     "expiry_date": structure.get("expiry_date"),
                     "input_exposure": remaining_exposure,
-                    "gross_ceded": 0.0,
-                    "net_ceded": 0.0,
+                    "cession_to_layer_100pct": 0.0,
+                    "cession_to_reinsurer": 0.0,
                     "reinsurer_share": 0.0,
                     "applied": False,
                     "section": None,
@@ -134,30 +134,30 @@ def apply_program(
                 "inception_date": structure.get("inception_date"),
                 "expiry_date": structure.get("expiry_date"),
                 "input_exposure": input_exposure,
-                "gross_ceded": ceded_result["gross_ceded"],
-                "net_ceded": ceded_result["net_ceded"],
+                "cession_to_layer_100pct": ceded_result["cession_to_layer_100pct"],
+                "cession_to_reinsurer": ceded_result["cession_to_reinsurer"],
                 "reinsurer_share": ceded_result["reinsurer_share"],
                 "applied": True,
                 "section": matched_section,
             }
         )
 
-        total_gross_ceded += ceded_result["gross_ceded"]
-        total_net_ceded += ceded_result["net_ceded"]
+        total_cession_to_layer_100pct += ceded_result["cession_to_layer_100pct"]
+        total_cession_to_reinsurer += ceded_result["cession_to_reinsurer"]
 
         # Mettre à jour l'exposition restante
         if structure["type_of_participation"] == "quota_share":
             # Quota Share réduit l'exposition restante
-            remaining_exposure -= ceded_result["gross_ceded"]
+            remaining_exposure -= ceded_result["cession_to_layer_100pct"]
         # Pour les Excess of Loss, on ne réduit pas l'exposition restante
         # car ils sont empilés et calculent sur la même base
 
     return {
         "policy_number": policy_data.get("numero_police"),
         "exposure": exposure,
-        "gross_ceded": total_gross_ceded,
-        "net_ceded": total_net_ceded,
-        "retained": exposure - total_gross_ceded,
+        "cession_to_layer_100pct": total_cession_to_layer_100pct,
+        "cession_to_reinsurer": total_cession_to_reinsurer,
+        "retained": exposure - total_cession_to_layer_100pct,
         "policy_inception_date": policy_data.get("inception_date"),
         "policy_expiry_date": policy_data.get("expiry_date"),
         "structures_detail": structures_detail,
@@ -177,9 +177,9 @@ def apply_program_to_bordereau(
     # Créer un DataFrame avec les résultats détaillés
     results_df = pd.DataFrame(results)
 
-    # Ajouter la colonne "Net Exposure" au bordereau original
+    # Ajouter la colonne "Cession to Reinsurer" au bordereau original
     bordereau_with_net = bordereau_df.copy()
-    bordereau_with_net["Net_Exposure"] = results_df["net_ceded"]
+    bordereau_with_net["Cession_To_Reinsurer"] = results_df["cession_to_reinsurer"]
 
     return bordereau_with_net, results_df
 
@@ -200,8 +200,8 @@ def write_detailed_results(
         file.write(f"\n{'─' * 80}\n")
         file.write(f"POLICY: {policy_result['policy_number']}\n")
         file.write(f"Initial exposure: {policy_result['exposure']:,.2f}\n")
-        file.write(f"Total ceded (gross): {policy_result['gross_ceded']:,.2f}\n")
-        file.write(f"Total ceded (net): {policy_result['net_ceded']:,.2f}\n")
+        file.write(f"Total cession at layer (100%): {policy_result['cession_to_layer_100pct']:,.2f}\n")
+        file.write(f"Total cession to reinsurer: {policy_result['cession_to_reinsurer']:,.2f}\n")
         file.write(f"Retention: {policy_result['retained']:,.2f}\n")
         file.write(f"\nStructures applied:\n")
 
@@ -213,8 +213,8 @@ def write_detailed_results(
             file.write(f"   Input exposure: {struct['input_exposure']:,.2f}\n")
 
             if struct.get("applied", False):
-                file.write(f"   Ceded (gross): {struct['gross_ceded']:,.2f}\n")
-                file.write(f"   Ceded (net): {struct['net_ceded']:,.2f}\n")
+                file.write(f"   Cession at layer (100%): {struct['cession_to_layer_100pct']:,.2f}\n")
+                file.write(f"   Cession to reinsurer: {struct['cession_to_reinsurer']:,.2f}\n")
                 file.write(
                     f"   Reinsurer Share: {struct['reinsurer_share']:.4f} ({struct['reinsurer_share']*100:.2f}%)\n"
                 )
@@ -331,7 +331,7 @@ def apply_treaty_with_claim_basis(
         return {
             "policy_number": policy_data.get("numero_police"),
             "exposure": policy_data.get("exposition", 0),
-            "ceded": 0.0,
+            "cession_to_reinsurer": 0.0,
             "retained": policy_data.get("exposition", 0),
             "policy_inception_date": policy_inception_date,
             "policy_expiry_date": policy_expiry_date,
