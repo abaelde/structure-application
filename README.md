@@ -185,6 +185,26 @@ uv run python examples/scripts/create_program_config.py
 uv run python main.py
 ```
 
+## Développement
+
+### Formatage du code avec Black
+
+Le projet utilise [Black](https://black.readthedocs.io/) pour le formatage automatique du code Python.
+
+```bash
+# Vérifier quels fichiers nécessitent un formatage
+uv run black --check .
+
+# Formater tous les fichiers Python du projet
+uv run black .
+
+# Formater un fichier ou dossier spécifique
+uv run black path/to/file.py
+uv run black structures/
+```
+
+La configuration de Black se trouve dans le fichier `pyproject.toml`.
+
 ## Exemples et Démonstrations
 
 Le dossier `examples/` contient tous les exemples organisés par catégorie :

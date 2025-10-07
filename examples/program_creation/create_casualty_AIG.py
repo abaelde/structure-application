@@ -10,7 +10,8 @@ Programme risk attaching avec réassureur share à 10% (à déterminer)
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 import pandas as pd
 import numpy as np
@@ -34,8 +35,8 @@ REINSURER_SHARE_VALUES = {
 
 # Limites pour chaque section (en millions)
 LIMITS = {
-    "general": 25.0,    # Limite section générale: 25M
-    "cyber": 10.0,      # Limite section cyber: 10M
+    "general": 25.0,  # Limite section générale: 25M
+    "cyber": 10.0,  # Limite section cyber: 10M
 }
 
 # =============================================================================
@@ -56,7 +57,7 @@ program_data = {
     "BUSPAR_CED_REG_CLASS_CD": [None],  # Regulatory Class Code
     "BUSPAR_CED_REG_CLASS_NAME": [None],  # Regulatory Class Name
     "REPROG_MAIN_CURRENCY_CD": [None],  # Main Currency Code
-    "REPROG_MANAGEMENT_REPORTING_LOB_CD": [None]  # Management Reporting LOB Code
+    "REPROG_MANAGEMENT_REPORTING_LOB_CD": [None],  # Management Reporting LOB Code
 }
 
 # =============================================================================
@@ -83,7 +84,7 @@ structures_data = {
     "INSPER_CLAIM_BASIS_CD": ["risk_attaching"],  # Former claim_basis
     "INSPER_LODRA_CD_SLAV": [None],  # LODRA code
     "INSPER_LOD_TO_RA_DATE_SLAV": [None],  # LOD to RA date
-    "INSPER_COMMENT": [None]  # Comments
+    "INSPER_COMMENT": [None],  # Comments
 }
 
 # =============================================================================
@@ -97,12 +98,10 @@ sections_data = {
     "CED_ID_PRE": [None, None],  # Reference to cedant
     "BUSINESS_ID_PRE": [None, None],  # Reference to business
     "INSPER_ID_PRE": [1, 1],  # Reference to structure (QS_1)
-    
     # Exclusions and Names
     "BUSCL_EXCLUDE_CD": [None, "INCLUDE"],  # Section cyber uses INCLUDE for cyber
     "BUSCL_ENTITY_NAME_CED": [None, None],  # Cedant entity name
     "POL_RISK_NAME_CED": [None, "cyber"],  # Policy risk name - identifies cyber section
-    
     # Geographic and Product Dimensions
     "BUSCL_COUNTRY_CD": [None, None],  # Former country
     "BUSCL_COUNTRY": [None, None],  # Country name
@@ -110,38 +109,43 @@ sections_data = {
     "BUSCL_CLASS_OF_BUSINESS_1": [None, None],  # Former product_type_1
     "BUSCL_CLASS_OF_BUSINESS_2": [None, None],  # Former product_type_2
     "BUSCL_CLASS_OF_BUSINESS_3": [None, None],  # Former product_type_3
-    
     # Currency and Limits
     "BUSCL_LIMIT_CURRENCY_CD": [None, None],  # Former currency
     "AAD_100": [None, None],  # Annual Aggregate Deductible
     "LIMIT_100": [None, None],  # General limit
     "LIMIT_FLOATER_100": [None, None],  # Floater limit
-    "ATTACHMENT_POINT_100": [np.nan, np.nan],  # Quota Share n'utilise pas attachment_point_100
+    "ATTACHMENT_POINT_100": [
+        np.nan,
+        np.nan,
+    ],  # Quota Share n'utilise pas attachment_point_100
     "OLW_100": [None, None],  # Original Line Written
     "LIMIT_OCCURRENCE_100": [LIMITS["general"], LIMITS["cyber"]],  # Limites en millions
     "LIMIT_AGG_100": [None, None],  # Aggregate limit
-    
     # Cession and Retention
-    "CESSION_PCT": [CESSION_RATE_VALUES["QS_1"], CESSION_RATE_VALUES["QS_1"]],  # 100% cédé
+    "CESSION_PCT": [
+        CESSION_RATE_VALUES["QS_1"],
+        CESSION_RATE_VALUES["QS_1"],
+    ],  # 100% cédé
     "RETENTION_PCT": [None, None],  # Retention percentage
     "SUPI_100": [None, None],  # SUPI
-    
     # Premiums
     "BUSCL_PREMIUM_CURRENCY_CD": [None, None],  # Premium currency
     "BUSCL_PREMIUM_GROSS_NET_CD": [None, None],  # Gross/Net premium
     "PREMIUM_RATE_PCT": [None, None],  # Premium rate percentage
     "PREMIUM_DEPOSIT_100": [None, None],  # Premium deposit
     "PREMIUM_MIN_100": [None, None],  # Minimum premium
-    
     # Coverage and Participations
     "BUSCL_LIABILITY_1_LINE_100": [None, None],  # Liability line 1
     "MAX_COVER_PCT": [None, None],  # Maximum coverage percentage
     "MIN_EXCESS_PCT": [None, None],  # Minimum excess percentage
-    "SIGNED_SHARE_PCT": [REINSURER_SHARE_VALUES["QS_1"], REINSURER_SHARE_VALUES["QS_1"]],  # Former reinsurer_share
+    "SIGNED_SHARE_PCT": [
+        REINSURER_SHARE_VALUES["QS_1"],
+        REINSURER_SHARE_VALUES["QS_1"],
+    ],  # Former reinsurer_share
     "AVERAGE_LINE_SLAV_CED": [None, None],  # Average line
     "PML_DEFAULT_PCT": [None, None],  # PML default percentage
     "LIMIT_EVENT": [None, None],  # Limit per event
-    "NO_OF_REINSTATEMENTS": [None, None]  # Number of reinstatements
+    "NO_OF_REINSTATEMENTS": [None, None],  # Number of reinstatements
 }
 
 # =============================================================================
@@ -194,7 +198,8 @@ print("\n" + "=" * 80)
 print("RÉSUMÉ DU PROGRAMME")
 print("=" * 80)
 
-print("""
+print(
+    """
 Programme: Casualty AIG 2024
 Claim basis: Risk attaching
 
@@ -210,10 +215,13 @@ Sections:
    - Restriction sur le risque cyber (include="cyber")
    - Reinsurer share: 10% (à déterminer)
 
-""")
+"""
+)
 
 print("✓ Le programme Casualty AIG 2024 est prêt !")
 print("\nNotes importantes:")
 print("- Les montants sont exprimés en millions")
 print("- Le reinsurer share de 10% reste à déterminer selon les négociations")
-print("- La fonction quota_share a été modifiée pour supporter les limites optionnelles")
+print(
+    "- La fonction quota_share a été modifiée pour supporter les limites optionnelles"
+)

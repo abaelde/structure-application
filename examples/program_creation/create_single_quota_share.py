@@ -7,7 +7,8 @@ Programme: Single Quota share
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 import pandas as pd
 import numpy as np
@@ -32,7 +33,7 @@ program_data = {
     "BUSPAR_CED_REG_CLASS_CD": [None],  # Regulatory Class Code
     "BUSPAR_CED_REG_CLASS_NAME": [None],  # Regulatory Class Name
     "REPROG_MAIN_CURRENCY_CD": [None],  # Main Currency Code
-    "REPROG_MANAGEMENT_REPORTING_LOB_CD": [None]  # Management Reporting LOB Code
+    "REPROG_MANAGEMENT_REPORTING_LOB_CD": [None],  # Management Reporting LOB Code
 }
 
 structures_data = {
@@ -55,7 +56,7 @@ structures_data = {
     "INSPER_CLAIM_BASIS_CD": [None],  # Former claim_basis
     "INSPER_LODRA_CD_SLAV": [None],  # LODRA code
     "INSPER_LOD_TO_RA_DATE_SLAV": [None],  # LOD to RA date
-    "INSPER_COMMENT": [None]  # Comments
+    "INSPER_COMMENT": [None],  # Comments
 }
 
 sections_data = {
@@ -65,12 +66,10 @@ sections_data = {
     "CED_ID_PRE": [None],  # Reference to cedant
     "BUSINESS_ID_PRE": [None],  # Reference to business
     "INSPER_ID_PRE": [1],  # Reference to structure (former BUSINESS_TITLE reference)
-    
     # Exclusions and Names
     "BUSCL_EXCLUDE_CD": [None],  # ENUM: INCLUDE or EXCLUDE
     "BUSCL_ENTITY_NAME_CED": [None],  # Cedant entity name
     "POL_RISK_NAME_CED": [None],  # Policy risk name
-    
     # Geographic and Product Dimensions
     "BUSCL_COUNTRY_CD": [None],  # Former country
     "BUSCL_COUNTRY": [None],  # Country name
@@ -78,7 +77,6 @@ sections_data = {
     "BUSCL_CLASS_OF_BUSINESS_1": [None],  # Former product_type_1
     "BUSCL_CLASS_OF_BUSINESS_2": [None],  # Former product_type_2
     "BUSCL_CLASS_OF_BUSINESS_3": [None],  # Former product_type_3
-    
     # Currency and Limits
     "BUSCL_LIMIT_CURRENCY_CD": [None],  # Former currency
     "AAD_100": [None],  # Annual Aggregate Deductible
@@ -88,19 +86,16 @@ sections_data = {
     "OLW_100": [None],  # Original Line Written
     "LIMIT_OCCURRENCE_100": [np.nan],  # Former limit_occurrence_100
     "LIMIT_AGG_100": [None],  # Aggregate limit
-    
     # Cession and Retention
     "CESSION_PCT": [0.30],  # Former cession_PCT - 30% de cession
     "RETENTION_PCT": [None],  # Retention percentage
     "SUPI_100": [None],  # SUPI
-    
     # Premiums
     "BUSCL_PREMIUM_CURRENCY_CD": [None],  # Premium currency
     "BUSCL_PREMIUM_GROSS_NET_CD": [None],  # Gross/Net premium
     "PREMIUM_RATE_PCT": [None],  # Premium rate percentage
     "PREMIUM_DEPOSIT_100": [None],  # Premium deposit
     "PREMIUM_MIN_100": [None],  # Minimum premium
-    
     # Coverage and Participations
     "BUSCL_LIABILITY_1_LINE_100": [None],  # Liability line 1
     "MAX_COVER_PCT": [None],  # Maximum coverage percentage
@@ -109,7 +104,7 @@ sections_data = {
     "AVERAGE_LINE_SLAV_CED": [None],  # Average line
     "PML_DEFAULT_PCT": [None],  # PML default percentage
     "LIMIT_EVENT": [None],  # Limit per event
-    "NO_OF_REINSTATEMENTS": [None]  # Number of reinstatements
+    "NO_OF_REINSTATEMENTS": [None],  # Number of reinstatements
 }
 
 program_df = pd.DataFrame(program_data)
@@ -152,7 +147,8 @@ print("\n" + "=" * 80)
 print("COMPORTEMENT DU PROGRAMME")
 print("=" * 80)
 
-print("""
+print(
+    """
 Exemple avec une police de 1M d'exposition:
 
 PROGRAMME SINGLE QUOTA SHARE:
@@ -164,6 +160,7 @@ PRINCIPE:
 - Un seul quota share de 30% appliqué à toutes les polices
 - Pas de conditions géographiques ou autres
 - Simple et efficace pour tester la logique de base
-""")
+"""
+)
 
 print("\n✓ Le programme Single Quota share est prêt !")

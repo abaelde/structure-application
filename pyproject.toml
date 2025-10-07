@@ -8,3 +8,27 @@ dependencies = [
     "pandas>=2.3.3",
     "openpyxl>=3.1.5",
 ]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | __pycache__
+)/
+'''
+
+[dependency-groups]
+dev = [
+    "black>=25.9.0",
+]
