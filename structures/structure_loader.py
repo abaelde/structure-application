@@ -2,20 +2,21 @@ import pandas as pd
 from typing import Dict, Any, List
 
 
-# Keys and relations - necessary for program structure
+# Keys and relations - foreign keys between Excel sheets (tables)
 KEYS_AND_RELATIONS = [
-    "REPROG_ID_PRE",
-    "BUSCL_ID_PRE",
-    "CED_ID_PRE",
-    "BUSINESS_ID_PRE",
-    "INSPER_ID_PRE",
-    "BUSINESS_TITLE",
-    "TYPE_OF_PARTICIPATION_CD",
-    "INSPER_CONTRACT_ORDER",
+    "REPROG_ID_PRE",  # Program identifier
+    "INSPER_ID_PRE",  # Structure identifier (links structures to sections)
+    "BUSCL_ID_PRE",  # Business class identifier
+    "CED_ID_PRE",  # Cedant identifier (not used)
+    "BUSINESS_ID_PRE",  # Business identifier (not used)
+    "BUSINESS_TITLE",  # Structure name (used for matching when INSPER_ID_PRE is null)
 ]
 
-# Parameters - used in reinsurance calculations
+# Parameters - used in reinsurance calculations and structure configuration
 PARAMETERS = [
+    # Structure configuration parameters
+    "TYPE_OF_PARTICIPATION_CD",  # Defines structure type (quota_share, excess_of_loss)
+    "INSPER_CONTRACT_ORDER",  # Defines application order of structures
     # Core calculation parameters
     "CESSION_PCT",
     "ATTACHMENT_POINT_100",
