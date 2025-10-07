@@ -91,22 +91,57 @@ structures_data = {
 # =============================================================================
 
 sections_data = {
-    "BUSINESS_TITLE": ["QS_1", "QS_1"],  # Former structure_name
-    "cession_PCT": [CESSION_RATE_VALUES["QS_1"], CESSION_RATE_VALUES["QS_1"]],
-    "attachment_point_100": [np.nan, np.nan],  # Quota Share n'utilise pas attachment_point_100
-    "limit_occurrence_100": [LIMITS["general"], LIMITS["cyber"]],  # Limites en millions
-    "reinsurer_share": [REINSURER_SHARE_VALUES["QS_1"], REINSURER_SHARE_VALUES["QS_1"]],
-    # Conditions géographiques - pas de restriction spécifique
-    "country": [np.nan, np.nan],
-    "region": [np.nan, np.nan],
-    "product_type_1": [np.nan, np.nan],
-    "product_type_2": [np.nan, np.nan],
-    "product_type_3": [np.nan, np.nan],
-    "currency": [np.nan, np.nan],
-    "line_of_business": [np.nan, np.nan],
-    "industry": [np.nan, np.nan],
-    "sic_code": [np.nan, np.nan],
-    "include": [np.nan, "cyber"]  # Section cyber identifiée par le champ include
+    # Keys and References
+    "BUSCL_ID_PRE": [1, 2],  # Auto-increment key
+    "REPROG_ID_PRE": [1, 1],  # Reference to program
+    "CED_ID_PRE": [None, None],  # Reference to cedant
+    "BUSINESS_ID_PRE": [None, None],  # Reference to business
+    "INSPER_ID_PRE": [1, 1],  # Reference to structure (QS_1)
+    
+    # Exclusions and Names
+    "BUSCL_EXCLUDE_CD": [None, "INCLUDE"],  # Section cyber uses INCLUDE for cyber
+    "BUSCL_ENTITY_NAME_CED": [None, None],  # Cedant entity name
+    "POL_RISK_NAME_CED": [None, "cyber"],  # Policy risk name - identifies cyber section
+    
+    # Geographic and Product Dimensions
+    "BUSCL_COUNTRY_CD": [None, None],  # Former country
+    "BUSCL_COUNTRY": [None, None],  # Country name
+    "BUSCL_REGION": [None, None],  # Former region
+    "BUSCL_CLASS_OF_BUSINESS_1": [None, None],  # Former product_type_1
+    "BUSCL_CLASS_OF_BUSINESS_2": [None, None],  # Former product_type_2
+    "BUSCL_CLASS_OF_BUSINESS_3": [None, None],  # Former product_type_3
+    
+    # Currency and Limits
+    "BUSCL_LIMIT_CURRENCY_CD": [None, None],  # Former currency
+    "AAD_100": [None, None],  # Annual Aggregate Deductible
+    "LIMIT_100": [None, None],  # General limit
+    "LIMIT_FLOATER_100": [None, None],  # Floater limit
+    "ATTACHMENT_POINT_100": [np.nan, np.nan],  # Quota Share n'utilise pas attachment_point_100
+    "OLW_100": [None, None],  # Original Line Written
+    "LIMIT_OCCURRENCE_100": [LIMITS["general"], LIMITS["cyber"]],  # Limites en millions
+    "LIMIT_AGG_100": [None, None],  # Aggregate limit
+    
+    # Cession and Retention
+    "CESSION_PCT": [CESSION_RATE_VALUES["QS_1"], CESSION_RATE_VALUES["QS_1"]],  # 100% cédé
+    "RETENTION_PCT": [None, None],  # Retention percentage
+    "SUPI_100": [None, None],  # SUPI
+    
+    # Premiums
+    "BUSCL_PREMIUM_CURRENCY_CD": [None, None],  # Premium currency
+    "BUSCL_PREMIUM_GROSS_NET_CD": [None, None],  # Gross/Net premium
+    "PREMIUM_RATE_PCT": [None, None],  # Premium rate percentage
+    "PREMIUM_DEPOSIT_100": [None, None],  # Premium deposit
+    "PREMIUM_MIN_100": [None, None],  # Minimum premium
+    
+    # Coverage and Participations
+    "BUSCL_LIABILITY_1_LINE_100": [None, None],  # Liability line 1
+    "MAX_COVER_PCT": [None, None],  # Maximum coverage percentage
+    "MIN_EXCESS_PCT": [None, None],  # Minimum excess percentage
+    "SIGNED_SHARE_PCT": [REINSURER_SHARE_VALUES["QS_1"], REINSURER_SHARE_VALUES["QS_1"]],  # Former reinsurer_share
+    "AVERAGE_LINE_SLAV_CED": [None, None],  # Average line
+    "PML_DEFAULT_PCT": [None, None],  # PML default percentage
+    "LIMIT_EVENT": [None, None],  # Limit per event
+    "NO_OF_REINSTATEMENTS": [None, None]  # Number of reinstatements
 }
 
 # =============================================================================

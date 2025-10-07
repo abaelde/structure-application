@@ -48,37 +48,76 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 
 ### 3. Feuille "sections" (n lignes)
 **Contraintes :**
-- **BUSINESS_TITLE** : VARCHAR(255), référence vers structures.BUSINESS_TITLE (obligatoire)
-- **cession_PCT** : DECIMAL(0-1), pourcentage de cession pour quota_share (peut être NULL pour XOL)
-- **attachment_point_100** : DECIMAL, priorité pour excess_of_loss en millions (peut être NULL pour QS)
-- **limit_occurrence_100** : DECIMAL, limite pour excess_of_loss en millions (peut être NULL pour QS)
-- **reinsurer_share** : DECIMAL(0-1), part du réassureur dans la cession (peut être NULL)
-- **country** : VARCHAR(255), condition géographique (peut être NULL = pas de condition)
-- **region** : VARCHAR(255), condition régionale (peut être NULL = pas de condition)
-- **product_type_1** : VARCHAR(255), condition type produit niveau 1 (peut être NULL = pas de condition)
-- **product_type_2** : VARCHAR(255), condition type produit niveau 2 (peut être NULL = pas de condition)
-- **product_type_3** : VARCHAR(255), condition type produit niveau 3 (peut être NULL = pas de condition)
-- **currency** : VARCHAR(255), condition devise (peut être NULL = pas de condition)
-- **line_of_business** : VARCHAR(255), condition ligne de business (peut être NULL = pas de condition)
-- **industry** : VARCHAR(255), condition industrie (peut être NULL = pas de condition)
-- **sic_code** : VARCHAR(255), condition code SIC (peut être NULL = pas de condition)
-- **include** : VARCHAR(255), condition libre (peut être NULL = pas de condition)
+
+#### Clés et Références
+- **BUSCL_ID_PRE** : INTEGER PRIMARY KEY, clé primaire auto-incrémentée (commence à 1)
+- **REPROG_ID_PRE** : INTEGER, référence au programme (obligatoire)
+- **CED_ID_PRE** : INTEGER, référence au cédant (peut être NULL)
+- **BUSINESS_ID_PRE** : INTEGER, référence au business (peut être NULL)
+- **INSPER_ID_PRE** : INTEGER, référence vers structures.INSPER_ID_PRE (obligatoire)
+
+#### Exclusions et Noms
+- **BUSCL_EXCLUDE_CD** : VARCHAR(255), ENUM: 'INCLUDE' ou 'EXCLUDE' (peut être NULL)
+- **BUSCL_ENTITY_NAME_CED** : VARCHAR(255), nom d'entité cédante (peut être NULL)
+- **POL_RISK_NAME_CED** : VARCHAR(255), nom du risque de police (peut être NULL)
+
+#### Dimensions Géographiques et Produits
+- **BUSCL_COUNTRY_CD** : VARCHAR(255), code pays (peut être NULL = pas de condition)
+- **BUSCL_COUNTRY** : VARCHAR(255), nom du pays (peut être NULL)
+- **BUSCL_REGION** : VARCHAR(255), région (peut être NULL = pas de condition)
+- **BUSCL_CLASS_OF_BUSINESS_1** : VARCHAR(255), classe de business niveau 1 (peut être NULL = pas de condition)
+- **BUSCL_CLASS_OF_BUSINESS_2** : VARCHAR(255), classe de business niveau 2 (peut être NULL = pas de condition)
+- **BUSCL_CLASS_OF_BUSINESS_3** : VARCHAR(255), classe de business niveau 3 (peut être NULL = pas de condition)
+
+#### Devise et Limites
+- **BUSCL_LIMIT_CURRENCY_CD** : VARCHAR(255), devise des limites (peut être NULL = pas de condition)
+- **AAD_100** : DECIMAL, AAD (Annual Aggregate Deductible) en millions (peut être NULL)
+- **LIMIT_100** : DECIMAL, limite générale en millions (peut être NULL)
+- **LIMIT_FLOATER_100** : DECIMAL, limite flottante en millions (peut être NULL)
+- **ATTACHMENT_POINT_100** : DECIMAL, point d'attachement en millions (peut être NULL pour QS)
+- **OLW_100** : DECIMAL, OLW (Original Line Written) en millions (peut être NULL)
+- **LIMIT_OCCURRENCE_100** : DECIMAL, limite par occurrence en millions (peut être NULL pour QS)
+- **LIMIT_AGG_100** : DECIMAL, limite agrégée en millions (peut être NULL)
+
+#### Cession et Rétention
+- **CESSION_PCT** : DECIMAL(0-1), pourcentage de cession (obligatoire pour QS, NULL pour XOL)
+- **RETENTION_PCT** : DECIMAL(0-1), pourcentage de rétention (peut être NULL)
+- **SUPI_100** : DECIMAL, SUPI en millions (peut être NULL)
+
+#### Primes
+- **BUSCL_PREMIUM_CURRENCY_CD** : VARCHAR(255), devise des primes (peut être NULL)
+- **BUSCL_PREMIUM_GROSS_NET_CD** : VARCHAR(255), prime brute/nette (peut être NULL)
+- **PREMIUM_RATE_PCT** : DECIMAL(0-1), taux de prime en % (peut être NULL)
+- **PREMIUM_DEPOSIT_100** : DECIMAL, dépôt de prime en millions (peut être NULL)
+- **PREMIUM_MIN_100** : DECIMAL, prime minimum en millions (peut être NULL)
+
+#### Couverture et Participations
+- **BUSCL_LIABILITY_1_LINE_100** : DECIMAL, ligne de responsabilité 1 en millions (peut être NULL)
+- **MAX_COVER_PCT** : DECIMAL(0-1), couverture maximum en % (peut être NULL)
+- **MIN_EXCESS_PCT** : DECIMAL(0-1), excédent minimum en % (peut être NULL)
+- **SIGNED_SHARE_PCT** : DECIMAL(0-1), part signée en % (peut être NULL)
+- **AVERAGE_LINE_SLAV_CED** : DECIMAL, ligne moyenne (peut être NULL)
+- **PML_DEFAULT_PCT** : DECIMAL(0-1), PML par défaut en % (peut être NULL)
+- **LIMIT_EVENT** : DECIMAL, limite par événement (peut être NULL)
+- **NO_OF_REINSTATEMENTS** : INTEGER, nombre de reconstitutions (peut être NULL)
 
 ## Contraintes de Cohérence
 
 ### Contraintes Structurelles
 1. **INSPER_CONTRACT_ORDER** : Doit être unique et séquentiel (0, 1, 2, ...)
 2. **BUSINESS_TITLE** : Doit être unique dans la feuille structures
-3. **BUSINESS_TITLE** dans sections : Doit référencer une structure existante
+3. **INSPER_ID_PRE** dans sections : Doit référencer un INSPER_ID_PRE existant dans structures
 4. **REPROG_ID_PRE** dans structures : Doit référencer le REPROG_ID_PRE du programme parent
+5. **REPROG_ID_PRE** dans sections : Doit référencer le REPROG_ID_PRE du programme parent
+6. **BUSCL_ID_PRE** : Doit être unique et auto-incrémenté
 
 ### Contraintes Logiques
 1. **quota_share** : 
-   - `cession_PCT` obligatoire (0-1)
-   - `attachment_point_100` et `limit_occurrence_100` doivent être NULL
+   - `CESSION_PCT` obligatoire (0-1)
+   - `ATTACHMENT_POINT_100` et `LIMIT_OCCURRENCE_100` doivent être NULL
 2. **excess_of_loss** :
-   - `attachment_point_100` et `limit_occurrence_100` obligatoires (≥ 0)
-   - `cession_PCT` doit être NULL
+   - `ATTACHMENT_POINT_100` et `LIMIT_OCCURRENCE_100` obligatoires (≥ 0)
+   - `CESSION_PCT` doit être NULL
 
 ### Contraintes de Valeurs
 1. **Montants** : Tous les montants sont exprimés en millions
@@ -87,10 +126,22 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 
 ## Rétrocompatibilité
 
-Le système supporte l'ancien format pour assurer la compatibilité avec les programmes existants :
-- **Programme** : `program_name` au lieu de `REPROG_TITLE`
+Le système supporte trois formats pour assurer la compatibilité :
+
+### Format Ancien (legacy)
+- **Programme** : `program_name`
 - **Structures** : `structure_name`, `contract_order`, `type_of_participation`, `claim_basis`, `inception_date`, `expiry_date`
-- **Sections** : `structure_name` au lieu de `BUSINESS_TITLE`
+- **Sections** : `structure_name` (référence par nom), `cession_PCT`, `attachment_point_100`, `limit_occurrence_100`, `reinsurer_share`, dimensions (country, region, product_type_*, currency, line_of_business, industry, sic_code, include)
+
+### Format Intermédiaire
+- **Programme** : `REPROG_TITLE` + nouveaux champs programme
+- **Structures** : Nouveaux champs structures (INSPER_*, BUSINESS_TITLE, etc.)
+- **Sections** : `BUSINESS_TITLE` (référence par nom), anciens champs sections
+
+### Format Nouveau (actuel)
+- **Programme** : Tous les champs REPROG_*
+- **Structures** : Tous les champs INSPER_*
+- **Sections** : `INSPER_ID_PRE` (référence par ID), tous les champs BUSCL_*
 
 ## Scripts de Création
 

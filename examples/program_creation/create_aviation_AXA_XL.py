@@ -128,87 +128,148 @@ COMMON_CURRENCIES = ["USD", "CAD", "EUR", "AUD"]
 
 # Initialiser les listes pour les sections
 sections_data = {
-    "BUSINESS_TITLE": [],  # Former structure_name
-    "cession_PCT": [],
-    "attachment_point_100": [],
-    "limit_occurrence_100": [],
-    "reinsurer_share": [],
-    "country": [],
-    "region": [],
-    "product_type_1": [],
-    "product_type_2": [],
-    "product_type_3": [],
-    "currency": [],
-    "line_of_business": [],
-    "industry": [],
-    "sic_code": [],
-    "include": []
+    # Keys and References
+    "BUSCL_ID_PRE": [],  # Auto-increment key
+    "REPROG_ID_PRE": [],  # Reference to program
+    "CED_ID_PRE": [],  # Reference to cedant
+    "BUSINESS_ID_PRE": [],  # Reference to business
+    "INSPER_ID_PRE": [],  # Reference to structure
+    
+    # Exclusions and Names
+    "BUSCL_EXCLUDE_CD": [],  # ENUM: INCLUDE or EXCLUDE
+    "BUSCL_ENTITY_NAME_CED": [],  # Cedant entity name
+    "POL_RISK_NAME_CED": [],  # Policy risk name
+    
+    # Geographic and Product Dimensions
+    "BUSCL_COUNTRY_CD": [],  # Former country
+    "BUSCL_COUNTRY": [],  # Country name
+    "BUSCL_REGION": [],  # Former region
+    "BUSCL_CLASS_OF_BUSINESS_1": [],  # Former product_type_1
+    "BUSCL_CLASS_OF_BUSINESS_2": [],  # Former product_type_2
+    "BUSCL_CLASS_OF_BUSINESS_3": [],  # Former product_type_3
+    
+    # Currency and Limits
+    "BUSCL_LIMIT_CURRENCY_CD": [],  # Former currency
+    "AAD_100": [],  # Annual Aggregate Deductible
+    "LIMIT_100": [],  # General limit
+    "LIMIT_FLOATER_100": [],  # Floater limit
+    "ATTACHMENT_POINT_100": [],  # Former attachment_point_100
+    "OLW_100": [],  # Original Line Written
+    "LIMIT_OCCURRENCE_100": [],  # Former limit_occurrence_100
+    "LIMIT_AGG_100": [],  # Aggregate limit
+    
+    # Cession and Retention
+    "CESSION_PCT": [],  # Former cession_PCT
+    "RETENTION_PCT": [],  # Retention percentage
+    "SUPI_100": [],  # SUPI
+    
+    # Premiums
+    "BUSCL_PREMIUM_CURRENCY_CD": [],  # Premium currency
+    "BUSCL_PREMIUM_GROSS_NET_CD": [],  # Gross/Net premium
+    "PREMIUM_RATE_PCT": [],  # Premium rate percentage
+    "PREMIUM_DEPOSIT_100": [],  # Premium deposit
+    "PREMIUM_MIN_100": [],  # Minimum premium
+    
+    # Coverage and Participations
+    "BUSCL_LIABILITY_1_LINE_100": [],  # Liability line 1
+    "MAX_COVER_PCT": [],  # Maximum coverage percentage
+    "MIN_EXCESS_PCT": [],  # Minimum excess percentage
+    "SIGNED_SHARE_PCT": [],  # Former reinsurer_share
+    "AVERAGE_LINE_SLAV_CED": [],  # Average line
+    "PML_DEFAULT_PCT": [],  # PML default percentage
+    "LIMIT_EVENT": [],  # Limit per event
+    "NO_OF_REINSTATEMENTS": []  # Number of reinstatements
 }
+
+# Counter for section IDs
+section_id_counter = 1
+
+# Helper function to add a section
+def add_section(insper_id, cession_pct, attachment_point, limit_occurrence, signed_share, currency_cd):
+    global section_id_counter
+    sections_data["BUSCL_ID_PRE"].append(section_id_counter)
+    sections_data["REPROG_ID_PRE"].append(1)
+    sections_data["CED_ID_PRE"].append(None)
+    sections_data["BUSINESS_ID_PRE"].append(None)
+    sections_data["INSPER_ID_PRE"].append(insper_id)
+    sections_data["BUSCL_EXCLUDE_CD"].append(None)
+    sections_data["BUSCL_ENTITY_NAME_CED"].append(None)
+    sections_data["POL_RISK_NAME_CED"].append(None)
+    sections_data["BUSCL_COUNTRY_CD"].append(None)
+    sections_data["BUSCL_COUNTRY"].append(None)
+    sections_data["BUSCL_REGION"].append(None)
+    sections_data["BUSCL_CLASS_OF_BUSINESS_1"].append(None)
+    sections_data["BUSCL_CLASS_OF_BUSINESS_2"].append(None)
+    sections_data["BUSCL_CLASS_OF_BUSINESS_3"].append(None)
+    sections_data["BUSCL_LIMIT_CURRENCY_CD"].append(currency_cd)
+    sections_data["AAD_100"].append(None)
+    sections_data["LIMIT_100"].append(None)
+    sections_data["LIMIT_FLOATER_100"].append(None)
+    sections_data["ATTACHMENT_POINT_100"].append(attachment_point)
+    sections_data["OLW_100"].append(None)
+    sections_data["LIMIT_OCCURRENCE_100"].append(limit_occurrence)
+    sections_data["LIMIT_AGG_100"].append(None)
+    sections_data["CESSION_PCT"].append(cession_pct)
+    sections_data["RETENTION_PCT"].append(None)
+    sections_data["SUPI_100"].append(None)
+    sections_data["BUSCL_PREMIUM_CURRENCY_CD"].append(None)
+    sections_data["BUSCL_PREMIUM_GROSS_NET_CD"].append(None)
+    sections_data["PREMIUM_RATE_PCT"].append(None)
+    sections_data["PREMIUM_DEPOSIT_100"].append(None)
+    sections_data["PREMIUM_MIN_100"].append(None)
+    sections_data["BUSCL_LIABILITY_1_LINE_100"].append(None)
+    sections_data["MAX_COVER_PCT"].append(None)
+    sections_data["MIN_EXCESS_PCT"].append(None)
+    sections_data["SIGNED_SHARE_PCT"].append(signed_share)
+    sections_data["AVERAGE_LINE_SLAV_CED"].append(None)
+    sections_data["PML_DEFAULT_PCT"].append(None)
+    sections_data["LIMIT_EVENT"].append(None)
+    sections_data["NO_OF_REINSTATEMENTS"].append(None)
+    section_id_counter += 1
 
 # Créer les sections pour la structure Quota Share (QS_1) - toutes devises
 cession_rate_qs = CESSION_RATE_VALUES["QS_1"]
 reinsurer_share_qs = REINSURER_SHARE_VALUES["QS_1"]
 for currency in COMMON_CURRENCIES + ["GBP"]:
-    sections_data["BUSINESS_TITLE"].append("QS_1")
-    sections_data["cession_PCT"].append(cession_rate_qs)  # 25% cédé
-    sections_data["attachment_point_100"].append(np.nan)  # Quota Share n'utilise pas attachment_point_100
-    sections_data["limit_occurrence_100"].append(np.nan)  # Quota Share n'utilise pas limit_occurrence_100
-    sections_data["reinsurer_share"].append(reinsurer_share_qs)  # 1.65% du réassureur
-    sections_data["country"].append(np.nan)
-    sections_data["region"].append(np.nan)
-    sections_data["product_type_1"].append(np.nan)
-    sections_data["product_type_2"].append(np.nan)
-    sections_data["product_type_3"].append(np.nan)
-    sections_data["currency"].append(currency)
-    sections_data["line_of_business"].append(np.nan)
-    sections_data["industry"].append(np.nan)
-    sections_data["sic_code"].append(np.nan)
-    sections_data["include"].append(np.nan)
+    add_section(
+        insper_id=1,  # QS_1 has INSPER_ID_PRE = 1
+        cession_pct=cession_rate_qs,
+        attachment_point=np.nan,
+        limit_occurrence=np.nan,
+        signed_share=reinsurer_share_qs,
+        currency_cd=currency
+    )
 
 # Créer les sections pour les devises communes (USD, CAD, EUR, AUD) - structures XOL
-for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
+for idx, layer_name in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], start=2):
     limit_occurrence_100, attachment_point_100 = LAYER_VALUES_COMMON[layer_name]
     cession_PCT = CESSION_RATE_VALUES[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
     for currency in COMMON_CURRENCIES:
-        sections_data["BUSINESS_TITLE"].append(layer_name)
-        sections_data["cession_PCT"].append(cession_PCT)  # Utilise la valeur du dictionnaire
-        sections_data["attachment_point_100"].append(attachment_point_100)
-        sections_data["limit_occurrence_100"].append(limit_occurrence_100)
-        sections_data["reinsurer_share"].append(reinsurer_share)
-        sections_data["country"].append(np.nan)  # Pas de restriction géographique
-        sections_data["region"].append(np.nan)
-        sections_data["product_type_1"].append(np.nan)
-        sections_data["product_type_2"].append(np.nan)
-        sections_data["product_type_3"].append(np.nan)
-        sections_data["currency"].append(currency)  # Devise spécifique
-        sections_data["line_of_business"].append(np.nan)
-        sections_data["industry"].append(np.nan)
-        sections_data["sic_code"].append(np.nan)
-        sections_data["include"].append(np.nan)
+        add_section(
+            insper_id=idx,  # XOL_1=2, XOL_2=3, ..., XOL_6=7
+            cession_pct=cession_PCT,
+            attachment_point=attachment_point_100,
+            limit_occurrence=limit_occurrence_100,
+            signed_share=reinsurer_share,
+            currency_cd=currency
+        )
 
 # Créer les sections pour GBP (valeurs spécifiques) - structures XOL
-for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
+for idx, layer_name in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], start=2):
     limit_occurrence_100, attachment_point_100 = LAYER_VALUES_GBP[layer_name]
     cession_PCT = CESSION_RATE_VALUES[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
-    sections_data["BUSINESS_TITLE"].append(layer_name)
-    sections_data["cession_PCT"].append(cession_PCT)  # Utilise la valeur du dictionnaire
-    sections_data["attachment_point_100"].append(attachment_point_100)
-    sections_data["limit_occurrence_100"].append(limit_occurrence_100)
-    sections_data["reinsurer_share"].append(reinsurer_share)
-    sections_data["country"].append(np.nan)
-    sections_data["region"].append(np.nan)
-    sections_data["product_type_1"].append(np.nan)
-    sections_data["product_type_2"].append(np.nan)
-    sections_data["product_type_3"].append(np.nan)
-    sections_data["currency"].append("GBP")
-    sections_data["line_of_business"].append(np.nan)
-    sections_data["industry"].append(np.nan)
-    sections_data["sic_code"].append(np.nan)
-    sections_data["include"].append(np.nan)
+    add_section(
+        insper_id=idx,  # XOL_1=2, XOL_2=3, ..., XOL_6=7
+        cession_pct=cession_PCT,
+        attachment_point=attachment_point_100,
+        limit_occurrence=limit_occurrence_100,
+        signed_share=reinsurer_share,
+        currency_cd="GBP"
+    )
 
 # =============================================================================
 # CRÉATION DES DATAFRAMES
@@ -254,7 +315,7 @@ print(sections_df.head(10))
 
 print(f"\nTotal sections créées: {len(sections_df)}")
 print(f"Répartition par devise:")
-print(sections_df['currency'].value_counts())
+print(sections_df['BUSCL_LIMIT_CURRENCY_CD'].value_counts())
 
 # =============================================================================
 # RÉSUMÉ DU PROGRAMME

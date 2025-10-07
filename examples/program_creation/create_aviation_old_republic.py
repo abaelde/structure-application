@@ -77,61 +77,82 @@ REINSURER_SHARE_VALUES = {
 # =============================================================================
 
 sections_data = {
-    "BUSINESS_TITLE": ["XOL_1", "XOL_2", "XOL_3"],  # Former structure_name
-    "cession_PCT": [np.nan, np.nan, np.nan],  # XOL n'utilise pas cession_PCT
-    "attachment_point_100": [3.0, 11.75, 21.75],           # Priorités en millions
-    "limit_occurrence_100": [8.75, 10.0, 23.25],              # Limites en millions
-    "reinsurer_share": [REINSURER_SHARE_VALUES["XOL_1"], REINSURER_SHARE_VALUES["XOL_2"], REINSURER_SHARE_VALUES["XOL_3"]],
-    # Conditions géographiques
-    "country": ["United States", "United States", "United States"],
-    "region": [np.nan, np.nan, np.nan],
-    "product_type_1": [np.nan, np.nan, np.nan],
-    "product_type_2": [np.nan, np.nan, np.nan],
-    "product_type_3": [np.nan, np.nan, np.nan],
-    "currency": [np.nan, np.nan, np.nan],
-    "line_of_business": [np.nan, np.nan, np.nan],
-    "industry": [np.nan, np.nan, np.nan],
-    "sic_code": [np.nan, np.nan, np.nan],
-    "include": [np.nan, np.nan, np.nan]
+    # Keys and References
+    "BUSCL_ID_PRE": [1, 2, 3],  # Auto-increment key
+    "REPROG_ID_PRE": [1, 1, 1],  # Reference to program
+    "CED_ID_PRE": [None, None, None],  # Reference to cedant
+    "BUSINESS_ID_PRE": [None, None, None],  # Reference to business
+    "INSPER_ID_PRE": [1, 2, 3],  # Reference to structures (XOL_1, XOL_2, XOL_3)
+    
+    # Exclusions and Names
+    "BUSCL_EXCLUDE_CD": [None, None, None],  # ENUM: INCLUDE or EXCLUDE
+    "BUSCL_ENTITY_NAME_CED": [None, None, None],  # Cedant entity name
+    "POL_RISK_NAME_CED": [None, None, None],  # Policy risk name
+    
+    # Geographic and Product Dimensions
+    "BUSCL_COUNTRY_CD": ["United States", "United States", "United States"],  # Former country
+    "BUSCL_COUNTRY": [None, None, None],  # Country name
+    "BUSCL_REGION": [None, None, None],  # Former region
+    "BUSCL_CLASS_OF_BUSINESS_1": [None, None, None],  # Former product_type_1
+    "BUSCL_CLASS_OF_BUSINESS_2": [None, None, None],  # Former product_type_2
+    "BUSCL_CLASS_OF_BUSINESS_3": [None, None, None],  # Former product_type_3
+    
+    # Currency and Limits
+    "BUSCL_LIMIT_CURRENCY_CD": [None, None, None],  # Former currency
+    "AAD_100": [None, None, None],  # Annual Aggregate Deductible
+    "LIMIT_100": [None, None, None],  # General limit
+    "LIMIT_FLOATER_100": [None, None, None],  # Floater limit
+    "ATTACHMENT_POINT_100": [3.0, 11.75, 21.75],  # Priorités en millions
+    "OLW_100": [None, None, None],  # Original Line Written
+    "LIMIT_OCCURRENCE_100": [8.75, 10.0, 23.25],  # Limites en millions
+    "LIMIT_AGG_100": [None, None, None],  # Aggregate limit
+    
+    # Cession and Retention
+    "CESSION_PCT": [np.nan, np.nan, np.nan],  # XOL n'utilise pas cession_PCT
+    "RETENTION_PCT": [None, None, None],  # Retention percentage
+    "SUPI_100": [None, None, None],  # SUPI
+    
+    # Premiums
+    "BUSCL_PREMIUM_CURRENCY_CD": [None, None, None],  # Premium currency
+    "BUSCL_PREMIUM_GROSS_NET_CD": [None, None, None],  # Gross/Net premium
+    "PREMIUM_RATE_PCT": [None, None, None],  # Premium rate percentage
+    "PREMIUM_DEPOSIT_100": [None, None, None],  # Premium deposit
+    "PREMIUM_MIN_100": [None, None, None],  # Minimum premium
+    
+    # Coverage and Participations
+    "BUSCL_LIABILITY_1_LINE_100": [None, None, None],  # Liability line 1
+    "MAX_COVER_PCT": [None, None, None],  # Maximum coverage percentage
+    "MIN_EXCESS_PCT": [None, None, None],  # Minimum excess percentage
+    "SIGNED_SHARE_PCT": [REINSURER_SHARE_VALUES["XOL_1"], REINSURER_SHARE_VALUES["XOL_2"], REINSURER_SHARE_VALUES["XOL_3"]],  # Former reinsurer_share
+    "AVERAGE_LINE_SLAV_CED": [None, None, None],  # Average line
+    "PML_DEFAULT_PCT": [None, None, None],  # PML default percentage
+    "LIMIT_EVENT": [None, None, None],  # Limit per event
+    "NO_OF_REINSTATEMENTS": [None, None, None]  # Number of reinstatements
 }
 
-# Ajouter les sections pour le Canada
-sections_canada_data = {
-    "structure_name": ["XOL_1", "XOL_2", "XOL_3"],
-    "cession_PCT": [np.nan, np.nan, np.nan],
-    "attachment_point_100": [3.0, 11.75, 21.75],           # Priorités en millions
-    "limit_occurrence_100": [8.75, 10.0, 23.25],              # Limites en millions
-    "reinsurer_share": [REINSURER_SHARE_VALUES["XOL_1"], REINSURER_SHARE_VALUES["XOL_2"], REINSURER_SHARE_VALUES["XOL_3"]],
-    "country": ["Canada", "Canada", "Canada"],
-    "region": [np.nan, np.nan, np.nan],
-    "product_type_1": [np.nan, np.nan, np.nan],
-    "product_type_2": [np.nan, np.nan, np.nan],
-    "product_type_3": [np.nan, np.nan, np.nan],
-    "currency": [np.nan, np.nan, np.nan],
-    "line_of_business": [np.nan, np.nan, np.nan],
-    "industry": [np.nan, np.nan, np.nan],
-    "sic_code": [np.nan, np.nan, np.nan],
-    "include": [np.nan, np.nan, np.nan]
-}
+# Ajouter les sections pour le Canada (ajout direct aux listes existantes)
+for key in sections_data.keys():
+    if key == "BUSCL_ID_PRE":
+        sections_data[key].extend([4, 5, 6])  # IDs 4, 5, 6 pour Canada
+    elif key == "INSPER_ID_PRE":
+        sections_data[key].extend([1, 2, 3])  # Même structures XOL_1, XOL_2, XOL_3
+    elif key == "BUSCL_COUNTRY_CD":
+        sections_data[key].extend(["Canada", "Canada", "Canada"])
+    elif key == "ATTACHMENT_POINT_100":
+        sections_data[key].extend([3.0, 11.75, 21.75])
+    elif key == "LIMIT_OCCURRENCE_100":
+        sections_data[key].extend([8.75, 10.0, 23.25])
+    elif key == "CESSION_PCT":
+        sections_data[key].extend([np.nan, np.nan, np.nan])
+    elif key == "SIGNED_SHARE_PCT":
+        sections_data[key].extend([REINSURER_SHARE_VALUES["XOL_1"], REINSURER_SHARE_VALUES["XOL_2"], REINSURER_SHARE_VALUES["XOL_3"]])
+    elif key == "REPROG_ID_PRE":
+        sections_data[key].extend([1, 1, 1])
+    else:
+        sections_data[key].extend([None, None, None])
 
-# Combiner les sections US et Canada
-sections_combined_data = {
-    "structure_name": sections_data["structure_name"] + sections_canada_data["structure_name"],
-    "cession_PCT": sections_data["cession_PCT"] + sections_canada_data["cession_PCT"],
-    "attachment_point_100": sections_data["attachment_point_100"] + sections_canada_data["attachment_point_100"],
-    "limit_occurrence_100": sections_data["limit_occurrence_100"] + sections_canada_data["limit_occurrence_100"],
-    "reinsurer_share": sections_data["reinsurer_share"] + sections_canada_data["reinsurer_share"],
-    "country": sections_data["country"] + sections_canada_data["country"],
-    "region": sections_data["region"] + sections_canada_data["region"],
-    "product_type_1": sections_data["product_type_1"] + sections_canada_data["product_type_1"],
-    "product_type_2": sections_data["product_type_2"] + sections_canada_data["product_type_2"],
-    "product_type_3": sections_data["product_type_3"] + sections_canada_data["product_type_3"],
-    "currency": sections_data["currency"] + sections_canada_data["currency"],
-    "line_of_business": sections_data["line_of_business"] + sections_canada_data["line_of_business"],
-    "industry": sections_data["industry"] + sections_canada_data["industry"],
-    "sic_code": sections_data["sic_code"] + sections_canada_data["sic_code"],
-    "include": sections_data["include"] + sections_canada_data["include"]
-}
+# Use the combined sections_data directly
+sections_combined_data = sections_data
 
 # =============================================================================
 # CRÉATION DES DATAFRAMES

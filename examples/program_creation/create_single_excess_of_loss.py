@@ -59,20 +59,57 @@ structures_data = {
 }
 
 sections_data = {
-    "BUSINESS_TITLE": ["XOL_0.5M_1M"],  # Former structure_name
-    "cession_PCT": [np.nan],
-    "attachment_point_100": [0.5],  # 0.5 million
-    "limit_occurrence_100": [1.0],     # 1.0 million
-    "country": [np.nan],
-    "region": [np.nan],
-    "product_type_1": [np.nan],
-    "product_type_2": [np.nan],
-    "product_type_3": [np.nan],
-    "currency": [np.nan],
-    "line_of_business": [np.nan],
-    "industry": [np.nan],
-    "sic_code": [np.nan],
-    "include": [np.nan]
+    # Keys and References
+    "BUSCL_ID_PRE": [1],  # Auto-increment key
+    "REPROG_ID_PRE": [1],  # Reference to program
+    "CED_ID_PRE": [None],  # Reference to cedant
+    "BUSINESS_ID_PRE": [None],  # Reference to business
+    "INSPER_ID_PRE": [1],  # Reference to structure (former BUSINESS_TITLE reference)
+    
+    # Exclusions and Names
+    "BUSCL_EXCLUDE_CD": [None],  # ENUM: INCLUDE or EXCLUDE
+    "BUSCL_ENTITY_NAME_CED": [None],  # Cedant entity name
+    "POL_RISK_NAME_CED": [None],  # Policy risk name
+    
+    # Geographic and Product Dimensions
+    "BUSCL_COUNTRY_CD": [None],  # Former country
+    "BUSCL_COUNTRY": [None],  # Country name
+    "BUSCL_REGION": [None],  # Former region
+    "BUSCL_CLASS_OF_BUSINESS_1": [None],  # Former product_type_1
+    "BUSCL_CLASS_OF_BUSINESS_2": [None],  # Former product_type_2
+    "BUSCL_CLASS_OF_BUSINESS_3": [None],  # Former product_type_3
+    
+    # Currency and Limits
+    "BUSCL_LIMIT_CURRENCY_CD": [None],  # Former currency
+    "AAD_100": [None],  # Annual Aggregate Deductible
+    "LIMIT_100": [None],  # General limit
+    "LIMIT_FLOATER_100": [None],  # Floater limit
+    "ATTACHMENT_POINT_100": [0.5],  # 0.5 million
+    "OLW_100": [None],  # Original Line Written
+    "LIMIT_OCCURRENCE_100": [1.0],  # 1.0 million
+    "LIMIT_AGG_100": [None],  # Aggregate limit
+    
+    # Cession and Retention
+    "CESSION_PCT": [np.nan],  # XOL n'utilise pas cession_PCT
+    "RETENTION_PCT": [None],  # Retention percentage
+    "SUPI_100": [None],  # SUPI
+    
+    # Premiums
+    "BUSCL_PREMIUM_CURRENCY_CD": [None],  # Premium currency
+    "BUSCL_PREMIUM_GROSS_NET_CD": [None],  # Gross/Net premium
+    "PREMIUM_RATE_PCT": [None],  # Premium rate percentage
+    "PREMIUM_DEPOSIT_100": [None],  # Premium deposit
+    "PREMIUM_MIN_100": [None],  # Minimum premium
+    
+    # Coverage and Participations
+    "BUSCL_LIABILITY_1_LINE_100": [None],  # Liability line 1
+    "MAX_COVER_PCT": [None],  # Maximum coverage percentage
+    "MIN_EXCESS_PCT": [None],  # Minimum excess percentage
+    "SIGNED_SHARE_PCT": [None],  # Former reinsurer_share
+    "AVERAGE_LINE_SLAV_CED": [None],  # Average line
+    "PML_DEFAULT_PCT": [None],  # PML default percentage
+    "LIMIT_EVENT": [None],  # Limit per event
+    "NO_OF_REINSTATEMENTS": [None]  # Number of reinstatements
 }
 
 program_df = pd.DataFrame(program_data)
