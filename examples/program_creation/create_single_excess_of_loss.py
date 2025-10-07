@@ -36,13 +36,30 @@ program_data = {
 }
 
 structures_data = {
-    "structure_name": ["XOL_0.5M_1M"],
-    "contract_order": [1],
-    "type_of_participation": ["excess_of_loss"]
+    "INSPER_ID_PRE": [1],  # Auto-increment key
+    "BUSINESS_ID_PRE": [None],  # Tnumber
+    "TYPE_OF_PARTICIPATION_CD": ["excess_of_loss"],  # Former type_of_participation
+    "TYPE_OF_INSURED_PERIOD_CD": [None],  # TBD
+    "ACTIVE_FLAG_CD": [True],  # Default active
+    "INSPER_EFFECTIVE_DATE": [None],  # Former inception_date
+    "INSPER_EXPIRY_DATE": [None],  # Former expiry_date
+    "REPROG_ID_PRE": [1],  # Reference to program
+    "BUSINESS_TITLE": ["XOL_0.5M_1M"],  # Former structure_name
+    "INSPER_LAYER_NO": [None],  # Layer number
+    "INSPER_MAIN_CURRENCY_CD": [None],  # Main currency
+    "INSPER_UW_YEAR": [None],  # UW Year
+    "INSPER_CONTRACT_ORDER": [1],  # Former contract_order
+    "INSPER_CONTRACT_FORM_CD_SLAV": [None],  # Contract form code
+    "INSPER_CONTRACT_LODRA_CD_SLAV": [None],  # Contract LODRA code
+    "INSPER_CONTRACT_COVERAGE_CD_SLAV": [None],  # Contract coverage code
+    "INSPER_CLAIM_BASIS_CD": [None],  # Former claim_basis
+    "INSPER_LODRA_CD_SLAV": [None],  # LODRA code
+    "INSPER_LOD_TO_RA_DATE_SLAV": [None],  # LOD to RA date
+    "INSPER_COMMENT": [None]  # Comments
 }
 
 sections_data = {
-    "structure_name": ["XOL_0.5M_1M"],
+    "BUSINESS_TITLE": ["XOL_0.5M_1M"],  # Former structure_name
     "cession_PCT": [np.nan],
     "attachment_point_100": [0.5],  # 0.5 million
     "limit_occurrence_100": [1.0],     # 1.0 million

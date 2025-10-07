@@ -64,10 +64,26 @@ program_data = {
 # =============================================================================
 
 structures_data = {
-    "structure_name": ["QS_1"],
-    "contract_order": [0],
-    "type_of_participation": ["quota_share"],
-    "claim_basis": ["risk_attaching"]
+    "INSPER_ID_PRE": [1],  # Auto-increment key
+    "BUSINESS_ID_PRE": [None],  # Tnumber
+    "TYPE_OF_PARTICIPATION_CD": ["quota_share"],  # Former type_of_participation
+    "TYPE_OF_INSURED_PERIOD_CD": [None],  # TBD
+    "ACTIVE_FLAG_CD": [True],  # Default active
+    "INSPER_EFFECTIVE_DATE": [None],  # Former inception_date
+    "INSPER_EXPIRY_DATE": [None],  # Former expiry_date
+    "REPROG_ID_PRE": [1],  # Reference to program
+    "BUSINESS_TITLE": ["QS_1"],  # Former structure_name
+    "INSPER_LAYER_NO": [None],  # Layer number
+    "INSPER_MAIN_CURRENCY_CD": [None],  # Main currency
+    "INSPER_UW_YEAR": [None],  # UW Year
+    "INSPER_CONTRACT_ORDER": [0],  # Former contract_order
+    "INSPER_CONTRACT_FORM_CD_SLAV": [None],  # Contract form code
+    "INSPER_CONTRACT_LODRA_CD_SLAV": [None],  # Contract LODRA code
+    "INSPER_CONTRACT_COVERAGE_CD_SLAV": [None],  # Contract coverage code
+    "INSPER_CLAIM_BASIS_CD": ["risk_attaching"],  # Former claim_basis
+    "INSPER_LODRA_CD_SLAV": [None],  # LODRA code
+    "INSPER_LOD_TO_RA_DATE_SLAV": [None],  # LOD to RA date
+    "INSPER_COMMENT": [None]  # Comments
 }
 
 # =============================================================================
@@ -75,7 +91,7 @@ structures_data = {
 # =============================================================================
 
 sections_data = {
-    "structure_name": ["QS_1", "QS_1"],
+    "BUSINESS_TITLE": ["QS_1", "QS_1"],  # Former structure_name
     "cession_PCT": [CESSION_RATE_VALUES["QS_1"], CESSION_RATE_VALUES["QS_1"]],
     "attachment_point_100": [np.nan, np.nan],  # Quota Share n'utilise pas attachment_point_100
     "limit_occurrence_100": [LIMITS["general"], LIMITS["cyber"]],  # Limites en millions

@@ -95,12 +95,28 @@ program_data = {
 # =============================================================================
 
 structures_data = {
-    "structure_name": ["QS_1", "XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"],
-    "contract_order": [0, 1, 2, 3, 4, 5, 6],
-    "type_of_participation": ["quota_share", "excess_of_loss", "excess_of_loss", "excess_of_loss", 
-                    "excess_of_loss", "excess_of_loss", "excess_of_loss"],
-    "claim_basis": ["risk_attaching", "risk_attaching", "risk_attaching", "risk_attaching", 
-                   "risk_attaching", "risk_attaching", "risk_attaching"]
+    "INSPER_ID_PRE": [1, 2, 3, 4, 5, 6, 7],  # Auto-increment key
+    "BUSINESS_ID_PRE": [None, None, None, None, None, None, None],  # Tnumber
+    "TYPE_OF_PARTICIPATION_CD": ["quota_share", "excess_of_loss", "excess_of_loss", "excess_of_loss", 
+                                  "excess_of_loss", "excess_of_loss", "excess_of_loss"],  # Former type_of_participation
+    "TYPE_OF_INSURED_PERIOD_CD": [None, None, None, None, None, None, None],  # TBD
+    "ACTIVE_FLAG_CD": [True, True, True, True, True, True, True],  # Default active
+    "INSPER_EFFECTIVE_DATE": [None, None, None, None, None, None, None],  # Former inception_date
+    "INSPER_EXPIRY_DATE": [None, None, None, None, None, None, None],  # Former expiry_date
+    "REPROG_ID_PRE": [1, 1, 1, 1, 1, 1, 1],  # Reference to program
+    "BUSINESS_TITLE": ["QS_1", "XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"],  # Former structure_name
+    "INSPER_LAYER_NO": [None, None, None, None, None, None, None],  # Layer number
+    "INSPER_MAIN_CURRENCY_CD": [None, None, None, None, None, None, None],  # Main currency
+    "INSPER_UW_YEAR": [None, None, None, None, None, None, None],  # UW Year
+    "INSPER_CONTRACT_ORDER": [0, 1, 2, 3, 4, 5, 6],  # Former contract_order
+    "INSPER_CONTRACT_FORM_CD_SLAV": [None, None, None, None, None, None, None],  # Contract form code
+    "INSPER_CONTRACT_LODRA_CD_SLAV": [None, None, None, None, None, None, None],  # Contract LODRA code
+    "INSPER_CONTRACT_COVERAGE_CD_SLAV": [None, None, None, None, None, None, None],  # Contract coverage code
+    "INSPER_CLAIM_BASIS_CD": ["risk_attaching", "risk_attaching", "risk_attaching", "risk_attaching", 
+                               "risk_attaching", "risk_attaching", "risk_attaching"],  # Former claim_basis
+    "INSPER_LODRA_CD_SLAV": [None, None, None, None, None, None, None],  # LODRA code
+    "INSPER_LOD_TO_RA_DATE_SLAV": [None, None, None, None, None, None, None],  # LOD to RA date
+    "INSPER_COMMENT": [None, None, None, None, None, None, None]  # Comments
 }
 
 # =============================================================================
@@ -112,7 +128,7 @@ COMMON_CURRENCIES = ["USD", "CAD", "EUR", "AUD"]
 
 # Initialiser les listes pour les sections
 sections_data = {
-    "structure_name": [],
+    "BUSINESS_TITLE": [],  # Former structure_name
     "cession_PCT": [],
     "attachment_point_100": [],
     "limit_occurrence_100": [],
@@ -133,7 +149,7 @@ sections_data = {
 cession_rate_qs = CESSION_RATE_VALUES["QS_1"]
 reinsurer_share_qs = REINSURER_SHARE_VALUES["QS_1"]
 for currency in COMMON_CURRENCIES + ["GBP"]:
-    sections_data["structure_name"].append("QS_1")
+    sections_data["BUSINESS_TITLE"].append("QS_1")
     sections_data["cession_PCT"].append(cession_rate_qs)  # 25% cédé
     sections_data["attachment_point_100"].append(np.nan)  # Quota Share n'utilise pas attachment_point_100
     sections_data["limit_occurrence_100"].append(np.nan)  # Quota Share n'utilise pas limit_occurrence_100
@@ -156,7 +172,7 @@ for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
     for currency in COMMON_CURRENCIES:
-        sections_data["structure_name"].append(layer_name)
+        sections_data["BUSINESS_TITLE"].append(layer_name)
         sections_data["cession_PCT"].append(cession_PCT)  # Utilise la valeur du dictionnaire
         sections_data["attachment_point_100"].append(attachment_point_100)
         sections_data["limit_occurrence_100"].append(limit_occurrence_100)
@@ -178,7 +194,7 @@ for layer_name in ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]:
     cession_PCT = CESSION_RATE_VALUES[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
     
-    sections_data["structure_name"].append(layer_name)
+    sections_data["BUSINESS_TITLE"].append(layer_name)
     sections_data["cession_PCT"].append(cession_PCT)  # Utilise la valeur du dictionnaire
     sections_data["attachment_point_100"].append(attachment_point_100)
     sections_data["limit_occurrence_100"].append(limit_occurrence_100)

@@ -21,24 +21,45 @@ class ProgramLoader:
         else:
             program_name = program_row["program_name"]  # Fallback for old format
         
-        param_columns = ["structure_name", "cession_PCT", "attachment_point_100", "limit_occurrence_100", "reinsurer_share", "claim_basis", "inception_date", "expiry_date"]
+        # Support both old and new data model for param columns
+        param_columns = ["structure_name", "BUSINESS_TITLE", "cession_PCT", "attachment_point_100", "limit_occurrence_100", "reinsurer_share", "claim_basis", "inception_date", "expiry_date"]
         self.dimension_columns = [col for col in sections_df.columns if col not in param_columns]
         
         program_structures = []
         for _, structure_row in structures_df.iterrows():
-            structure_name = structure_row["structure_name"]
+            # Support both old and new data model
+            if "BUSINESS_TITLE" in structure_row:
+                structure_name = structure_row["BUSINESS_TITLE"]
+                contract_order = structure_row["INSPER_CONTRACT_ORDER"]
+                type_of_participation = structure_row["TYPE_OF_PARTICIPATION_CD"]
+                claim_basis = structure_row.get("INSPER_CLAIM_BASIS_CD")
+                inception_date = structure_row.get("INSPER_EFFECTIVE_DATE")
+                expiry_date = structure_row.get("INSPER_EXPIRY_DATE")
+            else:
+                structure_name = structure_row["structure_name"]
+                contract_order = structure_row["contract_order"]
+                type_of_participation = structure_row["type_of_participation"]
+                claim_basis = structure_row.get("claim_basis")
+                inception_date = structure_row.get("inception_date")
+                expiry_date = structure_row.get("expiry_date")
             
-            structure_sections = sections_df[
-                sections_df["structure_name"] == structure_name
-            ].to_dict("records")
+            # Support both old and new data model for sections
+            if "BUSINESS_TITLE" in sections_df.columns:
+                structure_sections = sections_df[
+                    sections_df["BUSINESS_TITLE"] == structure_name
+                ].to_dict("records")
+            else:
+                structure_sections = sections_df[
+                    sections_df["structure_name"] == structure_name
+                ].to_dict("records")
             
             program_structures.append({
                 "structure_name": structure_name,
-                "contract_order": structure_row["contract_order"],
-                "type_of_participation": structure_row["type_of_participation"],
-                "claim_basis": structure_row.get("claim_basis"),
-                "inception_date": structure_row.get("inception_date"),
-                "expiry_date": structure_row.get("expiry_date"),
+                "contract_order": contract_order,
+                "type_of_participation": type_of_participation,
+                "claim_basis": claim_basis,
+                "inception_date": inception_date,
+                "expiry_date": expiry_date,
                 "sections": structure_sections
             })
         

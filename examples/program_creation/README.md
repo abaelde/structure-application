@@ -25,16 +25,30 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 
 ### 2. Feuille "structures" (n lignes)
 **Contraintes :**
-- **structure_name** : VARCHAR(255), nom unique de la structure (obligatoire)
-- **contract_order** : INTEGER, ordre d'application séquentiel (commence à 0)
-- **type_of_participation** : ENUM('quota_share', 'excess_of_loss'), type de produit (obligatoire)
-- **claim_basis** : ENUM('risk_attaching', 'loss_occurring'), base de sinistre (peut être NULL)
-- **inception_date** : DATE, date de début (peut être NULL)
-- **expiry_date** : DATE, date de fin (peut être NULL)
+- **INSPER_ID_PRE** : INTEGER PRIMARY KEY, clé primaire auto-incrémentée (commence à 1)
+- **BUSINESS_ID_PRE** : VARCHAR(255), Tnumber (peut être NULL)
+- **TYPE_OF_PARTICIPATION_CD** : VARCHAR(255), type de participation (quota_share, excess_of_loss) (obligatoire)
+- **TYPE_OF_INSURED_PERIOD_CD** : VARCHAR(255), type de période assurée (peut être NULL)
+- **ACTIVE_FLAG_CD** : BOOLEAN, indicateur d'activation (défaut: TRUE)
+- **INSPER_EFFECTIVE_DATE** : DATE, date effective (peut être NULL)
+- **INSPER_EXPIRY_DATE** : DATE, date d'expiration (peut être NULL)
+- **REPROG_ID_PRE** : INTEGER, référence au programme (obligatoire)
+- **BUSINESS_TITLE** : VARCHAR(255), titre de la structure (obligatoire)
+- **INSPER_LAYER_NO** : INTEGER, numéro de couche (peut être NULL)
+- **INSPER_MAIN_CURRENCY_CD** : VARCHAR(255), devise principale (peut être NULL)
+- **INSPER_UW_YEAR** : INTEGER, année UW (peut être NULL)
+- **INSPER_CONTRACT_ORDER** : INTEGER, ordre d'application séquentiel (commence à 0)
+- **INSPER_CONTRACT_FORM_CD_SLAV** : VARCHAR(255), code forme de contrat (peut être NULL)
+- **INSPER_CONTRACT_LODRA_CD_SLAV** : VARCHAR(255), code LODRA contrat (peut être NULL)
+- **INSPER_CONTRACT_COVERAGE_CD_SLAV** : VARCHAR(255), code couverture contrat (peut être NULL)
+- **INSPER_CLAIM_BASIS_CD** : VARCHAR(255), base de sinistre (risk_attaching, loss_occurring) (peut être NULL)
+- **INSPER_LODRA_CD_SLAV** : VARCHAR(255), code LODRA (peut être NULL)
+- **INSPER_LOD_TO_RA_DATE_SLAV** : DATE, date LOD to RA (peut être NULL)
+- **INSPER_COMMENT** : VARCHAR, commentaires (peut être NULL)
 
 ### 3. Feuille "sections" (n lignes)
 **Contraintes :**
-- **structure_name** : VARCHAR(255), référence vers structures.structure_name (obligatoire)
+- **BUSINESS_TITLE** : VARCHAR(255), référence vers structures.BUSINESS_TITLE (obligatoire)
 - **cession_PCT** : DECIMAL(0-1), pourcentage de cession pour quota_share (peut être NULL pour XOL)
 - **attachment_point_100** : DECIMAL, priorité pour excess_of_loss en millions (peut être NULL pour QS)
 - **limit_occurrence_100** : DECIMAL, limite pour excess_of_loss en millions (peut être NULL pour QS)
@@ -53,9 +67,10 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 ## Contraintes de Cohérence
 
 ### Contraintes Structurelles
-1. **contract_order** : Doit être unique et séquentiel (0, 1, 2, ...)
-2. **structure_name** : Doit être unique dans la feuille structures
-3. **structure_name** dans sections : Doit référencer une structure existante
+1. **INSPER_CONTRACT_ORDER** : Doit être unique et séquentiel (0, 1, 2, ...)
+2. **BUSINESS_TITLE** : Doit être unique dans la feuille structures
+3. **BUSINESS_TITLE** dans sections : Doit référencer une structure existante
+4. **REPROG_ID_PRE** dans structures : Doit référencer le REPROG_ID_PRE du programme parent
 
 ### Contraintes Logiques
 1. **quota_share** : 
@@ -72,7 +87,10 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 
 ## Rétrocompatibilité
 
-Le système supporte l'ancien format avec `program_name` au lieu de `REPROG_TITLE` pour assurer la compatibilité avec les programmes existants.
+Le système supporte l'ancien format pour assurer la compatibilité avec les programmes existants :
+- **Programme** : `program_name` au lieu de `REPROG_TITLE`
+- **Structures** : `structure_name`, `contract_order`, `type_of_participation`, `claim_basis`, `inception_date`, `expiry_date`
+- **Sections** : `structure_name` au lieu de `BUSINESS_TITLE`
 
 ## Scripts de Création
 
