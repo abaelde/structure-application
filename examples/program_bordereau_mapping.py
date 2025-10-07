@@ -36,8 +36,7 @@ BORDEREAUX_DIR = EXAMPLES_DIR / "bordereaux"
 PROGRAM_BORDEREAU_MAPPING = {
     # Aviation Programs
     "aviation_axa_xl_2024": "bordereau_aviation_axa_xl",
-    # TODO: Create bordereau for aviation_old_republic_2024
-    "aviation_old_republic_2024": None,
+    "aviation_old_republic_2024": "bordereau_aviation_old_republic",
     # Casualty Programs
     # TODO: Create bordereau for casualty_aig_2024
     "casualty_aig_2024": None,

@@ -1,0 +1,4 @@
+numero_police,nom_assure,BUSCL_COUNTRY_CD,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1,BUSCL_CLASS_OF_BUSINESS_2,BUSCL_CLASS_OF_BUSINESS_3,BUSCL_LIMIT_CURRENCY_CD,line_of_business,industry,sic_code,include,exposition,inception_date,expiry_date
+AVI-2024-001,Air France-KLM,United States,,,,,USD,Aviation,Transportation,4512,,18,2024-01-01,2024-12-31
+AVI-2024-002,Lufthansa Grou,Canada,,,,,USD,Aviation,Transportation,4512,,22,2024-02-15,2025-02-14
+
