@@ -1,4 +1,4 @@
-numero_police,nom_assure,country,region,product_type_1,product_type_2,product_type_3,currency,line_of_business,industry,sic_code,include,exposition,inception_date,expiry_date
+numero_police,nom_assure,BUSCL_COUNTRY,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1,BUSCL_CLASS_OF_BUSINESS_2,BUSCL_CLASS_OF_BUSINESS_3,BUSCL_LIMIT_CURRENCY_CD,line_of_business,industry,sic_code,include,exposition,inception_date,expiry_date
 POL-2023-001,Company 2023A,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,1.0,2023-01-15,2023-12-31
 POL-2023-002,Company 2023B,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,1.0,2023-06-01,2024-05-31
 POL-2024-001,Company 2024A,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,1.0,2024-02-01,2024-12-31
