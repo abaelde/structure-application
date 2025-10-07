@@ -163,44 +163,41 @@ def apply_program_to_bordereau(bordereau_df: pd.DataFrame, program: Dict[str, An
 
 
 def generate_detailed_report(results_df: pd.DataFrame, output_file: str = "detailed_report.txt"):
-    """
-    Génère un rapport détaillé de l'application des structures
-    """
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write("=" * 80 + "\n")
-        f.write("RAPPORT DÉTAILLÉ D'APPLICATION DES STRUCTURES\n")
+        f.write("DETAILED STRUCTURES APPLICATION REPORT\n")
         f.write("=" * 80 + "\n\n")
         
         for _, policy_result in results_df.iterrows():
-            f.write(f"POLICE: {policy_result['policy_number']}\n")
-            f.write(f"Exposition initiale: {policy_result['exposure']:,.2f}\n")
-            f.write(f"Total cédé (gross): {policy_result['gross_ceded']:,.2f}\n")
-            f.write(f"Total cédé (net): {policy_result['net_ceded']:,.2f}\n")
-            f.write(f"Rétention: {policy_result['retained']:,.2f}\n")
+            f.write(f"POLICY: {policy_result['policy_number']}\n")
+            f.write(f"Initial exposure: {policy_result['exposure']:,.2f}\n")
+            f.write(f"Total ceded (gross): {policy_result['gross_ceded']:,.2f}\n")
+            f.write(f"Total ceded (net): {policy_result['net_ceded']:,.2f}\n")
+            f.write(f"Retention: {policy_result['retained']:,.2f}\n")
             f.write("-" * 60 + "\n")
             
             for i, struct in enumerate(policy_result["structures_detail"], 1):
-                status = "✓ APPLIQUÉE" if struct.get('applied', False) else "✗ NON APPLIQUÉE"
+                status = "✓ APPLIED" if struct.get('applied', False) else "✗ NOT APPLIED"
                 f.write(f"\n{i}. {struct['structure_name']} ({struct['type_of_participation']}) - {status}\n")
-                f.write(f"   Exposition d'entrée: {struct['input_exposure']:,.2f}\n")
+                f.write(f"   Input exposure: {struct['input_exposure']:,.2f}\n")
                 
                 if struct.get('applied', False):
-                    f.write(f"   Cédé (gross): {struct['gross_ceded']:,.2f}\n")
-                    f.write(f"   Cédé (net): {struct['net_ceded']:,.2f}\n")
+                    f.write(f"   Ceded (gross): {struct['gross_ceded']:,.2f}\n")
+                    f.write(f"   Ceded (net): {struct['net_ceded']:,.2f}\n")
                     f.write(f"   Reinsurer Share: {struct['reinsurer_share']:.4f} ({struct['reinsurer_share']*100:.2f}%)\n")
                     
                     if struct.get('section'):
                         section = struct['section']
-                        f.write(f"   Section appliquée:\n")
+                        f.write(f"   Applied section:\n")
                         for key, value in section.items():
                             if pd.notna(value) and key not in ['structure_name']:
                                 f.write(f"     {key}: {value}\n")
                 else:
-                    f.write(f"   Raison: Aucune section correspondante trouvée\n")
+                    f.write(f"   Reason: No matching section found\n")
             
             f.write("\n" + "=" * 80 + "\n\n")
     
-    print(f"✓ Rapport détaillé généré: {output_file}")
+    print(f"✓ Detailed report generated: {output_file}")
 
 
 def apply_treaty_with_claim_basis(policy_data: Dict[str, Any], treaty_manager: TreatyManager, 
