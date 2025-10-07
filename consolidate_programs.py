@@ -65,20 +65,7 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
     results["cedant_program"] = program_name
     results["program_name"] = program["name"]
 
-    # Display summary statistics for this program
-    total_exposure = results["exposure"].sum()
-    total_cession_to_layer_100pct = results["cession_to_layer_100pct"].sum()
-    total_cession_to_reinsurer = results["cession_to_reinsurer"].sum()
-    total_retained = results["retained"].sum()
-
-    print(f"\n   Summary for {program_name}:")
-    print(f"   - Total exposure:              {total_exposure:,.2f}")
-    print(f"   - Total cession at layer (100%): {total_cession_to_layer_100pct:,.2f}")
-    print(f"   - Total cession to reinsurer:  {total_cession_to_reinsurer:,.2f}")
-    print(f"   - Total retained:              {total_retained:,.2f}")
-    print(
-        f"   - Cession rate:                {(total_cession_to_reinsurer / total_exposure * 100) if total_exposure > 0 else 0:.2f}%"
-    )
+    print(f"   ✓ Processed {len(results)} policies")
 
     return program_name, bordereau_with_net, results
 
@@ -145,8 +132,8 @@ def consolidate_all_programs():
             {
                 "exposure": "first",  # Same exposure per policy
                 "cession_to_layer_100pct": "sum",  # Sum across all cedants
-                "cession_to_reinsurer": "sum",  # Sum across all cedants
-                "retained": "first",  # Take the final retained (from last application)
+                "cession_to_reinsurer": "sum",  # Sum across all cedants (= OUR NET EXPOSURE)
+                "retained_by_cedant": "first",  # Take the final retained (from last application)
                 "cedant_program": lambda x: ", ".join(
                     sorted(set(x))
                 ),  # List all cedants
@@ -155,112 +142,48 @@ def consolidate_all_programs():
         .reset_index()
     )
 
-    # Add computed fields
-    policy_aggregation["total_ceded_pct"] = (
-        policy_aggregation["cession_to_reinsurer"] / policy_aggregation["exposure"] * 100
-    )
-    policy_aggregation["retained_pct"] = (
-        policy_aggregation["retained"] / policy_aggregation["exposure"] * 100
-    )
 
-    # Display consolidated results
+    # Display consolidated results - ONLY BY POLICY (meaningful aggregation)
     print("\n" + "=" * 80)
-    print("CONSOLIDATED RESULTS BY POLICY")
+    print("CONSOLIDATED RESULTS BY POLICY (Reinsurer View)")
     print("=" * 80)
+    print(
+        f"\nNote: Aggregation by policy number across {len(ready_pairs)} cedant(s)."
+    )
+    print("Each policy may appear in multiple bordereaux (different cedants).\n")
     print(
         policy_aggregation[
             [
                 "policy_number",
                 "exposure",
-                "cession_to_layer_100pct",
                 "cession_to_reinsurer",
-                "retained",
-                "total_ceded_pct",
+                "retained_by_cedant",
                 "cedant_program",
             ]
         ].to_string(index=False)
     )
-
-    # Overall statistics
-    print("\n\n" + "=" * 80)
-    print("OVERALL CONSOLIDATED STATISTICS")
-    print("=" * 80)
-
-    total_exposure = policy_aggregation["exposure"].sum()
-    total_cession_to_layer_100pct = policy_aggregation["cession_to_layer_100pct"].sum()
-    total_cession_to_reinsurer = policy_aggregation["cession_to_reinsurer"].sum()
-    total_retained = policy_aggregation["retained"].sum()
-
-    print(f"\nTotal across all cedants:")
-    print(f"  Policies:                      {len(policy_aggregation)}")
-    print(f"  Cedants:                       {len(ready_pairs)}")
-    print(f"  Total exposure:                {total_exposure:,.2f}")
-    print(f"  Total cession at layer (100%): {total_cession_to_layer_100pct:,.2f}")
-    print(f"  Total cession to reinsurer:    {total_cession_to_reinsurer:,.2f}")
-    print(f"  Total retained:                {total_retained:,.2f}")
-    print(
-        f"  Overall cession rate:          {(total_cession_to_reinsurer / total_exposure * 100) if total_exposure > 0 else 0:.2f}%"
-    )
-
-    # Statistics by cedant
-    print("\n" + "=" * 80)
-    print("STATISTICS BY CEDANT")
-    print("=" * 80)
-
-    cedant_stats = (
-        consolidated_results.groupby(["cedant_program", "program_name"])
-        .agg(
-            {
-                "policy_number": "count",
-                "exposure": "sum",
-                "cession_to_layer_100pct": "sum",
-                "cession_to_reinsurer": "sum",
-                "retained": "sum",
-            }
-        )
-        .reset_index()
-    )
-
-    cedant_stats["cession_rate_pct"] = (
-        cedant_stats["cession_to_reinsurer"] / cedant_stats["exposure"] * 100
-    )
-    cedant_stats.columns = [
-        "Cedant",
-        "Program Name",
-        "Policies",
-        "Exposure",
-        "Cession at layer (100%)",
-        "Cession to Reinsurer",
-        "Retained",
-        "Cession %",
-    ]
-
-    print("\n" + cedant_stats.to_string(index=False))
+    
+    print(f"\n  Total policies consolidated: {len(policy_aggregation)}")
 
     # Save consolidated results
     output_dir = Path("consolidated_results")
     output_dir.mkdir(exist_ok=True)
 
-    # Save detailed results
-    consolidated_results_file = output_dir / "consolidated_results_detailed.csv"
-    consolidated_results.to_csv(consolidated_results_file, index=False)
-    print(f"\n✅ Detailed results saved to: {consolidated_results_file}")
-
-    # Save policy-level aggregation
+    # Save policy-level aggregation (the only meaningful aggregation)
     policy_aggregation_file = output_dir / "consolidated_results_by_policy.csv"
     policy_aggregation.to_csv(policy_aggregation_file, index=False)
-    print(f"✅ Policy aggregation saved to: {policy_aggregation_file}")
+    print(f"\n✅ Policy aggregation saved to: {policy_aggregation_file}")
 
-    # Save cedant statistics
-    cedant_stats_file = output_dir / "statistics_by_cedant.csv"
-    cedant_stats.to_csv(cedant_stats_file, index=False)
-    print(f"✅ Cedant statistics saved to: {cedant_stats_file}")
+    # Save detailed results for reference
+    consolidated_results_file = output_dir / "consolidated_results_detailed.csv"
+    consolidated_results.to_csv(consolidated_results_file, index=False)
+    print(f"✅ Detailed results saved to: {consolidated_results_file}")
 
     print("\n" + "=" * 80)
     print("CONSOLIDATION COMPLETE")
     print("=" * 80)
 
-    return consolidated_results, policy_aggregation, cedant_stats
+    return consolidated_results, policy_aggregation
 
 
 if __name__ == "__main__":

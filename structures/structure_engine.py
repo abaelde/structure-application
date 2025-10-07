@@ -157,7 +157,7 @@ def apply_program(
         "exposure": exposure,
         "cession_to_layer_100pct": total_cession_to_layer_100pct,
         "cession_to_reinsurer": total_cession_to_reinsurer,
-        "retained": exposure - total_cession_to_layer_100pct,
+        "retained_by_cedant": exposure - total_cession_to_layer_100pct,
         "policy_inception_date": policy_data.get("inception_date"),
         "policy_expiry_date": policy_data.get("expiry_date"),
         "structures_detail": structures_detail,
@@ -199,10 +199,10 @@ def write_detailed_results(
     for _, policy_result in results_df.iterrows():
         file.write(f"\n{'─' * 80}\n")
         file.write(f"POLICY: {policy_result['policy_number']}\n")
-        file.write(f"Initial exposure: {policy_result['exposure']:,.2f}\n")
-        file.write(f"Total cession at layer (100%): {policy_result['cession_to_layer_100pct']:,.2f}\n")
-        file.write(f"Total cession to reinsurer: {policy_result['cession_to_reinsurer']:,.2f}\n")
-        file.write(f"Retention: {policy_result['retained']:,.2f}\n")
+        file.write(f"Cedant gross exposure: {policy_result['exposure']:,.2f}\n")
+        file.write(f"Cession at layer (100%): {policy_result['cession_to_layer_100pct']:,.2f}\n")
+        file.write(f"Reinsurer net exposure: {policy_result['cession_to_reinsurer']:,.2f}\n")
+        file.write(f"Retained by cedant: {policy_result['retained_by_cedant']:,.2f}\n")
         file.write(f"\nStructures applied:\n")
 
         for i, struct in enumerate(policy_result["structures_detail"], 1):
@@ -332,7 +332,7 @@ def apply_treaty_with_claim_basis(
             "policy_number": policy_data.get("numero_police"),
             "exposure": policy_data.get("exposition", 0),
             "cession_to_reinsurer": 0.0,
-            "retained": policy_data.get("exposition", 0),
+            "retained_by_cedant": policy_data.get("exposition", 0),
             "policy_inception_date": policy_inception_date,
             "policy_expiry_date": policy_expiry_date,
             "selected_treaty_year": None,

@@ -53,7 +53,7 @@ def main():
     print("RESULTS SUMMARY")
     print("=" * 80)
     print(
-        results[["policy_number", "exposure", "cession_to_layer_100pct", "cession_to_reinsurer", "retained"]]
+        results[["policy_number", "exposure", "cession_to_layer_100pct", "cession_to_reinsurer", "retained_by_cedant"]]
     )
 
     print("\n")
