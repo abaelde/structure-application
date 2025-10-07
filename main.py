@@ -39,13 +39,12 @@ def main():
         print(f"Error loading files: {e}")
         sys.exit(1)
     
-    # Afficher la configuration du programme de manière user-friendly
     display_program(program)
     
     bordereau_with_net, results = apply_program_to_bordereau(bordereau_df, program)
     
     print("\n\n" + "=" * 80)
-    print("BORDEREAU AVEC NET EXPOSURE")
+    print("BORDEREAU WITH NET EXPOSURE")
     print("=" * 80)
     print(bordereau_with_net)
     
@@ -60,34 +59,50 @@ def main():
     
     for _, row in results.iterrows():
         print(f"\n{'─' * 80}")
-        print(f"Policy: {row['policy_number']}")
-        print(f"Total exposure: {row['exposure']:,.2f}")
+        print(f"POLICY: {row['policy_number']}")
+        print(f"Initial exposure: {row['exposure']:,.2f}")
         print(f"Total ceded (gross): {row['gross_ceded']:,.2f}")
         print(f"Total ceded (net): {row['net_ceded']:,.2f}")
-        print(f"Total retained: {row['retained']:,.2f}")
+        print(f"Retention: {row['retained']:,.2f}")
         print(f"\nStructures applied:")
         
-        for struct in row["structures_detail"]:
-            status = "✓ Applied" if struct.get('applied', False) else "✗ Not applied"
-            print(f"\n  {status} - {struct['structure_name']} ({struct['type_of_participation']})")
-            print(f"    Input exposure: {struct['input_exposure']:,.2f}")
+        for i, struct in enumerate(row["structures_detail"], 1):
+            status = "✓ APPLIED" if struct.get('applied', False) else "✗ NOT APPLIED"
+            print(f"\n{i}. {struct['structure_name']} ({struct['type_of_participation']}) - {status}")
+            print(f"   Input exposure: {struct['input_exposure']:,.2f}")
             if struct.get('applied', False):
-                print(f"    Ceded (gross): {struct['gross_ceded']:,.2f}")
-                print(f"    Ceded (net): {struct['net_ceded']:,.2f}")
-                print(f"    Reinsurer Share: {struct['reinsurer_share']:.4f} ({struct['reinsurer_share']*100:.2f}%)")
-            
-            if struct.get('section'):
-                section = struct['section']
-                conditions_str = format_section_conditions(section, dimension_columns)
-                print(f"    Section matched: {conditions_str}")
+                print(f"   Ceded (gross): {struct['gross_ceded']:,.2f}")
+                print(f"   Ceded (net): {struct['net_ceded']:,.2f}")
+                print(f"   Reinsurer Share: {struct['reinsurer_share']:.4f} ({struct['reinsurer_share']*100:.2f}%)")
+                
+                if struct.get('section'):
+                    section = struct['section']
+                    print(f"   Applied section parameters:")
+                    
+                    if struct['type_of_participation'] == 'quota_share':
+                        if pd.notna(section.get('CESSION_PCT')):
+                            print(f"      CESSION_PCT: {section['CESSION_PCT']}")
+                        if pd.notna(section.get('LIMIT_OCCURRENCE_100')):
+                            print(f"      LIMIT_OCCURRENCE_100: {section['LIMIT_OCCURRENCE_100']}")
+                    elif struct['type_of_participation'] == 'excess_of_loss':
+                        if pd.notna(section.get('ATTACHMENT_POINT_100')):
+                            print(f"      ATTACHMENT_POINT_100: {section['ATTACHMENT_POINT_100']}")
+                        if pd.notna(section.get('LIMIT_OCCURRENCE_100')):
+                            print(f"      LIMIT_OCCURRENCE_100: {section['LIMIT_OCCURRENCE_100']}")
+                    
+                    if pd.notna(section.get('SIGNED_SHARE_PCT')):
+                        print(f"      SIGNED_SHARE_PCT: {section['SIGNED_SHARE_PCT']}")
+                    
+                    conditions_str = format_section_conditions(section, dimension_columns)
+                    print(f"   Matching conditions: {conditions_str}")
+            else:
+                print(f"   Reason: No matching section found")
     
-    # Générer le rapport détaillé
     generate_detailed_report(results, "detailed_report.txt")
     
-    # Sauvegarder le bordereau avec Net Exposure
     output_bordereau_file = "bordereau_with_net_exposure.csv"
     bordereau_with_net.to_csv(output_bordereau_file, index=False)
-    print(f"✓ Bordereau avec Net Exposure sauvegardé: {output_bordereau_file}")
+    print(f"\n✓ Bordereau with Net Exposure saved: {output_bordereau_file}")
 
 
 if __name__ == "__main__":
