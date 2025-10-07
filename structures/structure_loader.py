@@ -15,21 +15,11 @@ class ProgramLoader:
         sections_df = pd.read_excel(self.excel_path, sheet_name="sections")
         
         program_row = program_df.iloc[0]
-        # Support both old and new data model
-        if "REPROG_TITLE" in program_row:
-            program_name = program_row["REPROG_TITLE"]
-        else:
-            program_name = program_row["program_name"]  # Fallback for old format
+        program_name = program_row["REPROG_TITLE"]
         
-        # Support old, intermediate, and new data models for param columns
-        # Old: structure_name, cession_PCT, etc.
-        # Intermediate: BUSINESS_TITLE (name-based reference)
-        # New: INSPER_ID_PRE (ID-based reference) + all BUSCL_* fields
         param_columns = [
-            "structure_name", "BUSINESS_TITLE", "INSPER_ID_PRE",
-            "cession_PCT", "CESSION_PCT", "attachment_point_100", "ATTACHMENT_POINT_100",
-            "limit_occurrence_100", "LIMIT_OCCURRENCE_100", "reinsurer_share", "SIGNED_SHARE_PCT",
-            "claim_basis", "inception_date", "expiry_date",
+            "BUSINESS_TITLE", "INSPER_ID_PRE",
+            "CESSION_PCT", "ATTACHMENT_POINT_100", "LIMIT_OCCURRENCE_100", "SIGNED_SHARE_PCT",
             "BUSCL_ID_PRE", "REPROG_ID_PRE", "CED_ID_PRE", "BUSINESS_ID_PRE",
             "BUSCL_EXCLUDE_CD", "BUSCL_ENTITY_NAME_CED", "POL_RISK_NAME_CED",
             "BUSCL_COUNTRY_CD", "BUSCL_COUNTRY", "BUSCL_REGION",
@@ -45,39 +35,21 @@ class ProgramLoader:
         
         program_structures = []
         for _, structure_row in structures_df.iterrows():
-            # Support both old and new data model
-            if "BUSINESS_TITLE" in structure_row:
-                structure_name = structure_row["BUSINESS_TITLE"]
-                structure_id = structure_row.get("INSPER_ID_PRE")
-                contract_order = structure_row["INSPER_CONTRACT_ORDER"]
-                type_of_participation = structure_row["TYPE_OF_PARTICIPATION_CD"]
-                claim_basis = structure_row.get("INSPER_CLAIM_BASIS_CD")
-                inception_date = structure_row.get("INSPER_EFFECTIVE_DATE")
-                expiry_date = structure_row.get("INSPER_EXPIRY_DATE")
-            else:
-                structure_name = structure_row["structure_name"]
-                structure_id = None
-                contract_order = structure_row["contract_order"]
-                type_of_participation = structure_row["type_of_participation"]
-                claim_basis = structure_row.get("claim_basis")
-                inception_date = structure_row.get("inception_date")
-                expiry_date = structure_row.get("expiry_date")
+            structure_name = structure_row["BUSINESS_TITLE"]
+            structure_id = structure_row.get("INSPER_ID_PRE")
+            contract_order = structure_row["INSPER_CONTRACT_ORDER"]
+            type_of_participation = structure_row["TYPE_OF_PARTICIPATION_CD"]
+            claim_basis = structure_row.get("INSPER_CLAIM_BASIS_CD")
+            inception_date = structure_row.get("INSPER_EFFECTIVE_DATE")
+            expiry_date = structure_row.get("INSPER_EXPIRY_DATE")
             
-            # Support old, intermediate, and new data models for sections
-            if "INSPER_ID_PRE" in sections_df.columns and structure_id is not None:
-                # New model: use INSPER_ID_PRE (ID-based reference)
+            if structure_id is not None:
                 structure_sections = sections_df[
                     sections_df["INSPER_ID_PRE"] == structure_id
                 ].to_dict("records")
-            elif "BUSINESS_TITLE" in sections_df.columns:
-                # Intermediate model: use BUSINESS_TITLE (name-based reference)
+            else:
                 structure_sections = sections_df[
                     sections_df["BUSINESS_TITLE"] == structure_name
-                ].to_dict("records")
-            else:
-                # Old model: use structure_name
-                structure_sections = sections_df[
-                    sections_df["structure_name"] == structure_name
                 ].to_dict("records")
             
             program_structures.append({

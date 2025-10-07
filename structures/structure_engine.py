@@ -34,23 +34,23 @@ def match_section(policy_data: Dict[str, Any], sections: list, dimension_columns
 
 def apply_section(exposure: float, section: Dict[str, Any], type_of_participation: str) -> Dict[str, float]:
     if type_of_participation == "quota_share":
-        cession_PCT = section["cession_PCT"]
+        cession_PCT = section["CESSION_PCT"]
         if pd.isna(cession_PCT):
-            raise ValueError("cession_PCT is required for quota_share")
+            raise ValueError("CESSION_PCT is required for quota_share")
         gross_ceded = quota_share(exposure, cession_PCT)
     
     elif type_of_participation == "excess_of_loss":
-        attachment_point_100 = section["attachment_point_100"]
-        limit_occurrence_100 = section["limit_occurrence_100"]
+        attachment_point_100 = section["ATTACHMENT_POINT_100"]
+        limit_occurrence_100 = section["LIMIT_OCCURRENCE_100"]
         if pd.isna(attachment_point_100) or pd.isna(limit_occurrence_100):
-            raise ValueError("attachment_point_100 and limit_occurrence_100 are required for excess_of_loss")
+            raise ValueError("ATTACHMENT_POINT_100 and LIMIT_OCCURRENCE_100 are required for excess_of_loss")
         gross_ceded = excess_of_loss(exposure, attachment_point_100, limit_occurrence_100)
     
     else:
         raise ValueError(f"Unknown product type: {type_of_participation}")
     
-    # Appliquer le reinsurer_share pour obtenir la net exposure
-    reinsurer_share = section.get("reinsurer_share", 1.0)
+    # Appliquer le SIGNED_SHARE_PCT pour obtenir la net exposure
+    reinsurer_share = section.get("SIGNED_SHARE_PCT", 1.0)
     if pd.isna(reinsurer_share):
         reinsurer_share = 1.0
     
