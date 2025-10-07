@@ -53,7 +53,6 @@ PARAMETERS = [
     "INSPER_MAIN_CURRENCY_CD",
 ]
 
-# Dimensions - must be explicitly specified
 # Any column not in KEYS_AND_RELATIONS, PARAMETERS, or DIMENSIONS is ignored
 DIMENSIONS = [
     "BUSCL_EXCLUDE_CD",

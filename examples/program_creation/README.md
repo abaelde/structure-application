@@ -149,6 +149,70 @@ Utilisez les scripts Python existants comme modèles :
 - `create_single_quota_share.py` - Exemple simple
 - `create_aviation_AXA_XL.py` - Exemple complexe multi-devises
 - `regenerate_all_programs.py` - Régénération en lot
+- `combine_all_programs.py` - Combinaison de tous les programmes en une base de données simulée
+- `excel_utils.py` - Utilitaires pour la manipulation des fichiers Excel
+
+### Auto-ajustement des colonnes Excel
+
+Tous les scripts de création utilisent la fonction `auto_adjust_column_widths()` du module `excel_utils` pour ajuster automatiquement la largeur des colonnes en fonction de leur contenu. Cette fonctionnalité améliore considérablement la lisibilité des fichiers générés.
+
+**Utilisation dans vos propres scripts :**
+
+```python
+from excel_utils import auto_adjust_column_widths
+
+# Après avoir créé votre fichier Excel
+with pd.ExcelWriter("mon_programme.xlsx", engine="openpyxl") as writer:
+    program_df.to_excel(writer, sheet_name="program", index=False)
+    structures_df.to_excel(writer, sheet_name="structures", index=False)
+    sections_df.to_excel(writer, sheet_name="sections", index=False)
+
+# Auto-ajuster les largeurs de colonnes
+auto_adjust_column_widths("mon_programme.xlsx")
+```
+
+**Paramètres optionnels :**
+- `min_width` : Largeur minimale des colonnes (défaut : 10)
+- `max_width` : Largeur maximale des colonnes (défaut : 50)
+
+```python
+auto_adjust_column_widths("mon_programme.xlsx", min_width=12, max_width=60)
+```
+
+### Base de Données Simulée : all_programs.xlsx
+
+Le script `combine_all_programs.py` crée un fichier `all_programs.xlsx` qui simule une base de données avec plusieurs programmes :
+
+```bash
+uv run python examples/program_creation/combine_all_programs.py
+```
+
+**Fonctionnement :**
+1. Lit tous les fichiers `.xlsx` du dossier `examples/programs/`
+2. Renumérote les IDs de manière séquentielle (simule l'auto-increment d'une base de données) :
+   - `REPROG_ID_PRE` : 1, 2, 3, ... (un par programme)
+   - `INSPER_ID_PRE` : continue séquentiellement à travers tous les programmes
+   - `BUSCL_ID_PRE` : continue séquentiellement à travers toutes les sections
+3. Maintient les relations entre tables (foreign keys)
+4. Concatène toutes les données en un seul fichier
+
+**Exemple de renumération :**
+```
+Programme 1 (aviation_axa_xl_2024.xlsx) :
+  - REPROG_ID_PRE : 1
+  - INSPER_ID_PRE : 1-7
+  - BUSCL_ID_PRE : 1-35
+
+Programme 2 (aviation_old_republic_2024.xlsx) :
+  - REPROG_ID_PRE : 2
+  - INSPER_ID_PRE : 8-10 (continue après 7)
+  - BUSCL_ID_PRE : 36-41 (continue après 35)
+```
+
+**Usage :**
+Le fichier `all_programs.xlsx` est une **base de données simulée** qui représente ce que vous auriez dans une vraie base de données avec plusieurs programmes. 
+
+⚠️ **Note** : Ce fichier n'est pas destiné à être utilisé directement avec le `ProgramLoader` actuel, qui est conçu pour charger un seul programme à la fois. Il sert de référence pour visualiser comment plusieurs programmes coexisteraient dans une base de données réelle.
 
 ## Validation
 

@@ -59,16 +59,46 @@ def regenerate_all_programs():
         except Exception as e:
             print(f"   ❌ Exception lors de l'exécution de {script_name}: {e}")
 
-    print(f"\n✅ Régénération terminée !")
+    print(f"\n✅ Régénération des programmes individuels terminée !")
+
+    # Combiner tous les programmes en une base de données simulée
+    print("\n" + "=" * 60)
+    print("🔗 Combinaison de tous les programmes en all_programs.xlsx...")
+    print("=" * 60)
+
+    combine_script = os.path.join(script_dir, "combine_all_programs.py")
+    if os.path.exists(combine_script):
+        try:
+            result = subprocess.run(
+                [sys.executable, combine_script],
+                capture_output=True,
+                text=True,
+                cwd=os.path.dirname(__file__),
+            )
+
+            if result.returncode == 0:
+                print("   ✅ all_programs.xlsx créé avec succès")
+            else:
+                print(f"   ❌ Erreur lors de la combinaison:")
+                print(f"   {result.stderr}")
+
+        except Exception as e:
+            print(f"   ❌ Exception lors de la combinaison: {e}")
+    else:
+        print("   ⚠️  Script combine_all_programs.py non trouvé")
+
     print(f"\n📋 Programmes disponibles dans examples/programs/:")
 
     # Lister les fichiers Excel créés
     programs_dir = os.path.join(os.path.dirname(__file__), "..", "programs")
     if os.path.exists(programs_dir):
-        excel_files = glob.glob(os.path.join(programs_dir, "*.xlsx"))
+        excel_files = sorted(glob.glob(os.path.join(programs_dir, "*.xlsx")))
         for excel_file in excel_files:
             filename = os.path.basename(excel_file)
-            print(f"   📊 {filename}")
+            if filename == "all_programs.xlsx":
+                print(f"   🗄️  {filename} (base de données simulée)")
+            else:
+                print(f"   📊 {filename}")
 
 
 if __name__ == "__main__":

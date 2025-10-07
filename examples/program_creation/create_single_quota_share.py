@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 import pandas as pd
 import numpy as np
+from excel_utils import auto_adjust_column_widths
 
 # =============================================================================
 # PROGRAMME: SINGLE QUOTA SHARE
@@ -115,10 +116,15 @@ sections_df = pd.DataFrame(sections_data)
 output_dir = "../programs"
 os.makedirs(output_dir, exist_ok=True)
 
-with pd.ExcelWriter("../programs/single_quota_share.xlsx", engine="openpyxl") as writer:
+output_file = "../programs/single_quota_share.xlsx"
+
+with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
     program_df.to_excel(writer, sheet_name="program", index=False)
     structures_df.to_excel(writer, sheet_name="structures", index=False)
     sections_df.to_excel(writer, sheet_name="sections", index=False)
+
+# Auto-adjust column widths for better readability
+auto_adjust_column_widths(output_file)
 
 print("✓ Programme Single Quota share créé: examples/programs/single_quota_share.xlsx")
 

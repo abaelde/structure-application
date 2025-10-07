@@ -15,6 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 import pandas as pd
 import numpy as np
+from excel_utils import auto_adjust_column_widths
 
 print("Création du programme Casualty AIG 2024...")
 
@@ -170,6 +171,9 @@ with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
     program_df.to_excel(writer, sheet_name="program", index=False)
     structures_df.to_excel(writer, sheet_name="structures", index=False)
     sections_df.to_excel(writer, sheet_name="sections", index=False)
+
+# Auto-adjust column widths for better readability
+auto_adjust_column_widths(output_file)
 
 print(f"✓ Programme créé: {output_file}")
 
