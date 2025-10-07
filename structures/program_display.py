@@ -8,11 +8,6 @@ def display_program(program: Dict[str, Any]) -> None:
     print("=" * 80)
     
     print(f"Program name: {program['name']}")
-    print(f"Execution mode: ORDER-BASED")
-    print("   → Structures are applied according to their defined order")
-    print("   → Quota Share reduces the remaining exposure")
-    print("   → Excess of Loss applies on remaining exposure (stacked)")
-    
     print(f"Number of structures: {len(program['structures'])}")
     print(f"Matching dimensions: {len(program['dimension_columns'])}")
     
@@ -84,7 +79,7 @@ def _display_section(section: Dict[str, Any], dimension_columns: list, type_of_p
 
 
 def display_program_summary(program: Dict[str, Any]) -> None:
-    print(f"{program['name']} (order-based) - {len(program['structures'])} structures")
+    print(f"{program['name']} - {len(program['structures'])} structures")
     
     for structure in program['structures']:
         type_of_participation = structure['type_of_participation']

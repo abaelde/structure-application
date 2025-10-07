@@ -89,7 +89,6 @@ class TreatyManager:
         for year, treaty in self.treaties.items():
             info["treaties_details"][year] = {
                 "name": treaty["name"],
-                "mode": treaty["mode"],
                 "structures_count": len(treaty["structures"]),
                 "structures": [
                     {
