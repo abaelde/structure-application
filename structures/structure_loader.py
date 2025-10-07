@@ -4,8 +4,8 @@ from typing import Dict, Any, List
 
 # Keys and relations - necessary for program structure
 KEYS_AND_RELATIONS = [
-    "BUSCL_ID_PRE",
     "REPROG_ID_PRE",
+    "BUSCL_ID_PRE",
     "CED_ID_PRE",
     "BUSINESS_ID_PRE",
     "INSPER_ID_PRE",
@@ -52,12 +52,19 @@ PARAMETERS = [
     "INSPER_MAIN_CURRENCY_CD",
 ]
 
-# Dimensions are automatically derived: any column not in KEYS_AND_RELATIONS or PARAMETERS
-# Expected dimensions:
-#   - BUSCL_COUNTRY_CD, BUSCL_REGION
-#   - BUSCL_CLASS_OF_BUSINESS_1, BUSCL_CLASS_OF_BUSINESS_2, BUSCL_CLASS_OF_BUSINESS_3
-#   - BUSCL_LIMIT_CURRENCY_CD
-#   - BUSCL_EXCLUDE_CD, BUSCL_ENTITY_NAME_CED, POL_RISK_NAME_CED
+# Dimensions - must be explicitly specified
+# Any column not in KEYS_AND_RELATIONS, PARAMETERS, or DIMENSIONS is ignored
+DIMENSIONS = [
+    "BUSCL_COUNTRY_CD",
+    "BUSCL_REGION",
+    "BUSCL_CLASS_OF_BUSINESS_1",
+    "BUSCL_CLASS_OF_BUSINESS_2",
+    "BUSCL_CLASS_OF_BUSINESS_3",
+    "BUSCL_LIMIT_CURRENCY_CD",
+    "BUSCL_EXCLUDE_CD",
+    "BUSCL_ENTITY_NAME_CED",
+    "POL_RISK_NAME_CED",
+]
 
 
 class ProgramLoader:
@@ -75,10 +82,9 @@ class ProgramLoader:
         program_row = program_df.iloc[0]
         program_name = program_row["REPROG_TITLE"]
 
-        # Dimensions are derived: all columns except keys/relations and parameters
-        non_dimension_columns = KEYS_AND_RELATIONS + PARAMETERS
+        # Use only explicitly defined dimensions that exist in sections_df
         self.dimension_columns = [
-            col for col in sections_df.columns if col not in non_dimension_columns
+            col for col in DIMENSIONS if col in sections_df.columns
         ]
 
         program_structures = []
