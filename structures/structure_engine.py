@@ -162,40 +162,75 @@ def apply_program_to_bordereau(bordereau_df: pd.DataFrame, program: Dict[str, An
     return bordereau_with_net, results_df
 
 
-def generate_detailed_report(results_df: pd.DataFrame, output_file: str = "detailed_report.txt"):
+def write_detailed_results(results_df: pd.DataFrame, dimension_columns: list, file=None):
+    import sys
+    if file is None:
+        file = sys.stdout
+    
+    file.write("=" * 80 + "\n")
+    file.write("DETAILED BREAKDOWN BY POLICY\n")
+    file.write("=" * 80 + "\n")
+    
+    for _, policy_result in results_df.iterrows():
+        file.write(f"\n{'─' * 80}\n")
+        file.write(f"POLICY: {policy_result['policy_number']}\n")
+        file.write(f"Initial exposure: {policy_result['exposure']:,.2f}\n")
+        file.write(f"Total ceded (gross): {policy_result['gross_ceded']:,.2f}\n")
+        file.write(f"Total ceded (net): {policy_result['net_ceded']:,.2f}\n")
+        file.write(f"Retention: {policy_result['retained']:,.2f}\n")
+        file.write(f"\nStructures applied:\n")
+        
+        for i, struct in enumerate(policy_result["structures_detail"], 1):
+            status = "✓ APPLIED" if struct.get('applied', False) else "✗ NOT APPLIED"
+            file.write(f"\n{i}. {struct['structure_name']} ({struct['type_of_participation']}) - {status}\n")
+            file.write(f"   Input exposure: {struct['input_exposure']:,.2f}\n")
+            
+            if struct.get('applied', False):
+                file.write(f"   Ceded (gross): {struct['gross_ceded']:,.2f}\n")
+                file.write(f"   Ceded (net): {struct['net_ceded']:,.2f}\n")
+                file.write(f"   Reinsurer Share: {struct['reinsurer_share']:.4f} ({struct['reinsurer_share']*100:.2f}%)\n")
+                
+                if struct.get('section'):
+                    section = struct['section']
+                    file.write(f"   Applied section parameters:\n")
+                    
+                    if struct['type_of_participation'] == 'quota_share':
+                        if pd.notna(section.get('CESSION_PCT')):
+                            file.write(f"      CESSION_PCT: {section['CESSION_PCT']}\n")
+                        if pd.notna(section.get('LIMIT_OCCURRENCE_100')):
+                            file.write(f"      LIMIT_OCCURRENCE_100: {section['LIMIT_OCCURRENCE_100']}\n")
+                    elif struct['type_of_participation'] == 'excess_of_loss':
+                        if pd.notna(section.get('ATTACHMENT_POINT_100')):
+                            file.write(f"      ATTACHMENT_POINT_100: {section['ATTACHMENT_POINT_100']}\n")
+                        if pd.notna(section.get('LIMIT_OCCURRENCE_100')):
+                            file.write(f"      LIMIT_OCCURRENCE_100: {section['LIMIT_OCCURRENCE_100']}\n")
+                    
+                    if pd.notna(section.get('SIGNED_SHARE_PCT')):
+                        file.write(f"      SIGNED_SHARE_PCT: {section['SIGNED_SHARE_PCT']}\n")
+                    
+                    conditions = []
+                    for dim in dimension_columns:
+                        value = section.get(dim)
+                        if pd.notna(value):
+                            conditions.append(f"{dim}={value}")
+                    conditions_str = ", ".join(conditions) if conditions else "All (no conditions)"
+                    file.write(f"   Matching conditions: {conditions_str}\n")
+            else:
+                file.write(f"   Reason: No matching section found\n")
+
+
+def generate_detailed_report(results_df: pd.DataFrame, program: Dict[str, Any], output_file: str = "detailed_report.txt"):
+    from .program_display import write_program_config
+    
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write("=" * 80 + "\n")
         f.write("DETAILED STRUCTURES APPLICATION REPORT\n")
         f.write("=" * 80 + "\n\n")
         
-        for _, policy_result in results_df.iterrows():
-            f.write(f"POLICY: {policy_result['policy_number']}\n")
-            f.write(f"Initial exposure: {policy_result['exposure']:,.2f}\n")
-            f.write(f"Total ceded (gross): {policy_result['gross_ceded']:,.2f}\n")
-            f.write(f"Total ceded (net): {policy_result['net_ceded']:,.2f}\n")
-            f.write(f"Retention: {policy_result['retained']:,.2f}\n")
-            f.write("-" * 60 + "\n")
-            
-            for i, struct in enumerate(policy_result["structures_detail"], 1):
-                status = "✓ APPLIED" if struct.get('applied', False) else "✗ NOT APPLIED"
-                f.write(f"\n{i}. {struct['structure_name']} ({struct['type_of_participation']}) - {status}\n")
-                f.write(f"   Input exposure: {struct['input_exposure']:,.2f}\n")
-                
-                if struct.get('applied', False):
-                    f.write(f"   Ceded (gross): {struct['gross_ceded']:,.2f}\n")
-                    f.write(f"   Ceded (net): {struct['net_ceded']:,.2f}\n")
-                    f.write(f"   Reinsurer Share: {struct['reinsurer_share']:.4f} ({struct['reinsurer_share']*100:.2f}%)\n")
-                    
-                    if struct.get('section'):
-                        section = struct['section']
-                        f.write(f"   Applied section:\n")
-                        for key, value in section.items():
-                            if pd.notna(value) and key not in ['structure_name']:
-                                f.write(f"     {key}: {value}\n")
-                else:
-                    f.write(f"   Reason: No matching section found\n")
-            
-            f.write("\n" + "=" * 80 + "\n\n")
+        write_program_config(program, file=f)
+        f.write("\n\n")
+        
+        write_detailed_results(results_df, program['dimension_columns'], file=f)
     
     print(f"✓ Detailed report generated: {output_file}")
 
