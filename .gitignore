@@ -214,3 +214,6 @@ __marimo__/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Consolidated results output
+consolidated_results/

@@ -174,16 +174,37 @@ Définit les sections de chaque structure avec paramètres et conditions.
 
 ## Utilisation
 
+### Cas d'usage simple : Un programme, un bordereau
+
 ```bash
 # Installer les dépendances
 uv sync
 
-# Créer/recréer le fichier de configuration (optionnel)
-uv run python examples/scripts/create_program_config.py
-
-# Exécuter le système
-uv run python main.py
+# Appliquer un programme à un bordereau
+uv run python main.py --program examples/programs/aviation_axa_xl_2024.xlsx --bordereau examples/bordereaux/bordereau_aviation_axa_xl.csv
 ```
+
+### Cas d'usage avancé : Consolidation multi-cédantes
+
+Le cas d'usage réel consiste à appliquer plusieurs programmes (un par cédante) à leurs bordereaux respectifs, puis à agréger les résultats par police sous-jacente.
+
+```bash
+# Vérifier le statut des mappings programme-bordereau
+uv run python examples/program_bordereau_mapping.py
+
+# Consolider tous les programmes prêts
+uv run python consolidate_programs.py
+```
+
+**Ce que fait le script de consolidation :**
+1. Charge tous les programmes avec leur bordereau mappé
+2. Applique chaque programme à son bordereau
+3. Agrège les résultats par police sous-jacente
+4. Génère des statistiques consolidées par cédante
+5. Exporte 3 fichiers CSV dans `consolidated_results/` :
+   - `consolidated_results_detailed.csv` : Résultats détaillés par police et cédante
+   - `consolidated_results_by_policy.csv` : Agrégation par police
+   - `statistics_by_cedant.csv` : Statistiques par cédante
 
 ## Développement
 
