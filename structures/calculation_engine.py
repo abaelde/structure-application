@@ -87,7 +87,6 @@ def apply_program(
     total_cession_to_layer_100pct = 0.0
     total_cession_to_reinsurer = 0.0
     structures_detail = []
-    remaining_exposure = exposure
 
     for structure in sorted_structures:
         matched_section = match_section(
@@ -102,7 +101,7 @@ def apply_program(
                     "claim_basis": structure.get("claim_basis"),
                     "inception_date": structure.get("inception_date"),
                     "expiry_date": structure.get("expiry_date"),
-                    "input_exposure": remaining_exposure,
+                    "input_exposure": exposure,
                     "cession_to_layer_100pct": 0.0,
                     "cession_to_reinsurer": 0.0,
                     "reinsurer_share": 0.0,
@@ -112,14 +111,7 @@ def apply_program(
             )
             continue
 
-        if structure["type_of_participation"] == PRODUCT.QUOTA_SHARE:
-            input_exposure = remaining_exposure
-        elif structure["type_of_participation"] == PRODUCT.EXCESS_OF_LOSS:
-            input_exposure = remaining_exposure
-        else:
-            raise ValueError(
-                f"Unknown product type: {structure['type_of_participation']}"
-            )
+        input_exposure = exposure
 
         ceded_result = apply_section(
             input_exposure, matched_section, structure["type_of_participation"]
@@ -143,9 +135,6 @@ def apply_program(
 
         total_cession_to_layer_100pct += ceded_result["cession_to_layer_100pct"]
         total_cession_to_reinsurer += ceded_result["cession_to_reinsurer"]
-
-        if structure["type_of_participation"] == PRODUCT.QUOTA_SHARE:
-            remaining_exposure -= ceded_result["cession_to_layer_100pct"]
 
     return {
         "insured_name": policy_data.get(FIELDS["INSURED_NAME"]),
