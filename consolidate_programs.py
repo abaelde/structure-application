@@ -19,7 +19,7 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from structures.structure_loader import ProgramLoader
-from structures.structure_engine import apply_program_to_bordereau
+from structures.calculation_engine import apply_program_to_bordereau
 from structures.program_display import display_program
 from structures.constants import FIELDS
 from examples.program_bordereau_mapping import (

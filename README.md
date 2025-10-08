@@ -119,7 +119,7 @@ Le système implémente la logique **claim_basis** qui détermine quel traité a
 
 ```python
 from structures.treaty_manager import TreatyManager
-from structures.structure_engine import apply_treaty_manager_to_bordereau
+from structures.calculation_engine import apply_treaty_manager_to_bordereau
 
 # Charger les traités multi-années
 treaty_paths = {

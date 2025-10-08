@@ -1,7 +1,11 @@
 from .structure_loader import ProgramLoader
-from .structure_engine import (
+from .calculation_engine import (
     apply_program,
     apply_program_to_bordereau,
+    apply_treaty_with_claim_basis,
+    apply_treaty_manager_to_bordereau,
+)
+from .report_display import (
     generate_detailed_report,
     write_detailed_results,
 )
@@ -11,6 +15,8 @@ __all__ = [
     "ProgramLoader",
     "apply_program",
     "apply_program_to_bordereau",
+    "apply_treaty_with_claim_basis",
+    "apply_treaty_manager_to_bordereau",
     "generate_detailed_report",
     "write_detailed_results",
     "BordereauLoader",
