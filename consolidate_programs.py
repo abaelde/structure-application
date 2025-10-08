@@ -30,7 +30,6 @@ def generate_consolidated_report(
     report_path: Path,
     all_program_info: list,
     ready_pairs: list,
-    consolidated_results: pd.DataFrame,
     insured_aggregation: pd.DataFrame,
 ):
     with open(report_path, "w", encoding="utf-8") as f:
