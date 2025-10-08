@@ -3,6 +3,8 @@ import argparse
 import sys
 from structures import (
     ProgramLoader,
+    load_bordereau,
+    BordereauValidationError,
     apply_program_to_bordereau,
     generate_detailed_report,
     write_detailed_results,
@@ -26,8 +28,9 @@ def main():
     print("=== Reinsurance Program Application System ===\n")
 
     try:
-        bordereau_df = pd.read_csv(args.bordereau)
-        print("Bordereau loaded:")
+        print("Loading and validating bordereau...")
+        bordereau_df = load_bordereau(args.bordereau)
+        print(f"✓ Bordereau loaded successfully: {len(bordereau_df)} policies")
         print(bordereau_df)
         print()
 
@@ -35,6 +38,9 @@ def main():
         program = loader.get_program()
     except FileNotFoundError as e:
         print(f"Error: File not found - {e}")
+        sys.exit(1)
+    except BordereauValidationError as e:
+        print(f"Error: Bordereau validation failed:\n{e}")
         sys.exit(1)
     except Exception as e:
         print(f"Error loading files: {e}")

@@ -5,6 +5,7 @@ from .structure_engine import (
     generate_detailed_report,
     write_detailed_results,
 )
+from .bordereau_loader import BordereauLoader, load_bordereau, BordereauValidationError
 
 __all__ = [
     "ProgramLoader",
@@ -12,4 +13,7 @@ __all__ = [
     "apply_program_to_bordereau",
     "generate_detailed_report",
     "write_detailed_results",
+    "BordereauLoader",
+    "load_bordereau",
+    "BordereauValidationError",
 ]
