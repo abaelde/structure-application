@@ -84,9 +84,9 @@ sections_data = {
     # Currency and Limits
     "BUSCL_LIMIT_CURRENCY_CD": [None],  # Former currency
     "AAD_100": [None],  # Annual Aggregate Deductible
-    "LIMIT_100": [1.0],  # Limit in millions
+    "LIMIT_100": [1_000_000],  # Limit in absolute value
     "LIMIT_FLOATER_100": [None],  # Floater limit
-    "ATTACHMENT_POINT_100": [0.5],  # 0.5 million
+    "ATTACHMENT_POINT_100": [500_000],  # 0.5 million
     "OLW_100": [None],  # Original Line Written
     "LIMIT_OCCURRENCE_100": [None],  # Deprecated - use LIMIT_100 instead
     "LIMIT_AGG_100": [None],  # Aggregate limit

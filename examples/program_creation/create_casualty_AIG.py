@@ -37,10 +37,10 @@ REINSURER_SHARE_VALUES = {
     "QS_1": 0.10,  # 10% du réassureur (à déterminer)
 }
 
-# Limites pour chaque section (en millions)
+# Limites pour chaque section (valeurs absolues)
 LIMITS = {
-    "general": 25.0,  # Limite section générale: 25M
-    "cyber": 10.0,  # Limite section cyber: 10M
+    "general": 25_000_000,  # Limite section générale: 25M
+    "cyber": 10_000_000,  # Limite section cyber: 10M
 }
 
 # =============================================================================
@@ -227,7 +227,7 @@ Sections:
 
 print("✓ Le programme Casualty AIG 2024 est prêt !")
 print("\nNotes importantes:")
-print("- Les montants sont exprimés en millions")
+print("- Les montants sont exprimés en valeurs absolues")
 print("- Le reinsurer share de 10% reste à déterminer selon les négociations")
 print(
     "- La fonction quota_share a été modifiée pour supporter les limites optionnelles"

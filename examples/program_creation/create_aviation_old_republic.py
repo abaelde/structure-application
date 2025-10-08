@@ -113,9 +113,9 @@ sections_data = {
     # Currency and Limits
     "BUSCL_LIMIT_CURRENCY_CD": [None, None, None],  # Former currency
     "AAD_100": [None, None, None],  # Annual Aggregate Deductible
-    "LIMIT_100": [8.75, 10.0, 23.25],  # Limits in millions
+    "LIMIT_100": [8_750_000, 10_000_000, 23_250_000],  # Limits in absolute values
     "LIMIT_FLOATER_100": [None, None, None],  # Floater limit
-    "ATTACHMENT_POINT_100": [3.0, 11.75, 21.75],  # Priorités en millions
+    "ATTACHMENT_POINT_100": [3_000_000, 11_750_000, 21_750_000],  # Priorités en valeurs absolues
     "OLW_100": [None, None, None],  # Original Line Written
     "LIMIT_OCCURRENCE_100": [None, None, None],  # Deprecated - use LIMIT_100 instead
     "LIMIT_AGG_100": [None, None, None],  # Aggregate limit
@@ -153,9 +153,9 @@ for key in sections_data.keys():
     elif key == "BUSCL_COUNTRY_CD":
         sections_data[key].extend(["Canada", "Canada", "Canada"])
     elif key == "ATTACHMENT_POINT_100":
-        sections_data[key].extend([3.0, 11.75, 21.75])
+        sections_data[key].extend([3_000_000, 11_750_000, 21_750_000])
     elif key == "LIMIT_100":
-        sections_data[key].extend([8.75, 10.0, 23.25])
+        sections_data[key].extend([8_750_000, 10_000_000, 23_250_000])
     elif key == "LIMIT_OCCURRENCE_100":
         sections_data[key].extend([None, None, None])
     elif key == "CESSION_PCT":

@@ -71,28 +71,28 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 
 #### Devise et Limites
 - **BUSCL_LIMIT_CURRENCY_CD** : VARCHAR(255), devise des limites (peut être NULL = pas de condition)
-- **AAD_100** : DECIMAL, AAD (Annual Aggregate Deductible) en millions (peut être NULL)
-- **LIMIT_100** : DECIMAL, limite générale en millions (peut être NULL)
-- **LIMIT_FLOATER_100** : DECIMAL, limite flottante en millions (peut être NULL)
-- **ATTACHMENT_POINT_100** : DECIMAL, point d'attachement en millions (peut être NULL pour QS)
-- **OLW_100** : DECIMAL, OLW (Original Line Written) en millions (peut être NULL)
-- **LIMIT_OCCURRENCE_100** : DECIMAL, limite par occurrence en millions (peut être NULL pour QS)
-- **LIMIT_AGG_100** : DECIMAL, limite agrégée en millions (peut être NULL)
+- **AAD_100** : DECIMAL, AAD (Annual Aggregate Deductible) en valeur absolue (peut être NULL)
+- **LIMIT_100** : DECIMAL, limite générale en valeur absolue (peut être NULL)
+- **LIMIT_FLOATER_100** : DECIMAL, limite flottante en valeur absolue (peut être NULL)
+- **ATTACHMENT_POINT_100** : DECIMAL, point d'attachement en valeur absolue (peut être NULL pour QS)
+- **OLW_100** : DECIMAL, OLW (Original Line Written) en valeur absolue (peut être NULL)
+- **LIMIT_OCCURRENCE_100** : DECIMAL, limite par occurrence en valeur absolue (peut être NULL pour QS)
+- **LIMIT_AGG_100** : DECIMAL, limite agrégée en valeur absolue (peut être NULL)
 
 #### Cession et Rétention
 - **CESSION_PCT** : DECIMAL(0-1), pourcentage de cession (obligatoire pour QS, NULL pour XOL)
 - **RETENTION_PCT** : DECIMAL(0-1), pourcentage de rétention (peut être NULL)
-- **SUPI_100** : DECIMAL, SUPI en millions (peut être NULL)
+- **SUPI_100** : DECIMAL, SUPI en valeur absolue (peut être NULL)
 
 #### Primes
 - **BUSCL_PREMIUM_CURRENCY_CD** : VARCHAR(255), devise des primes (peut être NULL)
 - **BUSCL_PREMIUM_GROSS_NET_CD** : VARCHAR(255), prime brute/nette (peut être NULL)
 - **PREMIUM_RATE_PCT** : DECIMAL(0-1), taux de prime en % (peut être NULL)
-- **PREMIUM_DEPOSIT_100** : DECIMAL, dépôt de prime en millions (peut être NULL)
-- **PREMIUM_MIN_100** : DECIMAL, prime minimum en millions (peut être NULL)
+- **PREMIUM_DEPOSIT_100** : DECIMAL, dépôt de prime en valeur absolue (peut être NULL)
+- **PREMIUM_MIN_100** : DECIMAL, prime minimum en valeur absolue (peut être NULL)
 
 #### Couverture et Participations
-- **BUSCL_LIABILITY_1_LINE_100** : DECIMAL, ligne de responsabilité 1 en millions (peut être NULL)
+- **BUSCL_LIABILITY_1_LINE_100** : DECIMAL, ligne de responsabilité 1 en valeur absolue (peut être NULL)
 - **MAX_COVER_PCT** : DECIMAL(0-1), couverture maximum en % (peut être NULL)
 - **MIN_EXCESS_PCT** : DECIMAL(0-1), excédent minimum en % (peut être NULL)
 - **SIGNED_SHARE_PCT** : DECIMAL(0-1), part signée en % (peut être NULL)
@@ -120,7 +120,7 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
    - `CESSION_PCT` doit être NULL
 
 ### Contraintes de Valeurs
-1. **Montants** : Tous les montants sont exprimés en millions
+1. **Montants** : Tous les montants sont exprimés en valeur absolue (unités réelles)
 2. **Pourcentages** : Tous les pourcentages sont exprimés en décimal (0.25 = 25%)
 3. **Dates** : Format ISO (YYYY-MM-DD) ou NULL
 
@@ -220,4 +220,4 @@ Avant de créer un nouveau programme, vérifiez :
 1. Toutes les contraintes structurelles sont respectées
 2. Les types de participation correspondent aux paramètres
 3. Les références entre feuilles sont cohérentes
-4. Les valeurs numériques sont dans les bonnes unités (millions)
+4. Les valeurs numériques sont dans les bonnes unités (valeur absolue)

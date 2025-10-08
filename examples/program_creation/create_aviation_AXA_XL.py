@@ -30,26 +30,26 @@ print("Création du programme Aviation Complex Multi-Currency...")
 # CONFIGURATION DES VALEURS - À MODIFIER SELON VOS BESOINS
 # =============================================================================
 
-# Définir les valeurs pour chaque layer (en millions)
+# Définir les valeurs pour chaque layer (valeurs absolues)
 # Format: (limit_100, attachment_point_100)
 # Les valeurs sont identiques pour USD, CAD, EUR, AUD
 LAYER_VALUES_COMMON = {
-    "XOL_1": (65, 0),
-    "XOL_2": (50, 65),
-    "XOL_3": (100, 115),
-    "XOL_4": (100, 215),
-    "XOL_5": (100, 315),
-    "XOL_6": (150, 415),
+    "XOL_1": (65_000_000, 0),
+    "XOL_2": (50_000_000, 65_000_000),
+    "XOL_3": (100_000_000, 115_000_000),
+    "XOL_4": (100_000_000, 215_000_000),
+    "XOL_5": (100_000_000, 315_000_000),
+    "XOL_6": (150_000_000, 415_000_000),
 }
 
-# Valeurs spécifiques pour GBP (en millions)
+# Valeurs spécifiques pour GBP (valeurs absolues)
 LAYER_VALUES_GBP = {
-    "XOL_1": (43.333333, 23.333333),
-    "XOL_2": (33.333333, 43.333333),
-    "XOL_3": (66.666666, 76.666666),
-    "XOL_4": (66.666666, 143.333333),
-    "XOL_5": (66.666666, 210),
-    "XOL_6": (100, 276.666666),
+    "XOL_1": (43_333_333, 23_333_333),
+    "XOL_2": (33_333_333, 43_333_333),
+    "XOL_3": (66_666_666, 76_666_666),
+    "XOL_4": (66_666_666, 143_333_333),
+    "XOL_5": (66_666_666, 210_000_000),
+    "XOL_6": (100_000_000, 276_666_666),
 }
 
 # Cession Rate Values (pourcentage cédé au réassureur)
@@ -316,7 +316,7 @@ def add_section(
 # Créer les sections pour la structure Quota Share (QS_1) - toutes devises
 cession_rate_qs = CESSION_RATE_VALUES["QS_1"]
 reinsurer_share_qs = REINSURER_SHARE_VALUES["QS_1"]
-qs_limit = 575  # Limite du quota share en millions
+qs_limit = 575_000_000  # Limite du quota share en valeur absolue
 for currency in COMMON_CURRENCIES + ["GBP"]:
     add_section(
         insper_id=1,  # QS_1 has INSPER_ID_PRE = 1
