@@ -54,7 +54,7 @@ LAYER_VALUES_GBP = {
 
 # Cession Rate Values (pourcentage cédé au réassureur)
 CESSION_RATE_VALUES = {
-    "QS_1": 0.15,
+    "QS_1": 0.25,
     "XOL_1": np.nan,  # XOL n'utilise pas cession_PCT
     "XOL_2": np.nan,
     "XOL_3": np.nan,
