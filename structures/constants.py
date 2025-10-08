@@ -5,7 +5,7 @@ from types import SimpleNamespace
 # Bordereau / colonnes d'entrée (CSV)
 # ──────────────────────────────────────────────────────────────────────────────
 FIELDS = {
-    "POLICY_NUMBER": "numero_police",
+    "POLICY_NUMBER": "policy_id",
     "INSURED_NAME": "insured_name",
     "COUNTRY": "BUSCL_COUNTRY_CD",
     "REGION": "BUSCL_REGION",

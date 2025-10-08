@@ -48,7 +48,7 @@ structure-application/
 
 ### 1. Bordereau
 Fichier CSV contenant les polices d'assurance avec :
-- `numero_police` : Identifiant unique
+- `policy_id` : Identifiant unique
 - `insured_name` : Nom de l'assuré
 - `country` : Pays
 - `region` : Région (APAC, EMEA, Americas, etc.)

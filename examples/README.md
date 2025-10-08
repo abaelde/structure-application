@@ -109,7 +109,7 @@ uv run python examples/scripts/create_program_config.py
 ## Structure des bordereaux CSV
 
 Colonnes requises :
-- `numero_police` : Numéro de la police
+- `policy_id` : Numéro de la police
 - `exposition` : Montant de l'exposition
 - `inception_date` : Date de souscription
 - `expiry_date` : Date d'expiration

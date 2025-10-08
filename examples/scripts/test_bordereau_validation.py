@@ -27,7 +27,7 @@ def test_bordereau_with_warnings():
     print("=" * 80)
     
     test_data = pd.DataFrame({
-        "numero_police": ["POL-001", "POL-002", "POL-001"],
+        "policy_id": ["POL-001", "POL-002", "POL-001"],
         "insured_name": ["Company A", "Company B", "Company C"],
         "BUSCL_COUNTRY_CD": ["US", "FR", "UK"],
         "BUSCL_REGION": ["NA", "EU", "EU"],
@@ -59,7 +59,7 @@ def test_invalid_bordereau():
     print("=" * 80)
     
     test_data = pd.DataFrame({
-        "numero_police": ["POL-001", "POL-002", "POL-003"],
+        "policy_id": ["POL-001", "POL-002", "POL-003"],
         "insured_name": ["Company A", "Company B", "Company C"],
         "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
         "exposition": ["abc", -50, 25.5],
@@ -85,7 +85,7 @@ def test_missing_required_columns():
     print("=" * 80)
     
     test_data = pd.DataFrame({
-        "numero_police": ["POL-001", "POL-002"],
+        "policy_id": ["POL-001", "POL-002"],
         "insured_name": ["Company A", "Company B"],
         "inception_date": ["2024-01-01", "2024-02-01"],
         "expiry_date": ["2024-12-31", "2025-01-31"],
@@ -109,7 +109,7 @@ def test_unknown_columns():
     print("=" * 80)
     
     test_data = pd.DataFrame({
-        "numero_police": ["POL-001", "POL-002"],
+        "policy_id": ["POL-001", "POL-002"],
         "insured_name": ["Company A", "Company B"],
         "exposition": [25.5, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01"],
@@ -136,7 +136,7 @@ def test_only_required_columns():
     print("=" * 80)
     
     test_data = pd.DataFrame({
-        "numero_police": ["POL-001", "POL-002"],
+        "policy_id": ["POL-001", "POL-002"],
         "insured_name": ["Company A", "Company B"],
         "exposition": [25.5, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01"],
@@ -160,7 +160,7 @@ def test_partial_dimensions():
     print("=" * 80)
     
     test_data = pd.DataFrame({
-        "numero_police": ["POL-001", "POL-002"],
+        "policy_id": ["POL-001", "POL-002"],
         "insured_name": ["Company A", "Company B"],
         "exposition": [25.5, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01"],
@@ -186,7 +186,7 @@ def test_null_dimension_columns():
     print("=" * 80)
     
     test_data = pd.DataFrame({
-        "numero_police": ["POL-001", "POL-002"],
+        "policy_id": ["POL-001", "POL-002"],
         "insured_name": ["Company A", "Company B"],
         "BUSCL_COUNTRY_CD": [None, "US"],
         "BUSCL_LIMIT_CURRENCY_CD": [None, "USD"],
@@ -213,7 +213,7 @@ def test_null_required_columns():
     print("=" * 80)
     
     test_data = pd.DataFrame({
-        "numero_police": ["POL-001", None, "POL-003"],
+        "policy_id": ["POL-001", None, "POL-003"],
         "insured_name": [None, "Company B", "Company C"],
         "exposition": [25.5, None, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01", None],
