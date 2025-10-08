@@ -139,15 +139,6 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
     # Add cedant identifier to results
     results["cedant_program"] = program_name
     results["program_name"] = program["name"]
-    
-    # Add insured_name from bordereau to results
-    if FIELDS["INSURED_NAME"] in bordereau_df.columns and FIELDS["POLICY_NUMBER"] in bordereau_df.columns:
-        results = results.merge(
-            bordereau_df[[FIELDS["POLICY_NUMBER"], FIELDS["INSURED_NAME"]]],
-            left_on='policy_number',
-            right_on=FIELDS["POLICY_NUMBER"],
-            how='left'
-        ).drop(columns=[FIELDS["POLICY_NUMBER"]], errors='ignore')
 
     print(f"   ✓ Processed {len(results)} policies")
 

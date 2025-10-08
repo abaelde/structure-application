@@ -80,7 +80,7 @@ def apply_program_to_mapped_bordereau(program_name: str):
     print("RESULTS SUMMARY")
     print("=" * 80)
     print(
-        results[["policy_number", "exposure", "cession_to_layer_100pct", "cession_to_reinsurer", "retained_by_cedant"]]
+        results[["insured_name", "exposure", "cession_to_layer_100pct", "cession_to_reinsurer", "retained_by_cedant"]]
     )
     print()
 

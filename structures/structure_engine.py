@@ -158,7 +158,7 @@ def apply_program(
         # car ils sont empilés et calculent sur la même base
 
     return {
-        "policy_number": policy_data.get(FIELDS["POLICY_NUMBER"]),
+        "insured_name": policy_data.get(FIELDS["INSURED_NAME"]),
         "exposure": exposure,
         "cession_to_layer_100pct": total_cession_to_layer_100pct,
         "cession_to_reinsurer": total_cession_to_reinsurer,
@@ -203,7 +203,7 @@ def write_detailed_results(
 
     for _, policy_result in results_df.iterrows():
         file.write(f"\n{'─' * 80}\n")
-        file.write(f"POLICY: {policy_result['policy_number']}\n")
+        file.write(f"INSURED: {policy_result['insured_name']}\n")
         file.write(f"Cedant gross exposure: {policy_result['exposure']:,.2f}\n")
         file.write(f"Cession at layer (100%): {policy_result['cession_to_layer_100pct']:,.2f}\n")
         file.write(f"Reinsurer net exposure: {policy_result['cession_to_reinsurer']:,.2f}\n")
@@ -330,7 +330,7 @@ def apply_treaty_with_claim_basis(
     if selected_treaty is None:
         # Aucun traité trouvé - pas de couverture
         return {
-            "policy_number": policy_data.get(FIELDS["POLICY_NUMBER"]),
+            "insured_name": policy_data.get(FIELDS["INSURED_NAME"]),
             "exposure": policy_data.get(FIELDS["EXPOSURE"], 0),
             "cession_to_reinsurer": 0.0,
             "retained_by_cedant": policy_data.get(FIELDS["EXPOSURE"], 0),

@@ -44,19 +44,19 @@ def example_claim_basis_usage():
     print("-" * 60)
 
     for _, result in results.iterrows():
-        print(f"\n📋 Police: {result['policy_number']}")
+        print(f"\n📋 Assuré: {result['insured_name']}")
         print(f"   Souscription: {result['policy_inception_date']}")
         print(f"   Traité appliqué: {result['selected_treaty_year']}")
         print(f"   Claim basis: {result['claim_basis']}")
         print(f"   Statut: {result['coverage_status']}")
         print(f"   Exposition: {result['exposure']:,.0f}")
-        print(f"   Cédé: {result['ceded']:,.0f}")
-        print(f"   Retenu: {result['retained']:,.0f}")
+        print(f"   Cédé: {result['cession_to_reinsurer']:,.0f}")
+        print(f"   Retenu: {result['retained_by_cedant']:,.0f}")
 
         if result["structures_detail"]:
             print(f"   Structures appliquées:")
             for detail in result["structures_detail"]:
-                print(f"     - {detail['structure_name']}: {detail['ceded']:,.0f}")
+                print(f"     - {detail['structure_name']}: {detail['cession_to_reinsurer']:,.0f}")
 
     # 5. Résumé par traité
     print(f"\n5. Résumé par traité appliqué:")
@@ -66,10 +66,10 @@ def example_claim_basis_usage():
         results.groupby("selected_treaty_year")
         .agg(
             {
-                "policy_number": "count",
+                "insured_name": "count",
                 "exposure": "sum",
-                "ceded": "sum",
-                "retained": "sum",
+                "cession_to_reinsurer": "sum",
+                "retained_by_cedant": "sum",
             }
         )
         .round(0)
@@ -92,7 +92,7 @@ def example_claim_basis_usage():
         print(f"   ⚠️  {len(no_coverage)} polices sans couverture:")
         for _, policy in no_coverage.iterrows():
             print(
-                f"     - {policy['policy_number']} (souscription: {policy['policy_inception_date']})"
+                f"     - {policy['insured_name']} (souscription: {policy['policy_inception_date']})"
             )
     else:
         print("   ✅ Toutes les polices sont couvertes")

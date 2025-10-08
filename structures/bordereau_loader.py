@@ -10,7 +10,6 @@ class BordereauValidationError(Exception):
 
 class BordereauLoader:
     REQUIRED_COLUMNS = [
-        FIELDS["POLICY_NUMBER"],
         FIELDS["INSURED_NAME"],
         FIELDS["EXPOSURE"],
         FIELDS["INCEPTION_DATE"],
@@ -30,7 +29,11 @@ class BordereauLoader:
         FIELDS["INCLUDE"],
     ]
     
-    ALLOWED_COLUMNS = REQUIRED_COLUMNS + DIMENSION_COLUMNS
+    OPTIONAL_COLUMNS = [
+        FIELDS["POLICY_NUMBER"],
+    ]
+    
+    ALLOWED_COLUMNS = REQUIRED_COLUMNS + DIMENSION_COLUMNS + OPTIONAL_COLUMNS
 
     NUMERIC_COLUMNS = [FIELDS["EXPOSURE"]]
 
@@ -237,16 +240,6 @@ class BordereauLoader:
                 f"Invalid policy periods (expiry <= inception): {', '.join(invalid_periods[:5])}"
                 + (f" and {len(invalid_periods) - 5} more" if len(invalid_periods) > 5 else "")
             )
-
-        policy_col = FIELDS["POLICY_NUMBER"]
-        if policy_col in self.df.columns:
-            duplicates = self.df[policy_col].duplicated()
-            if duplicates.any():
-                duplicate_policies = self.df[duplicates][policy_col].tolist()
-                self.validation_warnings.append(
-                    f"Duplicate policy numbers found: {', '.join(map(str, duplicate_policies[:5]))}"
-                    + (f" and {len(duplicate_policies) - 5} more" if len(duplicate_policies) > 5 else "")
-                )
 
 
 def load_bordereau(source: Union[str, Path], source_type: str = "auto") -> pd.DataFrame:
