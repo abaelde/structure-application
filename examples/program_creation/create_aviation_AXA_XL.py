@@ -28,7 +28,7 @@ print("Création du programme Aviation Complex Multi-Currency...")
 # =============================================================================
 
 # Définir les valeurs pour chaque layer (en millions)
-# Format: (attachment_point_100, limit_occurrence_100)
+# Format: (limit_occurrence_100, attachment_point_100)
 # Les valeurs sont identiques pour USD, CAD, EUR, AUD
 LAYER_VALUES_COMMON = {
     "XOL_1": (65, 0),
@@ -430,8 +430,8 @@ print(
 )
 
 for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], 1):
-    priority_common, limit_common = LAYER_VALUES_COMMON[layer]
-    priority_gbp, limit_gbp = LAYER_VALUES_GBP[layer]
+    limit_common, priority_common = LAYER_VALUES_COMMON[layer]
+    limit_gbp, priority_gbp = LAYER_VALUES_GBP[layer]
     print(f"{i}. {layer} (contract_order={i}):")
     print(f"   - USD/CAD/EUR/AUD: {limit_common}M xs {priority_common}M")
     print(f"   - GBP: {limit_gbp}M xs {priority_gbp}M")
