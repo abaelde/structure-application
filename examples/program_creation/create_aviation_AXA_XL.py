@@ -34,7 +34,7 @@ print("Création du programme Aviation Complex Multi-Currency...")
 # Format: (limit_100, attachment_point_100)
 # Les valeurs sont identiques pour USD, CAD, EUR, AUD
 LAYER_VALUES_COMMON = {
-    "XOL_1": (65_000_000, 0),
+    "XOL_1": (65_000_000, 35_000_000),
     "XOL_2": (50_000_000, 65_000_000),
     "XOL_3": (100_000_000, 115_000_000),
     "XOL_4": (100_000_000, 215_000_000),
