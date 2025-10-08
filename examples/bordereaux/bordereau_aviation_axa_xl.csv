@@ -1,4 +1,4 @@
-numero_police,nom_assure,BUSCL_COUNTRY,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1,BUSCL_CLASS_OF_BUSINESS_2,BUSCL_CLASS_OF_BUSINESS_3,BUSCL_LIMIT_CURRENCY_CD,line_of_business,industry,sic_code,include,exposition,inception_date,expiry_date
+numero_police,nom_assure,BUSCL_COUNTRY_CD,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1,BUSCL_CLASS_OF_BUSINESS_2,BUSCL_CLASS_OF_BUSINESS_3,BUSCL_LIMIT_CURRENCY_CD,line_of_business,industry,sic_code,include,exposition,inception_date,expiry_date
 AVI-2024-001,Air France-KLM,,,,,,USD,Aviation,Transportation,4512,,25,2024-01-01,2024-12-31
 AVI-2024-002,Lufthansa Group,,,,,,USD,Aviation,Transportation,4512,,30,2024-02-15,2025-02-14
 AVI-2024-003,Emirates Airlines,United Arab Emirates,Middle East,,,,,Aviation,Transportation,4512,,45,2024-03-01,2025-02-28
