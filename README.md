@@ -49,7 +49,7 @@ structure-application/
 ### 1. Bordereau
 Fichier CSV contenant les polices d'assurance avec :
 - `numero_police` : Identifiant unique
-- `nom_assure` : Nom de l'assuré
+- `insured_name` : Nom de l'assuré
 - `country` : Pays
 - `region` : Région (APAC, EMEA, Americas, etc.)
 - `product_type_1`, `product_type_2`, `product_type_3` : Hiérarchie des types de produits

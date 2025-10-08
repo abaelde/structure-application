@@ -6,7 +6,7 @@ from types import SimpleNamespace
 # ──────────────────────────────────────────────────────────────────────────────
 FIELDS = {
     "POLICY_NUMBER": "numero_police",
-    "INSURED_NAME": "nom_assure",
+    "INSURED_NAME": "insured_name",
     "COUNTRY": "BUSCL_COUNTRY_CD",
     "REGION": "BUSCL_REGION",
     "CLASS_1": "BUSCL_CLASS_OF_BUSINESS_1",

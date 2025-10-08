@@ -66,7 +66,7 @@ def generate_consolidated_report(
         f.write("CONSOLIDATED RESULTS BY INSURED (REINSURER VIEW)\n")
         f.write("=" * 80 + "\n\n")
         f.write(
-            f"Aggregation by insured name (nom_assure) across {len(ready_pairs)} cedant(s).\n\n"
+            f"Aggregation by insured name (insured_name) across {len(ready_pairs)} cedant(s).\n\n"
         )
 
         # Write insured aggregation table
@@ -140,7 +140,7 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
     results["cedant_program"] = program_name
     results["program_name"] = program["name"]
     
-    # Add nom_assure from bordereau to results
+    # Add insured_name from bordereau to results
     if FIELDS["INSURED_NAME"] in bordereau_df.columns and FIELDS["POLICY_NUMBER"] in bordereau_df.columns:
         results = results.merge(
             bordereau_df[[FIELDS["POLICY_NUMBER"], FIELDS["INSURED_NAME"]]],
@@ -220,7 +220,7 @@ def consolidate_all_programs():
     consolidated_results = pd.concat(all_results, ignore_index=True)
 
     # Aggregate by insured name (underlying insured entity)
-    print("Aggregating by insured name (nom_assure)...")
+    print("Aggregating by insured name (insured_name)...")
 
     # Group by insured name to get consolidated view
     insured_aggregation = (
@@ -245,7 +245,7 @@ def consolidate_all_programs():
     print("CONSOLIDATED RESULTS BY INSURED (Reinsurer View)")
     print("=" * 80)
     print(
-        f"\nAggregation by insured name (nom_assure) across {len(ready_pairs)} cedant(s).\n"
+        f"\nAggregation by insured name (insured_name) across {len(ready_pairs)} cedant(s).\n"
     )
     print(
         insured_aggregation[

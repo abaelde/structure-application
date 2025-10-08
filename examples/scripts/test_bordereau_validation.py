@@ -28,7 +28,7 @@ def test_bordereau_with_warnings():
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", "POL-002", "POL-001"],
-        "nom_assure": ["Company A", "Company B", "Company C"],
+        "insured_name": ["Company A", "Company B", "Company C"],
         "BUSCL_COUNTRY_CD": ["US", "FR", "UK"],
         "BUSCL_REGION": ["NA", "EU", "EU"],
         "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
@@ -60,7 +60,7 @@ def test_invalid_bordereau():
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", "POL-002", "POL-003"],
-        "nom_assure": ["Company A", "Company B", "Company C"],
+        "insured_name": ["Company A", "Company B", "Company C"],
         "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
         "exposition": ["abc", -50, 25.5],
         "inception_date": ["2024-01-01", "invalid-date", "2024-03-01"],
@@ -86,7 +86,7 @@ def test_missing_required_columns():
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", "POL-002"],
-        "nom_assure": ["Company A", "Company B"],
+        "insured_name": ["Company A", "Company B"],
         "inception_date": ["2024-01-01", "2024-02-01"],
         "expiry_date": ["2024-12-31", "2025-01-31"],
     })
@@ -110,7 +110,7 @@ def test_unknown_columns():
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", "POL-002"],
-        "nom_assure": ["Company A", "Company B"],
+        "insured_name": ["Company A", "Company B"],
         "exposition": [25.5, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01"],
         "expiry_date": ["2024-12-31", "2025-01-31"],
@@ -137,7 +137,7 @@ def test_only_required_columns():
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", "POL-002"],
-        "nom_assure": ["Company A", "Company B"],
+        "insured_name": ["Company A", "Company B"],
         "exposition": [25.5, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01"],
         "expiry_date": ["2024-12-31", "2025-01-31"],
@@ -161,7 +161,7 @@ def test_partial_dimensions():
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", "POL-002"],
-        "nom_assure": ["Company A", "Company B"],
+        "insured_name": ["Company A", "Company B"],
         "exposition": [25.5, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01"],
         "expiry_date": ["2024-12-31", "2025-01-31"],
@@ -187,7 +187,7 @@ def test_null_dimension_columns():
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", "POL-002"],
-        "nom_assure": ["Company A", "Company B"],
+        "insured_name": ["Company A", "Company B"],
         "BUSCL_COUNTRY_CD": [None, "US"],
         "BUSCL_LIMIT_CURRENCY_CD": [None, "USD"],
         "line_of_business": [None, "Aviation"],
@@ -214,7 +214,7 @@ def test_null_required_columns():
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", None, "POL-003"],
-        "nom_assure": [None, "Company B", "Company C"],
+        "insured_name": [None, "Company B", "Company C"],
         "exposition": [25.5, None, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01", None],
         "expiry_date": ["2024-12-31", None, "2025-02-28"],
