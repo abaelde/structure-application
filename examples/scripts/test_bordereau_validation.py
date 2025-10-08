@@ -31,18 +31,11 @@ def test_bordereau_with_warnings():
         "nom_assure": ["Company A", "Company B", "Company C"],
         "BUSCL_COUNTRY_CD": ["US", "FR", "UK"],
         "BUSCL_REGION": ["NA", "EU", "EU"],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None, None, None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None, None, None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None, None, None],
         "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
         "line_of_business": ["Aviation", "Property", "Aviation"],
-        "industry": ["Transportation", "Construction", "Transportation"],
-        "sic_code": ["4512", "1623", "4512"],
-        "include": [None, None, None],
         "exposition": [0, 25.5, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01", "2024-03-01"],
         "expiry_date": ["2024-12-31", "2025-01-31", "2025-02-28"],
-        "unknown_column": ["value1", "value2", "value3"],
     })
     
     test_file = "/tmp/test_warnings.csv"
@@ -68,16 +61,7 @@ def test_invalid_bordereau():
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", "POL-002", "POL-003"],
         "nom_assure": ["Company A", "Company B", "Company C"],
-        "BUSCL_COUNTRY_CD": ["US", "FR", "UK"],
-        "BUSCL_REGION": ["NA", "EU", "EU"],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None, None, None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None, None, None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None, None, None],
         "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
-        "line_of_business": ["Aviation", "Property", "Aviation"],
-        "industry": ["Transportation", "Construction", "Transportation"],
-        "sic_code": ["4512", "1623", "4512"],
-        "include": [None, None, None],
         "exposition": ["abc", -50, 25.5],
         "inception_date": ["2024-01-01", "invalid-date", "2024-03-01"],
         "expiry_date": ["2024-12-31", "2024-12-31", "2023-12-31"],
@@ -95,15 +79,14 @@ def test_invalid_bordereau():
     print()
 
 
-def test_missing_columns():
+def test_missing_required_columns():
     print("=" * 80)
-    print("TEST 4: Missing Mandatory Columns")
+    print("TEST 4: Missing Required Columns")
     print("=" * 80)
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", "POL-002"],
         "nom_assure": ["Company A", "Company B"],
-        "exposition": [25.5, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01"],
         "expiry_date": ["2024-12-31", "2025-01-31"],
     })
@@ -120,24 +103,94 @@ def test_missing_columns():
     print()
 
 
+def test_unknown_columns():
+    print("=" * 80)
+    print("TEST 5: Unknown Columns (should fail)")
+    print("=" * 80)
+    
+    test_data = pd.DataFrame({
+        "numero_police": ["POL-001", "POL-002"],
+        "nom_assure": ["Company A", "Company B"],
+        "exposition": [25.5, 30.0],
+        "inception_date": ["2024-01-01", "2024-02-01"],
+        "expiry_date": ["2024-12-31", "2025-01-31"],
+        "unknown_column": ["value1", "value2"],
+        "another_bad_column": ["x", "y"],
+    })
+    
+    test_file = "/tmp/test_unknown.csv"
+    test_data.to_csv(test_file, index=False)
+    
+    try:
+        df = load_bordereau(test_file)
+        print(f"✗ Unexpected: Loaded {len(df)} policies (should have failed)")
+    except BordereauValidationError as e:
+        print(f"✓ Expected failure:")
+        print(str(e))
+    print()
+
+
+def test_only_required_columns():
+    print("=" * 80)
+    print("TEST 6: Only Required Columns (should pass)")
+    print("=" * 80)
+    
+    test_data = pd.DataFrame({
+        "numero_police": ["POL-001", "POL-002"],
+        "nom_assure": ["Company A", "Company B"],
+        "exposition": [25.5, 30.0],
+        "inception_date": ["2024-01-01", "2024-02-01"],
+        "expiry_date": ["2024-12-31", "2025-01-31"],
+    })
+    
+    test_file = "/tmp/test_only_req.csv"
+    test_data.to_csv(test_file, index=False)
+    
+    try:
+        df = load_bordereau(test_file)
+        print(f"✓ Success: Loaded {len(df)} policies (dimension columns are optional)")
+    except BordereauValidationError as e:
+        print(f"✗ Unexpected failure: {e}")
+    print()
+
+
+def test_partial_dimensions():
+    print("=" * 80)
+    print("TEST 7: Partial Dimension Columns (should pass)")
+    print("=" * 80)
+    
+    test_data = pd.DataFrame({
+        "numero_police": ["POL-001", "POL-002"],
+        "nom_assure": ["Company A", "Company B"],
+        "exposition": [25.5, 30.0],
+        "inception_date": ["2024-01-01", "2024-02-01"],
+        "expiry_date": ["2024-12-31", "2025-01-31"],
+        "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR"],
+        "line_of_business": ["Aviation", "Property"],
+    })
+    
+    test_file = "/tmp/test_partial_dim.csv"
+    test_data.to_csv(test_file, index=False)
+    
+    try:
+        df = load_bordereau(test_file)
+        print(f"✓ Success: Loaded {len(df)} policies (can have some dimension columns)")
+    except BordereauValidationError as e:
+        print(f"✗ Unexpected failure: {e}")
+    print()
+
+
 def test_null_dimension_columns():
     print("=" * 80)
-    print("TEST 5: Null Values in Dimension Columns (should pass)")
+    print("TEST 8: Null Values in Dimension Columns (should pass)")
     print("=" * 80)
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", "POL-002"],
         "nom_assure": ["Company A", "Company B"],
         "BUSCL_COUNTRY_CD": [None, "US"],
-        "BUSCL_REGION": [None, None],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None, None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None, None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None, None],
         "BUSCL_LIMIT_CURRENCY_CD": [None, "USD"],
         "line_of_business": [None, "Aviation"],
-        "industry": [None, "Transportation"],
-        "sic_code": [None, "4512"],
-        "include": [None, None],
         "exposition": [25.5, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01"],
         "expiry_date": ["2024-12-31", "2025-01-31"],
@@ -156,22 +209,12 @@ def test_null_dimension_columns():
 
 def test_null_required_columns():
     print("=" * 80)
-    print("TEST 6: Null Values in Required Columns (should fail)")
+    print("TEST 9: Null Values in Required Columns (should fail)")
     print("=" * 80)
     
     test_data = pd.DataFrame({
         "numero_police": ["POL-001", None, "POL-003"],
         "nom_assure": [None, "Company B", "Company C"],
-        "BUSCL_COUNTRY_CD": [None, None, None],
-        "BUSCL_REGION": [None, None, None],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None, None, None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None, None, None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None, None, None],
-        "BUSCL_LIMIT_CURRENCY_CD": [None, None, None],
-        "line_of_business": [None, None, None],
-        "industry": [None, None, None],
-        "sic_code": [None, None, None],
-        "include": [None, None, None],
         "exposition": [25.5, None, 30.0],
         "inception_date": ["2024-01-01", "2024-02-01", None],
         "expiry_date": ["2024-12-31", None, "2025-02-28"],
@@ -199,7 +242,10 @@ def main():
     test_valid_bordereau()
     test_bordereau_with_warnings()
     test_invalid_bordereau()
-    test_missing_columns()
+    test_missing_required_columns()
+    test_unknown_columns()
+    test_only_required_columns()
+    test_partial_dimensions()
     test_null_dimension_columns()
     test_null_required_columns()
     

@@ -9,9 +9,7 @@ class BordereauValidationError(Exception):
 
 
 class BordereauLoader:
-    MANDATORY_COLUMNS = list(FIELDS.values())
-    
-    COLUMNS_REQUIRING_VALUE = [
+    REQUIRED_COLUMNS = [
         FIELDS["POLICY_NUMBER"],
         FIELDS["INSURED_NAME"],
         FIELDS["EXPOSURE"],
@@ -31,6 +29,8 @@ class BordereauLoader:
         FIELDS["SIC_CODE"],
         FIELDS["INCLUDE"],
     ]
+    
+    ALLOWED_COLUMNS = REQUIRED_COLUMNS + DIMENSION_COLUMNS
 
     NUMERIC_COLUMNS = [FIELDS["EXPOSURE"]]
 
@@ -95,27 +95,27 @@ class BordereauLoader:
             self.validation_errors.append("Bordereau is empty (no rows)")
 
     def _validate_all_columns_present(self):
-        missing_columns = [col for col in self.MANDATORY_COLUMNS if col not in self.df.columns]
-        if missing_columns:
+        missing_required = [col for col in self.REQUIRED_COLUMNS if col not in self.df.columns]
+        if missing_required:
             self.validation_errors.append(
-                f"Missing mandatory columns: {', '.join(missing_columns)}"
+                f"Missing required columns: {', '.join(missing_required)}"
             )
 
-        extra_columns = [
+        unknown_columns = [
             col
             for col in self.df.columns
-            if col not in self.MANDATORY_COLUMNS
+            if col not in self.ALLOWED_COLUMNS
         ]
-        if extra_columns:
-            self.validation_warnings.append(
-                f"Unknown columns (will be ignored): {', '.join(extra_columns)}"
+        if unknown_columns:
+            self.validation_errors.append(
+                f"Unknown columns not allowed: {', '.join(unknown_columns)}"
             )
 
     def _validate_non_null_values(self):
         if self.df is None:
             return
 
-        for col in self.COLUMNS_REQUIRING_VALUE:
+        for col in self.REQUIRED_COLUMNS:
             if col not in self.df.columns:
                 continue
 
