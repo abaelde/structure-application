@@ -88,7 +88,7 @@ sections_data = {
     "LIMIT_FLOATER_100": [None],  # Floater limit
     "ATTACHMENT_POINT_100": [np.nan],  # Former attachment_point_100
     "OLW_100": [None],  # Original Line Written
-    "LIMIT_OCCURRENCE_100": [np.nan],  # Former limit_occurrence_100
+    "LIMIT_OCCURRENCE_100": [None],  # Deprecated - use LIMIT_100 instead
     "LIMIT_AGG_100": [None],  # Aggregate limit
     # Cession and Retention
     "CESSION_PCT": [0.30],  # Former cession_PCT - 30% de cession

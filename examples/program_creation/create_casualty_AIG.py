@@ -116,14 +116,14 @@ sections_data = {
     # Currency and Limits
     "BUSCL_LIMIT_CURRENCY_CD": [None, None],  # Former currency
     "AAD_100": [None, None],  # Annual Aggregate Deductible
-    "LIMIT_100": [None, None],  # General limit
+    "LIMIT_100": [LIMITS["general"], LIMITS["cyber"]],  # Limits in millions
     "LIMIT_FLOATER_100": [None, None],  # Floater limit
     "ATTACHMENT_POINT_100": [
         np.nan,
         np.nan,
     ],  # Quota Share n'utilise pas attachment_point_100
     "OLW_100": [None, None],  # Original Line Written
-    "LIMIT_OCCURRENCE_100": [LIMITS["general"], LIMITS["cyber"]],  # Limites en millions
+    "LIMIT_OCCURRENCE_100": [None, None],  # Deprecated - use LIMIT_100 instead
     "LIMIT_AGG_100": [None, None],  # Aggregate limit
     # Cession and Retention
     "CESSION_PCT": [

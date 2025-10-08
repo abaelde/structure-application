@@ -87,15 +87,15 @@ def _write_section(
                 f"{indent}Cession rate: {cession_pct:.1%} ({cession_pct * 100:.1f}%)\n"
             )
 
-        if pd.notna(section.get(SC.LIMIT_OCCURRENCE)):
-            file.write(f"{indent}Limit: {section[SC.LIMIT_OCCURRENCE]:,.2f}M\n")
+        if pd.notna(section.get(SC.LIMIT)):
+            file.write(f"{indent}Limit: {section[SC.LIMIT]:,.2f}M\n")
 
     elif type_of_participation == PRODUCT.EXCESS_OF_LOSS:
         if pd.notna(section.get(SC.ATTACHMENT)) and pd.notna(
-            section.get(SC.LIMIT_OCCURRENCE)
+            section.get(SC.LIMIT)
         ):
             attachment = section[SC.ATTACHMENT]
-            limit = section[SC.LIMIT_OCCURRENCE]
+            limit = section[SC.LIMIT]
             file.write(f"{indent}Coverage: {limit:,.2f}M xs {attachment:,.2f}M\n")
             file.write(
                 f"{indent}Range: {attachment:,.2f}M to {attachment + limit:,.2f}M\n"
@@ -138,10 +138,10 @@ def display_program_summary(program: Dict[str, Any]) -> None:
             xol_params = []
             for section in structure["sections"]:
                 if pd.notna(section.get(SC.ATTACHMENT)) and pd.notna(
-                    section.get(SC.LIMIT_OCCURRENCE)
+                    section.get(SC.LIMIT)
                 ):
                     xol_params.append(
-                        f"{section[SC.LIMIT_OCCURRENCE]:,.0f}xs{section[SC.ATTACHMENT]:,.0f}"
+                        f"{section[SC.LIMIT]:,.0f}xs{section[SC.ATTACHMENT]:,.0f}"
                     )
             xol_str = ", ".join(set(xol_params)) if xol_params else "N/A"
             print(f"   {structure['structure_name']}: XOL {xol_str}")

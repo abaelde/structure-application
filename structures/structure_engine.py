@@ -42,17 +42,21 @@ def apply_section(
         cession_PCT = section[SC.CESSION_PCT]
         if pd.isna(cession_PCT):
             raise ValueError("CESSION_PCT is required for quota_share")
-        cession_to_layer_100pct = quota_share(exposure, cession_PCT)
+        limit = section.get(SC.LIMIT)
+        if pd.notna(limit):
+            cession_to_layer_100pct = quota_share(exposure, cession_PCT, limit)
+        else:
+            cession_to_layer_100pct = quota_share(exposure, cession_PCT)
 
     elif type_of_participation == PRODUCT.EXCESS_OF_LOSS:
         attachment_point_100 = section[SC.ATTACHMENT]
-        limit_occurrence_100 = section[SC.LIMIT_OCCURRENCE]
-        if pd.isna(attachment_point_100) or pd.isna(limit_occurrence_100):
+        limit_100 = section[SC.LIMIT]
+        if pd.isna(attachment_point_100) or pd.isna(limit_100):
             raise ValueError(
-                "ATTACHMENT_POINT_100 and LIMIT_OCCURRENCE_100 are required for excess_of_loss"
+                "ATTACHMENT_POINT_100 and LIMIT_100 are required for excess_of_loss"
             )
         cession_to_layer_100pct = excess_of_loss(
-            exposure, attachment_point_100, limit_occurrence_100
+            exposure, attachment_point_100, limit_100
         )
 
     else:
@@ -227,19 +231,15 @@ def write_detailed_results(
                     if struct["type_of_participation"] == PRODUCT.QUOTA_SHARE:
                         if pd.notna(section.get(SC.CESSION_PCT)):
                             file.write(f"      CESSION_PCT: {section[SC.CESSION_PCT]}\n")
-                        if pd.notna(section.get(SC.LIMIT_OCCURRENCE)):
-                            file.write(
-                                f"      LIMIT_OCCURRENCE_100: {section[SC.LIMIT_OCCURRENCE]}\n"
-                            )
+                        if pd.notna(section.get(SC.LIMIT)):
+                            file.write(f"      LIMIT_100: {section[SC.LIMIT]}\n")
                     elif struct["type_of_participation"] == PRODUCT.EXCESS_OF_LOSS:
                         if pd.notna(section.get(SC.ATTACHMENT)):
                             file.write(
                                 f"      ATTACHMENT_POINT_100: {section[SC.ATTACHMENT]}\n"
                             )
-                        if pd.notna(section.get(SC.LIMIT_OCCURRENCE)):
-                            file.write(
-                                f"      LIMIT_OCCURRENCE_100: {section[SC.LIMIT_OCCURRENCE]}\n"
-                            )
+                        if pd.notna(section.get(SC.LIMIT)):
+                            file.write(f"      LIMIT_100: {section[SC.LIMIT]}\n")
 
                     if pd.notna(section.get(SC.SIGNED_SHARE)):
                         file.write(

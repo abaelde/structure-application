@@ -31,7 +31,7 @@ print("Création du programme Aviation Complex Multi-Currency...")
 # =============================================================================
 
 # Définir les valeurs pour chaque layer (en millions)
-# Format: (limit_occurrence_100, attachment_point_100)
+# Format: (limit_100, attachment_point_100)
 # Les valeurs sont identiques pour USD, CAD, EUR, AUD
 LAYER_VALUES_COMMON = {
     "XOL_1": (65, 0),
@@ -54,7 +54,7 @@ LAYER_VALUES_GBP = {
 
 # Cession Rate Values (pourcentage cédé au réassureur)
 CESSION_RATE_VALUES = {
-    "QS_1": 0.25,  # 25% cédé (rétention 75%)
+    "QS_1": 0.15,
     "XOL_1": np.nan,  # XOL n'utilise pas cession_PCT
     "XOL_2": np.nan,
     "XOL_3": np.nan,
@@ -235,7 +235,7 @@ sections_data = {
     "LIMIT_FLOATER_100": [],  # Floater limit
     "ATTACHMENT_POINT_100": [],  # Former attachment_point_100
     "OLW_100": [],  # Original Line Written
-    "LIMIT_OCCURRENCE_100": [],  # Former limit_occurrence_100
+    "LIMIT_OCCURRENCE_100": [],  # Deprecated - use LIMIT_100 instead
     "LIMIT_AGG_100": [],  # Aggregate limit
     # Cession and Retention
     "CESSION_PCT": [],  # Former cession_PCT
@@ -267,7 +267,7 @@ def add_section(
     insper_id,
     cession_pct,
     attachment_point,
-    limit_occurrence,
+    limit_100,
     signed_share,
     currency_cd,
 ):
@@ -288,11 +288,11 @@ def add_section(
     sections_data["BUSCL_CLASS_OF_BUSINESS_3"].append(None)
     sections_data["BUSCL_LIMIT_CURRENCY_CD"].append(currency_cd)
     sections_data["AAD_100"].append(None)
-    sections_data["LIMIT_100"].append(None)
+    sections_data["LIMIT_100"].append(limit_100)
     sections_data["LIMIT_FLOATER_100"].append(None)
     sections_data["ATTACHMENT_POINT_100"].append(attachment_point)
     sections_data["OLW_100"].append(None)
-    sections_data["LIMIT_OCCURRENCE_100"].append(limit_occurrence)
+    sections_data["LIMIT_OCCURRENCE_100"].append(None)  # Deprecated
     sections_data["LIMIT_AGG_100"].append(None)
     sections_data["CESSION_PCT"].append(cession_pct)
     sections_data["RETENTION_PCT"].append(None)
@@ -316,12 +316,13 @@ def add_section(
 # Créer les sections pour la structure Quota Share (QS_1) - toutes devises
 cession_rate_qs = CESSION_RATE_VALUES["QS_1"]
 reinsurer_share_qs = REINSURER_SHARE_VALUES["QS_1"]
+qs_limit = 575  # Limite du quota share en millions
 for currency in COMMON_CURRENCIES + ["GBP"]:
     add_section(
         insper_id=1,  # QS_1 has INSPER_ID_PRE = 1
         cession_pct=cession_rate_qs,
         attachment_point=np.nan,
-        limit_occurrence=np.nan,
+        limit_100=qs_limit,
         signed_share=reinsurer_share_qs,
         currency_cd=currency,
     )
@@ -330,7 +331,7 @@ for currency in COMMON_CURRENCIES + ["GBP"]:
 for idx, layer_name in enumerate(
     ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], start=2
 ):
-    limit_occurrence_100, attachment_point_100 = LAYER_VALUES_COMMON[layer_name]
+    limit_100, attachment_point_100 = LAYER_VALUES_COMMON[layer_name]
     cession_PCT = CESSION_RATE_VALUES[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
 
@@ -339,7 +340,7 @@ for idx, layer_name in enumerate(
             insper_id=idx,  # XOL_1=2, XOL_2=3, ..., XOL_6=7
             cession_pct=cession_PCT,
             attachment_point=attachment_point_100,
-            limit_occurrence=limit_occurrence_100,
+            limit_100=limit_100,
             signed_share=reinsurer_share,
             currency_cd=currency,
         )
@@ -348,7 +349,7 @@ for idx, layer_name in enumerate(
 for idx, layer_name in enumerate(
     ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], start=2
 ):
-    limit_occurrence_100, attachment_point_100 = LAYER_VALUES_GBP[layer_name]
+    limit_100, attachment_point_100 = LAYER_VALUES_GBP[layer_name]
     cession_PCT = CESSION_RATE_VALUES[layer_name]
     reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
 
@@ -356,7 +357,7 @@ for idx, layer_name in enumerate(
         insper_id=idx,  # XOL_1=2, XOL_2=3, ..., XOL_6=7
         cession_pct=cession_PCT,
         attachment_point=attachment_point_100,
-        limit_occurrence=limit_occurrence_100,
+        limit_100=limit_100,
         signed_share=reinsurer_share,
         currency_cd="GBP",
     )
@@ -429,7 +430,7 @@ Structures (empilées selon l'ordre):
 
 print("0. QS_1 (contract_order=0):")
 print(
-    "   - Toutes devises: Quota Share 25% cédé, 1.65% reinsurer share (rétention 75%)"
+    "   - Toutes devises: Quota Share 15% cédé avec limite de 575M, 1.65% reinsurer share (rétention 85%)"
 )
 
 for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], 1):

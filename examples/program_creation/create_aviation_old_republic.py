@@ -113,11 +113,11 @@ sections_data = {
     # Currency and Limits
     "BUSCL_LIMIT_CURRENCY_CD": [None, None, None],  # Former currency
     "AAD_100": [None, None, None],  # Annual Aggregate Deductible
-    "LIMIT_100": [None, None, None],  # General limit
+    "LIMIT_100": [8.75, 10.0, 23.25],  # Limits in millions
     "LIMIT_FLOATER_100": [None, None, None],  # Floater limit
     "ATTACHMENT_POINT_100": [3.0, 11.75, 21.75],  # Priorités en millions
     "OLW_100": [None, None, None],  # Original Line Written
-    "LIMIT_OCCURRENCE_100": [8.75, 10.0, 23.25],  # Limites en millions
+    "LIMIT_OCCURRENCE_100": [None, None, None],  # Deprecated - use LIMIT_100 instead
     "LIMIT_AGG_100": [None, None, None],  # Aggregate limit
     # Cession and Retention
     "CESSION_PCT": [np.nan, np.nan, np.nan],  # XOL n'utilise pas cession_PCT
@@ -154,8 +154,10 @@ for key in sections_data.keys():
         sections_data[key].extend(["Canada", "Canada", "Canada"])
     elif key == "ATTACHMENT_POINT_100":
         sections_data[key].extend([3.0, 11.75, 21.75])
-    elif key == "LIMIT_OCCURRENCE_100":
+    elif key == "LIMIT_100":
         sections_data[key].extend([8.75, 10.0, 23.25])
+    elif key == "LIMIT_OCCURRENCE_100":
+        sections_data[key].extend([None, None, None])
     elif key == "CESSION_PCT":
         sections_data[key].extend([np.nan, np.nan, np.nan])
     elif key == "SIGNED_SHARE_PCT":
