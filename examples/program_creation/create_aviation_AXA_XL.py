@@ -21,6 +21,9 @@ import pandas as pd
 import numpy as np
 from excel_utils import auto_adjust_column_widths
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+from structures.constants import PRODUCT, SHEETS
+
 print("Création du programme Aviation Complex Multi-Currency...")
 
 # =============================================================================
@@ -100,13 +103,13 @@ structures_data = {
     "INSPER_ID_PRE": [1, 2, 3, 4, 5, 6, 7],  # Auto-increment key
     "BUSINESS_ID_PRE": [None, None, None, None, None, None, None],  # Tnumber
     "TYPE_OF_PARTICIPATION_CD": [
-        "quota_share",
-        "excess_of_loss",
-        "excess_of_loss",
-        "excess_of_loss",
-        "excess_of_loss",
-        "excess_of_loss",
-        "excess_of_loss",
+        PRODUCT.QUOTA_SHARE,
+        PRODUCT.EXCESS_OF_LOSS,
+        PRODUCT.EXCESS_OF_LOSS,
+        PRODUCT.EXCESS_OF_LOSS,
+        PRODUCT.EXCESS_OF_LOSS,
+        PRODUCT.EXCESS_OF_LOSS,
+        PRODUCT.EXCESS_OF_LOSS,
     ],  # Former type_of_participation
     "TYPE_OF_INSURED_PERIOD_CD": [None, None, None, None, None, None, None],  # TBD
     "ACTIVE_FLAG_CD": [True, True, True, True, True, True, True],  # Default active
@@ -377,9 +380,9 @@ os.makedirs(output_dir, exist_ok=True)
 output_file = os.path.join(output_dir, "aviation_axa_xl_2024.xlsx")
 
 with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
-    program_df.to_excel(writer, sheet_name="program", index=False)
-    structures_df.to_excel(writer, sheet_name="structures", index=False)
-    sections_df.to_excel(writer, sheet_name="sections", index=False)
+    program_df.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
+    structures_df.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
+    sections_df.to_excel(writer, sheet_name=SHEETS.SECTIONS, index=False)
 
 # Auto-adjust column widths for better readability
 auto_adjust_column_widths(output_file)

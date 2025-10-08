@@ -1,6 +1,8 @@
 import pandas as pd
 from typing import Dict, Any, List
 
+from .constants import DIMENSIONS, SHEETS, PROGRAM_COLS, STRUCTURE_COLS
+
 
 # Keys and relations - foreign keys between Excel sheets (tables)
 KEYS_AND_RELATIONS = [
@@ -53,20 +55,6 @@ PARAMETERS = [
     "INSPER_MAIN_CURRENCY_CD",
 ]
 
-# Any column not in KEYS_AND_RELATIONS, PARAMETERS, or DIMENSIONS is ignored
-DIMENSIONS = [
-    "BUSCL_EXCLUDE_CD",
-    "BUSCL_ENTITY_NAME_CED",
-    "POL_RISK_NAME_CED",
-    "BUSCL_COUNTRY_CD",
-    "BUSCL_REGION",
-    "BUSCL_CLASS_OF_BUSINESS_1",
-    "BUSCL_CLASS_OF_BUSINESS_2",
-    "BUSCL_CLASS_OF_BUSINESS_3",
-    "BUSCL_LIMIT_CURRENCY_CD",
-    
-]
-
 
 class ProgramLoader:
     def __init__(self, excel_path: str):
@@ -76,12 +64,12 @@ class ProgramLoader:
         self.load_program()
 
     def load_program(self):
-        program_df = pd.read_excel(self.excel_path, sheet_name="program")
-        structures_df = pd.read_excel(self.excel_path, sheet_name="structures")
-        sections_df = pd.read_excel(self.excel_path, sheet_name="sections")
+        program_df = pd.read_excel(self.excel_path, sheet_name=SHEETS.PROGRAM)
+        structures_df = pd.read_excel(self.excel_path, sheet_name=SHEETS.STRUCTURES)
+        sections_df = pd.read_excel(self.excel_path, sheet_name=SHEETS.SECTIONS)
 
         program_row = program_df.iloc[0]
-        program_name = program_row["REPROG_TITLE"]
+        program_name = program_row[PROGRAM_COLS.TITLE]
 
         # Use only explicitly defined dimensions that exist in sections_df
         self.dimension_columns = [
@@ -90,21 +78,21 @@ class ProgramLoader:
 
         program_structures = []
         for _, structure_row in structures_df.iterrows():
-            structure_name = structure_row["BUSINESS_TITLE"]
-            structure_id = structure_row.get("INSPER_ID_PRE")
-            contract_order = structure_row["INSPER_CONTRACT_ORDER"]
-            type_of_participation = structure_row["TYPE_OF_PARTICIPATION_CD"]
-            claim_basis = structure_row.get("INSPER_CLAIM_BASIS_CD")
-            inception_date = structure_row.get("INSPER_EFFECTIVE_DATE")
-            expiry_date = structure_row.get("INSPER_EXPIRY_DATE")
+            structure_name = structure_row[STRUCTURE_COLS.NAME]
+            structure_id = structure_row.get(STRUCTURE_COLS.INSPER_ID)
+            contract_order = structure_row[STRUCTURE_COLS.ORDER]
+            type_of_participation = structure_row[STRUCTURE_COLS.TYPE]
+            claim_basis = structure_row.get(STRUCTURE_COLS.CLAIM_BASIS)
+            inception_date = structure_row.get(STRUCTURE_COLS.INCEPTION)
+            expiry_date = structure_row.get(STRUCTURE_COLS.EXPIRY)
 
             if structure_id is not None:
                 structure_sections = sections_df[
-                    sections_df["INSPER_ID_PRE"] == structure_id
+                    sections_df[STRUCTURE_COLS.INSPER_ID] == structure_id
                 ].to_dict("records")
             else:
                 structure_sections = sections_df[
-                    sections_df["BUSINESS_TITLE"] == structure_name
+                    sections_df[STRUCTURE_COLS.NAME] == structure_name
                 ].to_dict("records")
 
             program_structures.append(

@@ -1,0 +1,82 @@
+# structures/constants.py
+from types import SimpleNamespace
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Bordereau / colonnes d'entrée (CSV)
+# ──────────────────────────────────────────────────────────────────────────────
+FIELDS = {
+    "POLICY_NUMBER": "numero_police",
+    "INSURED_NAME": "nom_assure",
+    "COUNTRY": "BUSCL_COUNTRY_CD",
+    "REGION": "BUSCL_REGION",
+    "CLASS_1": "BUSCL_CLASS_OF_BUSINESS_1",
+    "CLASS_2": "BUSCL_CLASS_OF_BUSINESS_2",
+    "CLASS_3": "BUSCL_CLASS_OF_BUSINESS_3",
+    "CURRENCY": "BUSCL_LIMIT_CURRENCY_CD",
+    "LINE_OF_BUSINESS": "line_of_business",
+    "INDUSTRY": "industry",
+    "SIC_CODE": "sic_code",
+    "INCLUDE": "include",
+    "EXPOSURE": "exposition",
+    "INCEPTION_DATE": "inception_date",
+    "EXPIRY_DATE": "expiry_date",
+}
+
+# Seules les dimensions ci-dessous sont considérées au matching
+DIMENSIONS = [
+    "BUSCL_EXCLUDE_CD",
+    "BUSCL_ENTITY_NAME_CED",
+    "POL_RISK_NAME_CED",
+    "BUSCL_COUNTRY_CD",
+    "BUSCL_REGION",
+    "BUSCL_CLASS_OF_BUSINESS_1",
+    "BUSCL_CLASS_OF_BUSINESS_2",
+    "BUSCL_CLASS_OF_BUSINESS_3",
+    "BUSCL_LIMIT_CURRENCY_CD",
+]
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Types produits / claim basis (avec noms symboliques + ensembles de validation)
+# ──────────────────────────────────────────────────────────────────────────────
+PRODUCT = SimpleNamespace(
+    QUOTA_SHARE="quota_share",
+    EXCESS_OF_LOSS="excess_of_loss",
+)
+PRODUCT_TYPES = {PRODUCT.QUOTA_SHARE, PRODUCT.EXCESS_OF_LOSS}
+
+CLAIM_BASIS = SimpleNamespace(
+    RISK_ATTACHING="risk_attaching",
+    LOSS_OCCURRING="loss_occurring",
+)
+CLAIM_BASIS_VALUES = {CLAIM_BASIS.RISK_ATTACHING, CLAIM_BASIS.LOSS_OCCURRING}
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Excel: noms des feuilles et colonnes
+# ──────────────────────────────────────────────────────────────────────────────
+SHEETS = SimpleNamespace(
+    PROGRAM="program",
+    STRUCTURES="structures",
+    SECTIONS="sections",
+)
+
+PROGRAM_COLS = SimpleNamespace(
+    TITLE="REPROG_TITLE",
+)
+
+STRUCTURE_COLS = SimpleNamespace(
+    NAME="BUSINESS_TITLE",
+    ORDER="INSPER_CONTRACT_ORDER",
+    TYPE="TYPE_OF_PARTICIPATION_CD",
+    CLAIM_BASIS="INSPER_CLAIM_BASIS_CD",
+    INCEPTION="INSPER_EFFECTIVE_DATE",
+    EXPIRY="INSPER_EXPIRY_DATE",
+    INSPER_ID="INSPER_ID_PRE",
+)
+
+SECTION_COLS = SimpleNamespace(
+    CESSION_PCT="CESSION_PCT",
+    ATTACHMENT="ATTACHMENT_POINT_100",
+    LIMIT_OCCURRENCE="LIMIT_OCCURRENCE_100",
+    SIGNED_SHARE="SIGNED_SHARE_PCT",
+)
+

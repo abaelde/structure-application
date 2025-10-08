@@ -3,6 +3,7 @@ import numpy as np
 from typing import Dict, Any, Optional
 from products import quota_share, excess_of_loss
 from .treaty_manager import TreatyManager
+from .constants import FIELDS, PRODUCT, SECTION_COLS as SC
 
 
 def match_section(
@@ -37,15 +38,15 @@ def match_section(
 def apply_section(
     exposure: float, section: Dict[str, Any], type_of_participation: str
 ) -> Dict[str, float]:
-    if type_of_participation == "quota_share":
-        cession_PCT = section["CESSION_PCT"]
+    if type_of_participation == PRODUCT.QUOTA_SHARE:
+        cession_PCT = section[SC.CESSION_PCT]
         if pd.isna(cession_PCT):
             raise ValueError("CESSION_PCT is required for quota_share")
         cession_to_layer_100pct = quota_share(exposure, cession_PCT)
 
-    elif type_of_participation == "excess_of_loss":
-        attachment_point_100 = section["ATTACHMENT_POINT_100"]
-        limit_occurrence_100 = section["LIMIT_OCCURRENCE_100"]
+    elif type_of_participation == PRODUCT.EXCESS_OF_LOSS:
+        attachment_point_100 = section[SC.ATTACHMENT]
+        limit_occurrence_100 = section[SC.LIMIT_OCCURRENCE]
         if pd.isna(attachment_point_100) or pd.isna(limit_occurrence_100):
             raise ValueError(
                 "ATTACHMENT_POINT_100 and LIMIT_OCCURRENCE_100 are required for excess_of_loss"
@@ -58,7 +59,7 @@ def apply_section(
         raise ValueError(f"Unknown product type: {type_of_participation}")
 
     # Appliquer le SIGNED_SHARE_PCT pour obtenir la cession effective au réassureur
-    reinsurer_share = section.get("SIGNED_SHARE_PCT", 1.0)
+    reinsurer_share = section.get(SC.SIGNED_SHARE, 1.0)
     if pd.isna(reinsurer_share):
         reinsurer_share = 1.0
 
@@ -74,7 +75,7 @@ def apply_section(
 def apply_program(
     policy_data: Dict[str, Any], program: Dict[str, Any]
 ) -> Dict[str, Any]:
-    exposure = policy_data.get("exposition")
+    exposure = policy_data.get(FIELDS["EXPOSURE"])
     structures = program["structures"]
     dimension_columns = program["dimension_columns"]
 
@@ -110,10 +111,10 @@ def apply_program(
             continue
 
         # Déterminer l'exposition d'entrée selon le type de produit
-        if structure["type_of_participation"] == "quota_share":
+        if structure["type_of_participation"] == PRODUCT.QUOTA_SHARE:
             # Quota Share s'applique sur l'exposition restante
             input_exposure = remaining_exposure
-        elif structure["type_of_participation"] == "excess_of_loss":
+        elif structure["type_of_participation"] == PRODUCT.EXCESS_OF_LOSS:
             # Excess of Loss s'applique sur l'exposition restante (après les Quota Share)
             # Si pas de Quota Share appliqué, utiliser l'exposition originale
             input_exposure = remaining_exposure
@@ -146,20 +147,20 @@ def apply_program(
         total_cession_to_reinsurer += ceded_result["cession_to_reinsurer"]
 
         # Mettre à jour l'exposition restante
-        if structure["type_of_participation"] == "quota_share":
+        if structure["type_of_participation"] == PRODUCT.QUOTA_SHARE:
             # Quota Share réduit l'exposition restante
             remaining_exposure -= ceded_result["cession_to_layer_100pct"]
         # Pour les Excess of Loss, on ne réduit pas l'exposition restante
         # car ils sont empilés et calculent sur la même base
 
     return {
-        "policy_number": policy_data.get("numero_police"),
+        "policy_number": policy_data.get(FIELDS["POLICY_NUMBER"]),
         "exposure": exposure,
         "cession_to_layer_100pct": total_cession_to_layer_100pct,
         "cession_to_reinsurer": total_cession_to_reinsurer,
         "retained_by_cedant": exposure - total_cession_to_layer_100pct,
-        "policy_inception_date": policy_data.get("inception_date"),
-        "policy_expiry_date": policy_data.get("expiry_date"),
+        "policy_inception_date": policy_data.get(FIELDS["INCEPTION_DATE"]),
+        "policy_expiry_date": policy_data.get(FIELDS["EXPIRY_DATE"]),
         "structures_detail": structures_detail,
     }
 
@@ -223,26 +224,26 @@ def write_detailed_results(
                     section = struct["section"]
                     file.write(f"   Applied section parameters:\n")
 
-                    if struct["type_of_participation"] == "quota_share":
-                        if pd.notna(section.get("CESSION_PCT")):
-                            file.write(f"      CESSION_PCT: {section['CESSION_PCT']}\n")
-                        if pd.notna(section.get("LIMIT_OCCURRENCE_100")):
+                    if struct["type_of_participation"] == PRODUCT.QUOTA_SHARE:
+                        if pd.notna(section.get(SC.CESSION_PCT)):
+                            file.write(f"      CESSION_PCT: {section[SC.CESSION_PCT]}\n")
+                        if pd.notna(section.get(SC.LIMIT_OCCURRENCE)):
                             file.write(
-                                f"      LIMIT_OCCURRENCE_100: {section['LIMIT_OCCURRENCE_100']}\n"
+                                f"      LIMIT_OCCURRENCE_100: {section[SC.LIMIT_OCCURRENCE]}\n"
                             )
-                    elif struct["type_of_participation"] == "excess_of_loss":
-                        if pd.notna(section.get("ATTACHMENT_POINT_100")):
+                    elif struct["type_of_participation"] == PRODUCT.EXCESS_OF_LOSS:
+                        if pd.notna(section.get(SC.ATTACHMENT)):
                             file.write(
-                                f"      ATTACHMENT_POINT_100: {section['ATTACHMENT_POINT_100']}\n"
+                                f"      ATTACHMENT_POINT_100: {section[SC.ATTACHMENT]}\n"
                             )
-                        if pd.notna(section.get("LIMIT_OCCURRENCE_100")):
+                        if pd.notna(section.get(SC.LIMIT_OCCURRENCE)):
                             file.write(
-                                f"      LIMIT_OCCURRENCE_100: {section['LIMIT_OCCURRENCE_100']}\n"
+                                f"      LIMIT_OCCURRENCE_100: {section[SC.LIMIT_OCCURRENCE]}\n"
                             )
 
-                    if pd.notna(section.get("SIGNED_SHARE_PCT")):
+                    if pd.notna(section.get(SC.SIGNED_SHARE)):
                         file.write(
-                            f"      SIGNED_SHARE_PCT: {section['SIGNED_SHARE_PCT']}\n"
+                            f"      SIGNED_SHARE_PCT: {section[SC.SIGNED_SHARE]}\n"
                         )
 
                     conditions = []
@@ -295,8 +296,8 @@ def apply_treaty_with_claim_basis(
         Résultat de l'application du traité
     """
     # Récupérer les informations de la police
-    policy_inception_date = policy_data.get("inception_date")
-    policy_expiry_date = policy_data.get("expiry_date")
+    policy_inception_date = policy_data.get(FIELDS["INCEPTION_DATE"])
+    policy_expiry_date = policy_data.get(FIELDS["EXPIRY_DATE"])
 
     if not policy_inception_date:
         raise ValueError("inception_date est requis pour la police")
@@ -329,10 +330,10 @@ def apply_treaty_with_claim_basis(
     if selected_treaty is None:
         # Aucun traité trouvé - pas de couverture
         return {
-            "policy_number": policy_data.get("numero_police"),
-            "exposure": policy_data.get("exposition", 0),
+            "policy_number": policy_data.get(FIELDS["POLICY_NUMBER"]),
+            "exposure": policy_data.get(FIELDS["EXPOSURE"], 0),
             "cession_to_reinsurer": 0.0,
-            "retained_by_cedant": policy_data.get("exposition", 0),
+            "retained_by_cedant": policy_data.get(FIELDS["EXPOSURE"], 0),
             "policy_inception_date": policy_inception_date,
             "policy_expiry_date": policy_expiry_date,
             "selected_treaty_year": None,

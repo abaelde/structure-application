@@ -2,6 +2,8 @@ from typing import Dict, Any
 import pandas as pd
 import sys
 
+from .constants import PRODUCT, SECTION_COLS as SC
+
 
 def write_program_config(program: Dict[str, Any], file=None) -> None:
     if file is None:
@@ -78,29 +80,29 @@ def _write_section(
     if file is None:
         file = sys.stdout
 
-    if type_of_participation == "quota_share":
-        if pd.notna(section.get("CESSION_PCT")):
-            cession_pct = section["CESSION_PCT"]
+    if type_of_participation == PRODUCT.QUOTA_SHARE:
+        if pd.notna(section.get(SC.CESSION_PCT)):
+            cession_pct = section[SC.CESSION_PCT]
             file.write(
                 f"{indent}Cession rate: {cession_pct:.1%} ({cession_pct * 100:.1f}%)\n"
             )
 
-        if pd.notna(section.get("LIMIT_OCCURRENCE_100")):
-            file.write(f"{indent}Limit: {section['LIMIT_OCCURRENCE_100']:,.2f}M\n")
+        if pd.notna(section.get(SC.LIMIT_OCCURRENCE)):
+            file.write(f"{indent}Limit: {section[SC.LIMIT_OCCURRENCE]:,.2f}M\n")
 
-    elif type_of_participation == "excess_of_loss":
-        if pd.notna(section.get("ATTACHMENT_POINT_100")) and pd.notna(
-            section.get("LIMIT_OCCURRENCE_100")
+    elif type_of_participation == PRODUCT.EXCESS_OF_LOSS:
+        if pd.notna(section.get(SC.ATTACHMENT)) and pd.notna(
+            section.get(SC.LIMIT_OCCURRENCE)
         ):
-            attachment = section["ATTACHMENT_POINT_100"]
-            limit = section["LIMIT_OCCURRENCE_100"]
+            attachment = section[SC.ATTACHMENT]
+            limit = section[SC.LIMIT_OCCURRENCE]
             file.write(f"{indent}Coverage: {limit:,.2f}M xs {attachment:,.2f}M\n")
             file.write(
                 f"{indent}Range: {attachment:,.2f}M to {attachment + limit:,.2f}M\n"
             )
 
-    if pd.notna(section.get("SIGNED_SHARE_PCT")):
-        reinsurer_share = section["SIGNED_SHARE_PCT"]
+    if pd.notna(section.get(SC.SIGNED_SHARE)):
+        reinsurer_share = section[SC.SIGNED_SHARE]
         file.write(
             f"{indent}Reinsurer share: {reinsurer_share:.2%} ({reinsurer_share * 100:.2f}%)\n"
         )
@@ -124,22 +126,22 @@ def display_program_summary(program: Dict[str, Any]) -> None:
         type_of_participation = structure["type_of_participation"]
         sections_count = len(structure["sections"])
 
-        if type_of_participation == "quota_share":
+        if type_of_participation == PRODUCT.QUOTA_SHARE:
             rates = []
             for section in structure["sections"]:
-                if pd.notna(section.get("CESSION_PCT")):
-                    rates.append(f"{section['CESSION_PCT']:.1%}")
+                if pd.notna(section.get(SC.CESSION_PCT)):
+                    rates.append(f"{section[SC.CESSION_PCT]:.1%}")
             rates_str = ", ".join(set(rates)) if rates else "N/A"
             print(f"   {structure['structure_name']}: QS {rates_str}")
 
-        elif type_of_participation == "excess_of_loss":
+        elif type_of_participation == PRODUCT.EXCESS_OF_LOSS:
             xol_params = []
             for section in structure["sections"]:
-                if pd.notna(section.get("ATTACHMENT_POINT_100")) and pd.notna(
-                    section.get("LIMIT_OCCURRENCE_100")
+                if pd.notna(section.get(SC.ATTACHMENT)) and pd.notna(
+                    section.get(SC.LIMIT_OCCURRENCE)
                 ):
                     xol_params.append(
-                        f"{section['LIMIT_OCCURRENCE_100']:,.0f}xs{section['ATTACHMENT_POINT_100']:,.0f}"
+                        f"{section[SC.LIMIT_OCCURRENCE]:,.0f}xs{section[SC.ATTACHMENT]:,.0f}"
                     )
             xol_str = ", ".join(set(xol_params)) if xol_params else "N/A"
             print(f"   {structure['structure_name']}: XOL {xol_str}")

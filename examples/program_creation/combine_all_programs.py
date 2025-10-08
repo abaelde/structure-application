@@ -18,6 +18,9 @@ import numpy as np
 from pathlib import Path
 from excel_utils import auto_adjust_column_widths
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+from structures.constants import SHEETS
+
 
 def combine_all_programs(programs_dir: str, output_file: str):
     """
@@ -59,9 +62,9 @@ def combine_all_programs(programs_dir: str, output_file: str):
 
         try:
             # Read the three sheets
-            program_df = pd.read_excel(program_file, sheet_name="program")
-            structures_df = pd.read_excel(program_file, sheet_name="structures")
-            sections_df = pd.read_excel(program_file, sheet_name="sections")
+            program_df = pd.read_excel(program_file, sheet_name=SHEETS.PROGRAM)
+            structures_df = pd.read_excel(program_file, sheet_name=SHEETS.STRUCTURES)
+            sections_df = pd.read_excel(program_file, sheet_name=SHEETS.SECTIONS)
 
             # Get original IDs
             old_reprog_id = program_df["REPROG_ID_PRE"].iloc[0]
@@ -150,9 +153,9 @@ def combine_all_programs(programs_dir: str, output_file: str):
     # Write to Excel file
     print(f"Writing to {output_file}...")
     with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
-        combined_programs.to_excel(writer, sheet_name="program", index=False)
-        combined_structures.to_excel(writer, sheet_name="structures", index=False)
-        combined_sections.to_excel(writer, sheet_name="sections", index=False)
+        combined_programs.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
+        combined_structures.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
+        combined_sections.to_excel(writer, sheet_name=SHEETS.SECTIONS, index=False)
 
     # Auto-adjust column widths
     print(f"Auto-adjusting column widths...")

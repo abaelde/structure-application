@@ -17,6 +17,9 @@ import pandas as pd
 import numpy as np
 from excel_utils import auto_adjust_column_widths
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+from structures.constants import PRODUCT, SHEETS
+
 print("Création du programme Casualty AIG 2024...")
 
 # =============================================================================
@@ -68,7 +71,7 @@ program_data = {
 structures_data = {
     "INSPER_ID_PRE": [1],  # Auto-increment key
     "BUSINESS_ID_PRE": [None],  # Tnumber
-    "TYPE_OF_PARTICIPATION_CD": ["quota_share"],  # Former type_of_participation
+    "TYPE_OF_PARTICIPATION_CD": [PRODUCT.QUOTA_SHARE],  # Former type_of_participation
     "TYPE_OF_INSURED_PERIOD_CD": [None],  # TBD
     "ACTIVE_FLAG_CD": [True],  # Default active
     "INSPER_EFFECTIVE_DATE": [None],  # Former inception_date
@@ -168,9 +171,9 @@ os.makedirs(output_dir, exist_ok=True)
 output_file = os.path.join(output_dir, "casualty_aig_2024.xlsx")
 
 with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
-    program_df.to_excel(writer, sheet_name="program", index=False)
-    structures_df.to_excel(writer, sheet_name="structures", index=False)
-    sections_df.to_excel(writer, sheet_name="sections", index=False)
+    program_df.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
+    structures_df.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
+    sections_df.to_excel(writer, sheet_name=SHEETS.SECTIONS, index=False)
 
 # Auto-adjust column widths for better readability
 auto_adjust_column_widths(output_file)

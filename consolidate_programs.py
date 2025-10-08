@@ -21,6 +21,7 @@ from datetime import datetime
 from structures.structure_loader import ProgramLoader
 from structures.structure_engine import apply_program_to_bordereau
 from structures.program_display import display_program
+from structures.constants import FIELDS
 from examples.program_bordereau_mapping import (
     get_ready_pairs,
     get_mapped_bordereau,
@@ -72,7 +73,7 @@ def generate_consolidated_report(
         f.write(
             insured_aggregation[
                 [
-                    "nom_assure",
+                    FIELDS["INSURED_NAME"],
                     "exposure",
                     "cession_to_reinsurer",
                     "retained_by_cedant",
@@ -140,13 +141,13 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
     results["program_name"] = program["name"]
     
     # Add nom_assure from bordereau to results
-    if 'nom_assure' in bordereau_df.columns and 'numero_police' in bordereau_df.columns:
+    if FIELDS["INSURED_NAME"] in bordereau_df.columns and FIELDS["POLICY_NUMBER"] in bordereau_df.columns:
         results = results.merge(
-            bordereau_df[['numero_police', 'nom_assure']],
+            bordereau_df[[FIELDS["POLICY_NUMBER"], FIELDS["INSURED_NAME"]]],
             left_on='policy_number',
-            right_on='numero_police',
+            right_on=FIELDS["POLICY_NUMBER"],
             how='left'
-        ).drop(columns=['numero_police'], errors='ignore')
+        ).drop(columns=[FIELDS["POLICY_NUMBER"]], errors='ignore')
 
     print(f"   ✓ Processed {len(results)} policies")
 
@@ -223,7 +224,7 @@ def consolidate_all_programs():
 
     # Group by insured name to get consolidated view
     insured_aggregation = (
-        consolidated_results.groupby("nom_assure")
+        consolidated_results.groupby(FIELDS["INSURED_NAME"])
         .agg(
             {
                 "exposure": "sum",  # Sum exposure across all cedants for same insured
@@ -249,7 +250,7 @@ def consolidate_all_programs():
     print(
         insured_aggregation[
             [
-                "nom_assure",
+                FIELDS["INSURED_NAME"],
                 "exposure",
                 "cession_to_reinsurer",
                 "retained_by_cedant",
