@@ -20,13 +20,9 @@ from pathlib import Path
 from datetime import datetime
 from structures.structure_loader import ProgramLoader
 from structures.calculation_engine import apply_program_to_bordereau
-from structures.program_display import display_program
 from structures.constants import FIELDS
 from examples.program_bordereau_mapping import (
     get_ready_pairs,
-    get_mapped_bordereau,
-    get_program_path,
-    PROGRAM_BORDEREAU_MAPPING,
 )
 
 
