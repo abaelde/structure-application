@@ -44,9 +44,9 @@ def generate_consolidated_report(
         f.write(f"Number of cedants processed: {len(ready_pairs)}\n")
         f.write("\n")
 
-        # Section 1: Program Processing Details
+        # Program Processing Details
         f.write("=" * 80 + "\n")
-        f.write("SECTION 1: PROGRAM PROCESSING DETAILS\n")
+        f.write("PROGRAM PROCESSING DETAILS\n")
         f.write("=" * 80 + "\n\n")
 
         for i, prog_info in enumerate(all_program_info, 1):
@@ -60,15 +60,12 @@ def generate_consolidated_report(
             f.write(f"  Processed Policies:   {prog_info['num_results']}\n")
             f.write("\n")
 
-        # Section 2: Consolidated Results by Insured
+        # Consolidated Results by Insured
         f.write("\n" + "=" * 80 + "\n")
-        f.write("SECTION 2: CONSOLIDATED RESULTS BY INSURED (REINSURER VIEW)\n")
+        f.write("CONSOLIDATED RESULTS BY INSURED (REINSURER VIEW)\n")
         f.write("=" * 80 + "\n\n")
         f.write(
-            f"Note: Aggregation by insured name (nom_assure) across {len(ready_pairs)} cedant(s).\n"
-        )
-        f.write(
-            "Same insured may appear in multiple bordereaux with different policy numbers.\n\n"
+            f"Aggregation by insured name (nom_assure) across {len(ready_pairs)} cedant(s).\n\n"
         )
 
         # Write insured aggregation table
@@ -80,15 +77,14 @@ def generate_consolidated_report(
                     "cession_to_reinsurer",
                     "retained_by_cedant",
                     "cedant_program",
-                    "policy_number",
                 ]
             ].to_string(index=False)
         )
         f.write(f"\n\nTotal insureds consolidated: {len(insured_aggregation)}\n")
 
-        # Section 3: Files Generated
+        # Files Generated
         f.write("\n\n" + "=" * 80 + "\n")
-        f.write("SECTION 3: OUTPUT FILES GENERATED\n")
+        f.write("OUTPUT FILES GENERATED\n")
         f.write("=" * 80 + "\n\n")
         f.write("The following files have been generated:\n\n")
         f.write(
@@ -142,6 +138,15 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
     # Add cedant identifier to results
     results["cedant_program"] = program_name
     results["program_name"] = program["name"]
+    
+    # Add nom_assure from bordereau to results
+    if 'nom_assure' in bordereau_df.columns and 'numero_police' in bordereau_df.columns:
+        results = results.merge(
+            bordereau_df[['numero_police', 'nom_assure']],
+            left_on='policy_number',
+            right_on='numero_police',
+            how='left'
+        ).drop(columns=['numero_police'], errors='ignore')
 
     print(f"   ✓ Processed {len(results)} policies")
 
@@ -215,25 +220,6 @@ def consolidate_all_programs():
 
     # Aggregate by insured name (underlying insured entity)
     print("Aggregating by insured name (nom_assure)...")
-    
-    # Add nom_assure from bordereau to results
-    # We need to merge with the original bordereaux to get nom_assure
-    for bordereau_df in all_bordereaux:
-        # Merge nom_assure into consolidated_results based on matching policy_number
-        if 'nom_assure' in bordereau_df.columns:
-            consolidated_results = consolidated_results.merge(
-                bordereau_df[['numero_police', 'nom_assure']],
-                left_on='policy_number',
-                right_on='numero_police',
-                how='left',
-                suffixes=('', '_from_bordereau')
-            )
-            # Keep only nom_assure if we don't have it yet
-            if 'nom_assure' not in consolidated_results.columns or consolidated_results['nom_assure'].isna().all():
-                if 'nom_assure_from_bordereau' in consolidated_results.columns:
-                    consolidated_results['nom_assure'] = consolidated_results['nom_assure'].fillna(consolidated_results['nom_assure_from_bordereau'])
-            # Clean up temporary columns
-            consolidated_results = consolidated_results.drop(columns=[c for c in consolidated_results.columns if '_from_bordereau' in c or c == 'numero_police'], errors='ignore')
 
     # Group by insured name to get consolidated view
     insured_aggregation = (
@@ -247,9 +233,6 @@ def consolidate_all_programs():
                 "cedant_program": lambda x: ", ".join(
                     sorted(set(x))
                 ),  # List all cedants
-                "policy_number": lambda x: ", ".join(
-                    sorted(set(x))
-                ),  # List all policy numbers
             }
         )
         .reset_index()
@@ -261,9 +244,8 @@ def consolidate_all_programs():
     print("CONSOLIDATED RESULTS BY INSURED (Reinsurer View)")
     print("=" * 80)
     print(
-        f"\nNote: Aggregation by insured name (nom_assure) across {len(ready_pairs)} cedant(s)."
+        f"\nAggregation by insured name (nom_assure) across {len(ready_pairs)} cedant(s).\n"
     )
-    print("Same insured may appear in multiple bordereaux with different policy numbers.\n")
     print(
         insured_aggregation[
             [
@@ -272,7 +254,6 @@ def consolidate_all_programs():
                 "cession_to_reinsurer",
                 "retained_by_cedant",
                 "cedant_program",
-                "policy_number",
             ]
         ].to_string(index=False)
     )
