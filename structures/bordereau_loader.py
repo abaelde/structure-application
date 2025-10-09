@@ -14,6 +14,7 @@ class BordereauLoader:
         FIELDS["EXPOSURE"],
         FIELDS["INCEPTION_DATE"],
         FIELDS["EXPIRY_DATE"],
+        FIELDS["LINE_OF_BUSINESS"],
     ]
     
     DIMENSION_COLUMNS = [
@@ -30,7 +31,7 @@ class BordereauLoader:
     ]
     
     OPTIONAL_COLUMNS = [
-        FIELDS["POLICY_NUMBER"],
+        FIELDS["POLICY_NUMBER"],  # Optional: used for tracking/reporting only
     ]
     
     ALLOWED_COLUMNS = REQUIRED_COLUMNS + DIMENSION_COLUMNS + OPTIONAL_COLUMNS
@@ -39,9 +40,10 @@ class BordereauLoader:
 
     DATE_COLUMNS = [FIELDS["INCEPTION_DATE"], FIELDS["EXPIRY_DATE"]]
 
-    def __init__(self, source: Union[str, Path], source_type: str = "auto"):
+    def __init__(self, source: Union[str, Path], source_type: str = "auto", line_of_business: Optional[str] = None):
         self.source = Path(source) if isinstance(source, str) else source
         self.source_type = source_type if source_type != "auto" else self._detect_source_type()
+        self.line_of_business = line_of_business or self._detect_line_of_business()
         self.df: Optional[pd.DataFrame] = None
         self.validation_warnings: List[str] = []
         self.validation_errors: List[str] = []
@@ -52,6 +54,16 @@ class BordereauLoader:
             return "csv"
         else:
             raise ValueError(f"Unsupported file type: {suffix}. Only CSV files are supported.")
+    
+    def _detect_line_of_business(self) -> Optional[str]:
+        parts = self.source.parts
+        
+        if "bordereaux" in parts:
+            bordereaux_idx = parts.index("bordereaux")
+            if len(parts) > bordereaux_idx + 2:
+                return parts[bordereaux_idx + 1]
+        
+        return None
 
     def load(self) -> pd.DataFrame:
         if self.source_type == "csv":
@@ -91,6 +103,8 @@ class BordereauLoader:
         self._validate_data_types()
         self._validate_dates()
         self._validate_numeric_values()
+        self._validate_insured_name_uppercase()
+        self._validate_line_of_business()
         self._validate_business_logic()
 
     def _validate_not_empty(self):
@@ -212,6 +226,50 @@ class BordereauLoader:
                 + (f" and {len(zero_expositions) - 5} more" if len(zero_expositions) > 5 else "")
             )
 
+    def _validate_insured_name_uppercase(self):
+        if self.df is None:
+            return
+
+        insured_col = FIELDS["INSURED_NAME"]
+        if insured_col not in self.df.columns:
+            return
+
+        non_uppercase = []
+        for idx, val in self.df[insured_col].items():
+            if pd.isna(val):
+                continue
+
+            str_val = str(val)
+            if str_val != str_val.upper():
+                non_uppercase.append(f"row {idx + 2}: '{str_val}'")
+
+        if non_uppercase:
+            self.validation_errors.append(
+                f"Column '{insured_col}' must contain only uppercase values: {', '.join(non_uppercase[:5])}"
+                + (f" and {len(non_uppercase) - 5} more" if len(non_uppercase) > 5 else "")
+            )
+
+    def _validate_line_of_business(self):
+        if self.df is None:
+            return
+
+        lob_col = FIELDS["LINE_OF_BUSINESS"]
+        if lob_col not in self.df.columns:
+            return
+
+        if self.line_of_business:
+            inconsistent_lobs = []
+            unique_lobs = self.df[lob_col].dropna().unique()
+            
+            for lob in unique_lobs:
+                if str(lob).lower() != self.line_of_business.lower():
+                    inconsistent_lobs.append(str(lob))
+            
+            if inconsistent_lobs:
+                self.validation_errors.append(
+                    f"Bordereau is in '{self.line_of_business}' folder but contains inconsistent line_of_business values: {', '.join(inconsistent_lobs)}"
+                )
+
     def _validate_business_logic(self):
         if self.df is None:
             return
@@ -242,7 +300,7 @@ class BordereauLoader:
             )
 
 
-def load_bordereau(source: Union[str, Path], source_type: str = "auto") -> pd.DataFrame:
-    loader = BordereauLoader(source, source_type)
+def load_bordereau(source: Union[str, Path], source_type: str = "auto", line_of_business: Optional[str] = None) -> pd.DataFrame:
+    loader = BordereauLoader(source, source_type, line_of_business)
     return loader.load()
 

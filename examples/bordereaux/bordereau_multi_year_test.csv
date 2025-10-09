@@ -1,7 +1,0 @@
-policy_id,insured_name,BUSCL_COUNTRY_CD,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1,BUSCL_CLASS_OF_BUSINESS_2,BUSCL_CLASS_OF_BUSINESS_3,BUSCL_LIMIT_CURRENCY_CD,line_of_business,industry,sic_code,include,exposition,inception_date,expiry_date
-POL-2023-001,Company 2023A,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,1000000,2023-01-15,2023-12-31
-POL-2023-002,Company 2023B,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,1000000,2023-06-01,2024-05-31
-POL-2024-001,Company 2024A,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,1000000,2024-02-01,2024-12-31
-POL-2024-002,Company 2024B,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,1000000,2024-08-15,2025-08-14
-POL-2025-001,Company 2025A,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,1000000,2025-01-01,2025-12-31
-POL-2022-001,Company 2022A,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,1000000,2022-12-01,2023-11-30

@@ -35,8 +35,8 @@ BORDEREAUX_DIR = EXAMPLES_DIR / "bordereaux"
 
 PROGRAM_BORDEREAU_MAPPING = {
     # Aviation Programs
-    "aviation_axa_xl_2024": "bordereau_aviation_axa_xl",
-    "aviation_old_republic_2024": "bordereau_aviation_old_republic",
+    "aviation_axa_xl_2024": "aviation/bordereau_aviation_axa_xl",
+    "aviation_old_republic_2024": "aviation/bordereau_aviation_old_republic",
     # Casualty Programs
     # TODO: Create bordereau for casualty_aig_2024
     "casualty_aig_2024": None,
@@ -74,6 +74,7 @@ def get_bordereau_path(bordereau_name: str) -> Path:
 
     Args:
         bordereau_name: Bordereau name (with or without .csv extension)
+                       Can include subdirectory (e.g., "aviation/bordereau_aviation_axa_xl")
 
     Returns:
         Path to the bordereau file

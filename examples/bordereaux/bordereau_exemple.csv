@@ -1,5 +1,0 @@
-policy_id,insured_name,BUSCL_COUNTRY_CD,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1,BUSCL_CLASS_OF_BUSINESS_2,BUSCL_CLASS_OF_BUSINESS_3,BUSCL_LIMIT_CURRENCY_CD,line_of_business,industry,sic_code,include,exposition,inception_date,expiry_date
-POL-2024-001,Entreprise Dupont SAS,France,EMEA,Property,Commercial,Fire,EUR,Property,Construction,1623,Standard,500000,2024-01-01,2024-12-31
-POL-2024-002,Société Martin & Fils,France,EMEA,Property,Commercial,Fire,EUR,Property,Technology,7371,Premium,750000,2024-02-15,2025-02-14
-POL-2024-003,Global Corp Ltd,Singapore,APAC,Property,Commercial,Fire,SGD,Property,Manufacturing,3561,Standard,1200000,2024-03-01,2025-02-28
-

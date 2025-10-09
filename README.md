@@ -19,9 +19,14 @@ structure-application/
 │   └── __init__.py
 ├── examples/                           # Exemples et démonstrations
 │   ├── README.md                      # Documentation des exemples
-│   ├── bordereaux/                    # Exemples de bordereaux
-│   │   ├── bordereau_exemple.csv      # Bordereau de base
-│   │   └── bordereau_multi_year_test.csv # Test claim_basis
+│   ├── bordereaux/                    # Exemples de bordereaux (organisés par ligne de business)
+│   │   ├── aviation/                  # Bordereaux Aviation
+│   │   │   ├── bordereau_aviation_axa_xl.csv
+│   │   │   └── bordereau_aviation_old_republic.csv
+│   │   ├── test/                      # Bordereaux de test
+│   │   │   ├── bordereau_exemple.csv
+│   │   │   └── bordereau_multi_year_test.csv
+│   │   └── README.md                  # Conventions des bordereaux
 │   ├── programs/                      # Exemples de programmes
 │   │   ├── program_simple_sequential.xlsx
 │   │   ├── program_simple_parallel.xlsx
@@ -48,19 +53,25 @@ structure-application/
 
 ### 1. Bordereau
 Fichier CSV contenant les polices d'assurance avec :
-- `policy_id` : Identifiant unique
-- `insured_name` : Nom de l'assuré
-- `country` : Pays
-- `region` : Région (APAC, EMEA, Americas, etc.)
-- `product_type_1`, `product_type_2`, `product_type_3` : Hiérarchie des types de produits
-- `currency` : Devise
+
+**Colonnes requises :**
+- `INSURED_NAME` : Nom de l'assuré (**DOIT être en MAJUSCULES**)
+- `exposition` : Valeur d'exposition (**en millions**)
+- `INCEPTION_DT` : Date de souscription de la police (**format YYYY-MM-DD**)
+- `EXPIRE_DT` : Date d'expiration de la police (**format YYYY-MM-DD**)
 - `line_of_business` : Ligne de business
+
+**Colonnes optionnelles (pour matching de sections) :**
+- `policy_id` : Identifiant unique (optionnel, pour tracking/reporting)
+- `BUSCL_COUNTRY_CD` : Code pays
+- `BUSCL_REGION` : Région (APAC, EMEA, Americas, etc.)
+- `BUSCL_CLASS_OF_BUSINESS_1`, `BUSCL_CLASS_OF_BUSINESS_2`, `BUSCL_CLASS_OF_BUSINESS_3` : Hiérarchie des classes de business
+- `BUSCL_LIMIT_CURRENCY_CD` : Code devise
 - `industry` : Industrie
 - `sic_code` : Code SIC
 - `include` : Champ libre pour conditions spéciales
-- `exposition` : Valeur d'exposition
-- `inception_date` : Date de souscription de la police
-- `expiry_date` : Date d'expiration de la police
+
+⚠️ **IMPORTANT** : Les bordereaux doivent être organisés dans des sous-dossiers par ligne de business (aviation/, property/, casualty/, test/). Consultez [examples/bordereaux/README.md](examples/bordereaux/README.md) pour les conventions complètes.
 
 ### 2. Produits de base
 - **quota-share** : Application d'un pourcentage de cession (cession_PCT) sur l'exposition
@@ -181,7 +192,7 @@ Définit les sections de chaque structure avec paramètres et conditions.
 uv sync
 
 # Appliquer un programme à un bordereau
-uv run python main.py --program examples/programs/aviation_axa_xl_2024.xlsx --bordereau examples/bordereaux/bordereau_aviation_axa_xl.csv
+uv run python main.py --program examples/programs/aviation_axa_xl_2024.xlsx --bordereau examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv
 ```
 
 ### Cas d'usage avancé : Consolidation multi-cédantes
@@ -243,7 +254,8 @@ uv run python demo_organized_examples.py
 ```
 
 ### Structure des exemples
-- **`examples/bordereaux/`** : Exemples de bordereaux avec les nouveaux champs
+- **`examples/bordereaux/`** : Exemples de bordereaux organisés par ligne de business (aviation/, test/)
+  - Consultez [examples/bordereaux/README.md](examples/bordereaux/README.md) pour les conventions
 - **`examples/programs/`** : Programmes simples (séquentiel/parallèle)
 - **`examples/treaties/`** : Traités multi-années pour claim_basis
 - **`examples/scripts/`** : Scripts de démonstration et d'exemple

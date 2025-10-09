@@ -1,7 +1,0 @@
-policy_id,insured_name,BUSCL_COUNTRY_CD,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1,BUSCL_CLASS_OF_BUSINESS_2,BUSCL_CLASS_OF_BUSINESS_3,BUSCL_LIMIT_CURRENCY_CD,line_of_business,industry,sic_code,include,exposition,inception_date,expiry_date
-AVI-2024-001,Air France-KLM,,,,,,USD,Aviation,Transportation,4512,,25000000,2024-01-01,2024-12-31
-AVI-2024-002,Lufthansa Group,,,,,,USD,Aviation,Transportation,4512,,30000000,2024-02-15,2025-02-14
-AVI-2024-003,Emirates Airlines,United Arab Emirates,Middle East,,,,,Aviation,Transportation,4512,,45000000,2024-03-01,2025-02-28
-AVI-2024-004,Singapore Airlines,Singapore,Asia,,,,,Aviation,Transportation,4512,,38000000,2024-01-15,2025-01-14
-AVI-2024-005,Delta Air Lines,United States,North America,,,,,Aviation,Transportation,4512,,52000000,2024-04-01,2025-03-31
-AVI-2024-006,British Airways,United Kingdom,Europe,,,,,Aviation,Transportation,4512,,41000000,2024-02-01,2025-01-31

@@ -13,7 +13,7 @@ def test_valid_bordereau():
     print("=" * 80)
     
     try:
-        df = load_bordereau("examples/bordereaux/bordereau_aviation_axa_xl.csv")
+        df = load_bordereau("examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv")
         print(f"✓ Success: Loaded {len(df)} policies")
         print(df.head())
     except BordereauValidationError as e:
@@ -28,14 +28,14 @@ def test_bordereau_with_warnings():
     
     test_data = pd.DataFrame({
         "policy_id": ["POL-001", "POL-002", "POL-001"],
-        "insured_name": ["Company A", "Company B", "Company C"],
+        "INSURED_NAME": ["COMPANY A", "COMPANY B", "COMPANY C"],
         "BUSCL_COUNTRY_CD": ["US", "FR", "UK"],
         "BUSCL_REGION": ["NA", "EU", "EU"],
         "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
         "line_of_business": ["Aviation", "Property", "Aviation"],
         "exposition": [0, 25.5, 30.0],
-        "inception_date": ["2024-01-01", "2024-02-01", "2024-03-01"],
-        "expiry_date": ["2024-12-31", "2025-01-31", "2025-02-28"],
+        "INCEPTION_DT": ["2024-01-01", "2024-02-01", "2024-03-01"],
+        "EXPIRE_DT": ["2024-12-31", "2025-01-31", "2025-02-28"],
     })
     
     test_file = "/tmp/test_warnings.csv"
@@ -60,11 +60,12 @@ def test_invalid_bordereau():
     
     test_data = pd.DataFrame({
         "policy_id": ["POL-001", "POL-002", "POL-003"],
-        "insured_name": ["Company A", "Company B", "Company C"],
+        "INSURED_NAME": ["COMPANY A", "COMPANY B", "COMPANY C"],
         "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
+        "line_of_business": ["Test", "Test", "Test"],
         "exposition": ["abc", -50, 25.5],
-        "inception_date": ["2024-01-01", "invalid-date", "2024-03-01"],
-        "expiry_date": ["2024-12-31", "2024-12-31", "2023-12-31"],
+        "INCEPTION_DT": ["2024-01-01", "invalid-date", "2024-03-01"],
+        "EXPIRE_DT": ["2024-12-31", "2024-12-31", "2023-12-31"],
     })
     
     test_file = "/tmp/test_invalid.csv"
@@ -86,9 +87,9 @@ def test_missing_required_columns():
     
     test_data = pd.DataFrame({
         "policy_id": ["POL-001", "POL-002"],
-        "insured_name": ["Company A", "Company B"],
-        "inception_date": ["2024-01-01", "2024-02-01"],
-        "expiry_date": ["2024-12-31", "2025-01-31"],
+        "INSURED_NAME": ["COMPANY A", "COMPANY B"],
+        "INCEPTION_DT": ["2024-01-01", "2024-02-01"],
+        "EXPIRE_DT": ["2024-12-31", "2025-01-31"],
     })
     
     test_file = "/tmp/test_missing.csv"
@@ -110,10 +111,11 @@ def test_unknown_columns():
     
     test_data = pd.DataFrame({
         "policy_id": ["POL-001", "POL-002"],
-        "insured_name": ["Company A", "Company B"],
+        "INSURED_NAME": ["COMPANY A", "COMPANY B"],
+        "line_of_business": ["Test", "Test"],
         "exposition": [25.5, 30.0],
-        "inception_date": ["2024-01-01", "2024-02-01"],
-        "expiry_date": ["2024-12-31", "2025-01-31"],
+        "INCEPTION_DT": ["2024-01-01", "2024-02-01"],
+        "EXPIRE_DT": ["2024-12-31", "2025-01-31"],
         "unknown_column": ["value1", "value2"],
         "another_bad_column": ["x", "y"],
     })
@@ -137,10 +139,11 @@ def test_only_required_columns():
     
     test_data = pd.DataFrame({
         "policy_id": ["POL-001", "POL-002"],
-        "insured_name": ["Company A", "Company B"],
+        "INSURED_NAME": ["COMPANY A", "COMPANY B"],
+        "line_of_business": ["Test", "Test"],
         "exposition": [25.5, 30.0],
-        "inception_date": ["2024-01-01", "2024-02-01"],
-        "expiry_date": ["2024-12-31", "2025-01-31"],
+        "INCEPTION_DT": ["2024-01-01", "2024-02-01"],
+        "EXPIRE_DT": ["2024-12-31", "2025-01-31"],
     })
     
     test_file = "/tmp/test_only_req.csv"
@@ -161,10 +164,10 @@ def test_partial_dimensions():
     
     test_data = pd.DataFrame({
         "policy_id": ["POL-001", "POL-002"],
-        "insured_name": ["Company A", "Company B"],
+        "INSURED_NAME": ["COMPANY A", "COMPANY B"],
         "exposition": [25.5, 30.0],
-        "inception_date": ["2024-01-01", "2024-02-01"],
-        "expiry_date": ["2024-12-31", "2025-01-31"],
+        "INCEPTION_DT": ["2024-01-01", "2024-02-01"],
+        "EXPIRE_DT": ["2024-12-31", "2025-01-31"],
         "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR"],
         "line_of_business": ["Aviation", "Property"],
     })
@@ -187,13 +190,13 @@ def test_null_dimension_columns():
     
     test_data = pd.DataFrame({
         "policy_id": ["POL-001", "POL-002"],
-        "insured_name": ["Company A", "Company B"],
+        "INSURED_NAME": ["COMPANY A", "COMPANY B"],
         "BUSCL_COUNTRY_CD": [None, "US"],
         "BUSCL_LIMIT_CURRENCY_CD": [None, "USD"],
-        "line_of_business": [None, "Aviation"],
+        "line_of_business": ["Test", "Test"],
         "exposition": [25.5, 30.0],
-        "inception_date": ["2024-01-01", "2024-02-01"],
-        "expiry_date": ["2024-12-31", "2025-01-31"],
+        "INCEPTION_DT": ["2024-01-01", "2024-02-01"],
+        "EXPIRE_DT": ["2024-12-31", "2025-01-31"],
     })
     
     test_file = "/tmp/test_null_dim.csv"
@@ -214,10 +217,11 @@ def test_null_required_columns():
     
     test_data = pd.DataFrame({
         "policy_id": ["POL-001", None, "POL-003"],
-        "insured_name": [None, "Company B", "Company C"],
+        "INSURED_NAME": [None, "COMPANY B", "COMPANY C"],
+        "line_of_business": ["Test", "Test", "Test"],
         "exposition": [25.5, None, 30.0],
-        "inception_date": ["2024-01-01", "2024-02-01", None],
-        "expiry_date": ["2024-12-31", None, "2025-02-28"],
+        "INCEPTION_DT": ["2024-01-01", "2024-02-01", None],
+        "EXPIRE_DT": ["2024-12-31", None, "2025-02-28"],
     })
     
     test_file = "/tmp/test_null_req.csv"

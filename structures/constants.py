@@ -6,7 +6,7 @@ from types import SimpleNamespace
 # ──────────────────────────────────────────────────────────────────────────────
 FIELDS = {
     "POLICY_NUMBER": "policy_id",
-    "INSURED_NAME": "insured_name",
+    "INSURED_NAME": "INSURED_NAME",
     "COUNTRY": "BUSCL_COUNTRY_CD",
     "REGION": "BUSCL_REGION",
     "CLASS_1": "BUSCL_CLASS_OF_BUSINESS_1",
@@ -18,8 +18,8 @@ FIELDS = {
     "SIC_CODE": "sic_code",
     "INCLUDE": "include",
     "EXPOSURE": "exposition",
-    "INCEPTION_DATE": "inception_date",
-    "EXPIRY_DATE": "expiry_date",
+    "INCEPTION_DATE": "INCEPTION_DT",
+    "EXPIRY_DATE": "EXPIRE_DT",
 }
 
 # Seules les dimensions ci-dessous sont considérées au matching
