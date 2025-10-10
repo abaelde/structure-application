@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 from typing import List, Optional, Union
 from .constants import FIELDS, DIMENSIONS
+from .exposure_mapping import find_exposure_column
 
 
 class BordereauValidationError(Exception):
@@ -89,6 +90,13 @@ class BordereauLoader:
     def _load_from_csv(self) -> pd.DataFrame:
         try:
             df = pd.read_csv(self.source)
+            
+            found_column, target_column = find_exposure_column(df.columns.tolist(), self.line_of_business)
+            
+            if found_column and found_column != target_column:
+                df = df.rename(columns={found_column: target_column})
+                print(f"ℹ️  Colonne d'exposition '{found_column}' mappée vers '{target_column}'")
+            
             return df
         except Exception as e:
             raise BordereauValidationError(f"Error reading CSV file: {e}")

@@ -97,7 +97,7 @@ Le système accepte **plusieurs noms possibles** pour la colonne d'exposition se
 
 | Line of Business | Noms de colonnes acceptés |
 |------------------|---------------------------|
-| **Aviation** | `exposition`, `liable_limit`, `exposure` |
+| **Aviation** | `exposition`, 
 | **Casualty** | `exposition`, `limite`, `limit` |
 | **Property** | `exposition`, `exposure` |
 | **Autres** | `exposition`, `exposure` |
@@ -135,9 +135,8 @@ Pour accepter de nouveaux noms de colonnes :
 ```python
 # Dans exposure_mapping.py
 EXPOSURE_COLUMN_ALIASES = {
-    "aviation": ["exposition", "liable_limit", "exposure"],
-    "casualty": ["exposition", "limite", "limit"],
-    "marine": ["exposition", "insured_value"],  # Nouvelle LOB
+    "aviation": ["hull_limit"],
+    "casualty": ["limit"],
 }
 ```
 
