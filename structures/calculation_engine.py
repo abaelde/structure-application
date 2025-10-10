@@ -224,7 +224,7 @@ def apply_program(
             total_cession_to_reinsurer += detail["cession_to_reinsurer"]
 
     return {
-        "insured_name": policy_data.get(FIELDS["INSURED_NAME"]),
+        FIELDS["INSURED_NAME"]: policy_data.get(FIELDS["INSURED_NAME"]),
         "exposure": exposure,
         "cession_to_layer_100pct": total_cession_to_layer_100pct,
         "cession_to_reinsurer": total_cession_to_reinsurer,
@@ -282,7 +282,7 @@ def apply_treaty_with_claim_basis(
 
     if selected_treaty is None:
         return {
-            "insured_name": policy_data.get(FIELDS["INSURED_NAME"]),
+            FIELDS["INSURED_NAME"]: policy_data.get(FIELDS["INSURED_NAME"]),
             "exposure": policy_data.get(FIELDS["EXPOSURE"], 0),
             "cession_to_reinsurer": 0.0,
             "retained_by_cedant": policy_data.get(FIELDS["EXPOSURE"], 0),

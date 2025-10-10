@@ -1,8 +1,149 @@
-# Bordereaux - Conventions et Structure
+# Bordereaux - Data Model et Spécifications
+
+## Vue d'Ensemble
+
+Ce document définit le **data model** des bordereaux utilisés dans le système de réassurance. Un bordereau est un fichier CSV contenant les informations sur les polices d'assurance souscrites, utilisé pour calculer les cessions de réassurance.
+
+## Data Model
+
+### Règles Générales (Applicables à Tous les Bordereaux)
+
+Quel que soit la ligne de business, **tous les bordereaux** doivent respecter les règles suivantes :
+
+#### Colonnes Obligatoires Minimales
+
+| Colonne | Nom Exact | Type | Format | Description | Règles de Validation |
+|---------|-----------|------|--------|-------------|----------------------|
+| **Insured Name** | `INSURED_NAME` | String | **MAJUSCULES** | Nom de l'assuré | ✅ Obligatoire<br>✅ DOIT être en MAJUSCULES uniquement<br>❌ Erreur si minuscules présentes |
+| **Inception Date** | `INCEPTION_DT` | Date | `YYYY-MM-DD` | Date de début de couverture | ✅ Obligatoire<br>✅ Format ISO 8601<br>❌ Erreur si format invalide |
+| **Expiry Date** | `EXPIRE_DT` | Date | `YYYY-MM-DD` | Date de fin de couverture | ✅ Obligatoire<br>✅ Format ISO 8601<br>✅ Doit être > `INCEPTION_DT`<br>❌ Erreur si ≤ inception |
+
+#### Colonnes Obligatoires Standard
+
+En plus des colonnes minimales, ces colonnes sont également requises :
+
+| Colonne | Nom Exact | Type | Format | Description | Règles de Validation |
+|---------|-----------|------|--------|-------------|----------------------|
+| **Exposition** | `exposition` | Numeric | Nombre positif | Montant d'exposition en valeur absolue | ✅ Obligatoire<br>✅ Valeur positive<br>⚠️ Warning si = 0<br>❌ Erreur si < 0 |
+| **Line of Business** | `line_of_business` | String | Texte | Ligne de business de la police | ✅ Obligatoire<br>✅ Doit être cohérent avec le dossier |
+
+#### Colonnes Optionnelles Standards
+
+| Colonne | Nom Exact | Type | Description | Utilisation |
+|---------|-----------|------|-------------|-------------|
+| **Policy ID** | `policy_id` | String | Identifiant unique de la police | Tracking, reporting, traçabilité |
+
+#### Colonnes Dimensionnelles (Optionnelles)
+
+Ces colonnes sont utilisées pour le **matching avancé** des sections dans les programmes de réassurance :
+
+| Colonne | Nom Exact | Type | Description |
+|---------|-----------|------|-------------|
+| **Country** | `BUSCL_COUNTRY_CD` | String | Code pays (ISO) |
+| **Region** | `BUSCL_REGION` | String | Région géographique |
+| **Class of Business 1** | `BUSCL_CLASS_OF_BUSINESS_1` | String | Classe de business niveau 1 |
+| **Class of Business 2** | `BUSCL_CLASS_OF_BUSINESS_2` | String | Classe de business niveau 2 |
+| **Class of Business 3** | `BUSCL_CLASS_OF_BUSINESS_3` | String | Classe de business niveau 3 |
+| **Currency** | `BUSCL_LIMIT_CURRENCY_CD` | String | Code devise (ISO 4217) |
+| **Industry** | `industry` | String | Secteur industriel |
+| **SIC Code** | `sic_code` | String/Numeric | Code SIC (Standard Industrial Classification) |
+| **Include** | `include` | String/Boolean | Indicateur d'inclusion/exclusion |
+
+### Règles Spécifiques par Line of Business
+
+#### Aviation
+
+Pour les bordereaux situés dans `bordereaux/aviation/` :
+
+**Colonnes additionnelles recommandées** :
+- `industry` : Généralement "Transportation"
+- `sic_code` : Généralement 4512 (Air Transportation)
+- `BUSCL_REGION` : Important pour la segmentation géographique
+
+**Valeurs typiques** :
+- `line_of_business` : "Aviation"
+- Exposition : Généralement entre 10M et 300M
+
+#### Casualty
+
+Pour les bordereaux situés dans `bordereaux/casualty/` :
+
+**Colonnes additionnelles recommandées** :
+- `industry` : Secteur d'activité (Retail, Manufacturing, Services, etc.)
+- `sic_code` : Code SIC spécifique au secteur
+- `BUSCL_COUNTRY_CD` : Pays de l'entreprise assurée
+
+**Valeurs typiques** :
+- `line_of_business` : "Casualty"
+- Exposition : Variable selon le secteur (1M à 50M)
+
+#### Property
+
+Pour les bordereaux situés dans `bordereaux/property/` :
+
+**Colonnes additionnelles recommandées** :
+- `BUSCL_REGION` : Région pour l'analyse de risque géographique
+- `BUSCL_COUNTRY_CD` : Pays de localisation du bien
+
+**Valeurs typiques** :
+- `line_of_business` : "Property"
+- Exposition : Variable selon le type de bien
+
+## Noms de Colonnes Alternatifs (Optionnel)
+
+Le système accepte **plusieurs noms possibles** pour la colonne d'exposition selon la ligne de business. Cela permet de travailler avec des bordereaux qui utilisent des conventions de nommage différentes sans avoir à les modifier.
+
+### Noms Acceptés par LOB
+
+| Line of Business | Noms de colonnes acceptés |
+|------------------|---------------------------|
+| **Aviation** | `exposition`, `liable_limit`, `exposure` |
+| **Casualty** | `exposition`, `limite`, `limit` |
+| **Property** | `exposition`, `exposure` |
+| **Autres** | `exposition`, `exposure` |
+
+### Fonctionnement
+
+- Le système **détecte automatiquement** quelle colonne est présente dans votre bordereau
+- Si un nom alternatif est utilisé (ex: `limite`), il crée automatiquement la colonne `exposition` pour le moteur de calcul
+- **Aucune modification de vos fichiers n'est nécessaire** - utilisez le nom qui vous convient
+
+### Exemples
+
+**Avec le nom standard** :
+```csv
+policy_id,INSURED_NAME,exposition,INCEPTION_DT,EXPIRE_DT,line_of_business
+CAS-001,CARREFOUR SA,5000000,2024-01-01,2024-12-31,Casualty
+```
+
+**Avec un nom alternatif** (fonctionne aussi) :
+```csv
+policy_id,INSURED_NAME,limite,INCEPTION_DT,EXPIRE_DT,line_of_business
+CAS-001,CARREFOUR SA,5000000,2024-01-01,2024-12-31,Casualty
+```
+
+Les deux formats sont acceptés, aucune modification requise !
+
+### Extensibilité
+
+Pour accepter de nouveaux noms de colonnes :
+
+1. Modifier `EXPOSURE_COLUMN_ALIASES` dans `structures/exposure_mapping.py`
+2. Ajouter le nom dans `LOB_SPECIFIC_EXPOSURE_COLUMNS` de `structures/bordereau_loader.py`
+
+**Exemple** :
+```python
+# Dans exposure_mapping.py
+EXPOSURE_COLUMN_ALIASES = {
+    "aviation": ["exposition", "liable_limit", "exposure"],
+    "casualty": ["exposition", "limite", "limit"],
+    "marine": ["exposition", "insured_value"],  # Nouvelle LOB
+}
+```
 
 ## Structure de Dossiers
 
-Les bordereaux doivent être organisés par **ligne de business** (Line of Business) dans des sous-dossiers :
+Les bordereaux doivent être organisés par **ligne de business** dans des sous-dossiers :
 
 ```
 bordereaux/
@@ -12,49 +153,11 @@ bordereaux/
 └── test/           # Bordereaux de test
 ```
 
-Cette organisation permet :
-- De détecter automatiquement la ligne de business du bordereau
-- De relier automatiquement le bordereau au bon programme
-- D'organiser clairement les données par métier
-
-## Conventions de Nommage des Colonnes
-
-### Colonnes Requises
-
-Toutes les colonnes suivantes sont **obligatoires** :
-
-| Colonne | Nom Exact | Format | Description |
-|---------|-----------|--------|-------------|
-| Insured Name | `INSURED_NAME` | **MAJUSCULES** | Nom de l'assuré (DOIT être en capitales) |
-| Exposition | `exposition` | Nombre | Montant d'exposition en **valeur absolue** |
-| Inception Date | `INCEPTION_DT` | **YYYY-MM-DD** | Date de début de couverture |
-| Expiry Date | `EXPIRE_DT` | **YYYY-MM-DD** | Date de fin de couverture |
-| Line of Business | `line_of_business` | Texte | Ligne de business (doit correspondre au dossier) |
-
-⚠️ **IMPORTANT** :
-- Les noms de colonnes pour les dates sont en **MAJUSCULES** : `INCEPTION_DT`, `EXPIRE_DT`
-- Le champ `INSURED_NAME` doit contenir uniquement des valeurs en **MAJUSCULES**
-- Les expositions sont en **valeur absolue** (ex: `25000000` pour 25 millions)
-
-### Colonnes Optionnelles
-
-| Colonne | Nom Exact | Format | Description |
-|---------|-----------|--------|-------------|
-| Policy ID | `policy_id` | Texte | Identifiant unique de la police (pour tracking/reporting) |
-
-### Colonnes Dimensionnelles (Optionnelles)
-
-Ces colonnes sont utilisées pour le matching des sections dans les programmes :
-
-- `BUSCL_COUNTRY_CD` : Code pays
-- `BUSCL_REGION` : Région géographique
-- `BUSCL_CLASS_OF_BUSINESS_1` : Classe de business niveau 1
-- `BUSCL_CLASS_OF_BUSINESS_2` : Classe de business niveau 2
-- `BUSCL_CLASS_OF_BUSINESS_3` : Classe de business niveau 3
-- `BUSCL_LIMIT_CURRENCY_CD` : Code devise
-- `industry` : Industrie
-- `sic_code` : Code SIC
-- `include` : Indicateur d'inclusion/exclusion
+**Avantages de cette organisation** :
+- Détection automatique de la ligne de business du bordereau
+- Liaison automatique au programme de réassurance correspondant
+- Organisation claire des données par métier
+- Facilite la validation spécifique par ligne de business
 
 ## Exemples
 

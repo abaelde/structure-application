@@ -1,7 +1,7 @@
 import pandas as pd
 import sys
 from typing import Dict, Any
-from .constants import PRODUCT, SECTION_COLS as SC
+from .constants import PRODUCT, SECTION_COLS as SC, FIELDS
 
 
 def write_detailed_results(
@@ -16,7 +16,7 @@ def write_detailed_results(
 
     for _, policy_result in results_df.iterrows():
         file.write(f"\n{'─' * 80}\n")
-        file.write(f"INSURED: {policy_result['insured_name']}\n")
+        file.write(f"INSURED: {policy_result[FIELDS['INSURED_NAME']]}\n")
         file.write(f"Cedant gross exposure: {policy_result['exposure']:,.2f}\n")
         file.write(f"Cession at layer (100%): {policy_result['cession_to_layer_100pct']:,.2f}\n")
         file.write(f"Reinsurer net exposure: {policy_result['cession_to_reinsurer']:,.2f}\n")

@@ -267,7 +267,6 @@ def consolidate_all_programs():
         report_file,
         all_program_info,
         ready_pairs,
-        consolidated_results,
         insured_aggregation,
     )
     print(f"✅ Consolidated report saved to: {report_file}")
