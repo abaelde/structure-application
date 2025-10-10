@@ -54,6 +54,7 @@ structures_data = {
     "INSPER_MAIN_CURRENCY_CD": [None],  # Main currency
     "INSPER_UW_YEAR": [None],  # UW Year
     "INSPER_CONTRACT_ORDER": [1],  # Former contract_order
+    "INSPER_PREDECESSOR_TITLE": [None],  # Entry point structure
     "INSPER_CONTRACT_FORM_CD_SLAV": [None],  # Contract form code
     "INSPER_CONTRACT_LODRA_CD_SLAV": [None],  # Contract LODRA code
     "INSPER_CONTRACT_COVERAGE_CD_SLAV": [None],  # Contract coverage code

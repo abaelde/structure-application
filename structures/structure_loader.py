@@ -18,7 +18,8 @@ KEYS_AND_RELATIONS = [
 PARAMETERS = [
     # Structure configuration parameters
     "TYPE_OF_PARTICIPATION_CD",  # Defines structure type (quota_share, excess_of_loss)
-    "INSPER_CONTRACT_ORDER",  # Defines application order of structures
+    "INSPER_CONTRACT_ORDER",  # Defines application order of structures (deprecated)
+    "INSPER_PREDECESSOR_TITLE",  # Inuring mechanism: name of predecessor structure
     # Core calculation parameters
     "CESSION_PCT",
     "ATTACHMENT_POINT_100",
@@ -81,6 +82,7 @@ class ProgramLoader:
             structure_name = structure_row[STRUCTURE_COLS.NAME]
             structure_id = structure_row.get(STRUCTURE_COLS.INSPER_ID)
             contract_order = structure_row[STRUCTURE_COLS.ORDER]
+            predecessor_title = structure_row.get(STRUCTURE_COLS.PREDECESSOR)
             type_of_participation = structure_row[STRUCTURE_COLS.TYPE]
             claim_basis = structure_row.get(STRUCTURE_COLS.CLAIM_BASIS)
             inception_date = structure_row.get(STRUCTURE_COLS.INCEPTION)
@@ -99,6 +101,7 @@ class ProgramLoader:
                 {
                     "structure_name": structure_name,
                     "contract_order": contract_order,
+                    "predecessor_title": predecessor_title,
                     "type_of_participation": type_of_participation,
                     "claim_basis": claim_basis,
                     "inception_date": inception_date,

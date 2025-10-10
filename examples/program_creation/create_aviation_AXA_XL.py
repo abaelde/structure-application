@@ -153,6 +153,15 @@ structures_data = {
     ],  # Main currency
     "INSPER_UW_YEAR": [None, None, None, None, None, None, None],  # UW Year
     "INSPER_CONTRACT_ORDER": [0, 1, 2, 3, 4, 5, 6],  # Former contract_order
+    "INSPER_PREDECESSOR_TITLE": [
+        None,
+        "QS_1",
+        "QS_1",
+        "QS_1",
+        "QS_1",
+        "QS_1",
+        "QS_1",
+    ],  # Inuring: predecessor structure
     "INSPER_CONTRACT_FORM_CD_SLAV": [
         None,
         None,

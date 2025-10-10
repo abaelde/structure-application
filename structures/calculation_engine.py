@@ -82,13 +82,28 @@ def apply_program(
     structures = program["structures"]
     dimension_columns = program["dimension_columns"]
 
-    sorted_structures = sorted(structures, key=lambda x: x["contract_order"])
-
+    structure_outputs = {}
     total_cession_to_layer_100pct = 0.0
     total_cession_to_reinsurer = 0.0
     structures_detail = []
 
-    for structure in sorted_structures:
+    entry_points = [s for s in structures if pd.isna(s.get("predecessor_title"))]
+    
+    processed = set()
+    
+    def process_structure(structure):
+        structure_name = structure["structure_name"]
+        
+        if structure_name in processed:
+            return
+        
+        predecessor_title = structure.get("predecessor_title")
+        
+        if pd.notna(predecessor_title):
+            predecessor = next((s for s in structures if s["structure_name"] == predecessor_title), None)
+            if predecessor:
+                process_structure(predecessor)
+        
         matched_section = match_section(
             policy_data, structure["sections"], dimension_columns
         )
@@ -96,30 +111,48 @@ def apply_program(
         if matched_section is None:
             structures_detail.append(
                 {
-                    "structure_name": structure["structure_name"],
+                    "structure_name": structure_name,
                     "type_of_participation": structure["type_of_participation"],
                     "claim_basis": structure.get("claim_basis"),
                     "inception_date": structure.get("inception_date"),
                     "expiry_date": structure.get("expiry_date"),
-                    "input_exposure": exposure,
+                    "input_exposure": 0.0,
                     "cession_to_layer_100pct": 0.0,
                     "cession_to_reinsurer": 0.0,
                     "reinsurer_share": 0.0,
                     "applied": False,
                     "section": None,
+                    "predecessor_title": predecessor_title if pd.notna(predecessor_title) else None,
                 }
             )
-            continue
+            structure_outputs[structure_name] = {
+                "retained": 0.0,
+                "cession_to_layer_100pct": 0.0,
+                "cession_to_reinsurer": 0.0,
+            }
+            processed.add(structure_name)
+            return
 
-        input_exposure = exposure
+        if pd.notna(predecessor_title) and predecessor_title in structure_outputs:
+            input_exposure = structure_outputs[predecessor_title]["retained"]
+        else:
+            input_exposure = exposure
 
         ceded_result = apply_section(
             input_exposure, matched_section, structure["type_of_participation"]
         )
 
+        retained = input_exposure - ceded_result["cession_to_layer_100pct"]
+        
+        structure_outputs[structure_name] = {
+            "retained": retained,
+            "cession_to_layer_100pct": ceded_result["cession_to_layer_100pct"],
+            "cession_to_reinsurer": ceded_result["cession_to_reinsurer"],
+        }
+
         structures_detail.append(
             {
-                "structure_name": structure["structure_name"],
+                "structure_name": structure_name,
                 "type_of_participation": structure["type_of_participation"],
                 "claim_basis": structure.get("claim_basis"),
                 "inception_date": structure.get("inception_date"),
@@ -130,11 +163,19 @@ def apply_program(
                 "reinsurer_share": ceded_result["reinsurer_share"],
                 "applied": True,
                 "section": matched_section,
+                "predecessor_title": predecessor_title if pd.notna(predecessor_title) else None,
             }
         )
 
-        total_cession_to_layer_100pct += ceded_result["cession_to_layer_100pct"]
-        total_cession_to_reinsurer += ceded_result["cession_to_reinsurer"]
+        processed.add(structure_name)
+
+    for structure in structures:
+        process_structure(structure)
+
+    for detail in structures_detail:
+        if detail["applied"]:
+            total_cession_to_layer_100pct += detail["cession_to_layer_100pct"]
+            total_cession_to_reinsurer += detail["cession_to_reinsurer"]
 
     return {
         "insured_name": policy_data.get(FIELDS["INSURED_NAME"]),
