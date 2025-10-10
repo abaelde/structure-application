@@ -37,7 +37,8 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 - **INSPER_LAYER_NO** : INTEGER, numéro de couche (peut être NULL)
 - **INSPER_MAIN_CURRENCY_CD** : VARCHAR(255), devise principale (peut être NULL)
 - **INSPER_UW_YEAR** : INTEGER, année UW (peut être NULL)
-- **INSPER_CONTRACT_ORDER** : INTEGER, ordre d'application séquentiel (commence à 0)
+- **INSPER_CONTRACT_ORDER** : INTEGER,(rempli avec NULL)
+- **INSPER_PREDECESSOR_TITLE** : VARCHAR(255), nom de la structure antécédente pour l'inuring (NULL = entry point)
 - **INSPER_CONTRACT_FORM_CD_SLAV** : VARCHAR(255), code forme de contrat (peut être NULL)
 - **INSPER_CONTRACT_LODRA_CD_SLAV** : VARCHAR(255), code LODRA contrat (peut être NULL)
 - **INSPER_CONTRACT_COVERAGE_CD_SLAV** : VARCHAR(255), code couverture contrat (peut être NULL)
@@ -104,12 +105,41 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 ## Contraintes de Cohérence
 
 ### Contraintes Structurelles
-1. **INSPER_CONTRACT_ORDER** : Doit être unique et séquentiel (0, 1, 2, ...)
-2. **BUSINESS_TITLE** : Doit être unique dans la feuille structures
-3. **INSPER_ID_PRE** dans sections : Doit référencer un INSPER_ID_PRE existant dans structures
-4. **REPROG_ID_PRE** dans structures : Doit référencer le REPROG_ID_PRE du programme parent
-5. **REPROG_ID_PRE** dans sections : Doit référencer le REPROG_ID_PRE du programme parent
-6. **BUSCL_ID_PRE** : Doit être unique et auto-incrémenté
+1. **BUSINESS_TITLE** : Doit être unique dans la feuille structures
+2. **INSPER_ID_PRE** dans sections : Doit référencer un INSPER_ID_PRE existant dans structures
+3. **REPROG_ID_PRE** dans structures : Doit référencer le REPROG_ID_PRE du programme parent
+4. **REPROG_ID_PRE** dans sections : Doit référencer le REPROG_ID_PRE du programme parent
+5. **BUSCL_ID_PRE** : Doit être unique et auto-incrémenté
+6. **INSPER_PREDECESSOR_TITLE** : Si non NULL, doit référencer un BUSINESS_TITLE existant dans le même programme
+
+### Mécanisme d'Inuring
+Le **mécanisme d'inuring** permet de chaîner les structures de réassurance :
+
+1. **Entry points** : Structures sans prédécesseur (INSPER_PREDECESSOR_TITLE = NULL)
+   - S'appliquent directement sur l'exposition initiale de la police
+   - Peuvent être multiples (structures parallèles)
+
+2. **Structures chaînées** : Structures avec prédécesseur
+   - S'appliquent sur la **rétention** du prédécesseur (exposure - cession)
+   - Permet de simuler des structures empilées ou sur la rétention
+
+3. **Structures parallèles** : Plusieurs structures avec le même prédécesseur
+   - Toutes s'appliquent sur la même base (rétention du prédécesseur)
+   - Exemple : Plusieurs XOL sur la rétention d'un Quota Share
+
+**Exemple :**
+```
+QS_1 (predecessor: None)     → Entry point, appliqué sur exposition initiale
+├─ XOL_1 (predecessor: QS_1) → Appliqué sur rétention du QS_1
+├─ XOL_2 (predecessor: QS_1) → Appliqué sur rétention du QS_1 (parallèle à XOL_1)
+└─ XOL_3 (predecessor: QS_1) → Appliqué sur rétention du QS_1 (parallèle à XOL_1 et XOL_2)
+```
+
+### Rescaling Automatique
+Quand un **Excess of Loss** s'applique après un **Quota Share** :
+- Les limites (LIMIT_100) et points d'attachement (ATTACHMENT_POINT_100) du XOL sont automatiquement **rescalés**
+- Facteur de rescaling = taux de rétention du QS
+- Exemple : QS avec cession 25% (rétention 75%) → XOL défini à 100M xs 50M devient 75M xs 37.5M
 
 ### Contraintes Logiques
 1. **quota_share** : 
@@ -124,24 +154,17 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 2. **Pourcentages** : Tous les pourcentages sont exprimés en décimal (0.25 = 25%)
 3. **Dates** : Format ISO (YYYY-MM-DD) ou NULL
 
-## Rétrocompatibilité
+## Format de Données
 
-Le système supporte trois formats pour assurer la compatibilité :
-
-### Format Ancien (legacy)
-- **Programme** : `program_name`
-- **Structures** : `structure_name`, `contract_order`, `type_of_participation`, `claim_basis`, `inception_date`, `expiry_date`
-- **Sections** : `structure_name` (référence par nom), `cession_PCT`, `attachment_point_100`, `limit_occurrence_100`, `reinsurer_share`, dimensions (country, region, product_type_*, currency, line_of_business, industry, sic_code, include)
-
-### Format Intermédiaire
-- **Programme** : `REPROG_TITLE` + nouveaux champs programme
-- **Structures** : Nouveaux champs structures (INSPER_*, BUSINESS_TITLE, etc.)
-- **Sections** : `BUSINESS_TITLE` (référence par nom), anciens champs sections
-
-### Format Nouveau (actuel)
+### Format Actuel
 - **Programme** : Tous les champs REPROG_*
-- **Structures** : Tous les champs INSPER_*
+- **Structures** : Tous les champs INSPER_* incluant **INSPER_PREDECESSOR_TITLE** pour l'inuring
 - **Sections** : `INSPER_ID_PRE` (référence par ID), tous les champs BUSCL_*
+
+### Conventions
+- **Montants** : Tous les montants sont en **valeur absolue** (pas en millions)
+- **Inuring** : Utilisation de `INSPER_PREDECESSOR_TITLE` pour chaîner les structures
+- **Ordre** : `INSPER_CONTRACT_ORDER` est **deprecated** et doit être NULL
 
 ## Scripts de Création
 

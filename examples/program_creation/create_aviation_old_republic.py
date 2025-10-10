@@ -62,7 +62,7 @@ structures_data = {
     "INSPER_LAYER_NO": [None, None, None],  # Layer number
     "INSPER_MAIN_CURRENCY_CD": [None, None, None],  # Main currency
     "INSPER_UW_YEAR": [None, None, None],  # UW Year
-    "INSPER_CONTRACT_ORDER": [1, 2, 3],  # Former contract_order
+    "INSPER_CONTRACT_ORDER": [None, None, None],  # Deprecated (not used anymore)
     "INSPER_PREDECESSOR_TITLE": [None, None, None],  # All are entry points (parallel XOLs)
     "INSPER_CONTRACT_FORM_CD_SLAV": [None, None, None],  # Contract form code
     "INSPER_CONTRACT_LODRA_CD_SLAV": [None, None, None],  # Contract LODRA code

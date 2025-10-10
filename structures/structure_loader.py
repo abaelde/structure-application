@@ -110,8 +110,6 @@ class ProgramLoader:
                 }
             )
 
-        program_structures.sort(key=lambda x: x["contract_order"])
-
         self.program = {
             "name": program_name,
             "structures": program_structures,
