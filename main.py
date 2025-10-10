@@ -10,6 +10,7 @@ from structures import (
     write_detailed_results,
 )
 from structures.program_display import display_program
+from structures.constants import FIELDS
 
 
 def main():
@@ -59,7 +60,7 @@ def main():
     print("RESULTS SUMMARY")
     print("=" * 80)
     print(
-        results[["insured_name", "exposure", "cession_to_layer_100pct", "cession_to_reinsurer", "retained_by_cedant"]]
+        results[[FIELDS["INSURED_NAME"], "exposure", "cession_to_layer_100pct", "cession_to_reinsurer", "retained_by_cedant"]]
     )
 
     print("\n")
