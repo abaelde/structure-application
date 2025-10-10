@@ -129,6 +129,8 @@ def apply_program(
                 "retained": 0.0,
                 "cession_to_layer_100pct": 0.0,
                 "cession_to_reinsurer": 0.0,
+                "type_of_participation": structure["type_of_participation"],
+                "retention_pct": 1.0,
             }
             processed.add(structure_name)
             return
@@ -138,16 +140,40 @@ def apply_program(
         else:
             input_exposure = exposure
 
+        section_to_apply = matched_section.copy()
+        
+        if pd.notna(predecessor_title) and predecessor_title in structure_outputs:
+            predecessor_info = structure_outputs[predecessor_title]
+            predecessor_type = predecessor_info.get("type_of_participation")
+            current_type = structure["type_of_participation"]
+            
+            if predecessor_type == PRODUCT.QUOTA_SHARE and current_type == PRODUCT.EXCESS_OF_LOSS:
+                retention_factor = predecessor_info.get("retention_pct", 1.0)
+                
+                if SC.ATTACHMENT in section_to_apply and pd.notna(section_to_apply[SC.ATTACHMENT]):
+                    section_to_apply[SC.ATTACHMENT] = section_to_apply[SC.ATTACHMENT] * retention_factor
+                
+                if SC.LIMIT in section_to_apply and pd.notna(section_to_apply[SC.LIMIT]):
+                    section_to_apply[SC.LIMIT] = section_to_apply[SC.LIMIT] * retention_factor
+
         ceded_result = apply_section(
-            input_exposure, matched_section, structure["type_of_participation"]
+            input_exposure, section_to_apply, structure["type_of_participation"]
         )
 
         retained = input_exposure - ceded_result["cession_to_layer_100pct"]
+        
+        current_retention_pct = 1.0
+        if structure["type_of_participation"] == PRODUCT.QUOTA_SHARE:
+            cession_pct = matched_section.get(SC.CESSION_PCT, 0.0)
+            if pd.notna(cession_pct):
+                current_retention_pct = 1.0 - cession_pct
         
         structure_outputs[structure_name] = {
             "retained": retained,
             "cession_to_layer_100pct": ceded_result["cession_to_layer_100pct"],
             "cession_to_reinsurer": ceded_result["cession_to_reinsurer"],
+            "type_of_participation": structure["type_of_participation"],
+            "retention_pct": current_retention_pct,
         }
 
         structures_detail.append(
