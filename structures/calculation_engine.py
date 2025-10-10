@@ -141,6 +141,7 @@ def apply_program(
             input_exposure = exposure
 
         section_to_apply = matched_section.copy()
+        rescaling_info = None
         
         if pd.notna(predecessor_title) and predecessor_title in structure_outputs:
             predecessor_info = structure_outputs[predecessor_title]
@@ -150,11 +151,28 @@ def apply_program(
             if predecessor_type == PRODUCT.QUOTA_SHARE and current_type == PRODUCT.EXCESS_OF_LOSS:
                 retention_factor = predecessor_info.get("retention_pct", 1.0)
                 
+                original_attachment = None
+                original_limit = None
+                rescaled_attachment = None
+                rescaled_limit = None
+                
                 if SC.ATTACHMENT in section_to_apply and pd.notna(section_to_apply[SC.ATTACHMENT]):
+                    original_attachment = section_to_apply[SC.ATTACHMENT]
                     section_to_apply[SC.ATTACHMENT] = section_to_apply[SC.ATTACHMENT] * retention_factor
+                    rescaled_attachment = section_to_apply[SC.ATTACHMENT]
                 
                 if SC.LIMIT in section_to_apply and pd.notna(section_to_apply[SC.LIMIT]):
+                    original_limit = section_to_apply[SC.LIMIT]
                     section_to_apply[SC.LIMIT] = section_to_apply[SC.LIMIT] * retention_factor
+                    rescaled_limit = section_to_apply[SC.LIMIT]
+                
+                rescaling_info = {
+                    "retention_factor": retention_factor,
+                    "original_attachment": original_attachment,
+                    "rescaled_attachment": rescaled_attachment,
+                    "original_limit": original_limit,
+                    "rescaled_limit": rescaled_limit,
+                }
 
         ceded_result = apply_section(
             input_exposure, section_to_apply, structure["type_of_participation"]
@@ -189,7 +207,9 @@ def apply_program(
                 "reinsurer_share": ceded_result["reinsurer_share"],
                 "applied": True,
                 "section": matched_section,
+                "section_rescaled": section_to_apply,
                 "predecessor_title": predecessor_title if pd.notna(predecessor_title) else None,
+                "rescaling_info": rescaling_info,
             }
         )
 

@@ -29,7 +29,14 @@ def write_program_config(program: Dict[str, Any], file=None) -> None:
     for i, structure in enumerate(program["structures"], 1):
         file.write(f"\nStructure {i}: {structure['structure_name']}\n")
         file.write(f"   Type: {structure['type_of_participation']}\n")
-        file.write(f"   Execution order: {structure['contract_order']}\n")
+        
+        # Afficher le prédécesseur
+        predecessor_title = structure.get("predecessor_title")
+        if predecessor_title and pd.notna(predecessor_title):
+            file.write(f"   Predecessor: {predecessor_title} (Inuring)\n")
+        else:
+            file.write(f"   Predecessor: None (Entry point)\n")
+        
         file.write(f"   Number of sections: {len(structure['sections'])}\n")
 
         if structure.get("claim_basis") and pd.notna(structure.get("claim_basis")):
