@@ -26,7 +26,7 @@ Toutes les colonnes suivantes sont **obligatoires** :
 | Colonne | Nom Exact | Format | Description |
 |---------|-----------|--------|-------------|
 | Insured Name | `INSURED_NAME` | **MAJUSCULES** | Nom de l'assuré (DOIT être en capitales) |
-| Exposition | `exposition` | Nombre (millions) | Montant d'exposition en millions |
+| Exposition | `exposition` | Nombre | Montant d'exposition en **valeur absolue** |
 | Inception Date | `INCEPTION_DT` | **YYYY-MM-DD** | Date de début de couverture |
 | Expiry Date | `EXPIRE_DT` | **YYYY-MM-DD** | Date de fin de couverture |
 | Line of Business | `line_of_business` | Texte | Ligne de business (doit correspondre au dossier) |
@@ -34,7 +34,7 @@ Toutes les colonnes suivantes sont **obligatoires** :
 ⚠️ **IMPORTANT** :
 - Les noms de colonnes pour les dates sont en **MAJUSCULES** : `INCEPTION_DT`, `EXPIRE_DT`
 - Le champ `INSURED_NAME` doit contenir uniquement des valeurs en **MAJUSCULES**
-- Les expositions sont en **millions** (ex: `25` pour 25 millions)
+- Les expositions sont en **valeur absolue** (ex: `25000000` pour 25 millions)
 
 ### Colonnes Optionnelles
 
@@ -62,16 +62,16 @@ Ces colonnes sont utilisées pour le matching des sections dans les programmes :
 
 ```csv
 policy_id,INSURED_NAME,BUSCL_COUNTRY_CD,line_of_business,exposition,INCEPTION_DT,EXPIRE_DT
-AVI-2024-001,AIR FRANCE-KLM,France,Aviation,25,2024-01-01,2024-12-31
-AVI-2024-002,LUFTHANSA GROUP,Germany,Aviation,30,2024-02-15,2025-02-14
+AVI-2024-001,AIR FRANCE-KLM,France,Aviation,25000000,2024-01-01,2024-12-31
+AVI-2024-002,LUFTHANSA GROUP,Germany,Aviation,30000000,2024-02-15,2025-02-14
 ```
 
 ### Exemple Property (sans policy_id)
 
 ```csv
 INSURED_NAME,BUSCL_REGION,line_of_business,exposition,INCEPTION_DT,EXPIRE_DT
-ENTREPRISE DUPONT SAS,EMEA,Property,0.5,2024-01-01,2024-12-31
-GLOBAL CORP LTD,APAC,Property,1.2,2024-03-01,2025-02-28
+ENTREPRISE DUPONT SAS,EMEA,Property,500000,2024-01-01,2024-12-31
+GLOBAL CORP LTD,APAC,Property,1200000,2024-03-01,2025-02-28
 ```
 
 ## Validation
