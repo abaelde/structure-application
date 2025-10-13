@@ -1,0 +1,208 @@
+---
+description: Guide pour écrire des tests d'intégration et unitaires dans le projet
+globs: tests/**/*.py
+---
+
+# Guide d'écriture des tests
+
+## Principes généraux
+
+### 1. Pas de print statements
+Les tests doivent être silencieux. Ne jamais utiliser `print()` dans les tests.
+
+❌ **Mauvais :**
+```python
+def test_something():
+    print("Testing...")
+    result = function()
+    print(f"Result: {result}")
+    assert result == expected
+```
+
+✅ **Bon :**
+```python
+def test_something():
+    result = function()
+    assert result == expected
+```
+
+### 2. Pas de messages dans les assertions
+Pytest affiche automatiquement les valeurs comparées. Les messages personnalisés sont redondants.
+
+❌ **Mauvais :**
+```python
+assert result == expected, f"Expected {expected}, got {result}"
+assert abs(cession - 300_000) < tolerance, f"Cession incorrecte: {cession}"
+```
+
+✅ **Bon :**
+```python
+assert result == expected
+assert abs(cession - 300_000) < tolerance
+```
+
+### 3. Docstrings explicites
+Chaque test doit avoir une docstring claire expliquant :
+- Le scénario testé
+- Les données d'entrée
+- Les résultats attendus
+
+✅ **Bon :**
+```python
+def test_single_line_quota_share_basic():
+    """
+    Test simple : Application d'un Quota Share 30% sur une unique ligne de bordereau
+    
+    STRUCTURE DU PROGRAMME:
+    - QS_30% : Quota Share 30% (reinsurer share 100%)
+    
+    BORDEREAU:
+    - Une seule police avec 1,000,000 d'exposition
+    
+    CALCUL ATTENDU:
+    - Exposition brute: 1,000,000
+    - Cession (30%): 300,000
+    - Retenu (70%): 700,000
+    """
+    # Test code here
+```
+
+## Structure des tests
+
+### Tests d'intégration (`tests/integration/`)
+Tests de workflows complets impliquant plusieurs modules.
+
+**Structure type :**
+```python
+def test_integration_scenario():
+    """Docstring explicite"""
+    # 1. Setup : Charger programme et créer bordereau
+    program_path = Path("examples/programs/program.xlsx")
+    if not program_path.exists():
+        pytest.skip(f"Programme non trouvé: {program_path}")
+    
+    loader = ProgramLoader(program_path)
+    program = loader.get_program()
+    
+    test_data = {
+        "policy_id": ["POL-001"],
+        "INSURED_NAME": ["COMPANY"],
+        "exposition": [1_000_000],
+        # ... autres colonnes requises
+    }
+    bordereau_df = pd.DataFrame(test_data)
+    
+    # 2. Exécution
+    calculation_date = "2024-06-01"
+    bordereau_with_net, results_df = apply_program_to_bordereau(
+        bordereau_df, program, calculation_date=calculation_date
+    )
+    
+    # 3. Assertions
+    result = results_df.iloc[0]
+    assert result["exposure"] == 1_000_000
+    assert abs(result["cession_to_layer_100pct"] - 300_000) < 1
+```
+
+### Tests unitaires (`tests/unit/`)
+Tests de fonctions ou classes individuelles de manière isolée.
+
+**Organisation :**
+- `tests/unit/loaders/` → teste `src/loaders/`
+- `tests/unit/engine/` → teste `src/engine/`
+- `tests/unit/domain/` → teste `src/domain/`
+
+## Colonnes requises dans les bordereaux de test
+
+Toujours inclure ces colonnes dans les DataFrames de test :
+
+```python
+test_data = {
+    # Identifiants
+    "policy_id": [...],
+    "INSURED_NAME": [...],
+    
+    # Montants
+    "exposition": [...],
+    
+    # Dates
+    "INCEPTION_DT": [...],
+    "EXPIRE_DT": [...],
+    
+    # Dimensions (peuvent être None)
+    "BUSCL_EXCLUDE_CD": [...],
+    "BUSCL_ENTITY_NAME_CED": [...],
+    "POL_RISK_NAME_CED": [...],
+    "BUSCL_COUNTRY_CD": [...],
+    "BUSCL_REGION": [...],
+    "BUSCL_CLASS_OF_BUSINESS_1": [...],
+    "BUSCL_CLASS_OF_BUSINESS_2": [...],
+    "BUSCL_CLASS_OF_BUSINESS_3": [...],
+    "BUSCL_LIMIT_CURRENCY_CD": [...],
+}
+```
+
+## Vérifications courantes
+
+### Tolérance pour les arrondis
+Utiliser une tolérance pour les comparaisons de floats :
+
+```python
+tolerance = 1  # 1$ de tolérance
+assert abs(result["cession_to_layer_100pct"] - expected_cession) < tolerance
+```
+
+### Vérification des structures appliquées
+```python
+structures_detail = result["structures_detail"]
+assert len(structures_detail) >= 1
+applied_structures = [s for s in structures_detail if s["applied"]]
+assert len(applied_structures) == expected_count
+```
+
+## Conventions de nommage
+
+- **Tests unitaires :** `test_function_name_scenario()`
+- **Tests d'intégration :** `test_workflow_description()`
+
+**Exemples :**
+- `test_single_line_quota_share_basic()`
+- `test_multiple_lines_quota_share()`
+- `test_quota_share_with_currency_matching()`
+- `test_policy_expired_before_calculation_date()`
+
+## Exécution des tests
+
+```bash
+# Tous les tests
+uv run pytest
+
+# Tests d'intégration uniquement
+uv run pytest tests/integration/
+
+# Un fichier spécifique
+uv run pytest tests/integration/test_simple_quota_share.py
+
+# Un test spécifique
+uv run pytest tests/integration/test_simple_quota_share.py::test_single_line_quota_share_basic
+
+# Avec verbosité
+uv run pytest -v
+
+# Avec couverture
+uv run pytest --cov=src --cov-report=html
+```
+
+## Anti-patterns à éviter
+
+❌ **Ne pas utiliser de scripts de test standalone**
+Les tests doivent être exécutables avec pytest, pas avec `python test_file.py`
+
+❌ **Ne pas créer de fichiers temporaires sans les nettoyer**
+Si vous devez créer des fichiers, nettoyez-les dans un fixture ou teardown
+
+❌ **Ne pas ignorer les warnings**
+Si le test génère des warnings, soit corrigez le code, soit documentez pourquoi c'est attendu
+
+❌ **Ne pas tester plusieurs choses dans un seul test**
+Un test = un scénario. Créez plusieurs tests si nécessaire.
