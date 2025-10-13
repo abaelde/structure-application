@@ -6,12 +6,40 @@ from src.domain import FIELDS, PRODUCT, SECTION_COLS as SC
 from .treaty_manager import TreatyManager
 
 
+def check_exclusion(
+    policy_data: Dict[str, Any], sections: list, dimension_columns: list
+) -> bool:
+    for section in sections:
+        if section.get("BUSCL_EXCLUDE_CD") == "exclude":
+            matches = True
+            
+            for dimension in dimension_columns:
+                if dimension == "BUSCL_EXCLUDE_CD":
+                    continue
+                
+                section_value = section.get(dimension)
+                
+                if pd.notna(section_value):
+                    policy_value = policy_data.get(dimension)
+                    if policy_value != section_value:
+                        matches = False
+                        break
+            
+            if matches:
+                return True
+    
+    return False
+
+
 def match_section(
     policy_data: Dict[str, Any], sections: list, dimension_columns: list
 ) -> Optional[Dict[str, Any]]:
     matched_sections = []
 
     for section in sections:
+        if section.get("BUSCL_EXCLUDE_CD") == "exclude":
+            continue
+        
         matches = True
         specificity = 0
 
@@ -81,6 +109,27 @@ def apply_program(
     exposure = policy_data.get(FIELDS["EXPOSURE"])
     structures = program["structures"]
     dimension_columns = program["dimension_columns"]
+
+    all_sections = []
+    for structure in structures:
+        all_sections.extend(structure["sections"])
+    
+    is_excluded = check_exclusion(policy_data, all_sections, dimension_columns)
+    
+    if is_excluded:
+        return {
+            FIELDS["INSURED_NAME"]: policy_data.get(FIELDS["INSURED_NAME"]),
+            "exposure": exposure,
+            "effective_exposure": 0.0,
+            "cession_to_layer_100pct": 0.0,
+            "cession_to_reinsurer": 0.0,
+            "retained_by_cedant": 0.0,
+            "policy_inception_date": policy_data.get(FIELDS["INCEPTION_DATE"]),
+            "policy_expiry_date": policy_data.get(FIELDS["EXPIRY_DATE"]),
+            "structures_detail": [],
+            "exclusion_status": "excluded",
+            "exclusion_reason": "Matched exclusion rule",
+        }
 
     structure_outputs = {}
     total_cession_to_layer_100pct = 0.0
@@ -226,12 +275,14 @@ def apply_program(
     return {
         FIELDS["INSURED_NAME"]: policy_data.get(FIELDS["INSURED_NAME"]),
         "exposure": exposure,
+        "effective_exposure": exposure,
         "cession_to_layer_100pct": total_cession_to_layer_100pct,
         "cession_to_reinsurer": total_cession_to_reinsurer,
         "retained_by_cedant": exposure - total_cession_to_layer_100pct,
         "policy_inception_date": policy_data.get(FIELDS["INCEPTION_DATE"]),
         "policy_expiry_date": policy_data.get(FIELDS["EXPIRY_DATE"]),
         "structures_detail": structures_detail,
+        "exclusion_status": "included",
     }
 
 
@@ -284,6 +335,7 @@ def apply_treaty_with_claim_basis(
         return {
             FIELDS["INSURED_NAME"]: policy_data.get(FIELDS["INSURED_NAME"]),
             "exposure": policy_data.get(FIELDS["EXPOSURE"], 0),
+            "effective_exposure": policy_data.get(FIELDS["EXPOSURE"], 0),
             "cession_to_reinsurer": 0.0,
             "retained_by_cedant": policy_data.get(FIELDS["EXPOSURE"], 0),
             "policy_inception_date": policy_inception_date,
@@ -292,6 +344,7 @@ def apply_treaty_with_claim_basis(
             "claim_basis": claim_basis,
             "structures_detail": [],
             "coverage_status": "no_treaty_found",
+            "exclusion_status": "included",
         }
 
     result = apply_program(policy_data, selected_treaty)
