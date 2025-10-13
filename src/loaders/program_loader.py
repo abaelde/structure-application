@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import Dict, Any, List
 
-from .constants import DIMENSIONS, SHEETS, PROGRAM_COLS, STRUCTURE_COLS
+from src.domain import DIMENSIONS, SHEETS, PROGRAM_COLS, STRUCTURE_COLS
 
 
 # Keys and relations - foreign keys between Excel sheets (tables)

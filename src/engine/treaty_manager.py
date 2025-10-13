@@ -6,7 +6,7 @@ et la logique de sélection selon claim_basis
 import pandas as pd
 from typing import Dict, Any, List, Optional
 from datetime import datetime, date
-from .program_loader import ProgramLoader
+from src.loaders import ProgramLoader
 
 
 class TreatyManager:
@@ -142,3 +142,4 @@ def create_treaty_manager_from_directory(
                 break
 
     return TreatyManager(treaty_paths)
+

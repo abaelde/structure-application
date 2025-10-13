@@ -1,4 +1,4 @@
-# structures/constants.py
+# src/domain/constants.py
 from types import SimpleNamespace
 
 # ──────────────────────────────────────────────────────────────────────────────

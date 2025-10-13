@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 from typing import Dict, Any, Optional
-from products import quota_share, excess_of_loss
+from src.domain.products import quota_share, excess_of_loss
+from src.domain import FIELDS, PRODUCT, SECTION_COLS as SC
 from .treaty_manager import TreatyManager
-from .constants import FIELDS, PRODUCT, SECTION_COLS as SC
 
 
 def match_section(

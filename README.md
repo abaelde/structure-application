@@ -8,15 +8,27 @@ Système d'application de programmes de réassurance sur des bordereaux.
 
 ```
 structure-application/
-├── products/                           # Building blocks de réassurance
-│   ├── base_products.py               # quota_share & excess_of_loss
-│   └── __init__.py
-├── structures/                         # Moteur d'application des programmes
-│   ├── program_loader.py              # Chargement depuis Excel (ProgramLoader)
-│   ├── structure_engine.py            # Logique d'application et matching de sections
-│   ├── treaty_manager.py              # Gestionnaire de traités multi-années
-│   ├── program_display.py             # Affichage des programmes
-│   └── __init__.py
+├── src/                                # Code source
+│   ├── domain/                         # Logique métier et modèles
+│   │   ├── products/                   # Produits de réassurance (building blocks)
+│   │   │   ├── quota_share.py
+│   │   │   ├── excess_of_loss.py
+│   │   │   └── __init__.py
+│   │   ├── constants.py                # Constantes métier (FIELDS, DIMENSIONS, PRODUCT)
+│   │   └── __init__.py
+│   ├── loaders/                        # Chargement et validation de données
+│   │   ├── program_loader.py          # Chargement de programmes depuis Excel
+│   │   ├── bordereau_loader.py        # Chargement et validation de bordereaux CSV
+│   │   ├── exposure_mapping.py        # Mapping de colonnes d'exposition par LoB
+│   │   └── __init__.py
+│   ├── engine/                         # Moteur de calcul et orchestration
+│   │   ├── calculation_engine.py      # Application de programmes, matching de sections
+│   │   ├── treaty_manager.py          # Gestion de traités multi-années (claim basis)
+│   │   └── __init__.py
+│   └── presentation/                   # Affichage et génération de rapports
+│       ├── program_display.py         # Affichage de programmes
+│       ├── report_display.py          # Génération de rapports de résultats
+│       └── __init__.py
 ├── examples/                           # Exemples et démonstrations
 │   ├── README.md                      # Documentation des exemples
 │   ├── bordereaux/                    # Exemples de bordereaux (organisés par ligne de business)
@@ -129,8 +141,7 @@ Le système implémente la logique **claim_basis** qui détermine quel traité a
 ### Utilisation avec TreatyManager
 
 ```python
-from structures.treaty_manager import TreatyManager
-from structures.calculation_engine import apply_treaty_manager_to_bordereau
+from src.engine import TreatyManager, apply_treaty_manager_to_bordereau
 
 # Charger les traités multi-années
 treaty_paths = {

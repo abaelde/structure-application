@@ -1,16 +1,18 @@
 import pandas as pd
 import argparse
 import sys
-from structures import (
+from src.loaders import (
     ProgramLoader,
     load_bordereau,
     BordereauValidationError,
-    apply_program_to_bordereau,
+)
+from src.engine import apply_program_to_bordereau
+from src.presentation import (
+    display_program,
     generate_detailed_report,
     write_detailed_results,
 )
-from structures.program_display import display_program
-from structures.constants import FIELDS
+from src.domain import FIELDS
 
 
 def main():

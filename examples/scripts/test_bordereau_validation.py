@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from structures import load_bordereau, BordereauLoader, BordereauValidationError
+from src.loaders import load_bordereau, BordereauLoader, BordereauValidationError
 
 
 def test_valid_bordereau():

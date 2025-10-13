@@ -3,14 +3,13 @@ import argparse
 import sys
 from pathlib import Path
 from datetime import datetime
-from structures import (
+from src.loaders import (
     ProgramLoader,
     load_bordereau,
     BordereauValidationError,
-    apply_program_to_bordereau,
-    generate_detailed_report,
 )
-from structures.program_display import display_program
+from src.engine import apply_program_to_bordereau
+from src.presentation import display_program, generate_detailed_report
 
 
 def main():

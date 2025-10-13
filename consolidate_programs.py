@@ -18,9 +18,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
-from structures.program_loader import ProgramLoader
-from structures.calculation_engine import apply_program_to_bordereau
-from structures.constants import FIELDS
+from src.loaders import ProgramLoader
+from src.engine import apply_program_to_bordereau
+from src.domain import FIELDS
 from examples.program_bordereau_mapping import (
     get_ready_pairs,
 )

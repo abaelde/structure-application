@@ -1,7 +1,7 @@
 import pandas as pd
 import sys
 from typing import Dict, Any
-from .constants import PRODUCT, SECTION_COLS as SC, FIELDS
+from src.domain import PRODUCT, SECTION_COLS as SC, FIELDS
 
 
 def write_detailed_results(

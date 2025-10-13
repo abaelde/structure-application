@@ -1,0 +1,620 @@
+================================================================================
+DETAILED STRUCTURES APPLICATION REPORT
+================================================================================
+
+================================================================================
+PROGRAM CONFIGURATION
+================================================================================
+Program name: AVIATION_AXA_XL_2024
+Number of structures: 7
+Matching dimensions: 9
+   Dimensions: BUSCL_EXCLUDE_CD, BUSCL_ENTITY_NAME_CED, POL_RISK_NAME_CED, BUSCL_COUNTRY_CD, BUSCL_REGION, BUSCL_CLASS_OF_BUSINESS_1, BUSCL_CLASS_OF_BUSINESS_2, BUSCL_CLASS_OF_BUSINESS_3, BUSCL_LIMIT_CURRENCY_CD
+
+--------------------------------------------------------------------------------
+STRUCTURE DETAILS
+--------------------------------------------------------------------------------
+
+Structure 1: QS_1
+   Type: quota_share
+   Predecessor: None (Entry point)
+   Number of sections: 5
+   Claim basis: risk_attaching
+   Sections:
+      Section 1:
+         Cession rate: 25.0% (25.0%)
+         Limit: 575,000,000.00M
+         Reinsurer share: 1.65% (1.65%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+      Section 2:
+         Cession rate: 25.0% (25.0%)
+         Limit: 575,000,000.00M
+         Reinsurer share: 1.65% (1.65%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=CAD
+      Section 3:
+         Cession rate: 25.0% (25.0%)
+         Limit: 575,000,000.00M
+         Reinsurer share: 1.65% (1.65%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=EUR
+      Section 4:
+         Cession rate: 25.0% (25.0%)
+         Limit: 575,000,000.00M
+         Reinsurer share: 1.65% (1.65%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=AUD
+      Section 5:
+         Cession rate: 25.0% (25.0%)
+         Limit: 575,000,000.00M
+         Reinsurer share: 1.65% (1.65%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=GBP
+
+Structure 2: XOL_1
+   Type: excess_of_loss
+   Predecessor: QS_1 (Inuring)
+   Number of sections: 5
+   Claim basis: risk_attaching
+   Sections:
+      Section 1:
+         Coverage: 65,000,000.00M xs 35,000,000.00M
+         Range: 35,000,000.00M to 100,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+      Section 2:
+         Coverage: 65,000,000.00M xs 35,000,000.00M
+         Range: 35,000,000.00M to 100,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=CAD
+      Section 3:
+         Coverage: 65,000,000.00M xs 35,000,000.00M
+         Range: 35,000,000.00M to 100,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=EUR
+      Section 4:
+         Coverage: 65,000,000.00M xs 35,000,000.00M
+         Range: 35,000,000.00M to 100,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=AUD
+      Section 5:
+         Coverage: 43,333,333.00M xs 23,333,333.00M
+         Range: 23,333,333.00M to 66,666,666.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=GBP
+
+Structure 3: XOL_2
+   Type: excess_of_loss
+   Predecessor: QS_1 (Inuring)
+   Number of sections: 5
+   Claim basis: risk_attaching
+   Sections:
+      Section 1:
+         Coverage: 50,000,000.00M xs 65,000,000.00M
+         Range: 65,000,000.00M to 115,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+      Section 2:
+         Coverage: 50,000,000.00M xs 65,000,000.00M
+         Range: 65,000,000.00M to 115,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=CAD
+      Section 3:
+         Coverage: 50,000,000.00M xs 65,000,000.00M
+         Range: 65,000,000.00M to 115,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=EUR
+      Section 4:
+         Coverage: 50,000,000.00M xs 65,000,000.00M
+         Range: 65,000,000.00M to 115,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=AUD
+      Section 5:
+         Coverage: 33,333,333.00M xs 43,333,333.00M
+         Range: 43,333,333.00M to 76,666,666.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=GBP
+
+Structure 4: XOL_3
+   Type: excess_of_loss
+   Predecessor: QS_1 (Inuring)
+   Number of sections: 5
+   Claim basis: risk_attaching
+   Sections:
+      Section 1:
+         Coverage: 100,000,000.00M xs 115,000,000.00M
+         Range: 115,000,000.00M to 215,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+      Section 2:
+         Coverage: 100,000,000.00M xs 115,000,000.00M
+         Range: 115,000,000.00M to 215,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=CAD
+      Section 3:
+         Coverage: 100,000,000.00M xs 115,000,000.00M
+         Range: 115,000,000.00M to 215,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=EUR
+      Section 4:
+         Coverage: 100,000,000.00M xs 115,000,000.00M
+         Range: 115,000,000.00M to 215,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=AUD
+      Section 5:
+         Coverage: 66,666,666.00M xs 76,666,666.00M
+         Range: 76,666,666.00M to 143,333,332.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=GBP
+
+Structure 5: XOL_4
+   Type: excess_of_loss
+   Predecessor: QS_1 (Inuring)
+   Number of sections: 5
+   Claim basis: risk_attaching
+   Sections:
+      Section 1:
+         Coverage: 100,000,000.00M xs 215,000,000.00M
+         Range: 215,000,000.00M to 315,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+      Section 2:
+         Coverage: 100,000,000.00M xs 215,000,000.00M
+         Range: 215,000,000.00M to 315,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=CAD
+      Section 3:
+         Coverage: 100,000,000.00M xs 215,000,000.00M
+         Range: 215,000,000.00M to 315,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=EUR
+      Section 4:
+         Coverage: 100,000,000.00M xs 215,000,000.00M
+         Range: 215,000,000.00M to 315,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=AUD
+      Section 5:
+         Coverage: 66,666,666.00M xs 143,333,333.00M
+         Range: 143,333,333.00M to 209,999,999.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=GBP
+
+Structure 6: XOL_5
+   Type: excess_of_loss
+   Predecessor: QS_1 (Inuring)
+   Number of sections: 5
+   Claim basis: risk_attaching
+   Sections:
+      Section 1:
+         Coverage: 100,000,000.00M xs 315,000,000.00M
+         Range: 315,000,000.00M to 415,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+      Section 2:
+         Coverage: 100,000,000.00M xs 315,000,000.00M
+         Range: 315,000,000.00M to 415,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=CAD
+      Section 3:
+         Coverage: 100,000,000.00M xs 315,000,000.00M
+         Range: 315,000,000.00M to 415,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=EUR
+      Section 4:
+         Coverage: 100,000,000.00M xs 315,000,000.00M
+         Range: 315,000,000.00M to 415,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=AUD
+      Section 5:
+         Coverage: 66,666,666.00M xs 210,000,000.00M
+         Range: 210,000,000.00M to 276,666,666.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=GBP
+
+Structure 7: XOL_6
+   Type: excess_of_loss
+   Predecessor: QS_1 (Inuring)
+   Number of sections: 5
+   Claim basis: risk_attaching
+   Sections:
+      Section 1:
+         Coverage: 150,000,000.00M xs 415,000,000.00M
+         Range: 415,000,000.00M to 565,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+      Section 2:
+         Coverage: 150,000,000.00M xs 415,000,000.00M
+         Range: 415,000,000.00M to 565,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=CAD
+      Section 3:
+         Coverage: 150,000,000.00M xs 415,000,000.00M
+         Range: 415,000,000.00M to 565,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=EUR
+      Section 4:
+         Coverage: 150,000,000.00M xs 415,000,000.00M
+         Range: 415,000,000.00M to 565,000,000.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=AUD
+      Section 5:
+         Coverage: 100,000,000.00M xs 276,666,666.00M
+         Range: 276,666,666.00M to 376,666,666.00M
+         Reinsurer share: 5.00% (5.00%)
+         Matching conditions: BUSCL_LIMIT_CURRENCY_CD=GBP
+
+================================================================================
+
+
+================================================================================
+DETAILED BREAKDOWN BY POLICY
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: AIR FRANCE-KLM
+Cedant gross exposure: 250,000,000.00
+Cession at layer (100%): 250,000,000.00
+Reinsurer net exposure: 10,406,250.00
+Retained by cedant: 0.00
+
+Structures applied:
+
+1. QS_1 (quota_share) - ✓ APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 250,000,000.00
+   Cession at layer (100%): 62,500,000.00
+   Reinsurer Share: 0.0165 (1.65%)
+   Cession to reinsurer: 1,031,250.00
+   Applied section parameters:
+      CESSION_PCT: 0.25
+      LIMIT_100: 575000000
+      SIGNED_SHARE_PCT: 0.0165
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+2. XOL_1 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 187,500,000.00
+   Cession at layer (100%): 48,750,000.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 2,437,500.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 35,000,000 → 26,250,000
+      LIMIT_100: 65,000,000 → 48,750,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+3. XOL_2 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 187,500,000.00
+   Cession at layer (100%): 37,500,000.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 1,875,000.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 65,000,000 → 48,750,000
+      LIMIT_100: 50,000,000 → 37,500,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+4. XOL_3 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 187,500,000.00
+   Cession at layer (100%): 75,000,000.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 3,750,000.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 115,000,000 → 86,250,000
+      LIMIT_100: 100,000,000 → 75,000,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+5. XOL_4 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 187,500,000.00
+   Cession at layer (100%): 26,250,000.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 1,312,500.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 215,000,000 → 161,250,000
+      LIMIT_100: 100,000,000 → 75,000,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+6. XOL_5 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 187,500,000.00
+   Cession at layer (100%): 0.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 0.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 315,000,000 → 236,250,000
+      LIMIT_100: 100,000,000 → 75,000,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+7. XOL_6 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 187,500,000.00
+   Cession at layer (100%): 0.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 0.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 415,000,000 → 311,250,000
+      LIMIT_100: 150,000,000 → 112,500,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: LUFTHANSA GROUP
+Cedant gross exposure: 30,000,000.00
+Cession at layer (100%): 7,500,000.00
+Reinsurer net exposure: 123,750.00
+Retained by cedant: 22,500,000.00
+
+Structures applied:
+
+1. QS_1 (quota_share) - ✓ APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 30,000,000.00
+   Cession at layer (100%): 7,500,000.00
+   Reinsurer Share: 0.0165 (1.65%)
+   Cession to reinsurer: 123,750.00
+   Applied section parameters:
+      CESSION_PCT: 0.25
+      LIMIT_100: 575000000
+      SIGNED_SHARE_PCT: 0.0165
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+2. XOL_1 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 22,500,000.00
+   Cession at layer (100%): 0.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 0.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 35,000,000 → 26,250,000
+      LIMIT_100: 65,000,000 → 48,750,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+3. XOL_2 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 22,500,000.00
+   Cession at layer (100%): 0.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 0.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 65,000,000 → 48,750,000
+      LIMIT_100: 50,000,000 → 37,500,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+4. XOL_3 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 22,500,000.00
+   Cession at layer (100%): 0.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 0.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 115,000,000 → 86,250,000
+      LIMIT_100: 100,000,000 → 75,000,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+5. XOL_4 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 22,500,000.00
+   Cession at layer (100%): 0.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 0.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 215,000,000 → 161,250,000
+      LIMIT_100: 100,000,000 → 75,000,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+6. XOL_5 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 22,500,000.00
+   Cession at layer (100%): 0.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 0.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 315,000,000 → 236,250,000
+      LIMIT_100: 100,000,000 → 75,000,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+7. XOL_6 (excess_of_loss) - ✓ APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 22,500,000.00
+   Cession at layer (100%): 0.00
+   Reinsurer Share: 0.0500 (5.00%)
+   Cession to reinsurer: 0.00
+   Applied section parameters:
+      ⚠️ RESCALED (Retention factor: 75.00%)
+      ATTACHMENT_POINT_100: 415,000,000 → 311,250,000
+      LIMIT_100: 150,000,000 → 112,500,000
+      SIGNED_SHARE_PCT: 0.05
+   Matching conditions: BUSCL_LIMIT_CURRENCY_CD=USD
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: EMIRATES AIRLINES
+Cedant gross exposure: 45,000,000.00
+Cession at layer (100%): 0.00
+Reinsurer net exposure: 0.00
+Retained by cedant: 45,000,000.00
+
+Structures applied:
+
+1. QS_1 (quota_share) - ✗ NOT APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+2. XOL_1 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+3. XOL_2 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+4. XOL_3 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+5. XOL_4 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+6. XOL_5 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+7. XOL_6 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: SINGAPORE AIRLINES
+Cedant gross exposure: 38,000,000.00
+Cession at layer (100%): 0.00
+Reinsurer net exposure: 0.00
+Retained by cedant: 38,000,000.00
+
+Structures applied:
+
+1. QS_1 (quota_share) - ✗ NOT APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+2. XOL_1 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+3. XOL_2 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+4. XOL_3 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+5. XOL_4 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+6. XOL_5 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+7. XOL_6 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: DELTA AIR LINES
+Cedant gross exposure: 52,000,000.00
+Cession at layer (100%): 0.00
+Reinsurer net exposure: 0.00
+Retained by cedant: 52,000,000.00
+
+Structures applied:
+
+1. QS_1 (quota_share) - ✗ NOT APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+2. XOL_1 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+3. XOL_2 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+4. XOL_3 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+5. XOL_4 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+6. XOL_5 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+7. XOL_6 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: BRITISH AIRWAYS
+Cedant gross exposure: 41,000,000.00
+Cession at layer (100%): 0.00
+Reinsurer net exposure: 0.00
+Retained by cedant: 41,000,000.00
+
+Structures applied:
+
+1. QS_1 (quota_share) - ✗ NOT APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+2. XOL_1 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+3. XOL_2 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+4. XOL_3 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+5. XOL_4 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+6. XOL_5 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found
+
+7. XOL_6 (excess_of_loss) - ✗ NOT APPLIED
+   Predecessor: QS_1 (Inuring)
+   Input exposure: 0.00
+   Reason: No matching section found

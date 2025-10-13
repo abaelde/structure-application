@@ -2,7 +2,7 @@ from typing import Dict, Any
 import pandas as pd
 import sys
 
-from .constants import PRODUCT, SECTION_COLS as SC
+from src.domain import PRODUCT, SECTION_COLS as SC
 
 
 def write_program_config(program: Dict[str, Any], file=None) -> None:
@@ -164,3 +164,4 @@ def display_program_comparison(programs: Dict[str, Dict[str, Any]]) -> None:
         display_program_summary(program)
 
     print("\n" + "=" * 80)
+

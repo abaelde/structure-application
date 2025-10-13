@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from typing import List, Optional, Union
-from .constants import FIELDS, DIMENSIONS
+from src.domain import FIELDS, DIMENSIONS
 from .exposure_mapping import find_exposure_column
 
 

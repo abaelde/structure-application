@@ -18,7 +18,7 @@ import numpy as np
 from excel_utils import auto_adjust_column_widths
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
-from structures.constants import PRODUCT, SHEETS
+from src.domain import PRODUCT, SHEETS
 
 print("Création du programme Casualty AIG 2024...")
 

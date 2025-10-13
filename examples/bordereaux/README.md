@@ -225,7 +225,7 @@ Si vous avez des bordereaux avec l'ancien format :
 ## Chargement Programmatique
 
 ```python
-from structures import load_bordereau
+from src.loaders import load_bordereau
 
 # Chargement automatique avec détection de la ligne de business
 df = load_bordereau("examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv")
