@@ -23,7 +23,6 @@ structure-application/
 │   │   └── __init__.py
 │   ├── engine/                         # Moteur de calcul et orchestration
 │   │   ├── calculation_engine.py      # Application de programmes, matching de sections
-│   │   ├── treaty_manager.py          # Gestion de traités multi-années (claim basis)
 │   │   └── __init__.py
 │   └── presentation/                   # Affichage et génération de rapports
 │       ├── program_display.py         # Affichage de programmes
@@ -43,10 +42,6 @@ structure-application/
 │   │   ├── program_simple_sequential.xlsx
 │   │   ├── program_simple_parallel.xlsx
 │   │   └── program_simple_*_updated.xlsx
-│   ├── treaties/                      # Traités multi-années
-│   │   ├── treaty_2023.xlsx
-│   │   ├── treaty_2024.xlsx
-│   │   └── treaty_2025.xlsx
 │   └── scripts/                       # Scripts d'exemple
 │       ├── create_simple_programs.py
 │       ├── create_program_config.py
@@ -129,44 +124,6 @@ Pour chaque police et chaque structure :
 - Section 2 : cession_PCT=40%, localisation=Paris → S'applique uniquement à Paris (spécifique)
 
 Pour une police à Paris, la Section 2 sera choisie car elle est plus spécifique.
-
-## Logique Claim Basis
-
-Le système implémente la logique **claim_basis** qui détermine quel traité appliquer selon la date de la loss et la date de souscription de la police.
-
-### Types de Claim Basis
-
-#### `risk_attaching`
-- **Règle** : Utilise le traité qui était en vigueur lors de la **souscription** de la police
-- **Date de référence** : `inception_date` de la police
-- **Exemple** : Police souscrite en 2023 → Applique le traité de 2023, même si la loss survient en 2025
-
-#### `loss_occurring`
-- **Règle** : Utilise le traité qui est en vigueur au moment de la **loss**
-- **Date de référence** : Date de calcul "as of now"
-- **Exemple** : Loss en 2025 → Applique le traité de 2025, même si la police a été souscrite en 2023
-
-### Utilisation avec TreatyManager
-
-```python
-from src.engine import TreatyManager, apply_treaty_manager_to_bordereau
-
-# Charger les traités multi-années
-treaty_paths = {
-    "2023": "examples/treaties/treaty_2023.xlsx",
-    "2024": "examples/treaties/treaty_2024.xlsx", 
-    "2025": "examples/treaties/treaty_2025.xlsx"
-}
-
-treaty_manager = TreatyManager(treaty_paths)
-
-# Calcul "as of now"
-results = apply_treaty_manager_to_bordereau(
-    bordereau_df, treaty_manager, "2025-06-15"
-)
-```
-
-Pour plus de détails, consultez le [Guide Claim Basis](CLAIM_BASIS_GUIDE.md).
 
 ## Configuration Excel
 
@@ -276,7 +233,6 @@ uv run python demo_organized_examples.py
 - **`examples/bordereaux/`** : Exemples de bordereaux organisés par ligne de business (aviation/, test/)
   - Consultez [examples/bordereaux/README.md](examples/bordereaux/README.md) pour les conventions
 - **`examples/programs/`** : Programmes simples (séquentiel/parallèle)
-- **`examples/treaties/`** : Traités multi-années pour claim_basis
 - **`examples/scripts/`** : Scripts de démonstration et d'exemple
 
 Consultez [examples/README.md](examples/README.md) pour plus de détails.

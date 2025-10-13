@@ -39,11 +39,6 @@ Sinon :
 2. **`apply_program_to_bordereau(bordereau_df, program, calculation_date=None)`**
    - Propage la `calculation_date` à chaque police du bordereau
 
-3. **`apply_treaty_with_claim_basis(policy_data, treaty_manager, calculation_date=None)`**
-   - Vérifie l'activité de la police
-   - Sélectionne le traité approprié selon `claim_basis`
-   - Applique la vérification d'expiration
-
 ### Code de vérification
 
 ```python
@@ -137,25 +132,6 @@ _, results_df = apply_program_to_bordereau(
     bordereau_df, 
     program, 
     calculation_date="2024-12-31"
-)
-```
-
-### Exemple 3 : Avec TreatyManager
-
-```python
-from src.engine.treaty_manager import TreatyManager
-from src.engine.calculation_engine import apply_treaty_manager_to_bordereau
-
-treaty_manager = TreatyManager({
-    "2023": "treaty_2023.xlsx",
-    "2024": "treaty_2024.xlsx",
-})
-
-# Calcul au 01/06/2024
-results_df = apply_treaty_manager_to_bordereau(
-    bordereau_df,
-    treaty_manager,
-    calculation_date="2024-06-01"
 )
 ```
 

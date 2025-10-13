@@ -1,7 +1,5 @@
 import pandas as pd
 from typing import Dict, Any, Optional
-from src.domain import FIELDS
-from .treaty_manager import TreatyManager
 
 
 def apply_program_to_bordereau(

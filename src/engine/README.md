@@ -12,8 +12,7 @@ src/engine/
 ├── policy_lifecycle.py         # Gestion du cycle de vie des polices
 ├── cession_calculator.py       # Calculs de cession
 ├── structure_orchestrator.py   # Orchestration des structures
-├── bordereau_processor.py      # Traitement batch
-└── treaty_manager.py           # Gestion des traités multi-années
+└── bordereau_processor.py      # Traitement batch
 ```
 
 ## Responsabilités
@@ -95,24 +94,10 @@ src/engine/
 
 **Fonctions** :
 - `apply_program_to_bordereau(bordereau_df, program, calculation_date)` : Applique un programme à un bordereau
-- `apply_treaty_with_claim_basis(policy_data, treaty_manager, calculation_date)` : Applique un traité avec claim basis
-- `apply_treaty_manager_to_bordereau(bordereau_df, treaty_manager, calculation_date)` : Applique un treaty manager à un bordereau
 
 **Responsabilités** :
 - Itérer sur les polices d'un bordereau
-- Gérer les traités multi-années
 - Convertir les résultats en DataFrame
-
-### `treaty_manager.py`
-**Rôle** : Gestion des traités multi-années
-
-**Classes** :
-- `TreatyManager` : Gère plusieurs traités par année
-
-**Responsabilités** :
-- Stocker plusieurs versions de traités
-- Sélectionner le bon traité selon claim basis et dates
-- Gérer les traités risk attaching vs losses occurring
 
 ## Flux de Données
 
@@ -163,10 +148,6 @@ Le module exporte les fonctions suivantes via `__init__.py` :
 from src.engine import (
     apply_program,                      # calculation_engine
     apply_program_to_bordereau,         # bordereau_processor
-    apply_treaty_with_claim_basis,      # bordereau_processor
-    apply_treaty_manager_to_bordereau,  # bordereau_processor
-    TreatyManager,                      # treaty_manager
-    create_treaty_manager_from_directory, # treaty_manager
 )
 ```
 
