@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from src.domain.models import Section
 
 
 class Product(ABC):
     @abstractmethod
-    def apply(self, exposure: float, section: Dict[str, Any]) -> float:
+    def apply(self, exposure: float, section: Section) -> float:
         pass
 
