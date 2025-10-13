@@ -10,6 +10,25 @@ class Section:
         self.attachment = data.get(SECTION_COLS.ATTACHMENT)
         self.limit = data.get(SECTION_COLS.LIMIT)
         self.signed_share = data.get(SECTION_COLS.SIGNED_SHARE)
+        self._validate()
+
+    def _validate(self):
+        import pandas as pd
+        
+        # Les sections d'exclusion n'ont pas besoin de SIGNED_SHARE_PCT
+        is_exclusion = self._data.get("BUSCL_EXCLUDE_CD") == "exclude"
+        if is_exclusion:
+            return
+        
+        if pd.isna(self.signed_share):
+            raise ValueError(
+                f"SIGNED_SHARE_PCT is required for all non-exclusion sections. "
+                f"Section data: {self._data}"
+            )
+        if not 0 <= self.signed_share <= 1:
+            raise ValueError(
+                f"SIGNED_SHARE_PCT must be between 0 and 1, got {self.signed_share}"
+            )
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Section":
