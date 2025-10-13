@@ -1,13 +1,25 @@
 import pandas as pd
-from pathlib import Path
-from src.loaders import ProgramLoader
 from src.engine import apply_program_to_bordereau
+from tests.builders import build_quota_share, build_program
 
 
 def test_policy_expiry_mechanism():
-    program_path = Path("tests/integration/fixtures/programs/single_quota_share.xlsx")
-    loader = ProgramLoader(program_path)
-    program = loader.get_program()
+    """
+    Test du mécanisme d'expiration des polices
+    
+    STRUCTURE DU PROGRAMME:
+    - QS_30% : Quota Share 30%
+    
+    BORDEREAU:
+    - 4 polices avec différentes dates d'expiration
+    
+    CALCULS ATTENDUS:
+    - Les polices expirées sont marquées "inactive"
+    - Les polices actives sont marquées "included"
+    - Cession = 0 pour les polices expirées
+    """
+    qs = build_quota_share(name="QS_30", cession_pct=0.30)
+    program = build_program(name="TEST_LIFECYCLE", structures=[qs])
 
     test_data = {
         "INSURED_NAME": ["COMPANY A", "COMPANY B", "COMPANY C", "COMPANY D"],

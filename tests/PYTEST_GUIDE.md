@@ -291,17 +291,28 @@ Des fixtures sont disponibles dans `tests/conftest.py` :
 ```python
 import pytest
 
-def test_example(sample_program_path, sample_valid_bordereau_data):
-    # sample_program_path : chemin vers un programme de test
+def test_example(sample_valid_bordereau_data):
     # sample_valid_bordereau_data : DataFrame de bordereau valide
     # ...
 ```
 
 ### Fixtures disponibles
 
-- `sample_program_path`: Chemin vers `single_quota_share.xlsx`
 - `sample_bordereau_path`: Chemin vers `bordereau_exemple.csv`
 - `sample_valid_bordereau_data`: DataFrame avec données de bordereau valides
+
+### Builders disponibles
+
+Pour créer des programmes de test, utiliser les **builders** au lieu de fichiers Excel :
+
+```python
+from tests.builders import build_quota_share, build_program
+
+qs = build_quota_share(name="QS_30", cession_pct=0.30)
+program = build_program(name="TEST", structures=[qs])
+```
+
+Voir `tests/builders/README.md` pour la documentation complète.
 
 ---
 
@@ -360,30 +371,42 @@ def test_quota_share_negative_limit():
         quota_share(1000.0, 0.3, limit=-100)
 ```
 
-### Test d'intégration avec fixture
+### Test d'intégration avec builders
 
 ```python
 # tests/integration/test_full_workflow.py
 
-import pytest
-from src.loaders import ProgramLoader, load_bordereau
+import pandas as pd
 from src.engine import apply_program_to_bordereau
+from tests.builders import build_quota_share, build_program
 
 
-def test_full_workflow(sample_program_path):
+def test_full_workflow():
     """Test du workflow complet de A à Z"""
-    # Arrange
-    loader = ProgramLoader(str(sample_program_path))
-    program = loader.get_program()
-    bordereau_df = load_bordereau("examples/bordereaux/test/bordereau_exemple.csv")
+    # Arrange - Créer le programme avec les builders
+    qs = build_quota_share(name="QS_30", cession_pct=0.30)
+    program = build_program(name="TEST", structures=[qs])
+    
+    # Créer un bordereau de test
+    bordereau_df = pd.DataFrame({
+        "policy_id": ["POL-001", "POL-002"],
+        "INSURED_NAME": ["COMPANY A", "COMPANY B"],
+        "exposition": [1_000_000, 2_000_000],
+        "INCEPTION_DT": ["2024-01-01", "2024-01-01"],
+        "EXPIRE_DT": ["2025-01-01", "2025-01-01"],
+        "BUSCL_COUNTRY_CD": ["US", "FR"],
+        "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR"],
+        # ... autres colonnes requises
+    })
     
     # Act
+    calculation_date = "2024-06-01"
     bordereau_with_cession, results = apply_program_to_bordereau(
-        bordereau_df, program
+        bordereau_df, program, calculation_date=calculation_date
     )
     
     # Assert
-    assert len(results) > 0
+    assert len(results) == 2
     assert "cession_to_reinsurer" in results.columns
     assert results["cession_to_reinsurer"].sum() > 0
 ```

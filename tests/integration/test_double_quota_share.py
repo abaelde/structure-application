@@ -1,8 +1,6 @@
 import pandas as pd
-import pytest
-from pathlib import Path
-from src.loaders import ProgramLoader
 from src.engine import apply_program_to_bordereau
+from tests.builders import build_quota_share, build_program
 
 
 def test_double_quota_share_parallel():
@@ -28,13 +26,13 @@ def test_double_quota_share_parallel():
     - Les cessions s'additionnent
     - Retenu = Exposition brute - Total des cessions
     """
-    program_path = Path("tests/integration/fixtures/programs/double_quota_share.xlsx")
+    qs_10 = build_quota_share(name="QS_10", cession_pct=0.10)
+    qs_15 = build_quota_share(name="QS_15", cession_pct=0.15)
     
-    if not program_path.exists():
-        pytest.skip(f"Programme de test non trouvé: {program_path}")
-    
-    loader = ProgramLoader(program_path)
-    program = loader.get_program()
+    program = build_program(
+        name="DOUBLE_QUOTA_SHARE_2024",
+        structures=[qs_10, qs_15]
+    )
     
     test_data = {
         "policy_id": ["POL-001"],

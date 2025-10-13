@@ -1,8 +1,6 @@
 import pandas as pd
-import pytest
-from pathlib import Path
-from src.loaders import ProgramLoader
 from src.engine import apply_program_to_bordereau
+from tests.builders import build_quota_share, build_program
 
 
 def test_single_line_quota_share_basic():
@@ -20,13 +18,15 @@ def test_single_line_quota_share_basic():
     - Cession (30%): 300,000
     - Retenu (70%): 700,000
     """
-    program_path = Path("tests/integration/fixtures/programs/single_quota_share.xlsx")
+    qs_structure = build_quota_share(
+        name="QS_30",
+        cession_pct=0.30,
+    )
     
-    if not program_path.exists():
-        pytest.skip(f"Programme de test non trouvé: {program_path}")
-    
-    loader = ProgramLoader(program_path)
-    program = loader.get_program()
+    program = build_program(
+        name="SINGLE_QUOTA_SHARE_2024",
+        structures=[qs_structure]
+    )
     
     test_data = {
         "policy_id": ["POL-001"],
@@ -89,13 +89,18 @@ def test_single_line_quota_share_with_currency_matching():
     - Cession (25%): 250,000
     - Retenu (75%): 750,000
     """
-    program_path = Path("tests/integration/fixtures/programs/quota_share_by_currency.xlsx")
+    qs_structure = build_quota_share(
+        name="QS_BY_CURRENCY",
+        sections_config=[
+            {"currency_cd": "USD", "cession_pct": 0.25},
+            {"currency_cd": "EUR", "cession_pct": 0.35},
+        ]
+    )
     
-    if not program_path.exists():
-        pytest.skip(f"Programme de test non trouvé: {program_path}")
-    
-    loader = ProgramLoader(program_path)
-    program = loader.get_program()
+    program = build_program(
+        name="QS_BY_CURRENCY_2024",
+        structures=[qs_structure]
+    )
     
     test_data = {
         "policy_id": ["POL-USD"],

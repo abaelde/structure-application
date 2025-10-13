@@ -1,6 +1,6 @@
 import pandas as pd
-from src.loaders import ProgramLoader, load_bordereau
 from src.engine import apply_program_to_bordereau
+from tests.builders import build_quota_share, build_exclusion_section, build_section, build_program
 
 
 def test_exclusion_mechanism():
@@ -8,10 +8,11 @@ def test_exclusion_mechanism():
     Test du mécanisme d'exclusion dans un programme Quota Share
     
     STRUCTURE DU PROGRAMME:
-    - Quota Share 25% avec critères d'exclusion par pays/région
+    - Quota Share 25% avec critères d'exclusion par pays (Iran, Russia)
+    - Section catch-all avec 25% de cession
     
     BORDEREAU:
-    - 7 polices avec différents pays et régions
+    - 7 polices avec différents pays
     - Certaines polices doivent être exclues selon les critères
     
     CALCULS ATTENDUS:
@@ -19,15 +20,44 @@ def test_exclusion_mechanism():
     - Les polices incluses ont une cession de 25% de leur exposition
     - Le statut d'exclusion est correctement reporté
     """
-    program_file = "tests/integration/fixtures/programs/quota_share_with_exclusion.xlsx"
-    bordereau_file = "tests/integration/fixtures/bordereaux/bordereau_exclusion_test.csv"
+    # Créer le programme avec exclusions
+    sections = [
+        build_exclusion_section(country_cd="Iran").to_dict(),
+        build_exclusion_section(country_cd="Russia").to_dict(),
+        build_section(cession_pct=0.25).to_dict(),
+    ]
+    
+    qs = build_quota_share(
+        name="QS_Aviation_25%",
+        sections_config=sections
+    )
+    
+    program = build_program(
+        name="QS_WITH_EXCLUSIONS",
+        structures=[qs]
+    )
+    
+    # Créer le bordereau de test
+    test_data = {
+        "policy_id": ["TST-001", "TST-002", "TST-003", "TST-004", "TST-005", "TST-006", "TST-007"],
+        "INSURED_NAME": ["AIR FRANCE", "IRAN AIR", "LUFTHANSA", "AEROFLOT", "EMIRATES", "SANCTIONED AIRLINE", "BRITISH AIRWAYS"],
+        "BUSCL_COUNTRY_CD": ["France", "Iran", "Germany", "Russia", "United Arab Emirates", "Syria", "United Kingdom"],
+        "BUSCL_REGION": ["Europe", "Middle East", "Europe", "Europe", "Middle East", "Sanctioned", "Europe"],
+        "exposition": [250_000, 30_000, 40_000, 35_000, 52_000, 20_000, 41_000],
+        "INCEPTION_DT": ["2024-01-01", "2024-02-15", "2024-03-01", "2024-01-15", "2024-04-01", "2024-02-01", "2024-05-01"],
+        "EXPIRE_DT": ["2025-12-31", "2025-02-14", "2025-02-28", "2025-01-14", "2025-03-31", "2025-01-31", "2025-04-30"],
+        "BUSCL_CLASS_OF_BUSINESS_1": [None] * 7,
+        "BUSCL_CLASS_OF_BUSINESS_2": [None] * 7,
+        "BUSCL_CLASS_OF_BUSINESS_3": [None] * 7,
+        "BUSCL_LIMIT_CURRENCY_CD": [None] * 7,
+        "BUSCL_EXCLUDE_CD": [None] * 7,
+        "BUSCL_ENTITY_NAME_CED": [None] * 7,
+        "POL_RISK_NAME_CED": [None] * 7,
+    }
+    
+    bordereau_df = pd.DataFrame(test_data)
 
-    loader = ProgramLoader(program_file)
-    program = loader.get_program()
-
-    bordereau_df = load_bordereau(bordereau_file)
-
-    __, results = apply_program_to_bordereau(bordereau_df, program)
+    __, results = apply_program_to_bordereau(bordereau_df, program, calculation_date="2024-06-01")
 
     excluded_count = (results["exclusion_status"] == "excluded").sum()
     included_count = (results["exclusion_status"] == "included").sum()

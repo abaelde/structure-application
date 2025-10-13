@@ -8,11 +8,6 @@ sys.path.insert(0, str(project_root))
 
 
 @pytest.fixture
-def sample_program_path():
-    return project_root / "examples" / "programs" / "single_quota_share.xlsx"
-
-
-@pytest.fixture
 def sample_bordereau_path():
     return project_root / "examples" / "bordereaux" / "test" / "bordereau_exemple.csv"
 
