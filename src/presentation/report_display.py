@@ -112,14 +112,12 @@ def generate_detailed_report(
     program: Program,
     output_file: str = "detailed_report.txt",
 ):
-    from .program_display import write_program_config
-
     with open(output_file, "w", encoding="utf-8") as f:
         f.write("=" * 80 + "\n")
         f.write("DETAILED STRUCTURES APPLICATION REPORT\n")
         f.write("=" * 80 + "\n\n")
 
-        write_program_config(program, file=f)
+        program.describe(file=f)
         f.write("\n\n")
 
         write_detailed_results(results_df, program.dimension_columns, file=f)

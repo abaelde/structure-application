@@ -9,7 +9,7 @@ from src.loaders import (
     BordereauValidationError,
 )
 from src.engine import apply_program_to_bordereau
-from src.presentation import display_program, generate_detailed_report
+from src.presentation import generate_detailed_report
 
 
 def main():
@@ -74,7 +74,7 @@ def main():
 
     print("3. Program configuration:")
     print("-" * 80)
-    display_program(program)
+    program.describe()
     print()
 
     print("4. Applying program to bordereau...")
