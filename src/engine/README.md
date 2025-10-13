@@ -46,15 +46,19 @@ src/engine/
 ### `policy_lifecycle.py`
 **Rôle** : Gestion du cycle de vie des polices (expiration, statuts)
 
-**Fonctions** :
+**Fonctions publiques** :
 - `check_policy_status(policy_data, calculation_date)` : Vérifie si une police est active
 - `create_inactive_result(policy_data, inactive_reason)` : Crée un résultat pour une police inactive
 - `create_excluded_result(policy_data)` : Crée un résultat pour une police exclue
+
+**Fonctions internes** :
+- `create_non_covered_result(policy_data, exclusion_status, exclusion_reason)` : Fonction générique pour créer un résultat de police non couverte
 
 **Responsabilités** :
 - Vérifier les dates d'expiration
 - Générer les résultats pour polices inactives
 - Générer les résultats pour polices exclues
+- Factoriser la création de résultats "zero cession" (DRY principle)
 
 ### `cession_calculator.py`
 **Rôle** : Calculs mathématiques purs des cessions
