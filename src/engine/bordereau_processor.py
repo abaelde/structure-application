@@ -19,6 +19,6 @@ def apply_program_to_bordereau(
     results_df = pd.DataFrame(results)
 
     bordereau_with_net = bordereau_df.copy()
-    bordereau_with_net["Cession_To_Reinsurer"] = results_df["cession_to_reinsurer"]
+    bordereau_with_net["cession_to_reinsurer"] = results_df["cession_to_reinsurer"]
 
     return bordereau_with_net, results_df
