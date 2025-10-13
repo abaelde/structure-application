@@ -7,14 +7,17 @@ Programme: Single Excess of Loss
 
 import sys
 import os
+from pathlib import Path
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+# Navigate to project root (same logic as conftest.py but 2 levels deeper)
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 import pandas as pd
 import numpy as np
-from excel_utils import auto_adjust_column_widths
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+# Import utilities
+from examples.program_creation.excel_utils import auto_adjust_column_widths
 from src.domain import PRODUCT, SHEETS
 
 # =============================================================================
@@ -119,10 +122,10 @@ structures_df = pd.DataFrame(structures_data)
 sections_df = pd.DataFrame(sections_data)
 
 # Créer le dossier programs s'il n'existe pas
-output_dir = "../programs"
+output_dir = Path(__file__).parent / "programs"
 os.makedirs(output_dir, exist_ok=True)
 
-output_file = "../programs/single_excess_of_loss.xlsx"
+output_file = output_dir / "single_excess_of_loss.xlsx"
 
 with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
     program_df.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
@@ -132,9 +135,7 @@ with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
 # Auto-adjust column widths for better readability
 auto_adjust_column_widths(output_file)
 
-print(
-    "✓ Programme Single Excess of Loss créé: examples/programs/single_excess_of_loss.xlsx"
-)
+print(f"✓ Programme Single Excess of Loss créé: {output_file}")
 # =============================================================================
 # AFFICHAGE DES DÉTAILS
 # =============================================================================

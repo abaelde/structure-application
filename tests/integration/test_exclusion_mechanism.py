@@ -10,8 +10,8 @@ def test_exclusion_mechanism():
     print("=" * 80)
     print()
 
-    program_file = "examples/programs/quota_share_with_exclusion.xlsx"
-    bordereau_file = "examples/bordereaux/aviation/bordereau_exclusion_test.csv"
+    program_file = "tests/integration/fixtures/programs/quota_share_with_exclusion.xlsx"
+    bordereau_file = "tests/integration/fixtures/bordereaux/bordereau_exclusion_test.csv"
 
     print(f"Chargement du programme: {program_file}")
     loader = ProgramLoader(program_file)

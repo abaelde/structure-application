@@ -5,7 +5,7 @@ from src.engine import apply_program_to_bordereau
 
 
 def test_policy_expiry_mechanism():
-    program_path = Path("examples/programs/single_quota_share.xlsx")
+    program_path = Path("tests/integration/fixtures/programs/single_quota_share.xlsx")
     loader = ProgramLoader(program_path)
     program = loader.get_program()
 

@@ -50,7 +50,7 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     print("=" * 80)
     
     # 1. Créer le programme de test
-    program_path = Path("tests/integration/fixtures/test_program_qs_xl.xlsx")
+    program_path = Path("tests/integration/fixtures/programs/test_program_qs_xl.xlsx")
     
     if not program_path.exists():
         pytest.skip(f"Programme de test non trouvé: {program_path}")

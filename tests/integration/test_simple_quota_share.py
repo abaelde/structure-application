@@ -20,7 +20,7 @@ def test_single_line_quota_share_basic():
     - Cession (30%): 300,000
     - Retenu (70%): 700,000
     """
-    program_path = Path("examples/programs/single_quota_share.xlsx")
+    program_path = Path("tests/integration/fixtures/programs/single_quota_share.xlsx")
     
     if not program_path.exists():
         pytest.skip(f"Programme de test non trouvé: {program_path}")
@@ -89,7 +89,7 @@ def test_single_line_quota_share_with_currency_matching():
     - Cession (25%): 250,000
     - Retenu (75%): 750,000
     """
-    program_path = Path("examples/programs/quota_share_by_currency.xlsx")
+    program_path = Path("tests/integration/fixtures/programs/quota_share_by_currency.xlsx")
     
     if not program_path.exists():
         pytest.skip(f"Programme de test non trouvé: {program_path}")

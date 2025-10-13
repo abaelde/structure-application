@@ -1,10 +1,13 @@
-import pandas as pd
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
+# Navigate to project root (same logic as conftest.py but 2 levels deeper)
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
-output_file = "examples/programs/quota_share_with_exclusion.xlsx"
+import pandas as pd
+
+output_file = Path(__file__).parent / "programs" / "quota_share_with_exclusion.xlsx"
 
 program_df = pd.DataFrame(
     [

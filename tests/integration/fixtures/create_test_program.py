@@ -5,14 +5,16 @@ Programme: QS 30% → XL 50M xs 20M
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+# Navigate to project root (same logic as conftest.py but 2 levels deeper)
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 import pandas as pd
 from examples.program_creation.excel_utils import create_excel_with_auto_width
 
 
 def create_test_program_qs_xl():
-    output_path = Path(__file__).parent / "test_program_qs_xl.xlsx"
+    output_path = Path(__file__).parent / "programs" / "test_program_qs_xl.xlsx"
     
     # 1. PROGRAM sheet
     program_df = pd.DataFrame([{
