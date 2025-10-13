@@ -1,6 +1,5 @@
-import pandas as pd
 from typing import Dict, Any, List, Set, Optional
-from src.domain import PRODUCT, SECTION_COLS as SC, Structure, Section
+from src.domain import PRODUCT, Structure, Section
 from .section_matcher import match_section
 from .cession_calculator import apply_section
 
