@@ -12,45 +12,57 @@ def process_structures(
     exposure: float,
 ) -> tuple[List[Dict[str, Any]], float, float]:
     structure_outputs = {}
-    total_cession_to_layer_100pct = 0.0
-    total_cession_to_reinsurer = 0.0
     structures_detail = []
-
     processed: Set[str] = set()
 
-    def process_structure(structure: Structure) -> None:
-        nonlocal total_cession_to_layer_100pct, total_cession_to_reinsurer
+    def process_structure(structure: Structure) -> Dict[str, Any]:
+        if _is_already_processed(structure.structure_name):
+            return _no_cession_result()
 
-        if structure.structure_name in processed:
-            return
-
-        if structure.has_predecessor():
-            predecessor = next(
-                (s for s in structures if s.structure_name == structure.predecessor_title), None
-            )
-            if predecessor:
-                process_structure(predecessor)
+        _process_predecessor_if_needed(structure)
 
         matched_section = match_section(
             policy_data, structure.sections, dimension_columns
         )
 
         if matched_section is None:
-            _add_structure_detail(structures_detail, structure, applied=False)
-            structure_outputs[structure.structure_name] = {
-                "retained": 0.0,
-                "cession_to_layer_100pct": 0.0,
-                "cession_to_reinsurer": 0.0,
-                "type_of_participation": structure.type_of_participation,
-                "retention_pct": 1.0,
-            }
-            processed.add(structure.structure_name)
+            return _handle_no_matching_section(structure)
+
+        return _apply_structure_and_calculate_cession(structure, matched_section)
+
+    def _is_already_processed(structure_name: str) -> bool:
+        return structure_name in processed
+
+    def _no_cession_result() -> Dict[str, Any]:
+        return {"applied": False, "cession_to_layer_100pct": 0.0, "cession_to_reinsurer": 0.0}
+
+    def _process_predecessor_if_needed(structure: Structure) -> None:
+        if not structure.has_predecessor():
             return
 
-        input_exposure = _calculate_input_exposure(
-            exposure, structure, structure_outputs
+        predecessor = next(
+            (s for s in structures if s.structure_name == structure.predecessor_title), None
         )
+        if predecessor:
+            process_structure(predecessor)
 
+    def _handle_no_matching_section(structure: Structure) -> Dict[str, Any]:
+        _add_structure_detail(structures_detail, structure, applied=False)
+        structure_outputs[structure.structure_name] = {
+            "retained": 0.0,
+            "cession_to_layer_100pct": 0.0,
+            "cession_to_reinsurer": 0.0,
+            "type_of_participation": structure.type_of_participation,
+            "retention_pct": 1.0,
+        }
+        processed.add(structure.structure_name)
+        return _no_cession_result()
+
+    def _apply_structure_and_calculate_cession(
+        structure: Structure, matched_section: Section
+    ) -> Dict[str, Any]:
+        input_exposure = _calculate_input_exposure(exposure, structure, structure_outputs)
+        
         section_to_apply, rescaling_info = _rescale_section_if_needed(
             matched_section, structure, structure_outputs
         )
@@ -60,7 +72,6 @@ def process_structures(
         )
 
         retained = input_exposure - ceded_result["cession_to_layer_100pct"]
-
         current_retention_pct = _calculate_retention_pct(structure, matched_section)
 
         structure_outputs[structure.structure_name] = {
@@ -83,14 +94,21 @@ def process_structures(
         )
 
         processed.add(structure.structure_name)
+        
+        return {
+            "applied": True,
+            "cession_to_layer_100pct": ceded_result["cession_to_layer_100pct"],
+            "cession_to_reinsurer": ceded_result["cession_to_reinsurer"]
+        }
+
+    total_cession_to_layer_100pct = 0.0
+    total_cession_to_reinsurer = 0.0
 
     for structure in structures:
-        process_structure(structure)
-
-    for detail in structures_detail:
-        if detail["applied"]:
-            total_cession_to_layer_100pct += detail["cession_to_layer_100pct"]
-            total_cession_to_reinsurer += detail["cession_to_reinsurer"]
+        result = process_structure(structure)
+        if result["applied"]:
+            total_cession_to_layer_100pct += result["cession_to_layer_100pct"]
+            total_cession_to_reinsurer += result["cession_to_reinsurer"]
 
     return structures_detail, total_cession_to_layer_100pct, total_cession_to_reinsurer
 

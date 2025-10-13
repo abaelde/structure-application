@@ -188,37 +188,6 @@ class Program:
         self.dimension_columns = dimension_columns
         self.structures = structures
 
-    @classmethod
-    def from_dataframes(
-        cls,
-        program_name: str,
-        structures_data: List[Dict[str, Any]],
-        sections_by_structure: Dict[str, List[Dict[str, Any]]],
-        structure_cols,
-        dimension_columns: List[str],
-    ) -> "Program":
-        """
-        Factory method: create Program from dictionary data.
-        The Program orchestrates its own construction.
-        """
-        # Create all structures (they know how to build themselves)
-        structures = []
-        for structure_dict in structures_data:
-            structure_key = structure_dict.get(structure_cols.INSPER_ID)
-            if structure_key is None:
-                structure_key = structure_dict[structure_cols.NAME]
-            
-            sections_data = sections_by_structure.get(structure_key, [])
-            structures.append(
-                Structure.from_row(structure_dict, sections_data, structure_cols)
-            )
-
-        return cls(
-            name=program_name,
-            structures=structures,
-            dimension_columns=dimension_columns,
-        )
-
     def __getitem__(self, key: str):
         if not hasattr(self, key):
             raise KeyError(f"'{key}' not found in Program")

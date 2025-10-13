@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from typing import Dict, Any, List
 
 from src.domain import (
@@ -9,7 +8,6 @@ from src.domain import (
     STRUCTURE_COLS,
     Program,
     Structure,
-    Section,
 )
 
 
@@ -120,13 +118,22 @@ class ProgramLoader:
                 sections_by_structure[structure_key] = []
             sections_by_structure[structure_key].append(section)
 
-        # Step 5: Let the Program build itself from the dictionaries
-        # The construction logic is delegated to the domain models
-        self.program = Program.from_dataframes(
-            program_name=program_name,
-            structures_data=structures_data,
-            sections_by_structure=sections_by_structure,
-            structure_cols=STRUCTURE_COLS,
+        # Step 5: Build Structure objects
+        structures = []
+        for structure_dict in structures_data:
+            structure_key = structure_dict.get(STRUCTURE_COLS.INSPER_ID)
+            if structure_key is None:
+                structure_key = structure_dict[STRUCTURE_COLS.NAME]
+            
+            sections_data_for_structure = sections_by_structure.get(structure_key, [])
+            structures.append(
+                Structure.from_row(structure_dict, sections_data_for_structure, STRUCTURE_COLS)
+            )
+
+        # Step 6: Create Program with Structure objects
+        self.program = Program(
+            name=program_name,
+            structures=structures,
             dimension_columns=self.dimension_columns,
         )
 
