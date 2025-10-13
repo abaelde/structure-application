@@ -58,16 +58,20 @@ PARAMETERS = [
 
 
 class ProgramLoader:
-    def __init__(self, excel_path: str):
-        self.excel_path = excel_path
+    def __init__(self, source: str, data_source: str = "file"):
+        self.source = source
+        self.data_source = data_source
         self.program = None
         self.dimension_columns = []
         self.load_program()
 
     def load_program(self):
-        program_df = pd.read_excel(self.excel_path, sheet_name=SHEETS.PROGRAM)
-        structures_df = pd.read_excel(self.excel_path, sheet_name=SHEETS.STRUCTURES)
-        sections_df = pd.read_excel(self.excel_path, sheet_name=SHEETS.SECTIONS)
+        if self.data_source == "file":
+            program_df, structures_df, sections_df = self._load_from_file()
+        elif self.data_source == "snowflake":
+            program_df, structures_df, sections_df = self._load_from_snowflake()
+        else:
+            raise ValueError(f"Unknown data_source: {self.data_source}")
 
         program_row = program_df.iloc[0]
         program_name = program_row[PROGRAM_COLS.TITLE]
@@ -115,6 +119,15 @@ class ProgramLoader:
             "structures": program_structures,
             "dimension_columns": self.dimension_columns,
         }
+
+    def _load_from_file(self):
+        program_df = pd.read_excel(self.source, sheet_name=SHEETS.PROGRAM)
+        structures_df = pd.read_excel(self.source, sheet_name=SHEETS.STRUCTURES)
+        sections_df = pd.read_excel(self.source, sheet_name=SHEETS.SECTIONS)
+        return program_df, structures_df, sections_df
+    
+    def _load_from_snowflake(self):
+        raise NotImplementedError("Snowflake loading not yet implemented")
 
     def get_program(self) -> Dict[str, Any]:
         return self.program
