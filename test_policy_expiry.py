@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from src.loaders import ProgramLoader, BordereauLoader
-from src.engine.calculation_engine import apply_program_to_bordereau
+from src.engine import apply_program_to_bordereau
 
 
 def test_policy_expiry_mechanism():

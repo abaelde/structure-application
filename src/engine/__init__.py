@@ -1,5 +1,5 @@
-from .calculation_engine import (
-    apply_program,
+from .calculation_engine import apply_program
+from .bordereau_processor import (
     apply_program_to_bordereau,
     apply_treaty_with_claim_basis,
     apply_treaty_manager_to_bordereau,
