@@ -66,7 +66,7 @@ def main():
     )
 
     print("\n")
-    write_detailed_results(results, program["dimension_columns"])
+    write_detailed_results(results, program.dimension_columns)
 
     generate_detailed_report(results, program, "detailed_report.txt")
 

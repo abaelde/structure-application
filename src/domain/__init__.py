@@ -10,6 +10,7 @@ from .constants import (
     STRUCTURE_COLS,
     SECTION_COLS,
 )
+from .models import Program, Structure, Section
 
 __all__ = [
     "FIELDS",
@@ -22,5 +23,8 @@ __all__ = [
     "PROGRAM_COLS",
     "STRUCTURE_COLS",
     "SECTION_COLS",
+    "Program",
+    "Structure",
+    "Section",
 ]
 

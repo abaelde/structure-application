@@ -13,7 +13,7 @@ def test_policy_expiry_mechanism():
     print(f"\n1. Chargement du programme: {program_path}")
     loader = ProgramLoader(program_path)
     program = loader.get_program()
-    print(f"   ✓ Programme chargé: {program['name']}")
+    print(f"   ✓ Programme chargé: {program.name}")
     
     test_data = {
         "INSURED_NAME": ["COMPANY A", "COMPANY B", "COMPANY C", "COMPANY D"],

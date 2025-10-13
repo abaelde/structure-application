@@ -1,5 +1,5 @@
 from typing import Dict, Any, Optional
-from src.domain import FIELDS
+from src.domain import FIELDS, Program
 from .section_matcher import check_exclusion, match_section
 from .cession_calculator import apply_section
 from .policy_lifecycle import check_policy_status, create_inactive_result, create_excluded_result
@@ -7,11 +7,11 @@ from .structure_orchestrator import process_structures
 
 
 def apply_program(
-    policy_data: Dict[str, Any], program: Dict[str, Any], calculation_date: Optional[str] = None
+    policy_data: Dict[str, Any], program: Program, calculation_date: Optional[str] = None
 ) -> Dict[str, Any]:
     exposure = policy_data.get(FIELDS["EXPOSURE"])
-    structures = program["structures"]
-    dimension_columns = program["dimension_columns"]
+    structures = program.structures
+    dimension_columns = program.dimension_columns
     
     is_policy_active, inactive_reason = check_policy_status(policy_data, calculation_date)
     
@@ -20,7 +20,7 @@ def apply_program(
 
     all_sections = []
     for structure in structures:
-        all_sections.extend(structure["sections"])
+        all_sections.extend(structure.sections)
     
     is_excluded = check_exclusion(policy_data, all_sections, dimension_columns)
     

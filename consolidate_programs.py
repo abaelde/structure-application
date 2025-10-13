@@ -121,7 +121,7 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
     loader = ProgramLoader(str(program_path))
     program = loader.get_program()
     print(
-        f"   Loaded program '{program['name']}' with {len(program['structures'])} structures"
+        f"   Loaded program '{program.name}' with {len(program.structures)} structures"
     )
 
     # Load bordereau
@@ -133,17 +133,17 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
 
     # Add cedant identifier to results
     results["cedant_program"] = program_name
-    results["program_name"] = program["name"]
+    results["program_name"] = program.name
 
     print(f"   ✓ Processed {len(results)} policies")
 
     # Store program info for reporting
     program_info = {
         "program_name": program_name,
-        "program_display_name": program["name"],
+        "program_display_name": program.name,
         "program_file": program_path.name,
         "bordereau_file": bordereau_path.name,
-        "num_structures": len(program["structures"]),
+        "num_structures": len(program.structures),
         "num_policies": len(bordereau_df),
         "num_results": len(results),
     }

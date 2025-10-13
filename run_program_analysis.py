@@ -58,8 +58,8 @@ def main():
         print("2. Loading program configuration...")
         loader = ProgramLoader(args.program)
         program = loader.get_program()
-        print(f"   ✓ Program loaded: {program['name']}")
-        print(f"   ✓ Number of structures: {len(program['structures'])}")
+        print(f"   ✓ Program loaded: {program.name}")
+        print(f"   ✓ Number of structures: {len(program.structures)}")
         print()
 
     except FileNotFoundError as e:

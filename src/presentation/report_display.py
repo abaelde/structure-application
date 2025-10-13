@@ -1,7 +1,7 @@
 import pandas as pd
 import sys
 from typing import Dict, Any
-from src.domain import PRODUCT, SECTION_COLS as SC, FIELDS
+from src.domain import PRODUCT, SECTION_COLS as SC, FIELDS, Program
 
 
 def write_detailed_results(
@@ -95,7 +95,7 @@ def write_detailed_results(
 
 def generate_detailed_report(
     results_df: pd.DataFrame,
-    program: Dict[str, Any],
+    program: Program,
     output_file: str = "detailed_report.txt",
 ):
     from .program_display import write_program_config
@@ -108,7 +108,7 @@ def generate_detailed_report(
         write_program_config(program, file=f)
         f.write("\n\n")
 
-        write_detailed_results(results_df, program["dimension_columns"], file=f)
+        write_detailed_results(results_df, program.dimension_columns, file=f)
 
     print(f"✓ Detailed report generated: {output_file}")
 

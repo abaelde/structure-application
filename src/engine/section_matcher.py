@@ -1,9 +1,10 @@
 import pandas as pd
 from typing import Dict, Any, Optional, List
+from src.domain import Section
 
 
 def check_exclusion(
-    policy_data: Dict[str, Any], sections: List[Dict[str, Any]], dimension_columns: List[str]
+    policy_data: Dict[str, Any], sections: List[Section], dimension_columns: List[str]
 ) -> bool:
     for section in sections:
         if section.get("BUSCL_EXCLUDE_CD") == "exclude":
@@ -28,8 +29,8 @@ def check_exclusion(
 
 
 def match_section(
-    policy_data: Dict[str, Any], sections: List[Dict[str, Any]], dimension_columns: List[str]
-) -> Optional[Dict[str, Any]]:
+    policy_data: Dict[str, Any], sections: List[Section], dimension_columns: List[str]
+) -> Optional[Section]:
     matched_sections = []
 
     for section in sections:

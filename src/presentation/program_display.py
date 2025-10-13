@@ -2,10 +2,10 @@ from typing import Dict, Any
 import pandas as pd
 import sys
 
-from src.domain import PRODUCT, SECTION_COLS as SC
+from src.domain import PRODUCT, SECTION_COLS as SC, Program, Structure, Section
 
 
-def write_program_config(program: Dict[str, Any], file=None) -> None:
+def write_program_config(program: Program, file=None) -> None:
     if file is None:
         file = sys.stdout
 
@@ -13,12 +13,12 @@ def write_program_config(program: Dict[str, Any], file=None) -> None:
     file.write("PROGRAM CONFIGURATION\n")
     file.write("=" * 80 + "\n")
 
-    file.write(f"Program name: {program['name']}\n")
-    file.write(f"Number of structures: {len(program['structures'])}\n")
-    file.write(f"Matching dimensions: {len(program['dimension_columns'])}\n")
+    file.write(f"Program name: {program.name}\n")
+    file.write(f"Number of structures: {len(program.structures)}\n")
+    file.write(f"Matching dimensions: {len(program.dimension_columns)}\n")
 
-    if program["dimension_columns"]:
-        file.write(f"   Dimensions: {', '.join(program['dimension_columns'])}\n")
+    if program.dimension_columns:
+        file.write(f"   Dimensions: {', '.join(program.dimension_columns)}\n")
     else:
         file.write("   No dimensions (all policies treated the same way)\n")
 
@@ -26,46 +26,44 @@ def write_program_config(program: Dict[str, Any], file=None) -> None:
     file.write("STRUCTURE DETAILS\n")
     file.write("-" * 80 + "\n")
 
-    for i, structure in enumerate(program["structures"], 1):
-        file.write(f"\nStructure {i}: {structure['structure_name']}\n")
-        file.write(f"   Type: {structure['type_of_participation']}\n")
+    for i, structure in enumerate(program.structures, 1):
+        file.write(f"\nStructure {i}: {structure.structure_name}\n")
+        file.write(f"   Type: {structure.type_of_participation}\n")
         
         # Afficher le prédécesseur
-        predecessor_title = structure.get("predecessor_title")
+        predecessor_title = structure.predecessor_title
         if predecessor_title and pd.notna(predecessor_title):
             file.write(f"   Predecessor: {predecessor_title} (Inuring)\n")
         else:
             file.write(f"   Predecessor: None (Entry point)\n")
         
-        file.write(f"   Number of sections: {len(structure['sections'])}\n")
+        file.write(f"   Number of sections: {len(structure.sections)}\n")
 
-        if structure.get("claim_basis") and pd.notna(structure.get("claim_basis")):
-            file.write(f"   Claim basis: {structure['claim_basis']}\n")
-        if structure.get("inception_date") and pd.notna(
-            structure.get("inception_date")
-        ):
-            file.write(f"   Inception date: {structure['inception_date']}\n")
-        if structure.get("expiry_date") and pd.notna(structure.get("expiry_date")):
-            file.write(f"   Expiry date: {structure['expiry_date']}\n")
+        if structure.claim_basis and pd.notna(structure.claim_basis):
+            file.write(f"   Claim basis: {structure.claim_basis}\n")
+        if structure.inception_date and pd.notna(structure.inception_date):
+            file.write(f"   Inception date: {structure.inception_date}\n")
+        if structure.expiry_date and pd.notna(structure.expiry_date):
+            file.write(f"   Expiry date: {structure.expiry_date}\n")
 
-        if len(structure["sections"]) == 1:
-            section = structure["sections"][0]
+        if len(structure.sections) == 1:
+            section = structure.sections[0]
             file.write("   Single section:\n")
             _write_section(
                 section,
-                program["dimension_columns"],
-                structure["type_of_participation"],
+                program.dimension_columns,
+                structure.type_of_participation,
                 indent="      ",
                 file=file,
             )
         else:
             file.write("   Sections:\n")
-            for j, section in enumerate(structure["sections"], 1):
+            for j, section in enumerate(structure.sections, 1):
                 file.write(f"      Section {j}:\n")
                 _write_section(
                     section,
-                    program["dimension_columns"],
-                    structure["type_of_participation"],
+                    program.dimension_columns,
+                    structure.type_of_participation,
                     indent="         ",
                     file=file,
                 )
@@ -73,12 +71,12 @@ def write_program_config(program: Dict[str, Any], file=None) -> None:
     file.write("\n" + "=" * 80 + "\n")
 
 
-def display_program(program: Dict[str, Any]) -> None:
+def display_program(program: Program) -> None:
     write_program_config(program, file=sys.stdout)
 
 
 def _write_section(
-    section: Dict[str, Any],
+    section: Section,
     dimension_columns: list,
     type_of_participation: str,
     indent: str = "",
@@ -126,24 +124,24 @@ def _write_section(
         file.write(f"{indent}Matching conditions: None (applies to all policies)\n")
 
 
-def display_program_summary(program: Dict[str, Any]) -> None:
-    print(f"{program['name']} - {len(program['structures'])} structures")
+def display_program_summary(program: Program) -> None:
+    print(f"{program.name} - {len(program.structures)} structures")
 
-    for structure in program["structures"]:
-        type_of_participation = structure["type_of_participation"]
-        sections_count = len(structure["sections"])
+    for structure in program.structures:
+        type_of_participation = structure.type_of_participation
+        sections_count = len(structure.sections)
 
         if type_of_participation == PRODUCT.QUOTA_SHARE:
             rates = []
-            for section in structure["sections"]:
+            for section in structure.sections:
                 if pd.notna(section.get(SC.CESSION_PCT)):
                     rates.append(f"{section[SC.CESSION_PCT]:.1%}")
             rates_str = ", ".join(set(rates)) if rates else "N/A"
-            print(f"   {structure['structure_name']}: QS {rates_str}")
+            print(f"   {structure.structure_name}: QS {rates_str}")
 
         elif type_of_participation == PRODUCT.EXCESS_OF_LOSS:
             xol_params = []
-            for section in structure["sections"]:
+            for section in structure.sections:
                 if pd.notna(section.get(SC.ATTACHMENT)) and pd.notna(
                     section.get(SC.LIMIT)
                 ):
@@ -151,7 +149,7 @@ def display_program_summary(program: Dict[str, Any]) -> None:
                         f"{section[SC.LIMIT]:,.0f}xs{section[SC.ATTACHMENT]:,.0f}"
                     )
             xol_str = ", ".join(set(xol_params)) if xol_params else "N/A"
-            print(f"   {structure['structure_name']}: XOL {xol_str}")
+            print(f"   {structure.structure_name}: XOL {xol_str}")
 
 
 def display_program_comparison(programs: Dict[str, Dict[str, Any]]) -> None:

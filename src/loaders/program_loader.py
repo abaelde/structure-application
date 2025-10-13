@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import Dict, Any, List
 
-from src.domain import DIMENSIONS, SHEETS, PROGRAM_COLS, STRUCTURE_COLS
+from src.domain import DIMENSIONS, SHEETS, PROGRAM_COLS, STRUCTURE_COLS, Program
 
 
 # Keys and relations - foreign keys between Excel sheets (tables)
@@ -114,11 +114,11 @@ class ProgramLoader:
                 }
             )
 
-        self.program = {
-            "name": program_name,
-            "structures": program_structures,
-            "dimension_columns": self.dimension_columns,
-        }
+        self.program = Program(
+            name=program_name,
+            structures=program_structures,
+            dimension_columns=self.dimension_columns,
+        )
 
     def _load_from_file(self):
         program_df = pd.read_excel(self.source, sheet_name=SHEETS.PROGRAM)
@@ -129,6 +129,6 @@ class ProgramLoader:
     def _load_from_snowflake(self):
         raise NotImplementedError("Snowflake loading not yet implemented")
 
-    def get_program(self) -> Dict[str, Any]:
+    def get_program(self) -> Program:
         return self.program
 
