@@ -31,4 +31,25 @@ extend-exclude = '''
 [dependency-groups]
 dev = [
     "black>=25.9.0",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+markers = [
+    "unit: Tests unitaires (fonctions isolées)",
+    "integration: Tests d'intégration (workflow complets)",
+    "slow: Tests lents",
 ]
