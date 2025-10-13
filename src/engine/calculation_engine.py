@@ -16,12 +16,8 @@ def apply_program(
     
     if not is_policy_active:
         return create_inactive_result(policy_data, inactive_reason)
-
-    all_sections = []
-    for structure in structures:
-        all_sections.extend(structure.sections)
     
-    is_excluded = check_exclusion(policy_data, all_sections, dimension_columns)
+    is_excluded = check_exclusion(policy_data, program.all_sections, dimension_columns)
     
     if is_excluded:
         return create_excluded_result(policy_data)

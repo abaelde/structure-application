@@ -168,6 +168,14 @@ class Program:
             raise KeyError(f"'{key}' not found in Program")
         return getattr(self, key)
     
+    @property
+    def all_sections(self) -> List[Section]:
+        """Returns all sections from all structures"""
+        sections = []
+        for structure in self.structures:
+            sections.extend(structure.sections)
+        return sections
+    
     def to_dict(self) -> Dict[str, Any]:
         return {
             "name": self.name,
