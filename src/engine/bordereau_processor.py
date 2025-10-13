@@ -11,12 +11,10 @@ def apply_program_to_bordereau(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     from .calculation_engine import apply_program
     
-    results = []
-
-    for _, row in bordereau_df.iterrows():
-        policy_data = row.to_dict()
-        result = apply_program(policy_data, program, calculation_date)
-        results.append(result)
+    results = bordereau_df.apply(
+        lambda row: apply_program(row.to_dict(), program, calculation_date),
+        axis=1
+    ).tolist()
 
     results_df = pd.DataFrame(results)
 
