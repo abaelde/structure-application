@@ -54,6 +54,8 @@ structure-application/
 ├── program_config.xlsx                # Configuration du programme (Excel)
 ├── PROGRAM_SPECIFICATION_GUIDE.md     # Guide de spécification des programmes
 ├── CLAIM_BASIS_GUIDE.md               # Guide de la logique claim_basis
+├── EXCLUSION_MECHANISM.md             # Guide du mécanisme d'exclusion
+├── POLICY_EXPIRY_MECHANISM.md         # Guide de vérification d'activité des polices
 ├── main.py                            # Point d'entrée principal
 ├── test_simple_programs.py            # Tests des programmes simples
 ├── test_new_fields.py                 # Tests des nouveaux champs
@@ -84,6 +86,12 @@ Fichier CSV contenant les polices d'assurance avec :
 - `include` : Champ libre pour conditions spéciales
 
 ⚠️ **IMPORTANT** : Les bordereaux doivent être organisés dans des sous-dossiers par ligne de business (aviation/, property/, casualty/, test/). Consultez [examples/bordereaux/README.md](examples/bordereaux/README.md) pour les conventions complètes.
+
+**Vérification de l'activité des polices :**
+
+Le système vérifie automatiquement si les polices sont encore actives à la date de calcul. Une police est considérée comme **inactive** si `EXPIRE_DT <= calculation_date`. Les polices inactives ont une exposition effective de 0 et ne génèrent aucune cession.
+
+Pour plus de détails, consultez [POLICY_EXPIRY_MECHANISM.md](POLICY_EXPIRY_MECHANISM.md).
 
 ### 2. Produits de base
 - **quota-share** : Application d'un pourcentage de cession (cession_PCT) sur l'exposition

@@ -104,11 +104,47 @@ def apply_section(
 
 
 def apply_program(
-    policy_data: Dict[str, Any], program: Dict[str, Any]
+    policy_data: Dict[str, Any], program: Dict[str, Any], calculation_date: str = None
 ) -> Dict[str, Any]:
+    from datetime import datetime
+    
     exposure = policy_data.get(FIELDS["EXPOSURE"])
     structures = program["structures"]
     dimension_columns = program["dimension_columns"]
+    
+    policy_expiry_date = policy_data.get(FIELDS["EXPIRY_DATE"])
+    
+    if calculation_date is None:
+        calculation_date = datetime.now().strftime("%Y-%m-%d")
+    
+    is_policy_active = True
+    inactive_reason = None
+    
+    if policy_expiry_date:
+        try:
+            expiry_dt = pd.to_datetime(policy_expiry_date)
+            calc_dt = pd.to_datetime(calculation_date)
+            
+            if expiry_dt <= calc_dt:
+                is_policy_active = False
+                inactive_reason = f"Policy expired on {expiry_dt.date()} (calculation date: {calc_dt.date()})"
+        except Exception as e:
+            pass
+    
+    if not is_policy_active:
+        return {
+            FIELDS["INSURED_NAME"]: policy_data.get(FIELDS["INSURED_NAME"]),
+            "exposure": exposure,
+            "effective_exposure": 0.0,
+            "cession_to_layer_100pct": 0.0,
+            "cession_to_reinsurer": 0.0,
+            "retained_by_cedant": 0.0,
+            "policy_inception_date": policy_data.get(FIELDS["INCEPTION_DATE"]),
+            "policy_expiry_date": policy_expiry_date,
+            "structures_detail": [],
+            "exclusion_status": "inactive",
+            "exclusion_reason": inactive_reason,
+        }
 
     all_sections = []
     for structure in structures:
@@ -287,13 +323,13 @@ def apply_program(
 
 
 def apply_program_to_bordereau(
-    bordereau_df: pd.DataFrame, program: Dict[str, Any]
+    bordereau_df: pd.DataFrame, program: Dict[str, Any], calculation_date: str = None
 ) -> pd.DataFrame:
     results = []
 
     for _, row in bordereau_df.iterrows():
         policy_data = row.to_dict()
-        result = apply_program(policy_data, program)
+        result = apply_program(policy_data, program, calculation_date)
         results.append(result)
 
     results_df = pd.DataFrame(results)
@@ -347,7 +383,7 @@ def apply_treaty_with_claim_basis(
             "exclusion_status": "included",
         }
 
-    result = apply_program(policy_data, selected_treaty)
+    result = apply_program(policy_data, selected_treaty, calculation_date)
 
     selected_year = None
     for year, treaty in treaty_manager.treaties.items():
