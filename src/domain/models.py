@@ -1,6 +1,5 @@
 from typing import Dict, Any, List, Optional
-import pandas as pd
-from .constants import SECTION_COLS
+from .constants import SECTION_COLS, PRODUCT
 
 
 class Section:
@@ -13,14 +12,13 @@ class Section:
         self._validate()
 
     def _validate(self):
-        import pandas as pd
         
         # Les sections d'exclusion n'ont pas besoin de SIGNED_SHARE_PCT
         is_exclusion = self._data.get("BUSCL_EXCLUDE_CD") == "exclude"
         if is_exclusion:
             return
         
-        if pd.isna(self.signed_share):
+        if self.signed_share is None:
             raise ValueError(
                 f"SIGNED_SHARE_PCT is required for all non-exclusion sections. "
                 f"Section data: {self._data}"
@@ -62,13 +60,13 @@ class Section:
         return self._data.copy()
 
     def has_attachment(self) -> bool:
-        return pd.notna(self.attachment)
+        return self.attachment is not None
 
     def has_limit(self) -> bool:
-        return pd.notna(self.limit)
+        return self.limit is not None
 
     def has_cession_pct(self) -> bool:
-        return pd.notna(self.cession_pct)
+        return self.cession_pct is not None
 
     def is_exclusion(self) -> bool:
         return self.get("BUSCL_EXCLUDE_CD") == "exclude"
@@ -120,33 +118,20 @@ class Structure:
     @classmethod
     def from_row(
         cls,
-        structure_row: pd.Series,
-        sections_df: pd.DataFrame,
+        structure_row: Dict[str, Any],
+        sections_data: List[Dict[str, Any]],
         structure_cols,
     ) -> "Structure":
         """
-        Factory method: create Structure from DataFrame row.
+        Factory method: create Structure from dictionary data.
         The Structure knows how to find and link its own sections.
         """
-        structure_name = structure_row[structure_cols.NAME]
-        structure_id = structure_row.get(structure_cols.INSPER_ID)
-
-        # Logic to filter sections belongs to the Structure class
-        if pd.notna(structure_id):
-            sections_data = sections_df[
-                sections_df[structure_cols.INSPER_ID] == structure_id
-            ].to_dict("records")
-        else:
-            sections_data = sections_df[
-                sections_df[structure_cols.NAME] == structure_name
-            ].to_dict("records")
-
         # Create Section objects
         sections = [Section.from_dict(s) for s in sections_data]
 
         # Create and return Structure
         return cls(
-            structure_name=structure_name,
+            structure_name=structure_row[structure_cols.NAME],
             contract_order=structure_row[structure_cols.ORDER],
             type_of_participation=structure_row[structure_cols.TYPE],
             sections=sections,
@@ -177,14 +162,13 @@ class Structure:
         }
 
     def has_predecessor(self) -> bool:
-        return pd.notna(self.predecessor_title)
+        return self.predecessor_title is not None
 
     def is_quota_share(self) -> bool:
-        from .constants import PRODUCT
+        
         return self.type_of_participation == PRODUCT.QUOTA_SHARE
 
     def is_excess_of_loss(self) -> bool:
-        from .constants import PRODUCT
         return self.type_of_participation == PRODUCT.EXCESS_OF_LOSS
 
     def calculate_retention_pct(self, matched_section: Section) -> float:
@@ -207,24 +191,27 @@ class Program:
     @classmethod
     def from_dataframes(
         cls,
-        program_df: pd.DataFrame,
-        structures_df: pd.DataFrame,
-        sections_df: pd.DataFrame,
-        program_cols,
+        program_name: str,
+        structures_data: List[Dict[str, Any]],
+        sections_by_structure: Dict[str, List[Dict[str, Any]]],
         structure_cols,
         dimension_columns: List[str],
     ) -> "Program":
         """
-        Factory method: create Program from DataFrames.
+        Factory method: create Program from dictionary data.
         The Program orchestrates its own construction.
         """
-        program_name = program_df.iloc[0][program_cols.TITLE]
-
         # Create all structures (they know how to build themselves)
-        structures = [
-            Structure.from_row(row, sections_df, structure_cols)
-            for _, row in structures_df.iterrows()
-        ]
+        structures = []
+        for structure_dict in structures_data:
+            structure_key = structure_dict.get(structure_cols.INSPER_ID)
+            if structure_key is None:
+                structure_key = structure_dict[structure_cols.NAME]
+            
+            sections_data = sections_by_structure.get(structure_key, [])
+            structures.append(
+                Structure.from_row(structure_dict, sections_data, structure_cols)
+            )
 
         return cls(
             name=program_name,

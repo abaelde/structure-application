@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from typing import Dict, Any, List
 
 from src.domain import (
@@ -65,6 +66,22 @@ PARAMETERS = [
 ]
 
 
+def convert_pandas_to_native(value):
+    """Convert pandas null values (pd.NA, np.nan) to Python None"""
+    if pd.isna(value):
+        return None
+    return value
+
+
+def dataframe_to_dict_list(df: pd.DataFrame) -> List[Dict[str, Any]]:
+    """Convert DataFrame to list of dicts, replacing pandas nulls with None"""
+    records = df.to_dict("records")
+    return [
+        {key: convert_pandas_to_native(value) for key, value in record.items()}
+        for record in records
+    ]
+
+
 class ProgramLoader:
     def __init__(self, source: str, data_source: str = "file"):
         self.source = source
@@ -87,13 +104,28 @@ class ProgramLoader:
             col for col in DIMENSIONS if col in sections_df.columns
         ]
 
-        # Step 3: Let the Program build itself from the DataFrames
+        # Step 3: Convert DataFrames to native Python types
+        program_name = convert_pandas_to_native(program_df.iloc[0][PROGRAM_COLS.TITLE])
+        structures_data = dataframe_to_dict_list(structures_df)
+        sections_data = dataframe_to_dict_list(sections_df)
+
+        # Step 4: Group sections by structure
+        sections_by_structure = {}
+        for section in sections_data:
+            structure_key = section.get(STRUCTURE_COLS.INSPER_ID)
+            if structure_key is None:
+                structure_key = section.get(STRUCTURE_COLS.NAME)
+            
+            if structure_key not in sections_by_structure:
+                sections_by_structure[structure_key] = []
+            sections_by_structure[structure_key].append(section)
+
+        # Step 5: Let the Program build itself from the dictionaries
         # The construction logic is delegated to the domain models
         self.program = Program.from_dataframes(
-            program_df=program_df,
-            structures_df=structures_df,
-            sections_df=sections_df,
-            program_cols=PROGRAM_COLS,
+            program_name=program_name,
+            structures_data=structures_data,
+            sections_by_structure=sections_by_structure,
             structure_cols=STRUCTURE_COLS,
             dimension_columns=self.dimension_columns,
         )
