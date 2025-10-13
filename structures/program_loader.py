@@ -118,3 +118,4 @@ class ProgramLoader:
 
     def get_program(self) -> Dict[str, Any]:
         return self.program
+

@@ -6,7 +6,7 @@ et la logique de sélection selon claim_basis
 import pandas as pd
 from typing import Dict, Any, List, Optional
 from datetime import datetime, date
-from .structure_loader import ProgramLoader
+from .program_loader import ProgramLoader
 
 
 class TreatyManager:

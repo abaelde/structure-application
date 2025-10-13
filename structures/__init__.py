@@ -1,4 +1,4 @@
-from .structure_loader import ProgramLoader
+from .program_loader import ProgramLoader
 from .calculation_engine import (
     apply_program,
     apply_program_to_bordereau,

@@ -12,7 +12,7 @@ structure-application/
 │   ├── base_products.py               # quota_share & excess_of_loss
 │   └── __init__.py
 ├── structures/                         # Moteur d'application des programmes
-│   ├── structure_loader.py            # Chargement depuis Excel (ProgramLoader)
+│   ├── program_loader.py              # Chargement depuis Excel (ProgramLoader)
 │   ├── structure_engine.py            # Logique d'application et matching de sections
 │   ├── treaty_manager.py              # Gestionnaire de traités multi-années
 │   ├── program_display.py             # Affichage des programmes
