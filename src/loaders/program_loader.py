@@ -1,7 +1,15 @@
 import pandas as pd
 from typing import Dict, Any, List
 
-from src.domain import DIMENSIONS, SHEETS, PROGRAM_COLS, STRUCTURE_COLS, Program, Structure, Section
+from src.domain import (
+    DIMENSIONS,
+    SHEETS,
+    PROGRAM_COLS,
+    STRUCTURE_COLS,
+    Program,
+    Structure,
+    Section,
+)
 
 
 # Keys and relations - foreign keys between Excel sheets (tables)
@@ -95,10 +103,9 @@ class ProgramLoader:
         structures_df = pd.read_excel(self.source, sheet_name=SHEETS.STRUCTURES)
         sections_df = pd.read_excel(self.source, sheet_name=SHEETS.SECTIONS)
         return program_df, structures_df, sections_df
-    
+
     def _load_from_snowflake(self):
         raise NotImplementedError("Snowflake loading not yet implemented")
 
     def get_program(self) -> Program:
         return self.program
-

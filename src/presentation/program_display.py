@@ -29,14 +29,14 @@ def write_program_config(program: Program, file=None) -> None:
     for i, structure in enumerate(program.structures, 1):
         file.write(f"\nStructure {i}: {structure.structure_name}\n")
         file.write(f"   Type: {structure.type_of_participation}\n")
-        
+
         # Afficher le prédécesseur
         predecessor_title = structure.predecessor_title
         if predecessor_title and pd.notna(predecessor_title):
             file.write(f"   Predecessor: {predecessor_title} (Inuring)\n")
         else:
             file.write(f"   Predecessor: None (Entry point)\n")
-        
+
         file.write(f"   Number of sections: {len(structure.sections)}\n")
 
         if structure.claim_basis and pd.notna(structure.claim_basis):
@@ -96,9 +96,7 @@ def _write_section(
             file.write(f"{indent}Limit: {section[SC.LIMIT]:,.2f}M\n")
 
     elif type_of_participation == PRODUCT.EXCESS_OF_LOSS:
-        if pd.notna(section.get(SC.ATTACHMENT)) and pd.notna(
-            section.get(SC.LIMIT)
-        ):
+        if pd.notna(section.get(SC.ATTACHMENT)) and pd.notna(section.get(SC.LIMIT)):
             attachment = section[SC.ATTACHMENT]
             limit = section[SC.LIMIT]
             file.write(f"{indent}Coverage: {limit:,.2f}M xs {attachment:,.2f}M\n")
@@ -162,4 +160,3 @@ def display_program_comparison(programs: Dict[str, Dict[str, Any]]) -> None:
         display_program_summary(program)
 
     print("\n" + "=" * 80)
-

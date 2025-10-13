@@ -11,17 +11,64 @@ from pathlib import Path
 # ===========================
 
 LEGAL_FORMS = [
-    "sa", "sas", "sasu", "sarl", "eurl", "sc", "scop", "sci", "snc", "sep",
-    "selas", "selarl", "selafa", "scm", "inc", "corp", "co", "llc", "plc",
-    "ltd", "gmbh", "ag", "bv", "nv", "oy", "ab", "as", "spa", "srl",
-    "sa de cv", "pte ltd", "kk", "oyj", "aps"
+    "sa",
+    "sas",
+    "sasu",
+    "sarl",
+    "eurl",
+    "sc",
+    "scop",
+    "sci",
+    "snc",
+    "sep",
+    "selas",
+    "selarl",
+    "selafa",
+    "scm",
+    "inc",
+    "corp",
+    "co",
+    "llc",
+    "plc",
+    "ltd",
+    "gmbh",
+    "ag",
+    "bv",
+    "nv",
+    "oy",
+    "ab",
+    "as",
+    "spa",
+    "srl",
+    "sa de cv",
+    "pte ltd",
+    "kk",
+    "oyj",
+    "aps",
 ]
 
 CORPORATE_STOPWORDS = [
-    "group", "holding", "international", "global", "solutions", "services",
-    "technology", "technologies", "tech", "systems", "consulting",
-    "partners", "investments", "capital", "industrie", "industries",
-    "france", "europe", "company", "co", "societe"
+    "group",
+    "holding",
+    "international",
+    "global",
+    "solutions",
+    "services",
+    "technology",
+    "technologies",
+    "tech",
+    "systems",
+    "consulting",
+    "partners",
+    "investments",
+    "capital",
+    "industrie",
+    "industries",
+    "france",
+    "europe",
+    "company",
+    "co",
+    "societe",
 ]
 
 ALIASES = {
@@ -35,16 +82,19 @@ ALIASES = {
 # FONCTIONS UTILITAIRES
 # ===========================
 
+
 def detect_encoding(file_path):
     """Détecte automatiquement l’encodage d’un fichier texte."""
     with open(file_path, "rb") as f:
         rawdata = f.read(20000)
     return chardet.detect(rawdata)["encoding"] or "utf-8"
 
+
 def strip_accents(text: str) -> str:
     text = unicodedata.normalize("NFKD", text)
     text = "".join([c for c in text if not unicodedata.combining(c)])
     return unidecode(text)  # œ→oe, æ→ae
+
 
 def clean_punctuation(text: str) -> str:
     text = text.lower()
@@ -53,17 +103,21 @@ def clean_punctuation(text: str) -> str:
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
+
 def remove_legal_forms(text: str) -> str:
     pattern = r"\b(" + "|".join(re.escape(f) for f in LEGAL_FORMS) + r")\b"
     return re.sub(pattern, " ", text)
+
 
 def apply_aliases(text: str) -> str:
     for k, v in ALIASES.items():
         text = re.sub(k, v, text)
     return text
 
+
 def remove_corporate_stopwords(tokens):
     return [t for t in tokens if t not in CORPORATE_STOPWORDS and len(t) > 1]
+
 
 def normalize_name(name: str) -> str:
     if not isinstance(name, str) or not name.strip():
@@ -80,9 +134,11 @@ def normalize_name(name: str) -> str:
     normalized = " ".join(tokens).strip()
     return normalized
 
+
 # ===========================
 # PIPELINE PRINCIPAL
 # ===========================
+
 
 def prenormaliser_csv(fichier_entree, colonne_nom="nom", fichier_sortie=None):
     fichier = Path(fichier_entree)
@@ -98,11 +154,13 @@ def prenormaliser_csv(fichier_entree, colonne_nom="nom", fichier_sortie=None):
         df = pd.read_csv(fichier, encoding=encoding, sep=None, engine="python")
     except Exception as e:
         print("⚠️ Erreur lecture CSV, tentative avec ';' comme séparateur.")
-        df = pd.read_csv(fichier, encoding=encoding, sep=';')
+        df = pd.read_csv(fichier, encoding=encoding, sep=";")
 
     # Vérification de la colonne
     if colonne_nom not in df.columns:
-        raise ValueError(f"❌ Colonne '{colonne_nom}' absente. Colonnes dispo : {list(df.columns)}")
+        raise ValueError(
+            f"❌ Colonne '{colonne_nom}' absente. Colonnes dispo : {list(df.columns)}"
+        )
 
     # Application normalisation
     df["normalized_key"] = df[colonne_nom].apply(normalize_name)
@@ -112,7 +170,9 @@ def prenormaliser_csv(fichier_entree, colonne_nom="nom", fichier_sortie=None):
         fichier_sortie = fichier.with_name(f"{fichier.stem}_normalized.csv")
 
     df.to_csv(fichier_sortie, index=False, encoding="utf-8")
-    print(f"✅ Pré-normalisation terminée.\n📁 Fichier exporté : {fichier_sortie.resolve()}")
+    print(
+        f"✅ Pré-normalisation terminée.\n📁 Fichier exporté : {fichier_sortie.resolve()}"
+    )
     return df
 
 
@@ -121,14 +181,24 @@ def prenormaliser_csv(fichier_entree, colonne_nom="nom", fichier_sortie=None):
 # ===========================
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Pré-normalisation de noms d’assurés à partir d’un CSV.")
-    parser.add_argument("fichier_csv", help="Chemin vers le fichier CSV (Windows ou Linux path)")
-    parser.add_argument("--colonne", default="nom", help="Nom de la colonne contenant les noms (par défaut : 'nom')")
+    parser = argparse.ArgumentParser(
+        description="Pré-normalisation de noms d’assurés à partir d’un CSV."
+    )
+    parser.add_argument(
+        "fichier_csv", help="Chemin vers le fichier CSV (Windows ou Linux path)"
+    )
+    parser.add_argument(
+        "--colonne",
+        default="nom",
+        help="Nom de la colonne contenant les noms (par défaut : 'nom')",
+    )
     parser.add_argument("--sortie", help="Chemin du fichier de sortie CSV (optionnel)")
     args = parser.parse_args()
 
-    prenormaliser_csv(args.fichier_csv, colonne_nom=args.colonne, fichier_sortie=args.sortie)
- 
+    prenormaliser_csv(
+        args.fichier_csv, colonne_nom=args.colonne, fichier_sortie=args.sortie
+    )
+
 Blocking
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -156,9 +226,10 @@ from tqdm import tqdm
 
 # ---------- Fonctions utilitaires ----------
 
+
 def phonetic_key(name: str) -> str:
     """Construit une clé phonétique simple en appliquant Double Metaphone à chaque token."""
-    tokens = re.findall(r'\w+', name)
+    tokens = re.findall(r"\w+", name)
     phonetics = []
     for t in tokens:
         try:
@@ -171,8 +242,8 @@ def phonetic_key(name: str) -> str:
 
 def trigram_shingles(s: str):
     """Retourne les trigrammes d'une chaîne."""
-    s = re.sub(r'\s+', ' ', s.strip())
-    return {s[i:i+3] for i in range(len(s)-2)} if len(s) >= 3 else {s}
+    s = re.sub(r"\s+", " ", s.strip())
+    return {s[i : i + 3] for i in range(len(s) - 2)} if len(s) >= 3 else {s}
 
 
 def lsh_bucket(name: str, lsh_model, num_perm=64):
@@ -180,18 +251,33 @@ def lsh_bucket(name: str, lsh_model, num_perm=64):
     shingles = trigram_shingles(name)
     m = MinHash(num_perm=num_perm)
     for sh in shingles:
-        m.update(sh.encode('utf8'))
+        m.update(sh.encode("utf8"))
     return m, lsh_model.query(m)
 
 
 # ---------- Script principal ----------
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Étape 3 : Blocking (réduction des comparaisons)")
-    parser.add_argument("fichier_csv", help="Fichier CSV issu de la normalisation (avec normalized_key)")
-    parser.add_argument("--sortie", default="blocking_pairs.csv", help="Nom du fichier CSV de sortie")
-    parser.add_argument("--colonne", default="normalized_key", help="Nom de la colonne de clé normalisée")
-    parser.add_argument("--id_col", default=None, help="Colonne identifiant unique (sinon index utilisé)")
+    parser = argparse.ArgumentParser(
+        description="Étape 3 : Blocking (réduction des comparaisons)"
+    )
+    parser.add_argument(
+        "fichier_csv", help="Fichier CSV issu de la normalisation (avec normalized_key)"
+    )
+    parser.add_argument(
+        "--sortie", default="blocking_pairs.csv", help="Nom du fichier CSV de sortie"
+    )
+    parser.add_argument(
+        "--colonne",
+        default="normalized_key",
+        help="Nom de la colonne de clé normalisée",
+    )
+    parser.add_argument(
+        "--id_col",
+        default=None,
+        help="Colonne identifiant unique (sinon index utilisé)",
+    )
     args = parser.parse_args()
 
     print("📥 Lecture du fichier :", args.fichier_csv)
@@ -234,7 +320,7 @@ def main():
     for i, id_ in enumerate(ids):
         neighbors = lsh.query(minhashes[id_])
         if len(neighbors) > 1:
-            buckets[("C", "lsh_"+id_)].extend(neighbors)
+            buckets[("C", "lsh_" + id_)].extend(neighbors)
 
     # ---------- Génération des paires ----------
     print("🔹 Construction des paires candidates...")
@@ -255,7 +341,7 @@ def main():
 
 if __name__ == "__main__":
     main()
- 
+
 Pairing
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -279,6 +365,7 @@ AUTO_MERGE_THRESHOLD = 0.92
 HOLD_OUT_THRESHOLD = 0.84
 CHUNK_SIZE = 50000  # nombre de paires par chunk TF-IDF
 
+
 # ---------------------------
 # Fonctions utilitaires
 # ---------------------------
@@ -288,8 +375,10 @@ def jaccard_token_set(a, b):
     union = len(set_a | set_b)
     return inter / union if union > 0 else 0
 
+
 def jaro_winkler(a, b):
     return fuzz.WRatio(a, b) / 100.0
+
 
 def decision_from_score(score):
     if score >= AUTO_MERGE_THRESHOLD:
@@ -299,18 +388,19 @@ def decision_from_score(score):
     else:
         return "reject"
 
+
 # ---------------------------
 # TF-IDF chunké
 # ---------------------------
 def compute_tfidf_chunked(df_pairs, df_norm, col_key, chunk_size=CHUNK_SIZE):
-    vect = TfidfVectorizer(analyzer='word', token_pattern=r'\w+')
+    vect = TfidfVectorizer(analyzer="word", token_pattern=r"\w+")
 
     print("🔹 Fit TF-IDF sur tous les noms normalisés...")
     # Corriger ici : remplacer les NaN par des chaînes vides
     names_list = df_norm[col_key].fillna("").tolist()
     tfidf_matrix = vect.fit_transform(names_list)
 
-    id_to_idx = {str(id_): i for i, id_ in enumerate(df_norm['id'].tolist())}
+    id_to_idx = {str(id_): i for i, id_ in enumerate(df_norm["id"].tolist())}
 
     tfidf_scores = []
 
@@ -320,7 +410,7 @@ def compute_tfidf_chunked(df_pairs, df_norm, col_key, chunk_size=CHUNK_SIZE):
         chunk = df_pairs.iloc[start:end]
 
         chunk_scores = []
-        for n1_id, n2_id in zip(chunk['id1'], chunk['id2']):
+        for n1_id, n2_id in zip(chunk["id1"], chunk["id2"]):
             idx1 = id_to_idx.get(n1_id, None)
             idx2 = id_to_idx.get(n2_id, None)
             if idx1 is None or idx2 is None:
@@ -332,20 +422,31 @@ def compute_tfidf_chunked(df_pairs, df_norm, col_key, chunk_size=CHUNK_SIZE):
 
     return np.array(tfidf_scores)
 
+
 # ---------------------------
 # Script principal
 # ---------------------------
 def main():
     parser = argparse.ArgumentParser(description="Étape 4 : Scoring des paires")
-    parser.add_argument("--normalized_csv", required=True, help="CSV normalisé (id + normalized_key)")
-    parser.add_argument("--pairs_csv", required=True, help="CSV des paires candidates (id1,id2)")
-    parser.add_argument("--sortie", default="pair_scores.csv", help="Nom du CSV de sortie")
-    parser.add_argument("--id_col", default="id", help="Nom de la colonne identifiant unique")
-    parser.add_argument("--col_key", default="normalized_key", help="Nom de la colonne normalisée")
+    parser.add_argument(
+        "--normalized_csv", required=True, help="CSV normalisé (id + normalized_key)"
+    )
+    parser.add_argument(
+        "--pairs_csv", required=True, help="CSV des paires candidates (id1,id2)"
+    )
+    parser.add_argument(
+        "--sortie", default="pair_scores.csv", help="Nom du CSV de sortie"
+    )
+    parser.add_argument(
+        "--id_col", default="id", help="Nom de la colonne identifiant unique"
+    )
+    parser.add_argument(
+        "--col_key", default="normalized_key", help="Nom de la colonne normalisée"
+    )
     args = parser.parse_args()
 
     print("📥 Lecture des fichiers...")
-    df_norm = pd.read_csv(args.normalized_csv, sep=';', engine='python')
+    df_norm = pd.read_csv(args.normalized_csv, sep=";", engine="python")
     df_pairs = pd.read_csv(args.pairs_csv)
 
     df_norm[args.id_col] = df_norm[args.id_col].astype(str)
@@ -371,19 +472,31 @@ def main():
     df_pairs["tfidf_score"] = compute_tfidf_chunked(df_pairs, df_norm, args.col_key)
 
     print("🔹 Calcul du score final et décision...")
-    df_pairs["final_score"] = 0.6 * df_pairs["rule_score"] + 0.4 * df_pairs["tfidf_score"]
+    df_pairs["final_score"] = (
+        0.6 * df_pairs["rule_score"] + 0.4 * df_pairs["tfidf_score"]
+    )
     df_pairs["decision"] = df_pairs["final_score"].apply(decision_from_score)
 
     print("✅ Scores calculés. Sauvegarde...")
-    df_pairs[["id1", "id2", "name1", "name2", "rule_score", "tfidf_score", "final_score", "decision"]].to_csv(
-        args.sortie, index=False, sep=';'
-    )
+    df_pairs[
+        [
+            "id1",
+            "id2",
+            "name1",
+            "name2",
+            "rule_score",
+            "tfidf_score",
+            "final_score",
+            "decision",
+        ]
+    ].to_csv(args.sortie, index=False, sep=";")
     print("💾 Fichier écrit :", args.sortie)
     print(df_pairs["decision"].value_counts())
 
+
 if __name__ == "__main__":
     main()
- 
+
 Union
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -408,6 +521,7 @@ from collections import Counter
 # Union-Find pour composantes connexes
 # ---------------------------
 
+
 class UnionFind:
     def __init__(self):
         self.parent = dict()
@@ -431,24 +545,40 @@ class UnionFind:
             d.setdefault(root, []).append(node)
         return d
 
+
 # ---------------------------
 # Script principal
 # ---------------------------
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Étape 5 : Clustering & Union + Nom canonique")
+    parser = argparse.ArgumentParser(
+        description="Étape 5 : Clustering & Union + Nom canonique"
+    )
     parser.add_argument("--pairs_csv", required=True, help="CSV avec paires et scores")
-    parser.add_argument("--normalized_csv", required=True, help="CSV normalisé (id, normalized_key)")
+    parser.add_argument(
+        "--normalized_csv", required=True, help="CSV normalisé (id, normalized_key)"
+    )
     parser.add_argument("--sortie", default="clusters.csv", help="Nom du CSV de sortie")
-    parser.add_argument("--merge_threshold", type=float, default=0.92,
-                        help="Seuil pour fusion automatique des paires")
-    parser.add_argument("--id_col", default="id", help="Colonne identifiant unique dans normalized CSV")
-    parser.add_argument("--col_key", default="normalized_key", help="Colonne normalisée pour canonical name")
+    parser.add_argument(
+        "--merge_threshold",
+        type=float,
+        default=0.92,
+        help="Seuil pour fusion automatique des paires",
+    )
+    parser.add_argument(
+        "--id_col", default="id", help="Colonne identifiant unique dans normalized CSV"
+    )
+    parser.add_argument(
+        "--col_key",
+        default="normalized_key",
+        help="Colonne normalisée pour canonical name",
+    )
     args = parser.parse_args()
 
     print("📥 Lecture des fichiers...")
-    df_pairs = pd.read_csv(args.pairs_csv, sep=',', engine='python')
-    df_norm = pd.read_csv(args.normalized_csv, sep=';', engine='python')
+    df_pairs = pd.read_csv(args.pairs_csv, sep=",", engine="python")
+    df_norm = pd.read_csv(args.normalized_csv, sep=";", engine="python")
 
     # Créer dictionnaire id -> normalized_key
     d_map = df_norm.set_index(args.id_col)[args.col_key].to_dict()
@@ -489,15 +619,18 @@ def main():
         else:
             canonical_name = ""
 
-        cluster_list.append({
-            "cluster_id": i,
-            "canonical_name": canonical_name,
-            "members": "|".join(sorted(members))
-        })
+        cluster_list.append(
+            {
+                "cluster_id": i,
+                "canonical_name": canonical_name,
+                "members": "|".join(sorted(members)),
+            }
+        )
 
     df_clusters = pd.DataFrame(cluster_list)
     df_clusters.to_csv(args.sortie, index=False)
     print(f"💾 Fichier de clusters écrit : {args.sortie}")
+
 
 if __name__ == "__main__":
     main()

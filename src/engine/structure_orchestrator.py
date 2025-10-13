@@ -17,22 +17,24 @@ def process_structures(
     structures_detail = []
 
     processed: Set[str] = set()
-    
+
     def process_structure(structure: Structure) -> None:
         nonlocal total_cession_to_layer_100pct, total_cession_to_reinsurer
-        
+
         structure_name = structure.structure_name
-        
+
         if structure_name in processed:
             return
-        
+
         predecessor_title = structure.predecessor_title
-        
+
         if pd.notna(predecessor_title):
-            predecessor = next((s for s in structures if s.structure_name == predecessor_title), None)
+            predecessor = next(
+                (s for s in structures if s.structure_name == predecessor_title), None
+            )
             if predecessor:
                 process_structure(predecessor)
-        
+
         matched_section = match_section(
             policy_data, structure.sections, dimension_columns
         )
@@ -64,11 +66,11 @@ def process_structures(
         )
 
         retained = input_exposure - ceded_result["cession_to_layer_100pct"]
-        
+
         current_retention_pct = _calculate_retention_pct(
             structure.type_of_participation, matched_section
         )
-        
+
         structure_outputs[structure_name] = {
             "retained": retained,
             "cession_to_layer_100pct": ceded_result["cession_to_layer_100pct"],
@@ -120,30 +122,39 @@ def _rescale_section_if_needed(
 ) -> tuple[Section, Optional[Dict[str, Any]]]:
     section_to_apply = matched_section.copy()
     rescaling_info = None
-    
+
     if pd.notna(predecessor_title) and predecessor_title in structure_outputs:
         predecessor_info = structure_outputs[predecessor_title]
         predecessor_type = predecessor_info.get("type_of_participation")
         current_type = structure.type_of_participation
-        
-        if predecessor_type == PRODUCT.QUOTA_SHARE and current_type == PRODUCT.EXCESS_OF_LOSS:
+
+        if (
+            predecessor_type == PRODUCT.QUOTA_SHARE
+            and current_type == PRODUCT.EXCESS_OF_LOSS
+        ):
             retention_factor = predecessor_info.get("retention_pct", 1.0)
-            
+
             original_attachment = None
             original_limit = None
             rescaled_attachment = None
             rescaled_limit = None
-            
-            if SC.ATTACHMENT in section_to_apply and pd.notna(section_to_apply[SC.ATTACHMENT]):
+
+            if SC.ATTACHMENT in section_to_apply and pd.notna(
+                section_to_apply[SC.ATTACHMENT]
+            ):
                 original_attachment = section_to_apply[SC.ATTACHMENT]
-                section_to_apply[SC.ATTACHMENT] = section_to_apply[SC.ATTACHMENT] * retention_factor
+                section_to_apply[SC.ATTACHMENT] = (
+                    section_to_apply[SC.ATTACHMENT] * retention_factor
+                )
                 rescaled_attachment = section_to_apply[SC.ATTACHMENT]
-            
+
             if SC.LIMIT in section_to_apply and pd.notna(section_to_apply[SC.LIMIT]):
                 original_limit = section_to_apply[SC.LIMIT]
-                section_to_apply[SC.LIMIT] = section_to_apply[SC.LIMIT] * retention_factor
+                section_to_apply[SC.LIMIT] = (
+                    section_to_apply[SC.LIMIT] * retention_factor
+                )
                 rescaled_limit = section_to_apply[SC.LIMIT]
-            
+
             rescaling_info = {
                 "retention_factor": retention_factor,
                 "original_attachment": original_attachment,
@@ -151,7 +162,7 @@ def _rescale_section_if_needed(
                 "original_limit": original_limit,
                 "rescaled_limit": rescaled_limit,
             }
-    
+
     return section_to_apply, rescaling_info
 
 
@@ -184,7 +195,9 @@ def _add_unapplied_structure_detail(
             "reinsurer_share": 0.0,
             "applied": False,
             "section": None,
-            "predecessor_title": predecessor_title if pd.notna(predecessor_title) else None,
+            "predecessor_title": (
+                predecessor_title if pd.notna(predecessor_title) else None
+            ),
         }
     )
 
@@ -214,8 +227,9 @@ def _add_applied_structure_detail(
             "applied": True,
             "section": matched_section,
             "section_rescaled": section_to_apply,
-            "predecessor_title": predecessor_title if pd.notna(predecessor_title) else None,
+            "predecessor_title": (
+                predecessor_title if pd.notna(predecessor_title) else None
+            ),
             "rescaling_info": rescaling_info,
         }
     )
-

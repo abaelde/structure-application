@@ -80,4 +80,3 @@ SECTION_COLS = SimpleNamespace(
     LIMIT="LIMIT_100",
     SIGNED_SHARE="SIGNED_SHARE_PCT",
 )
-

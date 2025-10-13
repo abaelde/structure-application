@@ -42,4 +42,3 @@ def apply_section(
         "cession_to_reinsurer": cession_to_reinsurer,
         "reinsurer_share": reinsurer_share,
     }
-

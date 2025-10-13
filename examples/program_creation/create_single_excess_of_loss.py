@@ -43,7 +43,9 @@ program_data = {
 structures_data = {
     "INSPER_ID_PRE": [1],  # Auto-increment key
     "BUSINESS_ID_PRE": [None],  # Tnumber
-    "TYPE_OF_PARTICIPATION_CD": [PRODUCT.EXCESS_OF_LOSS],  # Former type_of_participation
+    "TYPE_OF_PARTICIPATION_CD": [
+        PRODUCT.EXCESS_OF_LOSS
+    ],  # Former type_of_participation
     "TYPE_OF_INSURED_PERIOD_CD": [None],  # TBD
     "ACTIVE_FLAG_CD": [True],  # Default active
     "INSPER_EFFECTIVE_DATE": [None],  # Former inception_date

@@ -8,4 +8,3 @@ __all__ = [
     "TreatyManager",
     "create_treaty_manager_from_directory",
 ]
-

@@ -152,7 +152,15 @@ structures_data = {
         None,
     ],  # Main currency
     "INSPER_UW_YEAR": [None, None, None, None, None, None, None],  # UW Year
-    "INSPER_CONTRACT_ORDER": [None, None, None, None, None, None, None],  # Deprecated (not used anymore)
+    "INSPER_CONTRACT_ORDER": [
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    ],  # Deprecated (not used anymore)
     "INSPER_PREDECESSOR_TITLE": [
         None,
         "QS_1",

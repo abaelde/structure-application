@@ -142,4 +142,3 @@ def create_treaty_manager_from_directory(
                 break
 
     return TreatyManager(treaty_paths)
-

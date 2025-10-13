@@ -63,7 +63,11 @@ structures_data = {
     "INSPER_MAIN_CURRENCY_CD": [None, None, None],  # Main currency
     "INSPER_UW_YEAR": [None, None, None],  # UW Year
     "INSPER_CONTRACT_ORDER": [None, None, None],  # Deprecated (not used anymore)
-    "INSPER_PREDECESSOR_TITLE": [None, None, None],  # All are entry points (parallel XOLs)
+    "INSPER_PREDECESSOR_TITLE": [
+        None,
+        None,
+        None,
+    ],  # All are entry points (parallel XOLs)
     "INSPER_CONTRACT_FORM_CD_SLAV": [None, None, None],  # Contract form code
     "INSPER_CONTRACT_LODRA_CD_SLAV": [None, None, None],  # Contract LODRA code
     "INSPER_CONTRACT_COVERAGE_CD_SLAV": [None, None, None],  # Contract coverage code
@@ -116,7 +120,11 @@ sections_data = {
     "AAD_100": [None, None, None],  # Annual Aggregate Deductible
     "LIMIT_100": [8_750_000, 10_000_000, 23_250_000],  # Limits in absolute values
     "LIMIT_FLOATER_100": [None, None, None],  # Floater limit
-    "ATTACHMENT_POINT_100": [3_000_000, 11_750_000, 21_750_000],  # Priorités en valeurs absolues
+    "ATTACHMENT_POINT_100": [
+        3_000_000,
+        11_750_000,
+        21_750_000,
+    ],  # Priorités en valeurs absolues
     "OLW_100": [None, None, None],  # Original Line Written
     "LIMIT_OCCURRENCE_100": [None, None, None],  # Deprecated - use LIMIT_100 instead
     "LIMIT_AGG_100": [None, None, None],  # Aggregate limit

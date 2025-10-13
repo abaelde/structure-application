@@ -10,18 +10,18 @@ class Section:
         self.attachment = data.get(SECTION_COLS.ATTACHMENT)
         self.limit = data.get(SECTION_COLS.LIMIT)
         self.signed_share = data.get(SECTION_COLS.SIGNED_SHARE)
-    
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Section':
+    def from_dict(cls, data: Dict[str, Any]) -> "Section":
         """Factory method: create Section from dictionary"""
         return cls(data)
-    
+
     def get(self, key: str, default=None):
         return self._data.get(key, default)
-    
+
     def __getitem__(self, key: str):
         return self._data[key]
-    
+
     def __setitem__(self, key: str, value: Any):
         self._data[key] = value
         if key == SECTION_COLS.CESSION_PCT:
@@ -32,13 +32,13 @@ class Section:
             self.limit = value
         elif key == SECTION_COLS.SIGNED_SHARE:
             self.signed_share = value
-    
+
     def __contains__(self, key: str) -> bool:
         return key in self._data
-    
-    def copy(self) -> 'Section':
+
+    def copy(self) -> "Section":
         return Section(self._data.copy())
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return self._data.copy()
 
@@ -49,7 +49,7 @@ class Structure:
         structure_name: str,
         contract_order: int,
         type_of_participation: str,
-        sections: List['Section'],
+        sections: List["Section"],
         predecessor_title: Optional[str] = None,
         claim_basis: Optional[str] = None,
         inception_date: Optional[str] = None,
@@ -63,21 +63,21 @@ class Structure:
         self.inception_date = inception_date
         self.expiry_date = expiry_date
         self.sections = sections
-    
+
     @classmethod
     def from_row(
         cls,
         structure_row: pd.Series,
         sections_df: pd.DataFrame,
         structure_cols,
-    ) -> 'Structure':
+    ) -> "Structure":
         """
         Factory method: create Structure from DataFrame row.
         The Structure knows how to find and link its own sections.
         """
         structure_name = structure_row[structure_cols.NAME]
         structure_id = structure_row.get(structure_cols.INSPER_ID)
-        
+
         # Logic to filter sections belongs to the Structure class
         if pd.notna(structure_id):
             sections_data = sections_df[
@@ -87,10 +87,10 @@ class Structure:
             sections_data = sections_df[
                 sections_df[structure_cols.NAME] == structure_name
             ].to_dict("records")
-        
+
         # Create Section objects
         sections = [Section.from_dict(s) for s in sections_data]
-        
+
         # Create and return Structure
         return cls(
             structure_name=structure_name,
@@ -102,15 +102,15 @@ class Structure:
             inception_date=structure_row.get(structure_cols.INCEPTION),
             expiry_date=structure_row.get(structure_cols.EXPIRY),
         )
-    
+
     def get(self, key: str, default=None):
         return getattr(self, key, default)
-    
+
     def __getitem__(self, key: str):
         if not hasattr(self, key):
             raise KeyError(f"'{key}' not found in Structure")
         return getattr(self, key)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "structure_name": self.structure_name,
@@ -134,7 +134,7 @@ class Program:
         self.name = name
         self.dimension_columns = dimension_columns
         self.structures = structures
-    
+
     @classmethod
     def from_dataframes(
         cls,
@@ -144,30 +144,30 @@ class Program:
         program_cols,
         structure_cols,
         dimension_columns: List[str],
-    ) -> 'Program':
+    ) -> "Program":
         """
         Factory method: create Program from DataFrames.
         The Program orchestrates its own construction.
         """
         program_name = program_df.iloc[0][program_cols.TITLE]
-        
+
         # Create all structures (they know how to build themselves)
         structures = [
             Structure.from_row(row, sections_df, structure_cols)
             for _, row in structures_df.iterrows()
         ]
-        
+
         return cls(
             name=program_name,
             structures=structures,
             dimension_columns=dimension_columns,
         )
-    
+
     def __getitem__(self, key: str):
         if not hasattr(self, key):
             raise KeyError(f"'{key}' not found in Program")
         return getattr(self, key)
-    
+
     @property
     def all_sections(self) -> List[Section]:
         """Returns all sections from all structures"""
@@ -175,11 +175,10 @@ class Program:
         for structure in self.structures:
             sections.extend(structure.sections)
         return sections
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "name": self.name,
             "structures": [s.to_dict() for s in self.structures],
             "dimension_columns": self.dimension_columns,
         }
-

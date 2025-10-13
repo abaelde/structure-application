@@ -12,4 +12,3 @@ __all__ = [
     "find_exposure_column",
     "EXPOSURE_COLUMN_ALIASES",
 ]
-

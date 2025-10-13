@@ -9,22 +9,22 @@ def check_exclusion(
     for section in sections:
         if section.get("BUSCL_EXCLUDE_CD") == "exclude":
             matches = True
-            
+
             for dimension in dimension_columns:
                 if dimension == "BUSCL_EXCLUDE_CD":
                     continue
-                
+
                 section_value = section.get(dimension)
-                
+
                 if pd.notna(section_value):
                     policy_value = policy_data.get(dimension)
                     if policy_value != section_value:
                         matches = False
                         break
-            
+
             if matches:
                 return True
-    
+
     return False
 
 
@@ -36,7 +36,7 @@ def match_section(
     for section in sections:
         if section.get("BUSCL_EXCLUDE_CD") == "exclude":
             continue
-        
+
         matches = True
         specificity = 0
 
@@ -58,4 +58,3 @@ def match_section(
 
     matched_sections.sort(key=lambda x: x[1], reverse=True)
     return matched_sections[0][0]
-

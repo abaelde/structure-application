@@ -15,7 +15,7 @@ class BordereauValidator:
         FIELDS["EXPIRY_DATE"],
         FIELDS["LINE_OF_BUSINESS"],
     ]
-    
+
     DIMENSION_COLUMNS = [
         FIELDS["COUNTRY"],
         FIELDS["REGION"],
@@ -28,11 +28,11 @@ class BordereauValidator:
         FIELDS["SIC_CODE"],
         FIELDS["INCLUDE"],
     ]
-    
+
     OPTIONAL_COLUMNS = [
         FIELDS["POLICY_NUMBER"],
     ]
-    
+
     ALLOWED_COLUMNS = REQUIRED_COLUMNS + DIMENSION_COLUMNS + OPTIONAL_COLUMNS
 
     NUMERIC_COLUMNS = [FIELDS["EXPOSURE"]]
@@ -61,7 +61,8 @@ class BordereauValidator:
 
         if self.validation_errors:
             raise BordereauValidationError(
-                f"Bordereau validation failed:\n" + "\n".join(f"  - {err}" for err in self.validation_errors)
+                f"Bordereau validation failed:\n"
+                + "\n".join(f"  - {err}" for err in self.validation_errors)
             )
 
         if self.validation_warnings:
@@ -77,16 +78,16 @@ class BordereauValidator:
             self.validation_errors.append("Bordereau is empty (no rows)")
 
     def _validate_all_columns_present(self):
-        missing_required = [col for col in self.REQUIRED_COLUMNS if col not in self.df.columns]
+        missing_required = [
+            col for col in self.REQUIRED_COLUMNS if col not in self.df.columns
+        ]
         if missing_required:
             self.validation_errors.append(
                 f"Missing required columns: {', '.join(missing_required)}"
             )
 
         unknown_columns = [
-            col
-            for col in self.df.columns
-            if col not in self.ALLOWED_COLUMNS
+            col for col in self.df.columns if col not in self.ALLOWED_COLUMNS
         ]
         if unknown_columns:
             self.validation_errors.append(
@@ -124,7 +125,11 @@ class BordereauValidator:
                 if non_numeric:
                     self.validation_errors.append(
                         f"Column '{col}' contains non-numeric values: {', '.join(non_numeric[:5])}"
-                        + (f" and {len(non_numeric) - 5} more" if len(non_numeric) > 5 else "")
+                        + (
+                            f" and {len(non_numeric) - 5} more"
+                            if len(non_numeric) > 5
+                            else ""
+                        )
                     )
 
     def _validate_dates(self):
@@ -146,7 +151,11 @@ class BordereauValidator:
             if invalid_dates:
                 self.validation_errors.append(
                     f"Column '{col}' contains invalid dates: {', '.join(invalid_dates[:5])}"
-                    + (f" and {len(invalid_dates) - 5} more" if len(invalid_dates) > 5 else "")
+                    + (
+                        f" and {len(invalid_dates) - 5} more"
+                        if len(invalid_dates) > 5
+                        else ""
+                    )
                 )
 
     def _validate_numeric_values(self):
@@ -173,13 +182,21 @@ class BordereauValidator:
         if negative_expositions:
             self.validation_errors.append(
                 f"Column '{exposure_col}' contains negative values: {', '.join(negative_expositions[:5])}"
-                + (f" and {len(negative_expositions) - 5} more" if len(negative_expositions) > 5 else "")
+                + (
+                    f" and {len(negative_expositions) - 5} more"
+                    if len(negative_expositions) > 5
+                    else ""
+                )
             )
 
         if zero_expositions:
             self.validation_warnings.append(
                 f"Column '{exposure_col}' contains zero values: {', '.join(zero_expositions[:5])}"
-                + (f" and {len(zero_expositions) - 5} more" if len(zero_expositions) > 5 else "")
+                + (
+                    f" and {len(zero_expositions) - 5} more"
+                    if len(zero_expositions) > 5
+                    else ""
+                )
             )
 
     def _validate_insured_name_uppercase(self):
@@ -199,7 +216,11 @@ class BordereauValidator:
         if non_uppercase:
             self.validation_errors.append(
                 f"Column '{insured_col}' must contain only uppercase values: {', '.join(non_uppercase[:5])}"
-                + (f" and {len(non_uppercase) - 5} more" if len(non_uppercase) > 5 else "")
+                + (
+                    f" and {len(non_uppercase) - 5} more"
+                    if len(non_uppercase) > 5
+                    else ""
+                )
             )
 
     def _validate_line_of_business(self):
@@ -210,11 +231,11 @@ class BordereauValidator:
         if self.line_of_business:
             inconsistent_lobs = []
             unique_lobs = self.df[lob_col].dropna().unique()
-            
+
             for lob in unique_lobs:
                 if str(lob).lower() != self.line_of_business.lower():
                     inconsistent_lobs.append(str(lob))
-            
+
             if inconsistent_lobs:
                 self.validation_errors.append(
                     f"Bordereau is in '{self.line_of_business}' folder but contains inconsistent line_of_business values: {', '.join(inconsistent_lobs)}"
@@ -223,7 +244,7 @@ class BordereauValidator:
     def _validate_business_logic(self):
         inception_col = FIELDS["INCEPTION_DATE"]
         expiry_col = FIELDS["EXPIRY_DATE"]
-        
+
         if inception_col not in self.df.columns or expiry_col not in self.df.columns:
             return
 
@@ -243,11 +264,14 @@ class BordereauValidator:
         if invalid_periods:
             self.validation_errors.append(
                 f"Invalid policy periods (expiry <= inception): {', '.join(invalid_periods[:5])}"
-                + (f" and {len(invalid_periods) - 5} more" if len(invalid_periods) > 5 else "")
+                + (
+                    f" and {len(invalid_periods) - 5} more"
+                    if len(invalid_periods) > 5
+                    else ""
+                )
             )
 
 
 def validate_bordereau(df: pd.DataFrame, line_of_business: str = None) -> bool:
     validator = BordereauValidator(df, line_of_business)
     return validator.validate()
-

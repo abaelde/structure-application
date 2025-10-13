@@ -62,7 +62,15 @@ def main():
     print("RESULTS SUMMARY")
     print("=" * 80)
     print(
-        results[[FIELDS["INSURED_NAME"], "exposure", "cession_to_layer_100pct", "cession_to_reinsurer", "retained_by_cedant"]]
+        results[
+            [
+                FIELDS["INSURED_NAME"],
+                "exposure",
+                "cession_to_layer_100pct",
+                "cession_to_reinsurer",
+                "retained_by_cedant",
+            ]
+        ]
     )
 
     print("\n")

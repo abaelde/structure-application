@@ -88,4 +88,3 @@ print("  - 3 sections d'exclusion:")
 print("    - Iran (pays)")
 print("    - Russia (pays)")
 print("  - 1 section normale: 25% cession sur tout le reste")
-

@@ -225,7 +225,6 @@ def consolidate_all_programs():
         .reset_index()
     )
 
-
     # Display consolidated results - BY INSURED (meaningful aggregation)
     print("\n" + "=" * 80)
     print("CONSOLIDATED RESULTS BY INSURED (Reinsurer View)")
@@ -244,7 +243,7 @@ def consolidate_all_programs():
             ]
         ].to_string(index=False)
     )
-    
+
     print(f"\n  Total insureds consolidated: {len(insured_aggregation)}")
 
     # Save consolidated results

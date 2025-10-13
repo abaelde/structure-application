@@ -17,4 +17,3 @@ __all__ = [
     "generate_detailed_report",
     "write_detailed_results",
 ]
-

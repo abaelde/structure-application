@@ -11,4 +11,3 @@ def quota_share(exposure: float, cession_PCT: float, limit: float = None) -> flo
         return min(ceded_amount, limit)
 
     return ceded_amount
-
