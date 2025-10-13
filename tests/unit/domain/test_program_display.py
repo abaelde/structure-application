@@ -1,0 +1,24 @@
+"""
+Tests for Program.describe() method
+"""
+import io
+from tests.builders.program_builder import build_program
+from tests.builders.structure_builder import build_quota_share
+
+
+def test_program_describe_generates_text():
+    """Test that program.describe() generates text output"""
+    qs_structure = build_quota_share(name="QS_1", cession_pct=0.25)
+    program = build_program(
+        name="Test Program",
+        structures=[qs_structure],
+        dimension_columns=[]
+    )
+    
+    output = io.StringIO()
+    program.describe(file=output)
+    output_text = output.getvalue()
+    
+    assert len(output_text) > 0
+    assert "Test Program" in output_text
+

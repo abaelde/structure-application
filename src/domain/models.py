@@ -1,4 +1,6 @@
 from typing import Dict, Any, List, Optional
+import pandas as pd
+import sys
 from .constants import SECTION_COLS, PRODUCT
 
 
@@ -70,6 +72,53 @@ class Section:
 
     def is_exclusion(self) -> bool:
         return self.get("BUSCL_EXCLUDE_CD") == "exclude"
+
+    def describe(
+        self,
+        dimension_columns: list,
+        type_of_participation: str,
+        indent: str = "",
+    ) -> str:
+        """Generate a text description of this section"""
+        lines = []
+        
+        if type_of_participation == PRODUCT.QUOTA_SHARE:
+            if pd.notna(self.get(SECTION_COLS.CESSION_PCT)):
+                cession_pct = self[SECTION_COLS.CESSION_PCT]
+                lines.append(
+                    f"{indent}Cession rate: {cession_pct:.1%} ({cession_pct * 100:.1f}%)"
+                )
+
+            if pd.notna(self.get(SECTION_COLS.LIMIT)):
+                lines.append(f"{indent}Limit: {self[SECTION_COLS.LIMIT]:,.2f}M")
+
+        elif type_of_participation == PRODUCT.EXCESS_OF_LOSS:
+            if pd.notna(self.get(SECTION_COLS.ATTACHMENT)) and pd.notna(self.get(SECTION_COLS.LIMIT)):
+                attachment = self[SECTION_COLS.ATTACHMENT]
+                limit = self[SECTION_COLS.LIMIT]
+                lines.append(f"{indent}Coverage: {limit:,.2f}M xs {attachment:,.2f}M")
+                lines.append(
+                    f"{indent}Range: {attachment:,.2f}M to {attachment + limit:,.2f}M"
+                )
+
+        if pd.notna(self.get(SECTION_COLS.SIGNED_SHARE)):
+            reinsurer_share = self[SECTION_COLS.SIGNED_SHARE]
+            lines.append(
+                f"{indent}Reinsurer share: {reinsurer_share:.2%} ({reinsurer_share * 100:.2f}%)"
+            )
+
+        conditions = []
+        for dim in dimension_columns:
+            value = self.get(dim)
+            if pd.notna(value):
+                conditions.append(f"{dim}={value}")
+
+        if conditions:
+            lines.append(f"{indent}Matching conditions: {', '.join(conditions)}")
+        else:
+            lines.append(f"{indent}Matching conditions: None (applies to all policies)")
+        
+        return "\n".join(lines)
 
     def rescale_for_predecessor(self, retention_factor: float) -> tuple["Section", Dict[str, Any]]:
         rescaled_section = self.copy()
@@ -176,6 +225,52 @@ class Structure:
             return 1.0 - matched_section.cession_pct
         return 1.0
 
+    def describe(self, dimension_columns: list, structure_number: int) -> str:
+        """Generate a text description of this structure"""
+        lines = []
+        
+        lines.append(f"\nStructure {structure_number}: {self.structure_name}")
+        lines.append(f"   Type: {self.type_of_participation}")
+
+        predecessor_title = self.predecessor_title
+        if predecessor_title and pd.notna(predecessor_title):
+            lines.append(f"   Predecessor: {predecessor_title} (Inuring)")
+        else:
+            lines.append(f"   Predecessor: None (Entry point)")
+
+        lines.append(f"   Number of sections: {len(self.sections)}")
+
+        if self.claim_basis and pd.notna(self.claim_basis):
+            lines.append(f"   Claim basis: {self.claim_basis}")
+        if self.inception_date and pd.notna(self.inception_date):
+            lines.append(f"   Inception date: {self.inception_date}")
+        if self.expiry_date and pd.notna(self.expiry_date):
+            lines.append(f"   Expiry date: {self.expiry_date}")
+
+        if len(self.sections) == 1:
+            section = self.sections[0]
+            lines.append("   Single section:")
+            lines.append(
+                section.describe(
+                    dimension_columns,
+                    self.type_of_participation,
+                    indent="      ",
+                )
+            )
+        else:
+            lines.append("   Sections:")
+            for j, section in enumerate(self.sections, 1):
+                lines.append(f"      Section {j}:")
+                lines.append(
+                    section.describe(
+                        dimension_columns,
+                        self.type_of_participation,
+                        indent="         ",
+                    )
+                )
+        
+        return "\n".join(lines)
+
 
 class Program:
     def __init__(
@@ -207,3 +302,34 @@ class Program:
             "structures": [s.to_dict() for s in self.structures],
             "dimension_columns": self.dimension_columns,
         }
+
+    def describe(self, file=None) -> str:
+        """Generate a complete text description of the program"""
+        if file is None:
+            file = sys.stdout
+        
+        lines = []
+        lines.append("=" * 80)
+        lines.append("PROGRAM CONFIGURATION")
+        lines.append("=" * 80)
+        lines.append(f"Program name: {self.name}")
+        lines.append(f"Number of structures: {len(self.structures)}")
+        lines.append(f"Matching dimensions: {len(self.dimension_columns)}")
+
+        if self.dimension_columns:
+            lines.append(f"   Dimensions: {', '.join(self.dimension_columns)}")
+        else:
+            lines.append("   No dimensions (all policies treated the same way)")
+
+        lines.append("\n" + "-" * 80)
+        lines.append("STRUCTURE DETAILS")
+        lines.append("-" * 80)
+
+        for i, structure in enumerate(self.structures, 1):
+            lines.append(structure.describe(self.dimension_columns, i))
+
+        lines.append("\n" + "=" * 80)
+        
+        description = "\n".join(lines)
+        file.write(description + "\n")
+        return description
