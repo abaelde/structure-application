@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import Dict, Any, List
 
-from src.domain import DIMENSIONS, SHEETS, PROGRAM_COLS, STRUCTURE_COLS, Program
+from src.domain import DIMENSIONS, SHEETS, PROGRAM_COLS, STRUCTURE_COLS, Program, Structure, Section
 
 
 # Keys and relations - foreign keys between Excel sheets (tables)
@@ -66,6 +66,7 @@ class ProgramLoader:
         self.load_program()
 
     def load_program(self):
+        # Step 1: Load data from source (only responsibility of the loader)
         if self.data_source == "file":
             program_df, structures_df, sections_df = self._load_from_file()
         elif self.data_source == "snowflake":
@@ -73,50 +74,19 @@ class ProgramLoader:
         else:
             raise ValueError(f"Unknown data_source: {self.data_source}")
 
-        program_row = program_df.iloc[0]
-        program_name = program_row[PROGRAM_COLS.TITLE]
-
-        # Use only explicitly defined dimensions that exist in sections_df
+        # Step 2: Determine dimension columns
         self.dimension_columns = [
             col for col in DIMENSIONS if col in sections_df.columns
         ]
 
-        program_structures = []
-        for _, structure_row in structures_df.iterrows():
-            structure_name = structure_row[STRUCTURE_COLS.NAME]
-            structure_id = structure_row.get(STRUCTURE_COLS.INSPER_ID)
-            contract_order = structure_row[STRUCTURE_COLS.ORDER]
-            predecessor_title = structure_row.get(STRUCTURE_COLS.PREDECESSOR)
-            type_of_participation = structure_row[STRUCTURE_COLS.TYPE]
-            claim_basis = structure_row.get(STRUCTURE_COLS.CLAIM_BASIS)
-            inception_date = structure_row.get(STRUCTURE_COLS.INCEPTION)
-            expiry_date = structure_row.get(STRUCTURE_COLS.EXPIRY)
-
-            if structure_id is not None:
-                structure_sections = sections_df[
-                    sections_df[STRUCTURE_COLS.INSPER_ID] == structure_id
-                ].to_dict("records")
-            else:
-                structure_sections = sections_df[
-                    sections_df[STRUCTURE_COLS.NAME] == structure_name
-                ].to_dict("records")
-
-            program_structures.append(
-                {
-                    "structure_name": structure_name,
-                    "contract_order": contract_order,
-                    "predecessor_title": predecessor_title,
-                    "type_of_participation": type_of_participation,
-                    "claim_basis": claim_basis,
-                    "inception_date": inception_date,
-                    "expiry_date": expiry_date,
-                    "sections": structure_sections,
-                }
-            )
-
-        self.program = Program(
-            name=program_name,
-            structures=program_structures,
+        # Step 3: Let the Program build itself from the DataFrames
+        # The construction logic is delegated to the domain models
+        self.program = Program.from_dataframes(
+            program_df=program_df,
+            structures_df=structures_df,
+            sections_df=sections_df,
+            program_cols=PROGRAM_COLS,
+            structure_cols=STRUCTURE_COLS,
             dimension_columns=self.dimension_columns,
         )
 

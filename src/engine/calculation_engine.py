@@ -1,7 +1,6 @@
 from typing import Dict, Any, Optional
 from src.domain import FIELDS, Program
-from .section_matcher import check_exclusion, match_section
-from .cession_calculator import apply_section
+from .section_matcher import check_exclusion
 from .policy_lifecycle import check_policy_status, create_inactive_result, create_excluded_result
 from .structure_orchestrator import process_structures
 
