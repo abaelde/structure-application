@@ -61,6 +61,40 @@ class Section:
     def to_dict(self) -> Dict[str, Any]:
         return self._data.copy()
 
+    def has_attachment(self) -> bool:
+        return pd.notna(self.attachment)
+
+    def has_limit(self) -> bool:
+        return pd.notna(self.limit)
+
+    def has_cession_pct(self) -> bool:
+        return pd.notna(self.cession_pct)
+
+    def is_exclusion(self) -> bool:
+        return self.get("BUSCL_EXCLUDE_CD") == "exclude"
+
+    def rescale_for_predecessor(self, retention_factor: float) -> tuple["Section", Dict[str, Any]]:
+        rescaled_section = self.copy()
+        rescaling_info = {
+            "retention_factor": retention_factor,
+            "original_attachment": None,
+            "rescaled_attachment": None,
+            "original_limit": None,
+            "rescaled_limit": None,
+        }
+
+        if self.has_attachment():
+            rescaling_info["original_attachment"] = self.attachment
+            rescaled_section[SECTION_COLS.ATTACHMENT] = self.attachment * retention_factor
+            rescaling_info["rescaled_attachment"] = rescaled_section.attachment
+
+        if self.has_limit():
+            rescaling_info["original_limit"] = self.limit
+            rescaled_section[SECTION_COLS.LIMIT] = self.limit * retention_factor
+            rescaling_info["rescaled_limit"] = rescaled_section.limit
+
+        return rescaled_section, rescaling_info
+
 
 class Structure:
     def __init__(
@@ -141,6 +175,22 @@ class Structure:
             "expiry_date": self.expiry_date,
             "sections": [s.to_dict() for s in self.sections],
         }
+
+    def has_predecessor(self) -> bool:
+        return pd.notna(self.predecessor_title)
+
+    def is_quota_share(self) -> bool:
+        from .constants import PRODUCT
+        return self.type_of_participation == PRODUCT.QUOTA_SHARE
+
+    def is_excess_of_loss(self) -> bool:
+        from .constants import PRODUCT
+        return self.type_of_participation == PRODUCT.EXCESS_OF_LOSS
+
+    def calculate_retention_pct(self, matched_section: Section) -> float:
+        if self.is_quota_share() and matched_section.has_cession_pct():
+            return 1.0 - matched_section.cession_pct
+        return 1.0
 
 
 class Program:

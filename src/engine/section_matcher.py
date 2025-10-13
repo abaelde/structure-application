@@ -7,23 +7,23 @@ def check_exclusion(
     policy_data: Dict[str, Any], sections: List[Section], dimension_columns: List[str]
 ) -> bool:
     for section in sections:
-        if section.get("BUSCL_EXCLUDE_CD") == "exclude":
-            matches = True
+        if not section.is_exclusion():
+            continue
 
-            for dimension in dimension_columns:
-                if dimension == "BUSCL_EXCLUDE_CD":
-                    continue
+        matches = True
+        for dimension in dimension_columns:
+            if dimension == "BUSCL_EXCLUDE_CD":
+                continue
 
-                section_value = section.get(dimension)
+            section_value = section.get(dimension)
+            if pd.notna(section_value):
+                policy_value = policy_data.get(dimension)
+                if policy_value != section_value:
+                    matches = False
+                    break
 
-                if pd.notna(section_value):
-                    policy_value = policy_data.get(dimension)
-                    if policy_value != section_value:
-                        matches = False
-                        break
-
-            if matches:
-                return True
+        if matches:
+            return True
 
     return False
 
@@ -34,7 +34,7 @@ def match_section(
     matched_sections = []
 
     for section in sections:
-        if section.get("BUSCL_EXCLUDE_CD") == "exclude":
+        if section.is_exclusion():
             continue
 
         matches = True
