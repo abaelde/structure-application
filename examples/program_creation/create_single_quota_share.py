@@ -34,27 +34,4 @@ print("✓ Programme Single Quota share créé: examples/programs/single_quota_s
 print("\n" + "=" * 80)
 print("PROGRAMME SINGLE QUOTA SHARE")
 print("=" * 80)
-
 program.describe()
-
-print("\n" + "=" * 80)
-print("COMPORTEMENT DU PROGRAMME")
-print("=" * 80)
-
-print(
-    """
-Exemple avec une police de 1M d'exposure:
-
-PROGRAMME SINGLE QUOTA SHARE:
-1. QS_30% s'applique sur 1M → 0.3M cédé, 0.7M retenu
-   Total cédé: 0.3M
-   Total retenu: 0.7M
-
-PRINCIPE:
-- Un seul quota share de 30% appliqué à toutes les polices
-- Pas de conditions géographiques ou autres
-- Simple et efficace pour tester la logique de base
-"""
-)
-
-print("\n✓ Le programme Single Quota share est prêt !")

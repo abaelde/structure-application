@@ -142,14 +142,3 @@ for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]
 
 
 print("\n✓ Le programme Aviation AXA XL 2024 est prêt !")
-print("\nPour modifier les valeurs:")
-print(
-    "1. Éditez le dictionnaire LAYER_VALUES_COMMON pour ajuster les layers (devises communes)"
-)
-print(
-    "2. Éditez le dictionnaire LAYER_VALUES_GBP pour ajuster les layers GBP"
-)
-print(
-    "3. Éditez CESSION_RATE_QS, REINSURER_SHARE_QS et REINSURER_SHARE_XOL pour les taux"
-)
-print("4. Relancez ce script pour régénérer le fichier Excel")

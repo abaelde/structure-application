@@ -59,35 +59,3 @@ print("PROGRAMME CASUALTY AIG 2024")
 print("=" * 80)
 
 program.describe()
-
-print("\n" + "=" * 80)
-print("RÉSUMÉ DU PROGRAMME")
-print("=" * 80)
-
-print(
-    """
-Programme: Casualty AIG 2024
-Claim basis: Risk attaching
-
-Structure unique:
-- QS_1 (contract_order=0): Quota Share 100% cédé
-
-Sections:
-1. Section générale: Quota Share 100% avec limite de 25M
-   - Pas de restriction spécifique
-   - Reinsurer share: 10% (à déterminer)
-
-2. Section cyber: Quota Share 100% avec limite de 10M
-   - Restriction sur le risque cyber (include="cyber")
-   - Reinsurer share: 10% (à déterminer)
-
-"""
-)
-
-print("✓ Le programme Casualty AIG 2024 est prêt !")
-print("\nNotes importantes:")
-print("- Les montants sont exprimés en valeurs absolues")
-print("- Le reinsurer share de 10% reste à déterminer selon les négociations")
-print(
-    "- La fonction quota_share a été modifiée pour supporter les limites optionnelles"
-)
