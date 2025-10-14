@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import Dict, Any, Optional
 from .calculation_engine import apply_program
-from .exposure_mapping import validate_exposure_columns, ExposureMappingError
+from .exposure_validation import validate_exposure_columns, ExposureValidationError
 
 
 def apply_program_to_bordereau(

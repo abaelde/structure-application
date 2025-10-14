@@ -1,7 +1,7 @@
 from src.domain import UNDERWRITING_DEPARTMENT, UNDERWRITING_DEPARTMENT_VALUES
 
 
-class ExposureMappingError(Exception):
+class ExposureValidationError(Exception):
     pass
 
 
@@ -13,7 +13,7 @@ REQUIRED_EXPOSURE_COLUMNS = {
 
 def validate_exposure_columns(df_columns: list, underwriting_department: str) -> None:
     if not underwriting_department:
-        raise ExposureMappingError(
+        raise ExposureValidationError(
             "Underwriting department is required for exposure column validation. "
             "The program must specify an underwriting department."
         )
@@ -21,7 +21,7 @@ def validate_exposure_columns(df_columns: list, underwriting_department: str) ->
     uw_dept_lower = underwriting_department.lower()
     
     if uw_dept_lower not in UNDERWRITING_DEPARTMENT_VALUES:
-        raise ExposureMappingError(
+        raise ExposureValidationError(
             f"Unknown underwriting department '{underwriting_department}'. "
             f"Supported underwriting departments: {', '.join(sorted(UNDERWRITING_DEPARTMENT_VALUES))}"
         )
@@ -33,7 +33,7 @@ def validate_exposure_columns(df_columns: list, underwriting_department: str) ->
         missing_columns = [col for col in required_columns if col not in df_columns]
 
         if missing_columns:
-            raise ExposureMappingError(
+            raise ExposureValidationError(
                 f"Missing required exposure columns for underwriting department '{underwriting_department}'. "
                 f"Required: {', '.join(required_columns)}. "
                 f"Missing: {', '.join(missing_columns)}. "
@@ -48,7 +48,7 @@ def _validate_aviation_exposure_columns(df_columns: list) -> None:
     has_liability_share = "LIABILITY_SHARE" in df_columns
 
     if not has_hull_limit and not has_liability_limit:
-        raise ExposureMappingError(
+        raise ExposureValidationError(
             f"Aviation bordereau must have at least one exposure type. "
             f"Required: HULL_LIMIT or LIABILITY_LIMIT (or both). "
             f"Found columns: {', '.join(df_columns)}"
@@ -69,7 +69,7 @@ def _validate_aviation_exposure_columns(df_columns: list) -> None:
         errors.append("LIABILITY_SHARE requires LIABILITY_LIMIT")
 
     if errors:
-        raise ExposureMappingError(
+        raise ExposureValidationError(
             f"Invalid Aviation exposure columns. "
             f"Errors: {'; '.join(errors)}. "
             f"Found columns: {', '.join(df_columns)}"

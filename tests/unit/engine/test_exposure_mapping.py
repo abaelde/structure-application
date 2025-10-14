@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 from src.engine import apply_program_to_bordereau
-from src.engine.exposure_mapping import ExposureMappingError
+from src.engine.exposure_validation import ExposureValidationError
 from tests.builders import build_program, build_quota_share
 
 
@@ -78,7 +78,7 @@ def test_exposure_mapping_failure_wrong_column():
         "EXPIRE_DT": ["2025-01-01"],
     })
     
-    with pytest.raises(ExposureMappingError) as exc_info:
+    with pytest.raises(ExposureValidationError) as exc_info:
         apply_program_to_bordereau(bordereau_df, program)
     
     error_message = str(exc_info.value)
