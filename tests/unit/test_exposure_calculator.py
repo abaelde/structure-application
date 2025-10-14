@@ -41,29 +41,25 @@ class TestAviationExposureCalculator:
         calculator = AviationExposureCalculator()
         policy_data = {
             "LIABILITY_LIMIT": 300_000_000,
-            "HULL_SHARE": 0.15,
             "LIABILITY_SHARE": 0.10,
         }
         
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            calculator.calculate(policy_data)
+        result = calculator.calculate(policy_data)
         
-        assert "Missing required exposure columns" in str(exc_info.value)
-        assert "HULL_LIMIT" in str(exc_info.value)
+        assert result == 300_000_000 * 0.10
+        assert result == 30_000_000
 
     def test_calculate_missing_liability_limit(self):
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 50_000_000,
             "HULL_SHARE": 0.15,
-            "LIABILITY_SHARE": 0.10,
         }
         
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            calculator.calculate(policy_data)
+        result = calculator.calculate(policy_data)
         
-        assert "Missing required exposure columns" in str(exc_info.value)
-        assert "LIABILITY_LIMIT" in str(exc_info.value)
+        assert result == 50_000_000 * 0.15
+        assert result == 7_500_000
 
     def test_calculate_missing_hull_share(self):
         calculator = AviationExposureCalculator()
@@ -76,7 +72,7 @@ class TestAviationExposureCalculator:
         with pytest.raises(ExposureCalculationError) as exc_info:
             calculator.calculate(policy_data)
         
-        assert "Missing required share columns" in str(exc_info.value)
+        assert "HULL_LIMIT requires HULL_SHARE" in str(exc_info.value)
         assert "HULL_SHARE" in str(exc_info.value)
 
     def test_calculate_missing_liability_share(self):
@@ -90,7 +86,7 @@ class TestAviationExposureCalculator:
         with pytest.raises(ExposureCalculationError) as exc_info:
             calculator.calculate(policy_data)
         
-        assert "Missing required share columns" in str(exc_info.value)
+        assert "LIABILITY_LIMIT requires LIABILITY_SHARE" in str(exc_info.value)
         assert "LIABILITY_SHARE" in str(exc_info.value)
 
     def test_calculate_invalid_numeric_value(self):
@@ -128,6 +124,44 @@ class TestAviationExposureCalculator:
         
         assert result == hull_exposure + liability_exposure
         assert result == 137_500_000
+
+    def test_calculate_missing_both_exposures(self):
+        calculator = AviationExposureCalculator()
+        policy_data = {
+            "HULL_SHARE": 0.15,
+            "LIABILITY_SHARE": 0.10,
+        }
+        
+        with pytest.raises(ExposureCalculationError) as exc_info:
+            calculator.calculate(policy_data)
+        
+        assert "At least one of HULL_LIMIT or LIABILITY_LIMIT must be provided" in str(exc_info.value)
+
+    def test_calculate_hull_share_without_hull_limit(self):
+        calculator = AviationExposureCalculator()
+        policy_data = {
+            "LIABILITY_LIMIT": 300_000_000,
+            "HULL_SHARE": 0.15,
+            "LIABILITY_SHARE": 0.10,
+        }
+        
+        result = calculator.calculate(policy_data)
+        
+        assert result == 300_000_000 * 0.10
+        assert result == 30_000_000
+
+    def test_calculate_liability_share_without_liability_limit(self):
+        calculator = AviationExposureCalculator()
+        policy_data = {
+            "HULL_LIMIT": 50_000_000,
+            "HULL_SHARE": 0.15,
+            "LIABILITY_SHARE": 0.10,
+        }
+        
+        result = calculator.calculate(policy_data)
+        
+        assert result == 50_000_000 * 0.15
+        assert result == 7_500_000
 
 
 class TestCasualtyExposureCalculator:

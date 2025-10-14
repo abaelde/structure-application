@@ -55,14 +55,14 @@ def test_exposure_mapping_failure_wrong_column():
     
     PROGRAMME:
     - Underwriting department: aviation
-    - Attend: HULL_LIMIT, LIABILITY_LIMIT, HULL_SHARE, LIABILITY_SHARE
+    - Attend: Au moins HULL_LIMIT ou LIABILITY_LIMIT (avec leur SHARE correspondant)
     
     BORDEREAU:
     - Colonne d'exposition: LIMIT (valide pour casualty, pas aviation)
     
     RÉSULTAT ATTENDU:
     - ExposureMappingError est levée
-    - Le message d'erreur indique les colonnes attendues
+    - Le message d'erreur indique qu'il faut au moins une exposition aviation
     """
     qs = build_quota_share(name="QS_30", cession_pct=0.30, signed_share=1.0)
     program = build_program(
@@ -82,9 +82,8 @@ def test_exposure_mapping_failure_wrong_column():
         apply_program_to_bordereau(bordereau_df, program)
     
     error_message = str(exc_info.value)
+    assert "at least one exposure type" in error_message.lower()
     assert "HULL_LIMIT" in error_message
     assert "LIABILITY_LIMIT" in error_message
-    assert "HULL_SHARE" in error_message
-    assert "LIABILITY_SHARE" in error_message
     assert "aviation" in error_message.lower()
 

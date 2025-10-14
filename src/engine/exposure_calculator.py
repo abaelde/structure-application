@@ -23,51 +23,52 @@ class AviationExposureCalculator(ExposureCalculator):
         hull_share = policy_data.get("HULL_SHARE")
         liability_share = policy_data.get("LIABILITY_SHARE")
 
-        if hull_limit is None or liability_limit is None:
+        has_hull = hull_limit is not None
+        has_liability = liability_limit is not None
+
+        if not has_hull and not has_liability:
             raise ExposureCalculationError(
-                f"Missing required exposure columns for Aviation. "
-                f"Required: HULL_LIMIT, LIABILITY_LIMIT, HULL_SHARE, LIABILITY_SHARE. "
-                f"Found: HULL_LIMIT={hull_limit}, LIABILITY_LIMIT={liability_limit}, "
-                f"HULL_SHARE={hull_share}, LIABILITY_SHARE={liability_share}"
+                f"Missing exposure for Aviation. "
+                f"At least one of HULL_LIMIT or LIABILITY_LIMIT must be provided. "
+                f"Found: HULL_LIMIT={hull_limit}, LIABILITY_LIMIT={liability_limit}"
             )
 
-        if hull_share is None or liability_share is None:
-            raise ExposureCalculationError(
-                f"Missing required share columns for Aviation. "
-                f"Required: HULL_SHARE, LIABILITY_SHARE. "
-                f"Found: HULL_SHARE={hull_share}, LIABILITY_SHARE={liability_share}"
-            )
+        total_exposure = 0.0
 
-        try:
-            hull_limit = float(hull_limit)
-            liability_limit = float(liability_limit)
-            hull_share = float(hull_share)
-            liability_share = float(liability_share)
-        except (ValueError, TypeError) as e:
-            raise ExposureCalculationError(
-                f"Invalid numeric values in Aviation exposure columns: {e}"
-            )
+        if has_hull:
+            if hull_share is None:
+                raise ExposureCalculationError(
+                    f"HULL_LIMIT requires HULL_SHARE. "
+                    f"Found: HULL_LIMIT={hull_limit}, HULL_SHARE={hull_share}"
+                )
+            try:
+                hull_limit_float = float(hull_limit)
+                hull_share_float = float(hull_share)
+                total_exposure += hull_limit_float * hull_share_float
+            except (ValueError, TypeError) as e:
+                raise ExposureCalculationError(
+                    f"Invalid numeric values for Hull exposure: {e}"
+                )
 
-        hull_exposure = hull_limit * hull_share
-        liability_exposure = liability_limit * liability_share
-
-        total_exposure = hull_exposure + liability_exposure
+        if has_liability:
+            if liability_share is None:
+                raise ExposureCalculationError(
+                    f"LIABILITY_LIMIT requires LIABILITY_SHARE. "
+                    f"Found: LIABILITY_LIMIT={liability_limit}, LIABILITY_SHARE={liability_share}"
+                )
+            try:
+                liability_limit_float = float(liability_limit)
+                liability_share_float = float(liability_share)
+                total_exposure += liability_limit_float * liability_share_float
+            except (ValueError, TypeError) as e:
+                raise ExposureCalculationError(
+                    f"Invalid numeric values for Liability exposure: {e}"
+                )
 
         return total_exposure
 
     def get_required_columns(self) -> list[str]:
         return ["HULL_LIMIT", "LIABILITY_LIMIT", "HULL_SHARE", "LIABILITY_SHARE"]
-# ⚠️ HYPOTHÈSE FORTE (TEMPORAIRE) :
-# On additionne (HULL_LIMIT × HULL_SHARE) + (LIABILITY_LIMIT × LIABILITY_SHARE)
-# pour obtenir une exposition unique à passer dans le programme.
-# 
-# Cette sommation est une SIMPLIFICATION. Dans la réalité, HULL et LIABILITY
-# sont deux expositions distinctes qui devraient être traitées séparément
-# dans les calculs de cession (sections différentes, limites différentes, etc.).
-# 
-# TODO FUTUR: Supporter plusieurs expositions par policy (multi-exposure),
-# avec des sections de programme pouvant cibler spécifiquement HULL ou LIABILITY.
-        hull_exposure = hull_limit * hull_share
 
 class CasualtyExposureCalculator(ExposureCalculator):
     def calculate(self, policy_data: Dict[str, Any]) -> float:
