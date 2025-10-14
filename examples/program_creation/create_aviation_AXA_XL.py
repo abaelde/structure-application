@@ -87,8 +87,8 @@ program_data = {
     "REPROG_COMMENT": [None],  # Optional comments
     "REPROG_UW_DEPARTMENT_CD": [None],  # UW Department Code
     "REPROG_UW_DEPARTMENT_NAME": [None],  # UW Department Name
-    "REPROG_UW_DEPARTMENT_LOB_CD": [None],  # UW Department LOB Code
-    "REPROG_UW_DEPARTMENT_LOB_NAME": [None],  # UW Department LOB Name
+    "REPROG_UW_DEPARTMENT_LOB_CD": ["aviation"],  # UW Department LOB Code
+    "REPROG_UW_DEPARTMENT_LOB_NAME": ["Aviation"],  # UW Department LOB Name
     "BUSPAR_CED_REG_CLASS_CD": [None],  # Regulatory Class Code
     "BUSPAR_CED_REG_CLASS_NAME": [None],  # Regulatory Class Name
     "REPROG_MAIN_CURRENCY_CD": [None],  # Main Currency Code

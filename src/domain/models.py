@@ -278,10 +278,12 @@ class Program:
         name: str,
         structures: List[Structure],
         dimension_columns: List[str],
+        line_of_business: Optional[str] = None,
     ):
         self.name = name
         self.dimension_columns = dimension_columns
         self.structures = structures
+        self.line_of_business = line_of_business
 
     def __getitem__(self, key: str):
         if not hasattr(self, key):
@@ -301,6 +303,7 @@ class Program:
             "name": self.name,
             "structures": [s.to_dict() for s in self.structures],
             "dimension_columns": self.dimension_columns,
+            "line_of_business": self.line_of_business,
         }
 
     def describe(self, file=None) -> str:
@@ -313,6 +316,8 @@ class Program:
         lines.append("PROGRAM CONFIGURATION")
         lines.append("=" * 80)
         lines.append(f"Program name: {self.name}")
+        if self.line_of_business:
+            lines.append(f"Line of business: {self.line_of_business}")
         lines.append(f"Number of structures: {len(self.structures)}")
         lines.append(f"Matching dimensions: {len(self.dimension_columns)}")
 

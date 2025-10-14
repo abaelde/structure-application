@@ -10,10 +10,9 @@ class BordereauValidationError(Exception):
 class BordereauValidator:
     REQUIRED_COLUMNS = [
         FIELDS["INSURED_NAME"],
-        FIELDS["EXPOSURE"],
         FIELDS["INCEPTION_DATE"],
         FIELDS["EXPIRY_DATE"],
-        FIELDS["LINE_OF_BUSINESS"],
+        FIELDS["LINE_OF_BUSINESS"], # AURE to delete ?
     ]
 
     DIMENSION_COLUMNS = [
@@ -33,15 +32,25 @@ class BordereauValidator:
         FIELDS["POLICY_NUMBER"],
     ]
 
-    ALLOWED_COLUMNS = REQUIRED_COLUMNS + DIMENSION_COLUMNS + OPTIONAL_COLUMNS
+    EXPOSURE_COLUMNS = [
+        "exposure",
+        "HULL_LIMIT",
+        "hull_limit",
+        "LIAB_LIMIT",
+        "liab_limit",
+        "LIMIT",
+        "limit",
+        "expo",
+    ]
 
-    NUMERIC_COLUMNS = [FIELDS["EXPOSURE"]]
+    ALLOWED_COLUMNS = REQUIRED_COLUMNS + DIMENSION_COLUMNS + OPTIONAL_COLUMNS + EXPOSURE_COLUMNS
+
+    NUMERIC_COLUMNS = EXPOSURE_COLUMNS
 
     DATE_COLUMNS = [FIELDS["INCEPTION_DATE"], FIELDS["EXPIRY_DATE"]]
 
-    def __init__(self, df: pd.DataFrame, line_of_business: str = None):
+    def __init__(self, df: pd.DataFrame):
         self.df = df
-        self.line_of_business = line_of_business
         self.validation_warnings: List[str] = []
         self.validation_errors: List[str] = []
 
@@ -56,7 +65,6 @@ class BordereauValidator:
         self._validate_dates()
         self._validate_numeric_values()
         self._validate_insured_name_uppercase()
-        self._validate_line_of_business()
         self._validate_business_logic()
 
         if self.validation_errors:
@@ -223,24 +231,6 @@ class BordereauValidator:
                 )
             )
 
-    def _validate_line_of_business(self):
-        lob_col = FIELDS["LINE_OF_BUSINESS"]
-        if lob_col not in self.df.columns:
-            return
-
-        if self.line_of_business:
-            inconsistent_lobs = []
-            unique_lobs = self.df[lob_col].dropna().unique()
-
-            for lob in unique_lobs:
-                if str(lob).lower() != self.line_of_business.lower():
-                    inconsistent_lobs.append(str(lob))
-
-            if inconsistent_lobs:
-                self.validation_errors.append(
-                    f"Bordereau is in '{self.line_of_business}' folder but contains inconsistent line_of_business values: {', '.join(inconsistent_lobs)}"
-                )
-
     def _validate_business_logic(self):
         inception_col = FIELDS["INCEPTION_DATE"]
         expiry_col = FIELDS["EXPIRY_DATE"]
@@ -272,6 +262,6 @@ class BordereauValidator:
             )
 
 
-def validate_bordereau(df: pd.DataFrame, line_of_business: str = None) -> bool:
-    validator = BordereauValidator(df, line_of_business)
+def validate_bordereau(df: pd.DataFrame) -> bool:
+    validator = BordereauValidator(df)
     return validator.validate()

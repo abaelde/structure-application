@@ -75,6 +75,7 @@ SHEETS = SimpleNamespace(
 
 PROGRAM_COLS = SimpleNamespace(
     TITLE="REPROG_TITLE",
+    LINE_OF_BUSINESS="REPROG_UW_DEPARTMENT_LOB_CD",
 )
 
 STRUCTURE_COLS = SimpleNamespace(
