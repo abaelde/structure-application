@@ -5,17 +5,17 @@ class ExposureMappingError(Exception):
     pass
 
 
-EXPOSURE_COLUMN_ALIASES = {
-    UNDERWRITING_DEPARTMENT.AVIATION: ["HULL_LIMIT", "LIAB_LIMIT"],
+REQUIRED_EXPOSURE_COLUMNS = {
+    UNDERWRITING_DEPARTMENT.AVIATION: ["HULL_LIMIT", "LIABILITY_LIMIT", "HULL_SHARE", "LIABILITY_SHARE"],
     UNDERWRITING_DEPARTMENT.CASUALTY: ["LIMIT"],
     UNDERWRITING_DEPARTMENT.TEST: ["exposure"],
 }
 
 
-def find_exposure_column(df_columns: list, underwriting_department: str) -> tuple:
+def validate_exposure_columns(df_columns: list, underwriting_department: str) -> None:
     if not underwriting_department:
         raise ExposureMappingError(
-            "Underwriting department is required for exposure column mapping. "
+            "Underwriting department is required for exposure column validation. "
             "The program must specify an underwriting department."
         )
 
@@ -27,14 +27,13 @@ def find_exposure_column(df_columns: list, underwriting_department: str) -> tupl
             f"Supported underwriting departments: {', '.join(sorted(UNDERWRITING_DEPARTMENT_VALUES))}"
         )
 
-    available_names = EXPOSURE_COLUMN_ALIASES[uw_dept_lower]
+    required_columns = REQUIRED_EXPOSURE_COLUMNS[uw_dept_lower]
+    missing_columns = [col for col in required_columns if col not in df_columns]
 
-    for col_name in available_names:
-        if col_name in df_columns:
-            return col_name, "exposure"
-
-    raise ExposureMappingError(
-        f"No valid exposure column found for underwriting department '{underwriting_department}'. "
-        f"Expected one of: {', '.join(available_names)}. "
-        f"Found columns: {', '.join(df_columns)}"
-    )
+    if missing_columns:
+        raise ExposureMappingError(
+            f"Missing required exposure columns for underwriting department '{underwriting_department}'. "
+            f"Required: {', '.join(required_columns)}. "
+            f"Missing: {', '.join(missing_columns)}. "
+            f"Found columns: {', '.join(df_columns)}"
+        )

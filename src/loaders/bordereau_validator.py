@@ -24,17 +24,22 @@ class BordereauValidator:
         FIELDS["LINE_OF_BUSINESS"],
         FIELDS["INDUSTRY"],
         FIELDS["SIC_CODE"],
-        FIELDS["INCLUDE"],
     ]
 
     OPTIONAL_COLUMNS = [
         FIELDS["POLICY_NUMBER"],
+        "POLICY_ID",
+        "INDUSTRY",
+        "SIC_CODE",
     ]
 
     EXPOSURE_COLUMNS = [
         "exposure",
         "HULL_LIMIT",
         "LIAB_LIMIT",
+        "LIABILITY_LIMIT",
+        "HULL_SHARE",
+        "LIABILITY_SHARE",
         "LIMIT",
     ]
 

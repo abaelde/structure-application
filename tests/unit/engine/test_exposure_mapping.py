@@ -7,19 +7,20 @@ from tests.builders import build_program, build_quota_share
 
 def test_exposure_mapping_success_aviation():
     """
-    Test : Mapping réussi d'une colonne HULL_LIMIT vers exposure pour un programme aviation
+    Test : Calcul d'exposition aviation avec HULL et LIABILITY pour un programme aviation
     
     PROGRAMME:
     - Underwriting department: aviation
     - Structure: Quota Share 30%
     
     BORDEREAU:
-    - Colonne d'exposition: HULL_LIMIT (valide pour aviation)
+    - Colonnes d'exposition: HULL_LIMIT, LIABILITY_LIMIT, HULL_SHARE, LIABILITY_SHARE
+    - Exposition calculée = (HULL_LIMIT × HULL_SHARE) + (LIABILITY_LIMIT × LIABILITY_SHARE)
     
     RÉSULTAT ATTENDU:
-    - HULL_LIMIT est mappée vers exposure
+    - L'exposition est calculée correctement
     - Le traitement se déroule sans erreur
-    - La cession est calculée correctement
+    - La cession est calculée sur l'exposition totale
     """
     qs = build_quota_share(name="QS_30", cession_pct=0.30, signed_share=1.0)
     program = build_program(
@@ -30,7 +31,10 @@ def test_exposure_mapping_success_aviation():
     
     bordereau_df = pd.DataFrame({
         "INSURED_NAME": ["TEST COMPANY"],
-        "HULL_LIMIT": [1_000_000],
+        "HULL_LIMIT": [10_000_000],
+        "LIABILITY_LIMIT": [50_000_000],
+        "HULL_SHARE": [0.20],
+        "LIABILITY_SHARE": [0.10],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-01-01"],
     })
@@ -40,18 +44,18 @@ def test_exposure_mapping_success_aviation():
         bordereau_df, program, calculation_date=calculation_date
     )
     
-    assert "exposure" in bordereau_with_net.columns
-    assert bordereau_with_net["exposure"].iloc[0] == 1_000_000
-    assert abs(results_df["cession_to_reinsurer"].iloc[0] - 300_000) < 1
+    expected_exposure = (10_000_000 * 0.20) + (50_000_000 * 0.10)
+    assert results_df["exposure"].iloc[0] == expected_exposure
+    assert abs(results_df["cession_to_reinsurer"].iloc[0] - (expected_exposure * 0.30)) < 1
 
 
 def test_exposure_mapping_failure_wrong_column():
     """
-    Test : Erreur levée quand le bordereau n'a pas de colonne d'exposition valide
+    Test : Erreur levée quand le bordereau n'a pas les colonnes d'exposition aviation requises
     
     PROGRAMME:
     - Underwriting department: aviation
-    - Attend: HULL_LIMIT ou LIAB_LIMIT
+    - Attend: HULL_LIMIT, LIABILITY_LIMIT, HULL_SHARE, LIABILITY_SHARE
     
     BORDEREAU:
     - Colonne d'exposition: LIMIT (valide pour casualty, pas aviation)
@@ -79,6 +83,8 @@ def test_exposure_mapping_failure_wrong_column():
     
     error_message = str(exc_info.value)
     assert "HULL_LIMIT" in error_message
-    assert "LIAB_LIMIT" in error_message
+    assert "LIABILITY_LIMIT" in error_message
+    assert "HULL_SHARE" in error_message
+    assert "LIABILITY_SHARE" in error_message
     assert "aviation" in error_message.lower()
 

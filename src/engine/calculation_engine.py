@@ -7,6 +7,7 @@ from .policy_lifecycle import (
     create_excluded_result,
 )
 from .structure_orchestrator import process_structures
+from .exposure_calculator import get_exposure_calculator
 
 
 def apply_program(
@@ -14,7 +15,8 @@ def apply_program(
     program: Program,
     calculation_date: Optional[str] = None,
 ) -> Dict[str, Any]:
-    exposure = policy_data.get(FIELDS["EXPOSURE"])
+    calculator = get_exposure_calculator(program.underwriting_department)
+    exposure = calculator.calculate(policy_data)
     structures = program.structures
     dimension_columns = program.dimension_columns
 
