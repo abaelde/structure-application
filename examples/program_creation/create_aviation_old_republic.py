@@ -82,24 +82,4 @@ print(f"✓ Programme créé: {output_file}")
 print("\n" + "=" * 80)
 print("PROGRAMME AVIATION OLD REPUBLIC 2024")
 print("=" * 80)
-
 program.describe()
-
-print("\n" + "=" * 80)
-print("RÉSUMÉ DU PROGRAMME")
-print("=" * 80)
-
-print(
-    """
-Programme: Aviation Old Republic 2024
-Géographie: United States et Canada
-
-Structures XOL (empilées selon l'ordre):
-1. XOL_1 (contract_order=1): 8.75M xs 3M (pour US et Canada)
-2. XOL_2 (contract_order=2): 10M xs 11.75M (pour US et Canada)  
-3. XOL_3 (contract_order=3): 23.25M xs 21.75M (pour US et Canada)
-
-"""
-)
-
-print("\n✓ Le programme Aviation Old Republic 2024 est prêt !")
