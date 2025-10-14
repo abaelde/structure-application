@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 from src.engine import apply_program_to_bordereau
-from src.loaders.exposure_mapping import ExposureMappingError
+from src.engine.exposure_mapping import ExposureMappingError
 from tests.builders import build_program, build_quota_share
 
 
