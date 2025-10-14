@@ -55,6 +55,8 @@ qs_1 = build_quota_share(
             "limit": 575_000_000,
             "signed_share": REINSURER_SHARE_QS,
             "currency_cd": currency,
+            "includes_hull": True,
+            "includes_liability": True,
         }
         for currency in ALL_CURRENCIES
     ],
@@ -71,6 +73,8 @@ def create_xol_layer(layer_name: str) -> object:
             "limit": limit,
             "signed_share": REINSURER_SHARE_XOL,
             "currency_cd": currency,
+            "includes_hull": True,
+            "includes_liability": True,
         })
     
     limit_gbp, attachment_gbp = LAYER_VALUES_GBP[layer_name]
@@ -79,6 +83,8 @@ def create_xol_layer(layer_name: str) -> object:
         "limit": limit_gbp,
         "signed_share": REINSURER_SHARE_XOL,
         "currency_cd": "GBP",
+        "includes_hull": True,
+        "includes_liability": True,
     })
     
     return build_excess_of_loss(

@@ -201,6 +201,8 @@ def program_to_excel(
         "PML_DEFAULT_PCT": [],
         "LIMIT_EVENT": [],
         "NO_OF_REINSTATEMENTS": [],
+        "INCLUDES_HULL": [],
+        "INCLUDES_LIABILITY": [],
     }
     
     insper_id = 1
@@ -276,6 +278,8 @@ def program_to_excel(
             sections_data["PML_DEFAULT_PCT"].append(section_dict.get("PML_DEFAULT_PCT"))
             sections_data["LIMIT_EVENT"].append(section_dict.get("LIMIT_EVENT"))
             sections_data["NO_OF_REINSTATEMENTS"].append(section_dict.get("NO_OF_REINSTATEMENTS"))
+            sections_data["INCLUDES_HULL"].append(section_dict.get("INCLUDES_HULL"))
+            sections_data["INCLUDES_LIABILITY"].append(section_dict.get("INCLUDES_LIABILITY"))
             
             section_id += 1
         

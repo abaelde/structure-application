@@ -24,7 +24,11 @@ def test_exclusion_mechanism():
     sections = [
         build_exclusion_section(country_cd="Iran").to_dict(),
         build_exclusion_section(country_cd="Russia").to_dict(),
-        build_section(cession_pct=0.25).to_dict(),
+        build_section(
+            cession_pct=0.25,
+            includes_hull=True,
+            includes_liability=True
+        ).to_dict(),
     ]
     
     qs = build_quota_share(
@@ -34,7 +38,8 @@ def test_exclusion_mechanism():
     
     program = build_program(
         name="QS_WITH_EXCLUSIONS",
-        structures=[qs]
+        structures=[qs],
+        underwriting_department="test"
     )
     
     # Créer le bordereau de test

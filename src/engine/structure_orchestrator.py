@@ -2,6 +2,7 @@ from typing import Dict, Any, List, Set, Optional
 from src.domain import PRODUCT, Structure, Section
 from .section_matcher import match_section
 from .cession_calculator import apply_section
+from .exposure_calculator import AviationExposureCalculator, ExposureComponents
 
 
 def process_structures(
@@ -60,17 +61,27 @@ def process_structures(
     def _apply_structure_and_calculate_cession(
         structure: Structure, matched_section: Section
     ) -> Dict[str, Any]:
-        input_exposure = _calculate_input_exposure(exposure, structure, structure_outputs)
+        base_input_exposure = _calculate_input_exposure(exposure, structure, structure_outputs)
+        
+        exposure_components = _calculate_exposure_components(policy_data, base_input_exposure)
+        
+        includes_hull = matched_section.includes_hull if matched_section.includes_hull is not None else True
+        includes_liability = matched_section.includes_liability if matched_section.includes_liability is not None else True
+        
+        filtered_exposure = exposure_components.apply_filters(
+            includes_hull=includes_hull,
+            includes_liability=includes_liability
+        )
         
         section_to_apply, rescaling_info = _rescale_section_if_needed(
             matched_section, structure, structure_outputs
         )
 
         ceded_result = apply_section(
-            input_exposure, section_to_apply, structure.type_of_participation
+            filtered_exposure, section_to_apply, structure.type_of_participation
         )
 
-        retained = input_exposure - ceded_result["cession_to_layer_100pct"]
+        retained = filtered_exposure - ceded_result["cession_to_layer_100pct"]
         current_retention_pct = _calculate_retention_pct(structure, matched_section)
 
         structure_outputs[structure.structure_name] = {
@@ -85,7 +96,7 @@ def process_structures(
             structures_detail,
             structure,
             applied=True,
-            input_exposure=input_exposure,
+            input_exposure=filtered_exposure,
             ceded_result=ceded_result,
             matched_section=matched_section,
             section_to_apply=section_to_apply,
@@ -110,6 +121,28 @@ def process_structures(
             total_cession_to_reinsurer += result["cession_to_reinsurer"]
 
     return structures_detail, total_cession_to_layer_100pct, total_cession_to_reinsurer
+
+
+def _calculate_exposure_components(
+    policy_data: Dict[str, Any],
+    total_exposure: float
+) -> ExposureComponents:
+    if "HULL_LIMIT" in policy_data or "LIABILITY_LIMIT" in policy_data:
+        calculator = AviationExposureCalculator()
+        raw_components = calculator.calculate_components(policy_data)
+        
+        if raw_components.total == 0:
+            return ExposureComponents(hull=0.0, liability=0.0)
+        
+        ratio_hull = raw_components.hull / raw_components.total
+        ratio_liability = raw_components.liability / raw_components.total
+        
+        return ExposureComponents(
+            hull=total_exposure * ratio_hull,
+            liability=total_exposure * ratio_liability
+        )
+    
+    return ExposureComponents(hull=total_exposure, liability=0.0)
 
 
 def _calculate_input_exposure(

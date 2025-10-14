@@ -61,6 +61,9 @@ PARAMETERS = [
     # Currency parameters
     "REPROG_MAIN_CURRENCY_CD",
     "INSPER_MAIN_CURRENCY_CD",
+    # Aviation coverage filtering
+    "INCLUDES_HULL",
+    "INCLUDES_LIABILITY",
 ]
 
 
@@ -153,7 +156,55 @@ class ProgramLoader:
         program_df = pd.read_excel(self.source, sheet_name=SHEETS.PROGRAM)
         structures_df = pd.read_excel(self.source, sheet_name=SHEETS.STRUCTURES)
         sections_df = pd.read_excel(self.source, sheet_name=SHEETS.SECTIONS)
+        
+        program_uw_dept = convert_pandas_to_native(
+            program_df.iloc[0].get(PROGRAM_COLS.UNDERWRITING_DEPARTMENT)
+        )
+        
+        sections_df = self._process_boolean_columns(sections_df, program_uw_dept)
+        
         return program_df, structures_df, sections_df
+    
+    def _process_boolean_columns(self, sections_df: pd.DataFrame, underwriting_department: str) -> pd.DataFrame:
+        boolean_columns = ["INCLUDES_HULL", "INCLUDES_LIABILITY"]
+        
+        for col in boolean_columns:
+            if col in sections_df.columns:
+                sections_df[col] = sections_df[col].map(self._to_boolean, na_action='ignore')
+        
+        if underwriting_department and underwriting_department.lower() == "aviation":
+            for col in boolean_columns:
+                if col not in sections_df.columns:
+                    raise ValueError(
+                        f"Column {col} is required for Aviation programs. "
+                        f"Please add {col} column to the sections sheet with explicit TRUE/FALSE values."
+                    )
+                
+                null_values = sections_df[col].isna().sum()
+                if null_values > 0:
+                    raise ValueError(
+                        f"Column {col} has {null_values} null/empty values. "
+                        f"For Aviation programs, all sections must have explicit TRUE or FALSE values for {col}."
+                    )
+        
+        return sections_df
+    
+    @staticmethod
+    def _to_boolean(value):
+        if pd.isna(value):
+            return None
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            value_lower = value.lower().strip()
+            if value_lower in ("true", "1", "yes", "y"):
+                return True
+            if value_lower in ("false", "0", "no", "n"):
+                return False
+            return None
+        if isinstance(value, (int, float)):
+            return bool(value)
+        return None
 
     def _load_from_snowflake(self):
         raise NotImplementedError("Snowflake loading not yet implemented")

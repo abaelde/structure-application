@@ -20,12 +20,17 @@ def test_single_line_quota_share_basic():
     """
     qs_structure = build_quota_share(
         name="QS_30",
-        cession_pct=0.30,
+        sections_config=[{
+            "cession_pct": 0.30,
+            "includes_hull": True,
+            "includes_liability": True,
+        }]
     )
     
     program = build_program(
         name="SINGLE_QUOTA_SHARE_2024",
-        structures=[qs_structure]
+        structures=[qs_structure],
+        underwriting_department="test"
     )
     
     test_data = {
@@ -82,14 +87,25 @@ def test_single_line_quota_share_with_currency_matching():
     qs_structure = build_quota_share(
         name="QS_BY_CURRENCY",
         sections_config=[
-            {"currency_cd": "USD", "cession_pct": 0.25},
-            {"currency_cd": "EUR", "cession_pct": 0.35},
+            {
+                "currency_cd": "USD",
+                "cession_pct": 0.25,
+                "includes_hull": True,
+                "includes_liability": True,
+            },
+            {
+                "currency_cd": "EUR",
+                "cession_pct": 0.35,
+                "includes_hull": True,
+                "includes_liability": True,
+            },
         ]
     )
     
     program = build_program(
         name="QS_BY_CURRENCY_2024",
-        structures=[qs_structure]
+        structures=[qs_structure],
+        underwriting_department="test"
     )
     
     test_data = {

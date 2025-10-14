@@ -170,6 +170,105 @@ class TestAviationExposureCalculator:
         assert result == 50_000_000 * 0.15
         assert result == 7_500_000
 
+    def test_calculate_components_with_both(self):
+        """
+        Test calculate_components avec Hull et Liability
+        
+        DONNÉES:
+        - Hull: 100M × 15% = 15M
+        - Liability: 500M × 10% = 50M
+        
+        ATTENDU:
+        - Hull exposure: 15M
+        - Liability exposure: 50M
+        - Total: 65M
+        """
+        calculator = AviationExposureCalculator()
+        policy_data = {
+            "HULL_LIMIT": 100_000_000,
+            "LIABILITY_LIMIT": 500_000_000,
+            "HULL_SHARE": 0.15,
+            "LIABILITY_SHARE": 0.10,
+        }
+        
+        components = calculator.calculate_components(policy_data)
+        
+        assert components.hull == 15_000_000
+        assert components.liability == 50_000_000
+        assert components.total == 65_000_000
+
+    def test_calculate_components_hull_only(self):
+        """
+        Test calculate_components avec seulement Hull
+        
+        DONNÉES:
+        - Hull: 100M × 15% = 15M
+        - Liability: None
+        
+        ATTENDU:
+        - Hull exposure: 15M
+        - Liability exposure: 0
+        - Total: 15M
+        """
+        calculator = AviationExposureCalculator()
+        policy_data = {
+            "HULL_LIMIT": 100_000_000,
+            "HULL_SHARE": 0.15,
+        }
+        
+        components = calculator.calculate_components(policy_data)
+        
+        assert components.hull == 15_000_000
+        assert components.liability == 0.0
+        assert components.total == 15_000_000
+
+    def test_calculate_components_liability_only(self):
+        """
+        Test calculate_components avec seulement Liability
+        
+        DONNÉES:
+        - Hull: None
+        - Liability: 500M × 10% = 50M
+        
+        ATTENDU:
+        - Hull exposure: 0
+        - Liability exposure: 50M
+        - Total: 50M
+        """
+        calculator = AviationExposureCalculator()
+        policy_data = {
+            "LIABILITY_LIMIT": 500_000_000,
+            "LIABILITY_SHARE": 0.10,
+        }
+        
+        components = calculator.calculate_components(policy_data)
+        
+        assert components.hull == 0.0
+        assert components.liability == 50_000_000
+        assert components.total == 50_000_000
+
+    def test_calculate_components_none(self):
+        """
+        Test calculate_components sans aucune exposition
+        
+        DONNÉES:
+        - Hull: None
+        - Liability: None
+        
+        ATTENDU:
+        - Hull exposure: 0
+        - Liability exposure: 0
+        - Total: 0
+        """
+        calculator = AviationExposureCalculator()
+        policy_data = {}
+        
+        components = calculator.calculate_components(policy_data)
+        
+        assert components.hull == 0.0
+        assert components.liability == 0.0
+        assert components.total == 0.0
+
 
 class TestCasualtyExposureCalculator:
     def test_calculate_valid_exposure(self):

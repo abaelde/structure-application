@@ -22,7 +22,15 @@ def test_exposure_mapping_success_aviation():
     - Le traitement se déroule sans erreur
     - La cession est calculée sur l'exposition totale
     """
-    qs = build_quota_share(name="QS_30", cession_pct=0.30, signed_share=1.0)
+    qs = build_quota_share(
+        name="QS_30",
+        sections_config=[{
+            "cession_pct": 0.30,
+            "signed_share": 1.0,
+            "includes_hull": True,
+            "includes_liability": True,
+        }]
+    )
     program = build_program(
         name="TEST_AVIATION",
         structures=[qs],
@@ -64,7 +72,15 @@ def test_exposure_mapping_failure_wrong_column():
     - ExposureMappingError est levée
     - Le message d'erreur indique qu'il faut au moins une exposition aviation
     """
-    qs = build_quota_share(name="QS_30", cession_pct=0.30, signed_share=1.0)
+    qs = build_quota_share(
+        name="QS_30",
+        sections_config=[{
+            "cession_pct": 0.30,
+            "signed_share": 1.0,
+            "includes_hull": True,
+            "includes_liability": True,
+        }]
+    )
     program = build_program(
         name="TEST_AVIATION",
         structures=[qs],

@@ -17,6 +17,8 @@ def build_section(
     class_of_business_2: Optional[str] = None,
     class_of_business_3: Optional[str] = None,
     currency_cd: Optional[str] = None,
+    includes_hull: Optional[bool] = None,
+    includes_liability: Optional[bool] = None,
     **kwargs
 ) -> Section:
     """
@@ -36,6 +38,8 @@ def build_section(
         class_of_business_2: Class of business level 2
         class_of_business_3: Class of business level 3
         currency_cd: Currency code
+        includes_hull: Whether to include Hull exposure (default True, for Aviation only)
+        includes_liability: Whether to include Liability exposure (default True, for Aviation only)
         **kwargs: Additional fields to include in section data
     
     Returns:
@@ -55,6 +59,8 @@ def build_section(
         "BUSCL_CLASS_OF_BUSINESS_2": class_of_business_2,
         "BUSCL_CLASS_OF_BUSINESS_3": class_of_business_3,
         "BUSCL_LIMIT_CURRENCY_CD": currency_cd,
+        "INCLUDES_HULL": includes_hull,
+        "INCLUDES_LIABILITY": includes_liability,
     }
     
     section_data.update(kwargs)

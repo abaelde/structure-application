@@ -11,11 +11,13 @@ class Section:
         self.attachment = data.get(SECTION_COLS.ATTACHMENT)
         self.limit = data.get(SECTION_COLS.LIMIT)
         self.signed_share = data.get(SECTION_COLS.SIGNED_SHARE)
+        self.includes_hull = data.get(SECTION_COLS.INCLUDES_HULL)
+        self.includes_liability = data.get(SECTION_COLS.INCLUDES_LIABILITY)
         self._validate()
 
     def _validate(self):
         
-        # Les sections d'exclusion n'ont pas besoin de SIGNED_SHARE_PCT
+        # Les sections d'exclusion n'ont pas besoin de SIGNED_SHARE_PCT ni de INCLUDES_HULL/LIABILITY
         is_exclusion = self._data.get("BUSCL_EXCLUDE_CD") == "exclude"
         if is_exclusion:
             return
@@ -29,6 +31,13 @@ class Section:
             raise ValueError(
                 f"SIGNED_SHARE_PCT must be between 0 and 1, got {self.signed_share}"
             )
+        
+        if self.includes_hull is not None and self.includes_liability is not None:
+            if not self.includes_hull and not self.includes_liability:
+                raise ValueError(
+                    f"At least one of INCLUDES_HULL or INCLUDES_LIABILITY must be True. "
+                    f"Section data: {self._data}"
+                )
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Section":
@@ -51,6 +60,10 @@ class Section:
             self.limit = value
         elif key == SECTION_COLS.SIGNED_SHARE:
             self.signed_share = value
+        elif key == SECTION_COLS.INCLUDES_HULL:
+            self.includes_hull = value
+        elif key == SECTION_COLS.INCLUDES_LIABILITY:
+            self.includes_liability = value
 
     def __contains__(self, key: str) -> bool:
         return key in self._data
@@ -106,6 +119,19 @@ class Section:
             lines.append(
                 f"{indent}Reinsurer share: {reinsurer_share:.2%} ({reinsurer_share * 100:.2f}%)"
             )
+
+        if self.includes_hull is not None or self.includes_liability is not None:
+            coverage_parts = []
+            if self.includes_hull is True:
+                coverage_parts.append("Hull")
+            if self.includes_liability is True:
+                coverage_parts.append("Liability")
+            
+            if coverage_parts:
+                coverage_str = " + ".join(coverage_parts)
+                lines.append(f"{indent}Coverage scope: {coverage_str}")
+            elif self.includes_hull is False and self.includes_liability is False:
+                lines.append(f"{indent}Coverage scope: None (invalid)")
 
         conditions = []
         for dim in dimension_columns:

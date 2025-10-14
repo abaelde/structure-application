@@ -28,6 +28,8 @@ qs = build_quota_share(
             "cession_pct": CESSION_RATE,
             "limit": 25_000_000,
             "signed_share": REINSURER_SHARE,
+            "includes_hull": True,
+            "includes_liability": True,
         },
         {
             "cession_pct": CESSION_RATE,
@@ -35,6 +37,8 @@ qs = build_quota_share(
             "signed_share": REINSURER_SHARE,
             "pol_risk_name_ced": "cyber",
             "exclude_cd": "INCLUDE",
+            "includes_hull": True,
+            "includes_liability": True,
         },
     ],
     claim_basis="risk_attaching"

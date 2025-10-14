@@ -15,7 +15,14 @@ from excel_utils import program_to_excel
 
 print("Création du programme Single Quota share...")
 
-qs = build_quota_share(name="QS_30", cession_pct=0.30)
+qs = build_quota_share(
+    name="QS_30",
+    sections_config=[{
+        "cession_pct": 0.30,
+        "includes_hull": True,
+        "includes_liability": True,
+    }]
+)
 
 program = build_program(
     name="SINGLE_QUOTA_SHARE_2024",

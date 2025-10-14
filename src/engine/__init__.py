@@ -7,6 +7,7 @@ from .exposure_calculator import (
     CasualtyExposureCalculator,
     TestExposureCalculator,
     ExposureCalculationError,
+    ExposureComponents,
 )
 from .exposure_validation import (
     validate_exposure_columns,

@@ -1,9 +1,28 @@
 from typing import Dict, Any
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 
 class ExposureCalculationError(Exception):
     pass
+
+
+@dataclass
+class ExposureComponents:
+    hull: float = 0.0
+    liability: float = 0.0
+    
+    @property
+    def total(self) -> float:
+        return self.hull + self.liability
+    
+    def apply_filters(self, includes_hull: bool, includes_liability: bool) -> float:
+        result = 0.0
+        if includes_hull:
+            result += self.hull
+        if includes_liability:
+            result += self.liability
+        return result
 
 
 class ExposureCalculator(ABC):
@@ -18,6 +37,10 @@ class ExposureCalculator(ABC):
 
 class AviationExposureCalculator(ExposureCalculator):
     def calculate(self, policy_data: Dict[str, Any]) -> float:
+        components = self.calculate_components(policy_data)
+        return components.total
+    
+    def calculate_components(self, policy_data: Dict[str, Any]) -> ExposureComponents:
         hull_limit = policy_data.get("HULL_LIMIT")
         liability_limit = policy_data.get("LIABILITY_LIMIT")
         hull_share = policy_data.get("HULL_SHARE")
@@ -26,7 +49,8 @@ class AviationExposureCalculator(ExposureCalculator):
         has_hull = hull_limit is not None
         has_liability = liability_limit is not None
 
-        total_exposure = 0.0
+        hull_exposure = 0.0
+        liability_exposure = 0.0
 
         if has_hull:
             if hull_share is None:
@@ -37,7 +61,7 @@ class AviationExposureCalculator(ExposureCalculator):
             try:
                 hull_limit_float = float(hull_limit)
                 hull_share_float = float(hull_share)
-                total_exposure += hull_limit_float * hull_share_float
+                hull_exposure = hull_limit_float * hull_share_float
             except (ValueError, TypeError) as e:
                 raise ExposureCalculationError(
                     f"Invalid numeric values for Hull exposure: {e}"
@@ -52,13 +76,13 @@ class AviationExposureCalculator(ExposureCalculator):
             try:
                 liability_limit_float = float(liability_limit)
                 liability_share_float = float(liability_share)
-                total_exposure += liability_limit_float * liability_share_float
+                liability_exposure = liability_limit_float * liability_share_float
             except (ValueError, TypeError) as e:
                 raise ExposureCalculationError(
                     f"Invalid numeric values for Liability exposure: {e}"
                 )
 
-        return total_exposure
+        return ExposureComponents(hull=hull_exposure, liability=liability_exposure)
 
     def get_required_columns(self) -> list[str]:
         return ["HULL_LIMIT", "LIABILITY_LIMIT", "HULL_SHARE", "LIABILITY_SHARE"]

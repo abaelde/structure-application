@@ -43,17 +43,29 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     Retained: 150M - 80M = 70M
     """
     
-    qs = build_quota_share(name="QS_30%", cession_pct=0.30)
+    qs = build_quota_share(
+        name="QS_30%",
+        sections_config=[{
+            "cession_pct": 0.30,
+            "includes_hull": True,
+            "includes_liability": True,
+        }]
+    )
     xl = build_excess_of_loss(
         name="XOL_50xs20",
-        attachment=20_000_000,
-        limit=50_000_000,
+        sections_config=[{
+            "attachment": 20_000_000,
+            "limit": 50_000_000,
+            "includes_hull": True,
+            "includes_liability": True,
+        }],
         predecessor_title="QS_30%"
     )
     
     program = build_program(
         name="TEST_QS_XL",
-        structures=[qs, xl]
+        structures=[qs, xl],
+        underwriting_department="test"
     )
     
     # 2. Créer le bordereau de test

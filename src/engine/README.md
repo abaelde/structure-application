@@ -206,3 +206,146 @@ Le refactoring est **rétro-compatible** :
 
 Les seuls changements nécessaires concernent les imports directs depuis `calculation_engine` qui doivent maintenant utiliser les modules spécialisés.
 
+## Filtrage Hull/Liability pour Aviation
+
+### Vue d'ensemble
+
+Le module `engine` supporte maintenant le filtrage sélectif des composantes Hull et Liability de l'exposition aviation. Cela permet de créer des structures qui ne s'appliquent que sur une partie de l'exposition totale.
+
+### Cas d'usage
+
+En aviation, l'exposition totale d'une police se décompose en :
+- **Hull** : `HULL_LIMIT × HULL_SHARE`
+- **Liability** : `LIABILITY_LIMIT × LIABILITY_SHARE`
+
+Certaines structures de réassurance peuvent ne couvrir que :
+- Hull uniquement (ex: protection spécifique sur les appareils)
+- Liability uniquement (ex: protection responsabilité civile)
+- Les deux (comportement par défaut)
+
+### Configuration
+
+Dans la feuille **sections** du fichier Excel de programme, deux colonnes optionnelles permettent de contrôler ce filtrage :
+
+| Colonne | Type | Défaut | Description |
+|---------|------|--------|-------------|
+| `INCLUDES_HULL` | Boolean | `TRUE` | Inclure la composante Hull dans cette section |
+| `INCLUDES_LIABILITY` | Boolean | `TRUE` | Inclure la composante Liability dans cette section |
+
+**Valeurs acceptées** : `TRUE`, `FALSE`, `true`, `false`, `1`, `0`, `yes`, `no`
+
+### Exemple
+
+#### Programme avec filtrage
+
+```
+Feuille "sections":
+| BUSINESS_TITLE | INCLUDES_HULL | INCLUDES_LIABILITY | CESSION_PCT | ... |
+|----------------|---------------|-------------------|-------------|-----|
+| QS_ALL         | TRUE          | TRUE              | 0.25        | ... |
+| XOL_HULL       | TRUE          | FALSE             | NULL        | ... |
+| XOL_LIABILITY  | FALSE         | TRUE              | NULL        | ... |
+```
+
+#### Calcul
+
+Pour une police avec :
+- Hull : 100M × 15% = **15M**
+- Liability : 500M × 10% = **50M**
+- Total : **65M**
+
+**1. QS_ALL (25% sur tout)** :
+- Input : 65M (Hull + Liability)
+- Cession : 16.25M
+- Retained : 48.75M
+
+**2. XOL_HULL (Hull only)** :
+- Retained total : 48.75M
+- Composante Hull du retained : 48.75M × (15M / 65M) = **11.25M**
+- Input XOL_HULL : 11.25M ← **Seul le Hull est injecté**
+- Application de l'XoL sur 11.25M uniquement
+
+**3. XOL_LIABILITY (Liability only)** :
+- Retained total : 48.75M
+- Composante Liability du retained : 48.75M × (50M / 65M) = **37.5M**
+- Input XOL_LIABILITY : 37.5M ← **Seul le Liability est injecté**
+- Application de l'XoL sur 37.5M uniquement
+
+### Implémentation
+
+#### Classe `ExposureComponents`
+
+```python
+from src.engine import ExposureComponents
+
+components = ExposureComponents(hull=15_000_000, liability=50_000_000)
+
+# Propriétés
+components.total  # 65_000_000
+components.hull  # 15_000_000
+components.liability  # 50_000_000
+
+# Filtrage
+components.apply_filters(includes_hull=True, includes_liability=False)  # 15_000_000
+components.apply_filters(includes_hull=False, includes_liability=True)  # 50_000_000
+components.apply_filters(includes_hull=True, includes_liability=True)   # 65_000_000
+```
+
+#### Calculateur d'exposition
+
+```python
+from src.engine import AviationExposureCalculator
+
+calculator = AviationExposureCalculator()
+policy_data = {
+    "HULL_LIMIT": 100_000_000,
+    "LIABILITY_LIMIT": 500_000_000,
+    "HULL_SHARE": 0.15,
+    "LIABILITY_SHARE": 0.10,
+}
+
+# Exposition totale (méthode existante, rétro-compatible)
+total = calculator.calculate(policy_data)  # 65_000_000
+
+# Composants détaillés (nouvelle méthode)
+components = calculator.calculate_components(policy_data)
+print(components.hull)       # 15_000_000
+print(components.liability)  # 50_000_000
+```
+
+### Orchestration
+
+Le module `structure_orchestrator` gère automatiquement :
+
+1. **Décomposition de l'exposition** : L'exposition est décomposée en composantes Hull/Liability
+2. **Propagation des proportions** : Après chaque structure, les proportions Hull/Liability sont maintenues
+3. **Filtrage par section** : Chaque section filtre l'exposition selon ses flags `INCLUDES_HULL` et `INCLUDES_LIABILITY`
+4. **Rescaling** : Si la section a un predecessor de type Quota Share, l'attachment et la limite sont rescalés
+
+### Validation
+
+Le modèle `Section` valide automatiquement que :
+- Au moins un des deux flags (`INCLUDES_HULL` ou `INCLUDES_LIABILITY`) est `True`
+- Cette validation est contournée pour les sections d'exclusion
+
+```python
+# ✅ Valide
+Section({"INCLUDES_HULL": True, "INCLUDES_LIABILITY": True, "SIGNED_SHARE_PCT": 1.0})
+Section({"INCLUDES_HULL": True, "INCLUDES_LIABILITY": False, "SIGNED_SHARE_PCT": 1.0})
+Section({"INCLUDES_HULL": False, "INCLUDES_LIABILITY": True, "SIGNED_SHARE_PCT": 1.0})
+
+# ❌ Invalide
+Section({"INCLUDES_HULL": False, "INCLUDES_LIABILITY": False, "SIGNED_SHARE_PCT": 1.0})
+# ValueError: At least one of INCLUDES_HULL or INCLUDES_LIABILITY must be True
+```
+
+### Compatibilité
+
+- **Rétrocompatible** : Si les colonnes `INCLUDES_HULL` et `INCLUDES_LIABILITY` sont absentes, le comportement par défaut est de tout inclure (comme avant)
+- **Casualty non affecté** : Pour les programmes Casualty, ces flags sont ignorés car il n'y a qu'une seule notion d'exposition
+- **Tests existants** : Tous les tests existants continuent de passer sans modification
+
+### Exemple complet
+
+Voir le fichier [`examples/program_creation/create_aviation_hull_liability_split.py`](../../examples/program_creation/create_aviation_hull_liability_split.py) pour un exemple complet de création d'un programme avec filtrage Hull/Liability.
+

@@ -26,12 +26,27 @@ def test_double_quota_share_parallel():
     - Les cessions s'additionnent
     - Retenu = Exposition brute - Total des cessions
     """
-    qs_10 = build_quota_share(name="QS_10", cession_pct=0.10)
-    qs_15 = build_quota_share(name="QS_15", cession_pct=0.15)
+    qs_10 = build_quota_share(
+        name="QS_10",
+        sections_config=[{
+            "cession_pct": 0.10,
+            "includes_hull": True,
+            "includes_liability": True,
+        }]
+    )
+    qs_15 = build_quota_share(
+        name="QS_15",
+        sections_config=[{
+            "cession_pct": 0.15,
+            "includes_hull": True,
+            "includes_liability": True,
+        }]
+    )
     
     program = build_program(
         name="DOUBLE_QUOTA_SHARE_2024",
-        structures=[qs_10, qs_15]
+        structures=[qs_10, qs_15],
+        underwriting_department="test"
     )
     
     test_data = {

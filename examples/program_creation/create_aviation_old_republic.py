@@ -33,6 +33,8 @@ xol_1 = build_excess_of_loss(
             "limit": 8_750_000,
             "signed_share": REINSURER_SHARE_VALUES["XOL_1"],
             "country_cd": country,
+            "includes_hull": True,
+            "includes_liability": True,
         }
         for country in COUNTRIES
     ],
@@ -47,6 +49,8 @@ xol_2 = build_excess_of_loss(
             "limit": 10_000_000,
             "signed_share": REINSURER_SHARE_VALUES["XOL_2"],
             "country_cd": country,
+            "includes_hull": True,
+            "includes_liability": True,
         }
         for country in COUNTRIES
     ],
@@ -61,6 +65,8 @@ xol_3 = build_excess_of_loss(
             "limit": 23_250_000,
             "signed_share": REINSURER_SHARE_VALUES["XOL_3"],
             "country_cd": country,
+            "includes_hull": True,
+            "includes_liability": True,
         }
         for country in COUNTRIES
     ],
