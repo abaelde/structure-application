@@ -2,14 +2,14 @@
 Création du programme New Line
 
 Programme casualty avec 3 layers Excess of Loss:
-- Layer 1: 2 sous-sections (a et b) avec des lignes de business spécifiques, multi-devises
+- Layer 1: 2 sous-conditions (a et b) avec des lignes de business spécifiques, multi-devises
 - Layer 2: Multi-devises
 - Layer 3: Multi-devises
 
 Line of Business utilisées (à affiner selon référentiel):
-- Sub-Section a: Financial Institutions, Commercial Crime, Professional Indemnity/E&O, 
+- Sub-condition a: Financial Institutions, Commercial Crime, Professional Indemnity/E&O, 
                  Commercial D&O, Medical Malpractice, Transactional Liability
-- Sub-Section b: Employers' Liability, General Liability
+- Sub-condition b: Employers' Liability, General Liability
 """
 
 import sys
@@ -71,11 +71,11 @@ LOB_SUB_B = [
     "General Liability",
 ]
 
-layer_1_sections = []
+layer_1_conditions = []
 for currency in CURRENCIES:
     limit_a, attachment_a = LAYER_1_SUB_A[currency]
     for lob in LOB_SUB_A:
-        layer_1_sections.append({
+        layer_1_conditions.append({
             "attachment": attachment_a,
             "limit": limit_a,
             "signed_share": REINSURER_SHARE,
@@ -86,7 +86,7 @@ for currency in CURRENCIES:
 for currency in CURRENCIES:
     limit_b, attachment_b = LAYER_1_SUB_B[currency]
     for lob in LOB_SUB_B:
-        layer_1_sections.append({
+        layer_1_conditions.append({
             "attachment": attachment_b,
             "limit": limit_b,
             "signed_share": REINSURER_SHARE,
@@ -96,14 +96,14 @@ for currency in CURRENCIES:
 
 layer_1 = build_excess_of_loss(
     name="LAYER_1",
-    sections_config=layer_1_sections,
+    conditions_config=layer_1_conditions,
     claim_basis="risk_attaching"
 )
 
-layer_2_sections = []
+layer_2_conditions = []
 for currency in CURRENCIES:
     limit, attachment = LAYER_2_VALUES[currency]
-    layer_2_sections.append({
+    layer_2_conditions.append({
         "attachment": attachment,
         "limit": limit,
         "signed_share": REINSURER_SHARE,
@@ -112,14 +112,14 @@ for currency in CURRENCIES:
 
 layer_2 = build_excess_of_loss(
     name="LAYER_2",
-    sections_config=layer_2_sections,
+    conditions_config=layer_2_conditions,
     claim_basis="risk_attaching"
 )
 
-layer_3_sections = []
+layer_3_conditions = []
 for currency in CURRENCIES:
     limit, attachment = LAYER_3_VALUES[currency]
-    layer_3_sections.append({
+    layer_3_conditions.append({
         "attachment": attachment,
         "limit": limit,
         "signed_share": REINSURER_SHARE,
@@ -128,7 +128,7 @@ for currency in CURRENCIES:
 
 layer_3 = build_excess_of_loss(
     name="LAYER_3",
-    sections_config=layer_3_sections,
+    conditions_config=layer_3_conditions,
     claim_basis="risk_attaching"
 )
 
@@ -161,8 +161,8 @@ Programme: New Line 2024
 Type: Casualty - Multi-currency XOL Layers
 Devises: GBP, USD, EUR, CAD, AUD
 
-LAYER 1 - Sections par Line of Business et Devise:
-  Sub-Section a) - Financial Institutions, Commercial Crime, Professional Indemnity/E&O,
+LAYER 1 - conditions par Line of Business et Devise:
+  Sub-condition a) - Financial Institutions, Commercial Crime, Professional Indemnity/E&O,
                    Commercial D&O, Medical Malpractice, Transactional Liability:
     GBP: 3,000,000 xs 1,000,000
     USD: 4,500,000 xs 1,500,000
@@ -170,42 +170,42 @@ LAYER 1 - Sections par Line of Business et Devise:
     CAD: 5,250,000 xs 1,750,000
     AUD: 8,000,000 xs 2,000,000
     
-  Sub-Section b) - Employers' Liability, General Liability:
+  Sub-condition b) - Employers' Liability, General Liability:
     GBP: 2,500,000 xs 1,500,000
     USD: 3,750,000 xs 2,250,000
     EUR: 3,750,000 xs 2,250,000
     CAD: 4,375,000 xs 2,625,000
     AUD: 7,000,000 xs 3,000,000
     
-  Total sections Layer 1: {len(layer_1_sections)} ({len(LOB_SUB_A)} LOB × 5 devises + {len(LOB_SUB_B)} LOB × 5 devises)
+  Total conditions Layer 1: {len(layer_1_conditions)} ({len(LOB_SUB_A)} LOB × 5 devises + {len(LOB_SUB_B)} LOB × 5 devises)
 
-LAYER 2 - Sections par Devise uniquement:
+LAYER 2 - conditions par Devise uniquement:
     GBP: 6,000,000 xs 4,000,000
     USD: 9,000,000 xs 6,000,000
     EUR: 9,000,000 xs 6,000,000
     CAD: 10,500,000 xs 7,000,000
     AUD: 15,000,000 xs 10,000,000
     
-  Total sections Layer 2: {len(layer_2_sections)} (5 devises)
+  Total conditions Layer 2: {len(layer_2_conditions)} (5 devises)
 
-LAYER 3 - Sections par Devise uniquement:
+LAYER 3 - conditions par Devise uniquement:
     GBP: 5,000,000 xs 10,000,000
     USD: 10,000,000 xs 15,000,000
     EUR: 10,000,000 xs 15,000,000
     CAD: 8,750,000 xs 17,500,000
     AUD: 5,000,000 xs 25,000,000
     
-  Total sections Layer 3: {len(layer_3_sections)} (5 devises)
+  Total conditions Layer 3: {len(layer_3_conditions)} (5 devises)
 
-TOTAL SECTIONS: {len(layer_1_sections) + len(layer_2_sections) + len(layer_3_sections)}
+TOTAL conditionS: {len(layer_1_conditions) + len(layer_2_conditions) + len(layer_3_conditions)}
 
-Reinsurer share: {REINSURER_SHARE:.1%} pour toutes les sections
+Reinsurer share: {REINSURER_SHARE:.1%} pour toutes les conditions
 """)
 
 print("✓ Le programme New Line 2024 est prêt !")
 print("\nNotes importantes:")
 print("- Les lignes de business sont prises telles quelles en attendant le référentiel")
-print("- Layer 1 utilise BUSCL_CLASS_OF_BUSINESS_1 pour distinguer les sous-sections")
+print("- Layer 1 utilise BUSCL_CLASS_OF_BUSINESS_1 pour distinguer les sous-conditions")
 print("- Toutes les structures sont des entry points (pas d'inuring)")
-print(f"- Total: 3 structures, {len(layer_1_sections) + len(layer_2_sections) + len(layer_3_sections)} sections")
+print(f"- Total: 3 structures, {len(layer_1_conditions) + len(layer_2_conditions) + len(layer_3_conditions)} conditions")
 

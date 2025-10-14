@@ -45,7 +45,7 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     
     qs = build_quota_share(
         name="QS_30%",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.30,
             "includes_hull": True,
             "includes_liability": True,
@@ -53,7 +53,7 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     )
     xl = build_excess_of_loss(
         name="XOL_50xs20",
-        sections_config=[{
+        conditions_config=[{
             "attachment": 20_000_000,
             "limit": 50_000_000,
             "includes_hull": True,

@@ -128,12 +128,12 @@ Résultats:
 **Ce qui est testé:**
 - ✅ Exclusion de polices par pays (BUSCL_COUNTRY_CD)
 - ✅ Exclusion de polices par région (BUSCL_REGION)
-- ✅ Matching de sections avec exclusions
+- ✅ Matching de conditions avec exclusions
 - ✅ Calcul de cession = 0 pour polices exclues
 - ✅ Statut d'exclusion dans les résultats
 
 **Modules couverts:**
-- `src/engine/section_matcher.py` - 30%
+- `src/engine/condition_matcher.py` - 30%
 - `src/engine/policy_lifecycle.py` - partiel
 - `src/engine/calculation_engine.py` - partiel
 
@@ -260,7 +260,7 @@ uv run pytest -v --tb=short
 |--------|------------|--------------|
 | `loaders/bordereau_validator.py` | ✅ 95% | Unitaire |
 | `engine/policy_lifecycle.py` | ⚠️ 60% | Intégration |
-| `engine/section_matcher.py` | ⚠️ 30% | Intégration |
+| `engine/condition_matcher.py` | ⚠️ 30% | Intégration |
 | `engine/calculation_engine.py` | ⚠️ 40% | Intégration |
 
 **Couverture globale estimée: ~20%**

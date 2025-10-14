@@ -27,7 +27,7 @@ COUNTRIES = ["United States", "Canada"]
 
 xol_1 = build_excess_of_loss(
     name="XOL_1",
-    sections_config=[
+    conditions_config=[
         {
             "attachment": 3_000_000,
             "limit": 8_750_000,
@@ -43,7 +43,7 @@ xol_1 = build_excess_of_loss(
 
 xol_2 = build_excess_of_loss(
     name="XOL_2",
-    sections_config=[
+    conditions_config=[
         {
             "attachment": 11_750_000,
             "limit": 10_000_000,
@@ -59,7 +59,7 @@ xol_2 = build_excess_of_loss(
 
 xol_3 = build_excess_of_loss(
     name="XOL_3",
-    sections_config=[
+    conditions_config=[
         {
             "attachment": 21_750_000,
             "limit": 23_250_000,

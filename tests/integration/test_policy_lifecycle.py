@@ -20,7 +20,7 @@ def test_policy_expiry_mechanism():
     """
     qs = build_quota_share(
         name="QS_30",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.30,
             "includes_hull": True,
             "includes_liability": True,

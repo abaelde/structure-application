@@ -70,7 +70,7 @@ def create_excel_with_auto_width(
             {
                 "program": program_df,
                 "structures": structures_df,
-                "sections": sections_df
+                "conditions": conditions_df
             }
         )
     """
@@ -97,7 +97,7 @@ def program_to_excel(
     This function automatically handles:
     - Auto-incrementing IDs (REPROG_ID_PRE, INSPER_ID_PRE, BUSCL_ID_PRE)
     - All required Excel fields with proper defaults
-    - Proper structure references (INSPER_ID_PRE in sections)
+    - Proper structure references (INSPER_ID_PRE in conditions)
     - Column width auto-adjustment
     
     Args:
@@ -162,7 +162,7 @@ def program_to_excel(
         "INSPER_COMMENT": [],
     }
     
-    sections_data = {
+    conditions_data = {
         "BUSCL_ID_PRE": [],
         "REPROG_ID_PRE": [],
         "CED_ID_PRE": [],
@@ -206,7 +206,7 @@ def program_to_excel(
     }
     
     insper_id = 1
-    section_id = 1
+    condition_id = 1
     
     for structure in program.structures:
         structures_data["INSPER_ID_PRE"].append(insper_id)
@@ -231,66 +231,66 @@ def program_to_excel(
         structures_data["INSPER_LOD_TO_RA_DATE_SLAV"].append(None)
         structures_data["INSPER_COMMENT"].append(None)
         
-        for section in structure.sections:
-            section_dict = section.to_dict()
+        for condition in structure.conditions:
+            condition_dict = condition.to_dict()
             
-            sections_data["BUSCL_ID_PRE"].append(section_id)
-            sections_data["REPROG_ID_PRE"].append(reprog_id)
-            sections_data["CED_ID_PRE"].append(None)
-            sections_data["BUSINESS_ID_PRE"].append(None)
-            sections_data["INSPER_ID_PRE"].append(insper_id)
-            sections_data["BUSCL_EXCLUDE_CD"].append(section_dict.get("BUSCL_EXCLUDE_CD"))
-            sections_data["BUSCL_ENTITY_NAME_CED"].append(section_dict.get("BUSCL_ENTITY_NAME_CED"))
-            sections_data["POL_RISK_NAME_CED"].append(section_dict.get("POL_RISK_NAME_CED"))
-            sections_data["BUSCL_COUNTRY_CD"].append(section_dict.get("BUSCL_COUNTRY_CD"))
-            sections_data["BUSCL_COUNTRY"].append(section_dict.get("BUSCL_COUNTRY"))
-            sections_data["BUSCL_REGION"].append(section_dict.get("BUSCL_REGION"))
-            sections_data["BUSCL_CLASS_OF_BUSINESS_1"].append(section_dict.get("BUSCL_CLASS_OF_BUSINESS_1"))
-            sections_data["BUSCL_CLASS_OF_BUSINESS_2"].append(section_dict.get("BUSCL_CLASS_OF_BUSINESS_2"))
-            sections_data["BUSCL_CLASS_OF_BUSINESS_3"].append(section_dict.get("BUSCL_CLASS_OF_BUSINESS_3"))
-            sections_data["BUSCL_LIMIT_CURRENCY_CD"].append(section_dict.get("BUSCL_LIMIT_CURRENCY_CD"))
-            sections_data["AAD_100"].append(section_dict.get("AAD_100"))
-            sections_data["LIMIT_100"].append(section_dict.get("LIMIT_100"))
-            sections_data["LIMIT_FLOATER_100"].append(section_dict.get("LIMIT_FLOATER_100"))
+            conditions_data["BUSCL_ID_PRE"].append(condition_id)
+            conditions_data["REPROG_ID_PRE"].append(reprog_id)
+            conditions_data["CED_ID_PRE"].append(None)
+            conditions_data["BUSINESS_ID_PRE"].append(None)
+            conditions_data["INSPER_ID_PRE"].append(insper_id)
+            conditions_data["BUSCL_EXCLUDE_CD"].append(condition_dict.get("BUSCL_EXCLUDE_CD"))
+            conditions_data["BUSCL_ENTITY_NAME_CED"].append(condition_dict.get("BUSCL_ENTITY_NAME_CED"))
+            conditions_data["POL_RISK_NAME_CED"].append(condition_dict.get("POL_RISK_NAME_CED"))
+            conditions_data["BUSCL_COUNTRY_CD"].append(condition_dict.get("BUSCL_COUNTRY_CD"))
+            conditions_data["BUSCL_COUNTRY"].append(condition_dict.get("BUSCL_COUNTRY"))
+            conditions_data["BUSCL_REGION"].append(condition_dict.get("BUSCL_REGION"))
+            conditions_data["BUSCL_CLASS_OF_BUSINESS_1"].append(condition_dict.get("BUSCL_CLASS_OF_BUSINESS_1"))
+            conditions_data["BUSCL_CLASS_OF_BUSINESS_2"].append(condition_dict.get("BUSCL_CLASS_OF_BUSINESS_2"))
+            conditions_data["BUSCL_CLASS_OF_BUSINESS_3"].append(condition_dict.get("BUSCL_CLASS_OF_BUSINESS_3"))
+            conditions_data["BUSCL_LIMIT_CURRENCY_CD"].append(condition_dict.get("BUSCL_LIMIT_CURRENCY_CD"))
+            conditions_data["AAD_100"].append(condition_dict.get("AAD_100"))
+            conditions_data["LIMIT_100"].append(condition_dict.get("LIMIT_100"))
+            conditions_data["LIMIT_FLOATER_100"].append(condition_dict.get("LIMIT_FLOATER_100"))
             
-            attachment = section_dict.get("ATTACHMENT_POINT_100")
-            sections_data["ATTACHMENT_POINT_100"].append(attachment if pd.notna(attachment) else np.nan)
+            attachment = condition_dict.get("ATTACHMENT_POINT_100")
+            conditions_data["ATTACHMENT_POINT_100"].append(attachment if pd.notna(attachment) else np.nan)
             
-            sections_data["OLW_100"].append(section_dict.get("OLW_100"))
-            sections_data["LIMIT_OCCURRENCE_100"].append(None)
-            sections_data["LIMIT_AGG_100"].append(section_dict.get("LIMIT_AGG_100"))
+            conditions_data["OLW_100"].append(condition_dict.get("OLW_100"))
+            conditions_data["LIMIT_OCCURRENCE_100"].append(None)
+            conditions_data["LIMIT_AGG_100"].append(condition_dict.get("LIMIT_AGG_100"))
             
-            cession = section_dict.get("CESSION_PCT")
-            sections_data["CESSION_PCT"].append(cession if pd.notna(cession) else np.nan)
+            cession = condition_dict.get("CESSION_PCT")
+            conditions_data["CESSION_PCT"].append(cession if pd.notna(cession) else np.nan)
             
-            sections_data["RETENTION_PCT"].append(section_dict.get("RETENTION_PCT"))
-            sections_data["SUPI_100"].append(section_dict.get("SUPI_100"))
-            sections_data["BUSCL_PREMIUM_CURRENCY_CD"].append(section_dict.get("BUSCL_PREMIUM_CURRENCY_CD"))
-            sections_data["BUSCL_PREMIUM_GROSS_NET_CD"].append(section_dict.get("BUSCL_PREMIUM_GROSS_NET_CD"))
-            sections_data["PREMIUM_RATE_PCT"].append(section_dict.get("PREMIUM_RATE_PCT"))
-            sections_data["PREMIUM_DEPOSIT_100"].append(section_dict.get("PREMIUM_DEPOSIT_100"))
-            sections_data["PREMIUM_MIN_100"].append(section_dict.get("PREMIUM_MIN_100"))
-            sections_data["BUSCL_LIABILITY_1_LINE_100"].append(section_dict.get("BUSCL_LIABILITY_1_LINE_100"))
-            sections_data["MAX_COVER_PCT"].append(section_dict.get("MAX_COVER_PCT"))
-            sections_data["MIN_EXCESS_PCT"].append(section_dict.get("MIN_EXCESS_PCT"))
-            sections_data["SIGNED_SHARE_PCT"].append(section_dict.get("SIGNED_SHARE_PCT"))
-            sections_data["AVERAGE_LINE_SLAV_CED"].append(section_dict.get("AVERAGE_LINE_SLAV_CED"))
-            sections_data["PML_DEFAULT_PCT"].append(section_dict.get("PML_DEFAULT_PCT"))
-            sections_data["LIMIT_EVENT"].append(section_dict.get("LIMIT_EVENT"))
-            sections_data["NO_OF_REINSTATEMENTS"].append(section_dict.get("NO_OF_REINSTATEMENTS"))
-            sections_data["INCLUDES_HULL"].append(section_dict.get("INCLUDES_HULL"))
-            sections_data["INCLUDES_LIABILITY"].append(section_dict.get("INCLUDES_LIABILITY"))
+            conditions_data["RETENTION_PCT"].append(condition_dict.get("RETENTION_PCT"))
+            conditions_data["SUPI_100"].append(condition_dict.get("SUPI_100"))
+            conditions_data["BUSCL_PREMIUM_CURRENCY_CD"].append(condition_dict.get("BUSCL_PREMIUM_CURRENCY_CD"))
+            conditions_data["BUSCL_PREMIUM_GROSS_NET_CD"].append(condition_dict.get("BUSCL_PREMIUM_GROSS_NET_CD"))
+            conditions_data["PREMIUM_RATE_PCT"].append(condition_dict.get("PREMIUM_RATE_PCT"))
+            conditions_data["PREMIUM_DEPOSIT_100"].append(condition_dict.get("PREMIUM_DEPOSIT_100"))
+            conditions_data["PREMIUM_MIN_100"].append(condition_dict.get("PREMIUM_MIN_100"))
+            conditions_data["BUSCL_LIABILITY_1_LINE_100"].append(condition_dict.get("BUSCL_LIABILITY_1_LINE_100"))
+            conditions_data["MAX_COVER_PCT"].append(condition_dict.get("MAX_COVER_PCT"))
+            conditions_data["MIN_EXCESS_PCT"].append(condition_dict.get("MIN_EXCESS_PCT"))
+            conditions_data["SIGNED_SHARE_PCT"].append(condition_dict.get("SIGNED_SHARE_PCT"))
+            conditions_data["AVERAGE_LINE_SLAV_CED"].append(condition_dict.get("AVERAGE_LINE_SLAV_CED"))
+            conditions_data["PML_DEFAULT_PCT"].append(condition_dict.get("PML_DEFAULT_PCT"))
+            conditions_data["LIMIT_EVENT"].append(condition_dict.get("LIMIT_EVENT"))
+            conditions_data["NO_OF_REINSTATEMENTS"].append(condition_dict.get("NO_OF_REINSTATEMENTS"))
+            conditions_data["INCLUDES_HULL"].append(condition_dict.get("INCLUDES_HULL"))
+            conditions_data["INCLUDES_LIABILITY"].append(condition_dict.get("INCLUDES_LIABILITY"))
             
-            section_id += 1
+            condition_id += 1
         
         insper_id += 1
     
     structures_df = pd.DataFrame(structures_data)
-    sections_df = pd.DataFrame(sections_data)
+    conditions_df = pd.DataFrame(conditions_data)
     
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
         program_df.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
         structures_df.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
-        sections_df.to_excel(writer, sheet_name=SHEETS.SECTIONS, index=False)
+        conditions_df.to_excel(writer, sheet_name=SHEETS.conditionS, index=False)
     
     auto_adjust_column_widths(output_path, min_width=min_width, max_width=max_width)

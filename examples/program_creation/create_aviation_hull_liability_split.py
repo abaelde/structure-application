@@ -23,7 +23,7 @@ print("Création du programme Aviation avec filtrage Hull/Liability...")
 
 qs_all = build_quota_share(
     name="QS_ALL",
-    sections_config=[{
+    conditions_config=[{
         "cession_pct": 0.25,
         "limit": 575_000_000,
         "signed_share": 0.0165,
@@ -35,7 +35,7 @@ qs_all = build_quota_share(
 
 xol_hull = build_excess_of_loss(
     name="XOL_HULL",
-    sections_config=[{
+    conditions_config=[{
         "attachment": 5_000_000,
         "limit": 10_000_000,
         "signed_share": 0.05,
@@ -48,7 +48,7 @@ xol_hull = build_excess_of_loss(
 
 xol_liability = build_excess_of_loss(
     name="XOL_LIABILITY",
-    sections_config=[{
+    conditions_config=[{
         "attachment": 10_000_000,
         "limit": 40_000_000,
         "signed_share": 0.05,
@@ -110,7 +110,7 @@ Ce programme illustre le nouveau mécanisme de filtrage Hull/Liability :
 
 UTILISATION:
 
-Dans Excel, ajoutez simplement deux colonnes optionnelles dans la feuille "sections":
+Dans Excel, ajoutez simplement deux colonnes optionnelles dans la feuille "conditions":
 - INCLUDES_HULL (TRUE/FALSE, défaut: TRUE)
 - INCLUDES_LIABILITY (TRUE/FALSE, défaut: TRUE)
 

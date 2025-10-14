@@ -1,7 +1,7 @@
 import pandas as pd
 import sys
 from typing import Dict, Any
-from src.domain import PRODUCT, SECTION_COLS as SC, FIELDS, Program
+from src.domain import PRODUCT, condition_COLS as SC, FIELDS, Program
 
 
 def write_detailed_results(
@@ -52,19 +52,19 @@ def write_detailed_results(
                     f"   Cession to reinsurer: {struct['cession_to_reinsurer']:,.2f}\n"
                 )
 
-                if struct.get("section"):
-                    section = struct["section"]
+                if struct.get("condition"):
+                    condition = struct["condition"]
                     rescaling_info = struct.get("rescaling_info")
 
-                    file.write(f"   Applied section parameters:\n")
+                    file.write(f"   Applied condition parameters:\n")
 
                     if struct["type_of_participation"] == PRODUCT.QUOTA_SHARE:
-                        if pd.notna(section.get(SC.CESSION_PCT)):
+                        if pd.notna(condition.get(SC.CESSION_PCT)):
                             file.write(
-                                f"      CESSION_PCT: {section[SC.CESSION_PCT]}\n"
+                                f"      CESSION_PCT: {condition[SC.CESSION_PCT]}\n"
                             )
-                        if pd.notna(section.get(SC.LIMIT)):
-                            file.write(f"      LIMIT_100: {section[SC.LIMIT]}\n")
+                        if pd.notna(condition.get(SC.LIMIT)):
+                            file.write(f"      LIMIT_100: {condition[SC.LIMIT]}\n")
                     elif struct["type_of_participation"] == PRODUCT.EXCESS_OF_LOSS:
                         # Afficher les limites rescalées si applicable
                         if rescaling_info:
@@ -80,23 +80,23 @@ def write_detailed_results(
                                     f"      LIMIT_100: {rescaling_info['original_limit']:,.0f} → {rescaling_info['rescaled_limit']:,.0f}\n"
                                 )
                         else:
-                            if pd.notna(section.get(SC.ATTACHMENT)):
+                            if pd.notna(condition.get(SC.ATTACHMENT)):
                                 file.write(
-                                    f"      ATTACHMENT_POINT_100: {section[SC.ATTACHMENT]:,.0f}\n"
+                                    f"      ATTACHMENT_POINT_100: {condition[SC.ATTACHMENT]:,.0f}\n"
                                 )
-                            if pd.notna(section.get(SC.LIMIT)):
+                            if pd.notna(condition.get(SC.LIMIT)):
                                 file.write(
-                                    f"      LIMIT_100: {section[SC.LIMIT]:,.0f}\n"
+                                    f"      LIMIT_100: {condition[SC.LIMIT]:,.0f}\n"
                                 )
 
-                    if pd.notna(section.get(SC.SIGNED_SHARE)):
+                    if pd.notna(condition.get(SC.SIGNED_SHARE)):
                         file.write(
-                            f"      SIGNED_SHARE_PCT: {section[SC.SIGNED_SHARE]}\n"
+                            f"      SIGNED_SHARE_PCT: {condition[SC.SIGNED_SHARE]}\n"
                         )
 
                     conditions = []
                     for dim in dimension_columns:
-                        value = section.get(dim)
+                        value = condition.get(dim)
                         if pd.notna(value):
                             conditions.append(f"{dim}={value}")
                     conditions_str = (
@@ -104,7 +104,7 @@ def write_detailed_results(
                     )
                     file.write(f"   Matching conditions: {conditions_str}\n")
             else:
-                file.write(f"   Reason: No matching section found\n")
+                file.write(f"   Reason: No matching condition found\n")
 
 
 def generate_detailed_report(

@@ -8,7 +8,7 @@ Programme aviation avec 1 structure Quota Share + 6 layers excess of loss, chacu
 Structure:
 - 1 structure Quota Share (QS_1) avec rétention 75% et reinsurer_share 1.65%
 - 6 layers XOL empilés (XOL_1 à XOL_6)
-- Chaque structure a des sections pour USD, CAD, EUR, AUD et GBP
+- Chaque structure a des conditions pour USD, CAD, EUR, AUD et GBP
 - Priorités et limites définies par devise
 """
 
@@ -49,7 +49,7 @@ ALL_CURRENCIES = COMMON_CURRENCIES + ["GBP"]
 
 qs_1 = build_quota_share(
     name="QS_1",
-    sections_config=[
+    conditions_config=[
         {
             "cession_pct": CESSION_RATE_QS,
             "limit": 575_000_000,
@@ -64,11 +64,11 @@ qs_1 = build_quota_share(
 )
 
 def create_xol_layer(layer_name: str) -> object:
-    sections = []
+    conditions = []
     
     for currency in COMMON_CURRENCIES:
         limit, attachment = LAYER_VALUES_COMMON[layer_name]
-        sections.append({
+        conditions.append({
             "attachment": attachment,
             "limit": limit,
             "signed_share": REINSURER_SHARE_XOL,
@@ -78,7 +78,7 @@ def create_xol_layer(layer_name: str) -> object:
         })
     
     limit_gbp, attachment_gbp = LAYER_VALUES_GBP[layer_name]
-    sections.append({
+    conditions.append({
         "attachment": attachment_gbp,
         "limit": limit_gbp,
         "signed_share": REINSURER_SHARE_XOL,
@@ -89,7 +89,7 @@ def create_xol_layer(layer_name: str) -> object:
     
     return build_excess_of_loss(
         name=layer_name,
-        sections_config=sections,
+        conditions_config=conditions,
         predecessor_title="QS_1",
         claim_basis="risk_attaching"
     )

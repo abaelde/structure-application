@@ -1,6 +1,6 @@
 # Builders - Créer des programmes de test en mémoire
 
-Ce module permet de créer des objets `Program`, `Structure` et `Section` directement en Python, sans passer par Excel.
+Ce module permet de créer des objets `Program`, `Structure` et `condition` directement en Python, sans passer par Excel.
 
 ## 🎯 Objectif
 
@@ -10,24 +10,24 @@ Ce module permet de créer des objets `Program`, `Structure` et `Section` direct
 
 ## 📦 Modules disponibles
 
-### `section_builder.py`
+### `condition_builder.py`
 
 ```python
-from tests.builders import build_section, build_exclusion_section
+from tests.builders import build_condition, build_exclusion_condition
 
-# Section simple avec cession 30%
-section = build_section(cession_pct=0.30)
+# condition simple avec cession 30%
+condition = build_condition(cession_pct=0.30)
 
-# Section avec dimensions
-section = build_section(
+# condition avec dimensions
+condition = build_condition(
     cession_pct=0.25,
     currency_cd="USD",
     country_cd="US",
     region="North America"
 )
 
-# Section d'exclusion
-exclusion = build_exclusion_section(
+# condition d'exclusion
+exclusion = build_exclusion_condition(
     country_cd="Iran"
 )
 ```
@@ -43,10 +43,10 @@ qs = build_quota_share(
     cession_pct=0.30
 )
 
-# Quota Share avec plusieurs sections (par currency)
+# Quota Share avec plusieurs conditions (par currency)
 qs = build_quota_share(
     name="QS_BY_CURRENCY",
-    sections_config=[
+    conditions_config=[
         {"currency_cd": "USD", "cession_pct": 0.25},
         {"currency_cd": "EUR", "cession_pct": 0.35},
     ]
@@ -146,18 +146,18 @@ def test_quota_share():
 ### Structure avec exclusions
 
 ```python
-from tests.builders import build_quota_share, build_exclusion_section, build_section
+from tests.builders import build_quota_share, build_exclusion_condition, build_condition
 
 # QS avec exclusions par pays
-sections = [
-    build_exclusion_section(country_cd="Iran"),
-    build_exclusion_section(country_cd="Russia"),
-    build_section(cession_pct=0.25),  # Section catch-all
+conditions = [
+    build_exclusion_condition(country_cd="Iran"),
+    build_exclusion_condition(country_cd="Russia"),
+    build_condition(cession_pct=0.25),  # condition catch-all
 ]
 
 qs = build_quota_share(
     name="QS_WITH_EXCLUSIONS",
-    sections_config=[s.to_dict() for s in sections]
+    conditions_config=[s.to_dict() for s in conditions]
 )
 ```
 
@@ -167,7 +167,7 @@ qs = build_quota_share(
 # QS 1 pour USD
 qs_usd = build_quota_share(
     name="QS_USD",
-    sections_config=[
+    conditions_config=[
         {"currency_cd": "USD", "cession_pct": 0.30}
     ]
 )
@@ -175,7 +175,7 @@ qs_usd = build_quota_share(
 # QS 2 pour EUR
 qs_eur = build_quota_share(
     name="QS_EUR",
-    sections_config=[
+    conditions_config=[
         {"currency_cd": "EUR", "cession_pct": 0.40}
     ]
 )

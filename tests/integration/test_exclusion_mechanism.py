@@ -1,6 +1,6 @@
 import pandas as pd
 from src.engine import apply_program_to_bordereau
-from tests.builders import build_quota_share, build_exclusion_section, build_section, build_program
+from tests.builders import build_quota_share, build_exclusion_condition, build_condition, build_program
 
 
 def test_exclusion_mechanism():
@@ -9,7 +9,7 @@ def test_exclusion_mechanism():
     
     STRUCTURE DU PROGRAMME:
     - Quota Share 25% avec critères d'exclusion par pays (Iran, Russia)
-    - Section catch-all avec 25% de cession
+    - condition catch-all avec 25% de cession
     
     BORDEREAU:
     - 7 polices avec différents pays
@@ -21,10 +21,10 @@ def test_exclusion_mechanism():
     - Le statut d'exclusion est correctement reporté
     """
     # Créer le programme avec exclusions
-    sections = [
-        build_exclusion_section(country_cd="Iran").to_dict(),
-        build_exclusion_section(country_cd="Russia").to_dict(),
-        build_section(
+    conditions = [
+        build_exclusion_condition(country_cd="Iran").to_dict(),
+        build_exclusion_condition(country_cd="Russia").to_dict(),
+        build_condition(
             cession_pct=0.25,
             includes_hull=True,
             includes_liability=True
@@ -33,7 +33,7 @@ def test_exclusion_mechanism():
     
     qs = build_quota_share(
         name="QS_Aviation_25%",
-        sections_config=sections
+        conditions_config=conditions
     )
     
     program = build_program(

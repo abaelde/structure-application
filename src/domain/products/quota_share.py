@@ -1,6 +1,6 @@
 import pandas as pd
 from .base import Product
-from src.domain.models import Section
+from src.domain.models import condition
 
 
 def quota_share(exposure: float, cession_PCT: float, limit: float = None) -> float:
@@ -19,11 +19,11 @@ def quota_share(exposure: float, cession_PCT: float, limit: float = None) -> flo
 
 
 class QuotaShare(Product):
-    def apply(self, exposure: float, section: Section) -> float:
-        if pd.isna(section.cession_pct):
+    def apply(self, exposure: float, condition: condition) -> float:
+        if pd.isna(condition.cession_pct):
             raise ValueError("CESSION_PCT is required for quota_share")
         
-        if pd.notna(section.limit):
-            return quota_share(exposure, section.cession_pct, section.limit)
+        if pd.notna(condition.limit):
+            return quota_share(exposure, condition.cession_pct, condition.limit)
         else:
-            return quota_share(exposure, section.cession_pct)
+            return quota_share(exposure, condition.cession_pct)

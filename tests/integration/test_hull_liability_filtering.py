@@ -43,7 +43,7 @@ def test_hull_liability_filtering_aviation():
     """
     qs_all = build_quota_share(
         name="QS_ALL",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.25,
             "signed_share": 1.0,
             "includes_hull": True,
@@ -53,7 +53,7 @@ def test_hull_liability_filtering_aviation():
     
     xol_hull = build_excess_of_loss(
         name="XOL_HULL",
-        sections_config=[{
+        conditions_config=[{
             "attachment": 5_000_000,
             "limit": 10_000_000,
             "signed_share": 1.0,
@@ -65,7 +65,7 @@ def test_hull_liability_filtering_aviation():
     
     xol_liability = build_excess_of_loss(
         name="XOL_LIABILITY",
-        sections_config=[{
+        conditions_config=[{
             "attachment": 10_000_000,
             "limit": 40_000_000,
             "signed_share": 1.0,
@@ -163,7 +163,7 @@ def test_hull_only_structure():
     """
     qs_hull = build_quota_share(
         name="QS_HULL",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.30,
             "signed_share": 1.0,
             "includes_hull": True,
@@ -237,7 +237,7 @@ def test_liability_only_structure():
     """
     qs_liability = build_quota_share(
         name="QS_LIABILITY",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.20,
             "signed_share": 1.0,
             "includes_hull": False,
@@ -307,7 +307,7 @@ def test_casualty_unaffected_by_hull_liability_flags():
     """
     qs_30 = build_quota_share(
         name="QS_30",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.30,
             "signed_share": 1.0,
             "includes_hull": True,

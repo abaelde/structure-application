@@ -10,7 +10,7 @@ def test_program_describe_generates_text():
     """Test that program.describe() generates text output"""
     qs_structure = build_quota_share(
         name="QS_1",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.25,
             "includes_hull": True,
             "includes_liability": True,

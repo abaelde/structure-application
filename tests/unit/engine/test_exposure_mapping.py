@@ -24,7 +24,7 @@ def test_exposure_mapping_success_aviation():
     """
     qs = build_quota_share(
         name="QS_30",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.30,
             "signed_share": 1.0,
             "includes_hull": True,
@@ -74,7 +74,7 @@ def test_exposure_mapping_failure_wrong_column():
     """
     qs = build_quota_share(
         name="QS_30",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.30,
             "signed_share": 1.0,
             "includes_hull": True,

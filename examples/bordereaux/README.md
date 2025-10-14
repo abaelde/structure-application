@@ -35,7 +35,7 @@ En plus des colonnes minimales, ces colonnes sont également requises :
 
 #### Colonnes Dimensionnelles (Optionnelles)
 
-Ces colonnes sont utilisées pour le **matching avancé** des sections dans les programmes de réassurance :
+Ces colonnes sont utilisées pour le **matching avancé** des conditions dans les programmes de réassurance :
 
 | Colonne | Nom Exact | Type | Description |
 |---------|-----------|------|-------------|
@@ -210,7 +210,7 @@ Le système valide automatiquement :
 
 2. **Line of Business de la Police** (colonne `line_of_business`)
    - Peut différer de la ligne du bordereau
-   - Utilisée pour le matching de sections spécifiques
+   - Utilisée pour le matching de conditions spécifiques
    - Permet une granularité fine dans le programme
 
 **Exemple** : Un bordereau Aviation peut contenir des polices avec différentes sous-catégories d'aviation, mais toutes relèvent du programme Aviation global.

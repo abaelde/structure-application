@@ -17,7 +17,7 @@ print("Création du programme Single Quota share...")
 
 qs = build_quota_share(
     name="QS_30",
-    sections_config=[{
+    conditions_config=[{
         "cession_pct": 0.30,
     }]
 )

@@ -147,7 +147,7 @@ Créé automatiquement via `fixtures/create_test_program.py`
 ### Tests additionnels recommandés :
 
 #### Test multi-devises
-- Programme avec sections par devise (USD, EUR, GBP)
+- Programme avec conditions par devise (USD, EUR, GBP)
 - 20-30 polices réparties sur différentes devises
 - Vérification des totaux par devise
 

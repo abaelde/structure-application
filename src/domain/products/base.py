@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from src.domain.models import Section
+from src.domain.models import condition
 
 
 class Product(ABC):
     @abstractmethod
-    def apply(self, exposure: float, section: Section) -> float:
+    def apply(self, exposure: float, condition: condition) -> float:
         pass
 

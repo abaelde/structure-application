@@ -28,7 +28,7 @@ def test_double_quota_share_parallel():
     """
     qs_10 = build_quota_share(
         name="QS_10",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.10,
             "includes_hull": True,
             "includes_liability": True,
@@ -36,7 +36,7 @@ def test_double_quota_share_parallel():
     )
     qs_15 = build_quota_share(
         name="QS_15",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.15,
             "includes_hull": True,
             "includes_liability": True,

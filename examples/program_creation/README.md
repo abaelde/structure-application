@@ -47,7 +47,7 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 - **INSPER_LOD_TO_RA_DATE_SLAV** : DATE, date LOD to RA (peut être NULL)
 - **INSPER_COMMENT** : VARCHAR, commentaires (peut être NULL)
 
-### 3. Feuille "sections" (n lignes)
+### 3. Feuille "conditions" (n lignes)
 **Contraintes :**
 
 #### Clés et Références
@@ -106,9 +106,9 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 
 ### Contraintes Structurelles
 1. **BUSINESS_TITLE** : Doit être unique dans la feuille structures
-2. **INSPER_ID_PRE** dans sections : Doit référencer un INSPER_ID_PRE existant dans structures
+2. **INSPER_ID_PRE** dans conditions : Doit référencer un INSPER_ID_PRE existant dans structures
 3. **REPROG_ID_PRE** dans structures : Doit référencer le REPROG_ID_PRE du programme parent
-4. **REPROG_ID_PRE** dans sections : Doit référencer le REPROG_ID_PRE du programme parent
+4. **REPROG_ID_PRE** dans conditions : Doit référencer le REPROG_ID_PRE du programme parent
 5. **BUSCL_ID_PRE** : Doit être unique et auto-incrémenté
 6. **INSPER_PREDECESSOR_TITLE** : Si non NULL, doit référencer un BUSINESS_TITLE existant dans le même programme
 
@@ -159,7 +159,7 @@ Quand un **Excess of Loss** s'applique après un **Quota Share** :
 ### Format Actuel
 - **Programme** : Tous les champs REPROG_*
 - **Structures** : Tous les champs INSPER_* incluant **INSPER_PREDECESSOR_TITLE** pour l'inuring
-- **Sections** : `INSPER_ID_PRE` (référence par ID), tous les champs BUSCL_*
+- **conditions** : `INSPER_ID_PRE` (référence par ID), tous les champs BUSCL_*
 
 ### Conventions
 - **Montants** : Tous les montants sont en **valeur absolue** (pas en millions)
@@ -181,7 +181,7 @@ Tous les scripts de création utilisent maintenant les **Builders** pour créer 
 
 **Scripts disponibles :**
 - `create_single_quota_share.py` - Exemple simple (61 lignes au lieu de 177)
-- `create_casualty_AIG.py` - QS avec 2 sections (94 lignes au lieu de 236)
+- `create_casualty_AIG.py` - QS avec 2 conditions (94 lignes au lieu de 236)
 - `create_aviation_old_republic.py` - 3 XOL parallèles (106 lignes au lieu de 248)
 - `create_aviation_AXA_XL.py` - Complexe multi-devises (156 lignes au lieu de 473)
 
@@ -212,12 +212,12 @@ program = build_program(
 program_to_excel(program, "../programs/my_program.xlsx")
 ```
 
-#### Exemple 2 : Quota Share avec plusieurs sections (multi-devises)
+#### Exemple 2 : Quota Share avec plusieurs conditions (multi-devises)
 
 ```python
 qs = build_quota_share(
     name="QS_MULTI_CURRENCY",
-    sections_config=[
+    conditions_config=[
         {
             "cession_pct": 0.25,
             "limit": 100_000_000,
@@ -263,7 +263,7 @@ program = build_program(
 program_to_excel(program, "../programs/qs_then_xol.xlsx")
 ```
 
-#### Exemple 4 : Plusieurs XOL parallèles avec sections par pays
+#### Exemple 4 : Plusieurs XOL parallèles avec conditions par pays
 
 ```python
 # Créer des XOL pour plusieurs pays
@@ -271,7 +271,7 @@ countries = ["United States", "Canada", "Mexico"]
 
 xol_1 = build_excess_of_loss(
     name="XOL_1",
-    sections_config=[
+    conditions_config=[
         {
             "attachment": 5_000_000,
             "limit": 10_000_000,
@@ -285,7 +285,7 @@ xol_1 = build_excess_of_loss(
 
 xol_2 = build_excess_of_loss(
     name="XOL_2",
-    sections_config=[
+    conditions_config=[
         {
             "attachment": 15_000_000,
             "limit": 20_000_000,
@@ -305,24 +305,24 @@ program = build_program(
 program_to_excel(program, "../programs/multi_xol.xlsx")
 ```
 
-#### Exemple 5 : Section avec exclusions
+#### Exemple 5 : condition avec exclusions
 
 ```python
-from tests.builders import build_section, build_quota_share
+from tests.builders import build_condition, build_quota_share
 
 qs = build_quota_share(
     name="QS_WITH_EXCLUSIONS",
-    sections_config=[
+    conditions_config=[
         {
             "cession_pct": 0.30,
             "signed_share": 0.10,
             "country_cd": "Iran",
-            "exclude_cd": "exclude",  # Section d'exclusion
+            "exclude_cd": "exclude",  # condition d'exclusion
         },
         {
             "cession_pct": 0.30,
             "signed_share": 0.10,
-            # Pas de country_cd = section catch-all pour tous les autres pays
+            # Pas de country_cd = condition catch-all pour tous les autres pays
         },
     ]
 )
@@ -356,7 +356,7 @@ uv run python examples/program_creation/combine_all_programs.py
 2. Renumérote les IDs de manière séquentielle (simule l'auto-increment d'une base de données) :
    - `REPROG_ID_PRE` : 1, 2, 3, ... (un par programme)
    - `INSPER_ID_PRE` : continue séquentiellement à travers tous les programmes
-   - `BUSCL_ID_PRE` : continue séquentiellement à travers toutes les sections
+   - `BUSCL_ID_PRE` : continue séquentiellement à travers toutes les conditions
 3. Maintient les relations entre tables (foreign keys)
 4. Concatène toutes les données en un seul fichier
 

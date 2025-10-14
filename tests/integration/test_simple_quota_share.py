@@ -20,7 +20,7 @@ def test_single_line_quota_share_basic():
     """
     qs_structure = build_quota_share(
         name="QS_30",
-        sections_config=[{
+        conditions_config=[{
             "cession_pct": 0.30,
             "includes_hull": True,
             "includes_liability": True,
@@ -71,22 +71,22 @@ def test_single_line_quota_share_with_currency_matching():
     """
     Test avec matching sur la currency
     
-    Programme avec 2 sections:
-    - Section USD: QS 25% pour BUSCL_LIMIT_CURRENCY_CD = USD
-    - Section EUR: QS 35% pour BUSCL_LIMIT_CURRENCY_CD = EUR
+    Programme avec 2 conditions:
+    - condition USD: QS 25% pour BUSCL_LIMIT_CURRENCY_CD = USD
+    - condition EUR: QS 35% pour BUSCL_LIMIT_CURRENCY_CD = EUR
     
     BORDEREAU:
     - Police en USD avec exposure 1,000,000
     
     CALCUL ATTENDU:
-    - Doit matcher la section USD
+    - Doit matcher la condition USD
     - Exposition: 1,000,000
     - Cession (25%): 250,000
     - Retenu (75%): 750,000
     """
     qs_structure = build_quota_share(
         name="QS_BY_CURRENCY",
-        sections_config=[
+        conditions_config=[
             {
                 "currency_cd": "USD",
                 "cession_pct": 0.25,

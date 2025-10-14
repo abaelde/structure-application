@@ -11,7 +11,7 @@ When the user asks to create or modify a reinsurance program configuration, refe
 ### Data Model
 - **Program** (1 row): program_name, mode (sequential/parallel)
 - **Structures** (n rows): structure_name, contract_order, type_of_participation (quota_share/excess_of_loss)
-- **Sections** (n rows): structure_name, parameters, + dimension columns
+- **conditions** (n rows): structure_name, parameters, + dimension columns
 
 ### Parameters
 - **quota-share**: cession_PCT (0-1)
@@ -21,16 +21,16 @@ When the user asks to create or modify a reinsurance program configuration, refe
 - `country`, `region`, `product_type_1`, `product_type_2`, `product_type_3`
 - `currency`, `line_of_business`, `industry`, `sic_code`, `include`
 
-### Section Matching
+### condition Matching
 - Empty dimension values = no condition (applies everywhere)
 - Non-empty dimension values = specific condition
-- Most specific section wins (most conditions matched)
+- Most specific condition wins (most conditions matched)
 
 ### Output Format
 Create Python script using pandas to generate Excel file with three sheets:
 1. `program`: Program configuration
 2. `structures`: Structure definitions  
-3. `sections`: Parameter sets with conditions
+3. `conditions`: Parameter sets with conditions
 
 Always use `np.nan` for empty values in Python, not `None`.
 

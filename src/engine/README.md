@@ -8,7 +8,7 @@ Le module `engine` est responsable du calcul des cessions de réassurance. Il a 
 src/engine/
 ├── __init__.py                  # Exports publics
 ├── calculation_engine.py        # Orchestrateur principal
-├── section_matcher.py          # Logique de matching
+├── condition_matcher.py          # Logique de matching
 ├── policy_lifecycle.py         # Gestion du cycle de vie des polices
 ├── cession_calculator.py       # Calculs de cession
 ├── structure_orchestrator.py   # Orchestration des structures
@@ -30,16 +30,16 @@ src/engine/
 - Orchestrer le traitement des structures
 - Construire le résultat final
 
-### `section_matcher.py`
-**Rôle** : Logique de matching entre polices et sections
+### `condition_matcher.py`
+**Rôle** : Logique de matching entre polices et conditions
 
 **Fonctions** :
-- `check_exclusion(policy_data, sections, dimension_columns)` : Vérifie si une police est exclue
-- `match_section(policy_data, sections, dimension_columns)` : Trouve la section la plus spécifique pour une police
+- `check_exclusion(policy_data, conditions, dimension_columns)` : Vérifie si une police est exclue
+- `match_condition(policy_data, conditions, dimension_columns)` : Trouve la condition la plus spécifique pour une police
 
 **Responsabilités** :
 - Évaluer les conditions de matching
-- Calculer la spécificité des sections
+- Calculer la spécificité des conditions
 - Identifier les exclusions
 
 ### `policy_lifecycle.py`
@@ -63,7 +63,7 @@ src/engine/
 **Rôle** : Calculs mathématiques purs des cessions
 
 **Fonctions** :
-- `apply_section(exposure, section, type_of_participation)` : Calcule la cession pour une section
+- `apply_condition(exposure, condition, type_of_participation)` : Calcule la cession pour une condition
 
 **Responsabilités** :
 - Appliquer les formules de quota share
@@ -78,7 +78,7 @@ src/engine/
 
 **Fonctions internes** :
 - `_calculate_input_exposure()` : Calcule l'exposure d'entrée pour une structure
-- `_rescale_section_if_needed()` : Rescale les sections XL après QS
+- `_rescale_condition_if_needed()` : Rescale les conditions XL après QS
 - `_calculate_retention_pct()` : Calcule le pourcentage de rétention
 - `_add_unapplied_structure_detail()` : Ajoute les détails d'une structure non appliquée
 - `_add_applied_structure_detail()` : Ajoute les détails d'une structure appliquée
@@ -114,15 +114,15 @@ policy_lifecycle.check_policy_status()
     │
     ├─ inactive? → create_inactive_result()
     │
-section_matcher.check_exclusion()
+condition_matcher.check_exclusion()
     │
     ├─ excluded? → create_excluded_result()
     │
 structure_orchestrator.process_structures()
     │
-    ├─ section_matcher.match_section()
-    ├─ cession_calculator.apply_section()
-    └─ _rescale_section_if_needed()
+    ├─ condition_matcher.match_condition()
+    ├─ cession_calculator.apply_condition()
+    └─ _rescale_condition_if_needed()
         ↓
     result_dict
 ```
@@ -181,7 +181,7 @@ from src.engine.calculation_engine import (
     apply_program,
     apply_program_to_bordereau,
     check_exclusion,
-    match_section,
+    match_condition,
 )
 ```
 
@@ -194,7 +194,7 @@ from src.engine import (
 )
 
 # Ou import direct si besoin d'accéder aux sous-modules
-from src.engine.section_matcher import check_exclusion, match_section
+from src.engine.condition_matcher import check_exclusion, match_condition
 ```
 
 ## Compatibilité
@@ -225,12 +225,12 @@ Certaines structures de réassurance peuvent ne couvrir que :
 
 ### Configuration
 
-Dans la feuille **sections** du fichier Excel de programme, deux colonnes optionnelles permettent de contrôler ce filtrage :
+Dans la feuille **conditions** du fichier Excel de programme, deux colonnes optionnelles permettent de contrôler ce filtrage :
 
 | Colonne | Type | Défaut | Description |
 |---------|------|--------|-------------|
-| `INCLUDES_HULL` | Boolean | `TRUE` | Inclure la composante Hull dans cette section |
-| `INCLUDES_LIABILITY` | Boolean | `TRUE` | Inclure la composante Liability dans cette section |
+| `INCLUDES_HULL` | Boolean | `TRUE` | Inclure la composante Hull dans cette condition |
+| `INCLUDES_LIABILITY` | Boolean | `TRUE` | Inclure la composante Liability dans cette condition |
 
 **Valeurs acceptées** : `TRUE`, `FALSE`, `true`, `false`, `1`, `0`, `yes`, `no`
 
@@ -239,7 +239,7 @@ Dans la feuille **sections** du fichier Excel de programme, deux colonnes option
 #### Programme avec filtrage
 
 ```
-Feuille "sections":
+Feuille "conditions":
 | BUSINESS_TITLE | INCLUDES_HULL | INCLUDES_LIABILITY | CESSION_PCT | ... |
 |----------------|---------------|-------------------|-------------|-----|
 | QS_ALL         | TRUE          | TRUE              | 0.25        | ... |
@@ -319,23 +319,23 @@ Le module `structure_orchestrator` gère automatiquement :
 
 1. **Décomposition de l'exposition** : L'exposition est décomposée en composantes Hull/Liability
 2. **Propagation des proportions** : Après chaque structure, les proportions Hull/Liability sont maintenues
-3. **Filtrage par section** : Chaque section filtre l'exposition selon ses flags `INCLUDES_HULL` et `INCLUDES_LIABILITY`
-4. **Rescaling** : Si la section a un predecessor de type Quota Share, l'attachment et la limite sont rescalés
+3. **Filtrage par condition** : Chaque condition filtre l'exposition selon ses flags `INCLUDES_HULL` et `INCLUDES_LIABILITY`
+4. **Rescaling** : Si la condition a un predecessor de type Quota Share, l'attachment et la limite sont rescalés
 
 ### Validation
 
-Le modèle `Section` valide automatiquement que :
+Le modèle `condition` valide automatiquement que :
 - Au moins un des deux flags (`INCLUDES_HULL` ou `INCLUDES_LIABILITY`) est `True`
-- Cette validation est contournée pour les sections d'exclusion
+- Cette validation est contournée pour les conditions d'exclusion
 
 ```python
 # ✅ Valide
-Section({"INCLUDES_HULL": True, "INCLUDES_LIABILITY": True, "SIGNED_SHARE_PCT": 1.0})
-Section({"INCLUDES_HULL": True, "INCLUDES_LIABILITY": False, "SIGNED_SHARE_PCT": 1.0})
-Section({"INCLUDES_HULL": False, "INCLUDES_LIABILITY": True, "SIGNED_SHARE_PCT": 1.0})
+condition({"INCLUDES_HULL": True, "INCLUDES_LIABILITY": True, "SIGNED_SHARE_PCT": 1.0})
+condition({"INCLUDES_HULL": True, "INCLUDES_LIABILITY": False, "SIGNED_SHARE_PCT": 1.0})
+condition({"INCLUDES_HULL": False, "INCLUDES_LIABILITY": True, "SIGNED_SHARE_PCT": 1.0})
 
 # ❌ Invalide
-Section({"INCLUDES_HULL": False, "INCLUDES_LIABILITY": False, "SIGNED_SHARE_PCT": 1.0})
+condition({"INCLUDES_HULL": False, "INCLUDES_LIABILITY": False, "SIGNED_SHARE_PCT": 1.0})
 # ValueError: At least one of INCLUDES_HULL or INCLUDES_LIABILITY must be True
 ```
 

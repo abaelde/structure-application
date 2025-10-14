@@ -100,7 +100,7 @@ def test_apply_filters_none_included():
     - Résultat: 0 (rien inclus)
     
     Note: Ce cas ne devrait pas se produire dans la pratique car la validation
-    du modèle Section empêche d'avoir les deux à False, mais on teste quand même
+    du modèle condition empêche d'avoir les deux à False, mais on teste quand même
     la méthode apply_filters de manière isolée.
     """
     components = ExposureComponents(hull=15_000_000, liability=50_000_000)

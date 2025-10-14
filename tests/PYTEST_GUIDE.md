@@ -252,7 +252,7 @@ addopts = [
 - ✅ `test_exclusion_mechanism`
 
 **Couverture:**
-- `section_matcher.py`: 51% ⚠️
+- `condition_matcher.py`: 51% ⚠️
 - `structure_orchestrator.py`: 63% ⚠️
 
 ---
@@ -277,7 +277,7 @@ Modules nécessitant plus de tests :
 | `excess_of_loss.py` | 14% | ❌ Tests unitaires |
 | `quota_share.py` | 67% | ❌ Tests unitaires |
 | `cession_calculator.py` | 64% | ❌ Tests unitaires |
-| `section_matcher.py` | 51% | ⚠️ Tests unitaires |
+| `condition_matcher.py` | 51% | ⚠️ Tests unitaires |
 | `bordereau_processor.py` | 37% | ⚠️ Tests d'intégration |
 | `treaty_manager.py` | 23% | ❌ Tests unitaires |
 | `report_display.py` | 9% | ❌ Tests (basse priorité) |

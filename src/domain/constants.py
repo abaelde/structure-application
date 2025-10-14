@@ -70,7 +70,7 @@ CLAIM_BASIS_VALUES = {CLAIM_BASIS.RISK_ATTACHING, CLAIM_BASIS.LOSS_OCCURRING}
 SHEETS = SimpleNamespace(
     PROGRAM="program",
     STRUCTURES="structures",
-    SECTIONS="sections",
+    conditionS="conditions",
 )
 
 PROGRAM_COLS = SimpleNamespace(
@@ -89,7 +89,7 @@ STRUCTURE_COLS = SimpleNamespace(
     INSPER_ID="INSPER_ID_PRE",
 )
 
-SECTION_COLS = SimpleNamespace(
+condition_COLS = SimpleNamespace(
     CESSION_PCT="CESSION_PCT",
     ATTACHMENT="ATTACHMENT_POINT_100",
     LIMIT="LIMIT_100",

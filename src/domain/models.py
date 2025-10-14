@@ -1,31 +1,31 @@
 from typing import Dict, Any, List, Optional, Literal
 import pandas as pd
 import sys
-from .constants import SECTION_COLS, PRODUCT
+from .constants import condition_COLS, PRODUCT
 
 
-class Section:
+class condition:
     def __init__(self, data: Dict[str, Any]):
         self._data = data.copy()
-        self.cession_pct = data.get(SECTION_COLS.CESSION_PCT)
-        self.attachment = data.get(SECTION_COLS.ATTACHMENT)
-        self.limit = data.get(SECTION_COLS.LIMIT)
-        self.signed_share = data.get(SECTION_COLS.SIGNED_SHARE)
-        self.includes_hull = data.get(SECTION_COLS.INCLUDES_HULL)
-        self.includes_liability = data.get(SECTION_COLS.INCLUDES_LIABILITY)
+        self.cession_pct = data.get(condition_COLS.CESSION_PCT)
+        self.attachment = data.get(condition_COLS.ATTACHMENT)
+        self.limit = data.get(condition_COLS.LIMIT)
+        self.signed_share = data.get(condition_COLS.SIGNED_SHARE)
+        self.includes_hull = data.get(condition_COLS.INCLUDES_HULL)
+        self.includes_liability = data.get(condition_COLS.INCLUDES_LIABILITY)
         self._validate()
 
     def _validate(self):
         
-        # Les sections d'exclusion n'ont pas besoin de SIGNED_SHARE_PCT ni de INCLUDES_HULL/LIABILITY
+        # Les conditions d'exclusion n'ont pas besoin de SIGNED_SHARE_PCT ni de INCLUDES_HULL/LIABILITY
         is_exclusion = self._data.get("BUSCL_EXCLUDE_CD") == "exclude"
         if is_exclusion:
             return
         
         if self.signed_share is None:
             raise ValueError(
-                f"SIGNED_SHARE_PCT is required for all non-exclusion sections. "
-                f"Section data: {self._data}"
+                f"SIGNED_SHARE_PCT is required for all non-exclusion conditions. "
+                f"condition data: {self._data}"
             )
         if not 0 <= self.signed_share <= 1:
             raise ValueError(
@@ -36,12 +36,12 @@ class Section:
             if not self.includes_hull and not self.includes_liability:
                 raise ValueError(
                     f"At least one of INCLUDES_HULL or INCLUDES_LIABILITY must be True. "
-                    f"Section data: {self._data}"
+                    f"condition data: {self._data}"
                 )
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Section":
-        """Factory method: create Section from dictionary"""
+    def from_dict(cls, data: Dict[str, Any]) -> "condition":
+        """Factory method: create condition from dictionary"""
         return cls(data)
 
     def get(self, key: str, default=None):
@@ -52,24 +52,24 @@ class Section:
 
     def __setitem__(self, key: str, value: Any):
         self._data[key] = value
-        if key == SECTION_COLS.CESSION_PCT:
+        if key == condition_COLS.CESSION_PCT:
             self.cession_pct = value
-        elif key == SECTION_COLS.ATTACHMENT:
+        elif key == condition_COLS.ATTACHMENT:
             self.attachment = value
-        elif key == SECTION_COLS.LIMIT:
+        elif key == condition_COLS.LIMIT:
             self.limit = value
-        elif key == SECTION_COLS.SIGNED_SHARE:
+        elif key == condition_COLS.SIGNED_SHARE:
             self.signed_share = value
-        elif key == SECTION_COLS.INCLUDES_HULL:
+        elif key == condition_COLS.INCLUDES_HULL:
             self.includes_hull = value
-        elif key == SECTION_COLS.INCLUDES_LIABILITY:
+        elif key == condition_COLS.INCLUDES_LIABILITY:
             self.includes_liability = value
 
     def __contains__(self, key: str) -> bool:
         return key in self._data
 
-    def copy(self) -> "Section":
-        return Section(self._data.copy())
+    def copy(self) -> "condition":
+        return condition(self._data.copy())
 
     def to_dict(self) -> Dict[str, Any]:
         return self._data.copy()
@@ -92,30 +92,30 @@ class Section:
         type_of_participation: str,
         indent: str = "",
     ) -> str:
-        """Generate a text description of this section"""
+        """Generate a text description of this condition"""
         lines = []
         
         if type_of_participation == PRODUCT.QUOTA_SHARE:
-            if pd.notna(self.get(SECTION_COLS.CESSION_PCT)):
-                cession_pct = self[SECTION_COLS.CESSION_PCT]
+            if pd.notna(self.get(condition_COLS.CESSION_PCT)):
+                cession_pct = self[condition_COLS.CESSION_PCT]
                 lines.append(
                     f"{indent}Cession rate: {cession_pct:.1%} ({cession_pct * 100:.1f}%)"
                 )
 
-            if pd.notna(self.get(SECTION_COLS.LIMIT)):
-                lines.append(f"{indent}Limit: {self[SECTION_COLS.LIMIT]:,.2f}M")
+            if pd.notna(self.get(condition_COLS.LIMIT)):
+                lines.append(f"{indent}Limit: {self[condition_COLS.LIMIT]:,.2f}M")
 
         elif type_of_participation == PRODUCT.EXCESS_OF_LOSS:
-            if pd.notna(self.get(SECTION_COLS.ATTACHMENT)) and pd.notna(self.get(SECTION_COLS.LIMIT)):
-                attachment = self[SECTION_COLS.ATTACHMENT]
-                limit = self[SECTION_COLS.LIMIT]
+            if pd.notna(self.get(condition_COLS.ATTACHMENT)) and pd.notna(self.get(condition_COLS.LIMIT)):
+                attachment = self[condition_COLS.ATTACHMENT]
+                limit = self[condition_COLS.LIMIT]
                 lines.append(f"{indent}Coverage: {limit:,.2f}M xs {attachment:,.2f}M")
                 lines.append(
                     f"{indent}Range: {attachment:,.2f}M to {attachment + limit:,.2f}M"
                 )
 
-        if pd.notna(self.get(SECTION_COLS.SIGNED_SHARE)):
-            reinsurer_share = self[SECTION_COLS.SIGNED_SHARE]
+        if pd.notna(self.get(condition_COLS.SIGNED_SHARE)):
+            reinsurer_share = self[condition_COLS.SIGNED_SHARE]
             lines.append(
                 f"{indent}Reinsurer share: {reinsurer_share:.2%} ({reinsurer_share * 100:.2f}%)"
             )
@@ -146,8 +146,8 @@ class Section:
         
         return "\n".join(lines)
 
-    def rescale_for_predecessor(self, retention_factor: float) -> tuple["Section", Dict[str, Any]]:
-        rescaled_section = self.copy()
+    def rescale_for_predecessor(self, retention_factor: float) -> tuple["condition", Dict[str, Any]]:
+        rescaled_condition = self.copy()
         rescaling_info = {
             "retention_factor": retention_factor,
             "original_attachment": None,
@@ -158,15 +158,15 @@ class Section:
 
         if self.has_attachment():
             rescaling_info["original_attachment"] = self.attachment
-            rescaled_section[SECTION_COLS.ATTACHMENT] = self.attachment * retention_factor
-            rescaling_info["rescaled_attachment"] = rescaled_section.attachment
+            rescaled_condition[condition_COLS.ATTACHMENT] = self.attachment * retention_factor
+            rescaling_info["rescaled_attachment"] = rescaled_condition.attachment
 
         if self.has_limit():
             rescaling_info["original_limit"] = self.limit
-            rescaled_section[SECTION_COLS.LIMIT] = self.limit * retention_factor
-            rescaling_info["rescaled_limit"] = rescaled_section.limit
+            rescaled_condition[condition_COLS.LIMIT] = self.limit * retention_factor
+            rescaling_info["rescaled_limit"] = rescaled_condition.limit
 
-        return rescaled_section, rescaling_info
+        return rescaled_condition, rescaling_info
 
 
 class Structure:
@@ -175,7 +175,7 @@ class Structure:
         structure_name: str,
         contract_order: int,
         type_of_participation: str,
-        sections: List["Section"],
+        conditions: List["condition"],
         predecessor_title: Optional[str] = None,
         claim_basis: Optional[str] = None,
         inception_date: Optional[str] = None,
@@ -188,28 +188,28 @@ class Structure:
         self.claim_basis = claim_basis
         self.inception_date = inception_date
         self.expiry_date = expiry_date
-        self.sections = sections
+        self.conditions = conditions
 
     @classmethod
     def from_row(
         cls,
         structure_row: Dict[str, Any],
-        sections_data: List[Dict[str, Any]],
+        conditions_data: List[Dict[str, Any]],
         structure_cols,
     ) -> "Structure":
         """
         Factory method: create Structure from dictionary data.
-        The Structure knows how to find and link its own sections.
+        The Structure knows how to find and link its own conditions.
         """
-        # Create Section objects
-        sections = [Section.from_dict(s) for s in sections_data]
+        # Create condition objects
+        conditions = [condition.from_dict(s) for s in conditions_data]
 
         # Create and return Structure
         return cls(
             structure_name=structure_row[structure_cols.NAME],
             contract_order=structure_row[structure_cols.ORDER],
             type_of_participation=structure_row[structure_cols.TYPE],
-            sections=sections,
+            conditions=conditions,
             predecessor_title=structure_row.get(structure_cols.PREDECESSOR),
             claim_basis=structure_row.get(structure_cols.CLAIM_BASIS),
             inception_date=structure_row.get(structure_cols.INCEPTION),
@@ -233,7 +233,7 @@ class Structure:
             "claim_basis": self.claim_basis,
             "inception_date": self.inception_date,
             "expiry_date": self.expiry_date,
-            "sections": [s.to_dict() for s in self.sections],
+            "conditions": [s.to_dict() for s in self.conditions],
         }
 
     def has_predecessor(self) -> bool:
@@ -245,9 +245,9 @@ class Structure:
     def is_excess_of_loss(self) -> bool:
         return self.type_of_participation == PRODUCT.EXCESS_OF_LOSS
 
-    def calculate_retention_pct(self, matched_section: Section) -> float:
-        if self.is_quota_share() and matched_section.has_cession_pct():
-            return 1.0 - matched_section.cession_pct
+    def calculate_retention_pct(self, matched_condition: condition) -> float:
+        if self.is_quota_share() and matched_condition.has_cession_pct():
+            return 1.0 - matched_condition.cession_pct
         return 1.0
 
     def describe(self, dimension_columns: list, structure_number: int) -> str:
@@ -263,7 +263,7 @@ class Structure:
         else:
             lines.append(f"   Predecessor: None (Entry point)")
 
-        lines.append(f"   Number of sections: {len(self.sections)}")
+        lines.append(f"   Number of conditions: {len(self.conditions)}")
 
         if self.claim_basis and pd.notna(self.claim_basis):
             lines.append(f"   Claim basis: {self.claim_basis}")
@@ -272,22 +272,22 @@ class Structure:
         if self.expiry_date and pd.notna(self.expiry_date):
             lines.append(f"   Expiry date: {self.expiry_date}")
 
-        if len(self.sections) == 1:
-            section = self.sections[0]
-            lines.append("   Single section:")
+        if len(self.conditions) == 1:
+            condition = self.conditions[0]
+            lines.append("   Single condition:")
             lines.append(
-                section.describe(
+                condition.describe(
                     dimension_columns,
                     self.type_of_participation,
                     indent="      ",
                 )
             )
         else:
-            lines.append("   Sections:")
-            for j, section in enumerate(self.sections, 1):
-                lines.append(f"      Section {j}:")
+            lines.append("   conditions:")
+            for j, condition in enumerate(self.conditions, 1):
+                lines.append(f"      condition {j}:")
                 lines.append(
-                    section.describe(
+                    condition.describe(
                         dimension_columns,
                         self.type_of_participation,
                         indent="         ",
@@ -316,12 +316,12 @@ class Program:
         return getattr(self, key)
 
     @property
-    def all_sections(self) -> List[Section]:
-        """Returns all sections from all structures"""
-        sections = []
+    def all_conditions(self) -> List[condition]:
+        """Returns all conditions from all structures"""
+        conditions = []
         for structure in self.structures:
-            sections.extend(structure.sections)
-        return sections
+            conditions.extend(structure.conditions)
+        return conditions
 
     def to_dict(self) -> Dict[str, Any]:
         return {

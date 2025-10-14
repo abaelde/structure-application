@@ -1,9 +1,9 @@
 """
 Création du programme Casualty AIG 2024
 
-Programme casualty avec 1 structure Quota Share avec 2 sections:
-1. Section générale: Quota Share 100% avec limite de 25M
-2. Section cyber: Quota Share 100% avec limite de 10M sur le risque cyber
+Programme casualty avec 1 structure Quota Share avec 2 conditions:
+1. condition générale: Quota Share 100% avec limite de 25M
+2. condition cyber: Quota Share 100% avec limite de 10M sur le risque cyber
 
 Programme risk attaching avec réassureur share à 10% (à déterminer)
 """
@@ -23,7 +23,7 @@ REINSURER_SHARE = 0.10
 
 qs = build_quota_share(
     name="QS_1",
-    sections_config=[
+    conditions_config=[
         {
             "cession_pct": CESSION_RATE,
             "limit": 25_000_000,

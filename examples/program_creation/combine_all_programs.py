@@ -4,7 +4,7 @@ Combine all individual program files into a single all_programs.xlsx file
 This script simulates what would happen in a real database with multiple programs:
 - Reads all .xlsx files from examples/programs/
 - Renumbers IDs sequentially (like auto-increment in a database)
-- Concatenates all programs, structures, and sections
+- Concatenates all programs, structures, and conditions
 - Outputs a single all_programs.xlsx file with 3 sheets
 """
 
@@ -49,7 +49,7 @@ def combine_all_programs(programs_dir: str, output_file: str):
     # Initialize combined dataframes
     all_programs = []
     all_structures = []
-    all_sections = []
+    all_conditions = []
 
     # Initialize ID counters (simulating auto-increment)
     next_reprog_id = 1
@@ -64,12 +64,12 @@ def combine_all_programs(programs_dir: str, output_file: str):
             # Read the three sheets
             program_df = pd.read_excel(program_file, sheet_name=SHEETS.PROGRAM)
             structures_df = pd.read_excel(program_file, sheet_name=SHEETS.STRUCTURES)
-            sections_df = pd.read_excel(program_file, sheet_name=SHEETS.SECTIONS)
+            conditions_df = pd.read_excel(program_file, sheet_name=SHEETS.conditionS)
 
             # Get original IDs
             old_reprog_id = program_df["REPROG_ID_PRE"].iloc[0]
             old_insper_ids = structures_df["INSPER_ID_PRE"].values
-            old_buscl_ids = sections_df["BUSCL_ID_PRE"].values
+            old_buscl_ids = conditions_df["BUSCL_ID_PRE"].values
 
             # Create mapping dictionaries for ID translation
             reprog_id_map = {old_reprog_id: next_reprog_id}
@@ -81,7 +81,7 @@ def combine_all_programs(programs_dir: str, output_file: str):
                 insper_id_map[old_id] = next_insper_id
                 next_insper_id += 1
 
-            # Map section IDs
+            # Map condition IDs
             for old_id in old_buscl_ids:
                 buscl_id_map[old_id] = next_buscl_id
                 next_buscl_id += 1
@@ -101,15 +101,15 @@ def combine_all_programs(programs_dir: str, output_file: str):
                 reprog_id_map
             )
 
-            # Apply new IDs to sections
-            sections_df_new = sections_df.copy()
-            sections_df_new["BUSCL_ID_PRE"] = sections_df_new["BUSCL_ID_PRE"].map(
+            # Apply new IDs to conditions
+            conditions_df_new = conditions_df.copy()
+            conditions_df_new["BUSCL_ID_PRE"] = conditions_df_new["BUSCL_ID_PRE"].map(
                 buscl_id_map
             )
-            sections_df_new["INSPER_ID_PRE"] = sections_df_new["INSPER_ID_PRE"].map(
+            conditions_df_new["INSPER_ID_PRE"] = conditions_df_new["INSPER_ID_PRE"].map(
                 insper_id_map
             )
-            sections_df_new["REPROG_ID_PRE"] = sections_df_new["REPROG_ID_PRE"].map(
+            conditions_df_new["REPROG_ID_PRE"] = conditions_df_new["REPROG_ID_PRE"].map(
                 reprog_id_map
             )
 
@@ -122,14 +122,14 @@ def combine_all_programs(programs_dir: str, output_file: str):
                 f"  BUSCL_ID_PRE: {min(old_buscl_ids)}-{max(old_buscl_ids)} -> {min(buscl_id_map.values())}-{max(buscl_id_map.values())}"
             )
             print(
-                f"  Structures: {len(structures_df_new)}, Sections: {len(sections_df_new)}"
+                f"  Structures: {len(structures_df_new)}, conditions: {len(conditions_df_new)}"
             )
             print()
 
             # Append to combined lists
             all_programs.append(program_df_new)
             all_structures.append(structures_df_new)
-            all_sections.append(sections_df_new)
+            all_conditions.append(conditions_df_new)
 
             # Update counter for next program
             next_reprog_id += 1
@@ -143,11 +143,11 @@ def combine_all_programs(programs_dir: str, output_file: str):
     print("Combining all dataframes...")
     combined_programs = pd.concat(all_programs, ignore_index=True)
     combined_structures = pd.concat(all_structures, ignore_index=True)
-    combined_sections = pd.concat(all_sections, ignore_index=True)
+    combined_conditions = pd.concat(all_conditions, ignore_index=True)
 
     print(f"Total programs: {len(combined_programs)}")
     print(f"Total structures: {len(combined_structures)}")
-    print(f"Total sections: {len(combined_sections)}")
+    print(f"Total conditions: {len(combined_conditions)}")
     print()
 
     # Write to Excel file
@@ -155,7 +155,7 @@ def combine_all_programs(programs_dir: str, output_file: str):
     with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
         combined_programs.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
         combined_structures.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
-        combined_sections.to_excel(writer, sheet_name=SHEETS.SECTIONS, index=False)
+        combined_conditions.to_excel(writer, sheet_name=SHEETS.conditionS, index=False)
 
     # Auto-adjust column widths
     print(f"Auto-adjusting column widths...")
@@ -178,11 +178,11 @@ def combine_all_programs(programs_dir: str, output_file: str):
         }
     )
     print(structure_summary)
-    print("\nSections by Program:")
-    section_summary = combined_sections.groupby("REPROG_ID_PRE").agg(
+    print("\nconditions by Program:")
+    condition_summary = combined_conditions.groupby("REPROG_ID_PRE").agg(
         {"BUSCL_ID_PRE": ["count", "min", "max"]}
     )
-    print(section_summary)
+    print(condition_summary)
 
 
 if __name__ == "__main__":

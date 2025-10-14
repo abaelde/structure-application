@@ -14,7 +14,7 @@ from src.domain import (
 # Keys and relations - foreign keys between Excel sheets (tables)
 KEYS_AND_RELATIONS = [
     "REPROG_ID_PRE",  # Program identifier
-    "INSPER_ID_PRE",  # Structure identifier (links structures to sections)
+    "INSPER_ID_PRE",  # Structure identifier (links structures to conditions)
     "BUSCL_ID_PRE",  # Business class identifier
     "CED_ID_PRE",  # Cedant identifier (not used)
     "BUSINESS_ID_PRE",  # Business identifier (not used)
@@ -94,15 +94,15 @@ class ProgramLoader:
     def load_program(self):
         # Step 1: Load data from source (only responsibility of the loader)
         if self.data_source == "file":
-            program_df, structures_df, sections_df = self._load_from_file()
+            program_df, structures_df, conditions_df = self._load_from_file()
         elif self.data_source == "snowflake":
-            program_df, structures_df, sections_df = self._load_from_snowflake()
+            program_df, structures_df, conditions_df = self._load_from_snowflake()
         else:
             raise ValueError(f"Unknown data_source: {self.data_source}")
 
         # Step 2: Determine dimension columns
         self.dimension_columns = [
-            col for col in DIMENSIONS if col in sections_df.columns
+            col for col in DIMENSIONS if col in conditions_df.columns
         ]
 
         # Step 3: Convert DataFrames to native Python types
@@ -119,18 +119,18 @@ class ProgramLoader:
             )
         
         structures_data = dataframe_to_dict_list(structures_df)
-        sections_data = dataframe_to_dict_list(sections_df)
+        conditions_data = dataframe_to_dict_list(conditions_df)
 
-        # Step 4: Group sections by structure
-        sections_by_structure = {}
-        for section in sections_data:
-            structure_key = section.get(STRUCTURE_COLS.INSPER_ID)
+        # Step 4: Group conditions by structure
+        conditions_by_structure = {}
+        for condition in conditions_data:
+            structure_key = condition.get(STRUCTURE_COLS.INSPER_ID)
             if structure_key is None:
-                structure_key = section.get(STRUCTURE_COLS.NAME)
+                structure_key = condition.get(STRUCTURE_COLS.NAME)
             
-            if structure_key not in sections_by_structure:
-                sections_by_structure[structure_key] = []
-            sections_by_structure[structure_key].append(section)
+            if structure_key not in conditions_by_structure:
+                conditions_by_structure[structure_key] = []
+            conditions_by_structure[structure_key].append(condition)
 
         # Step 5: Build Structure objects
         structures = []
@@ -139,9 +139,9 @@ class ProgramLoader:
             if structure_key is None:
                 structure_key = structure_dict[STRUCTURE_COLS.NAME]
             
-            sections_data_for_structure = sections_by_structure.get(structure_key, [])
+            conditions_data_for_structure = conditions_by_structure.get(structure_key, [])
             structures.append(
-                Structure.from_row(structure_dict, sections_data_for_structure, STRUCTURE_COLS)
+                Structure.from_row(structure_dict, conditions_data_for_structure, STRUCTURE_COLS)
             )
 
         # Step 6: Create Program with Structure objects
@@ -155,39 +155,39 @@ class ProgramLoader:
     def _load_from_file(self):
         program_df = pd.read_excel(self.source, sheet_name=SHEETS.PROGRAM)
         structures_df = pd.read_excel(self.source, sheet_name=SHEETS.STRUCTURES)
-        sections_df = pd.read_excel(self.source, sheet_name=SHEETS.SECTIONS)
+        conditions_df = pd.read_excel(self.source, sheet_name=SHEETS.conditionS)
         
         program_uw_dept = convert_pandas_to_native(
             program_df.iloc[0].get(PROGRAM_COLS.UNDERWRITING_DEPARTMENT)
         )
         
-        sections_df = self._process_boolean_columns(sections_df, program_uw_dept)
+        conditions_df = self._process_boolean_columns(conditions_df, program_uw_dept)
         
-        return program_df, structures_df, sections_df
+        return program_df, structures_df, conditions_df
     
-    def _process_boolean_columns(self, sections_df: pd.DataFrame, underwriting_department: str) -> pd.DataFrame:
+    def _process_boolean_columns(self, conditions_df: pd.DataFrame, underwriting_department: str) -> pd.DataFrame:
         boolean_columns = ["INCLUDES_HULL", "INCLUDES_LIABILITY"]
         
         for col in boolean_columns:
-            if col in sections_df.columns:
-                sections_df[col] = sections_df[col].map(self._to_boolean, na_action='ignore')
+            if col in conditions_df.columns:
+                conditions_df[col] = conditions_df[col].map(self._to_boolean, na_action='ignore')
         
         if underwriting_department and underwriting_department.lower() == "aviation":
             for col in boolean_columns:
-                if col not in sections_df.columns:
+                if col not in conditions_df.columns:
                     raise ValueError(
                         f"Column {col} is required for Aviation programs. "
-                        f"Please add {col} column to the sections sheet with explicit TRUE/FALSE values."
+                        f"Please add {col} column to the conditions sheet with explicit TRUE/FALSE values."
                     )
                 
-                null_values = sections_df[col].isna().sum()
+                null_values = conditions_df[col].isna().sum()
                 if null_values > 0:
                     raise ValueError(
                         f"Column {col} has {null_values} null/empty values. "
-                        f"For Aviation programs, all sections must have explicit TRUE or FALSE values for {col}."
+                        f"For Aviation programs, all conditions must have explicit TRUE or FALSE values for {col}."
                     )
         
-        return sections_df
+        return conditions_df
     
     @staticmethod
     def _to_boolean(value):

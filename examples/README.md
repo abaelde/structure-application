@@ -99,7 +99,7 @@ uv run python examples/scripts/create_program_config.py
 - `inception_date` : Date de début de la structure
 - `expiry_date` : Date de fin de la structure
 
-### Feuille "sections"
+### Feuille "conditions"
 - `structure_name` : Référence vers la structure
 - `cession_PCT` : Taux de cession (pour quota_share)
 - `attachment_point_100` : Priorité (pour excess_of_loss)
