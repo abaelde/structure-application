@@ -214,7 +214,6 @@ class Structure:
         return self.predecessor_title is not None
 
     def is_quota_share(self) -> bool:
-        
         return self.type_of_participation == PRODUCT.QUOTA_SHARE
 
     def is_excess_of_loss(self) -> bool:

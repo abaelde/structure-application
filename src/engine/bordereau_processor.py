@@ -13,26 +13,15 @@ def apply_program_to_bordereau(
     bordereau_df = bordereau_df.copy()
     
     # Map exposure column based on program's underwriting department
-    try:
-        found_column, target_column = find_exposure_column(
-            bordereau_df.columns.tolist(), program.underwriting_department
-        )
-        
-        if found_column and found_column != target_column:
-            bordereau_df = bordereau_df.rename(columns={found_column: target_column})
-            print(
-                f"ℹ️  Colonne d'exposure '{found_column}' mappée vers '{target_column}' "
-                f"(underwriting department: {program.underwriting_department})"
-            )
-    except ExposureMappingError as e:
-        print(f"⚠️  {e}")
-        print(f"   Le bordereau sera traité sans mapping de colonne d'exposition.")
+    found_column, target_column = find_exposure_column(
+        bordereau_df.columns.tolist(), program.underwriting_department
+    )
     
-    if "exposure" not in bordereau_df.columns:
-        raise ValueError(
-            f"Colonne 'exposure' manquante dans le bordereau après mapping. "
-            f"Underwriting department du programme: {program.underwriting_department}. "
-            f"Colonnes disponibles: {', '.join(bordereau_df.columns.tolist())}"
+    if found_column and found_column != target_column:
+        bordereau_df = bordereau_df.rename(columns={found_column: target_column})
+        print(
+            f"ℹ️  Colonne d'exposure '{found_column}' mappée vers '{target_column}' "
+            f"(underwriting department: {program.underwriting_department})"
         )
 
     results_df = bordereau_df.apply(
