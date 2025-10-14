@@ -15,24 +15,13 @@ Structure:
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-
-import pandas as pd
-import numpy as np
-from excel_utils import auto_adjust_column_widths
-
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
-from src.domain import PRODUCT, SHEETS
+
+from tests.builders import build_quota_share, build_excess_of_loss, build_program
+from excel_utils import program_to_excel
 
 print("Création du programme Aviation Complex Multi-Currency...")
 
-# =============================================================================
-# CONFIGURATION DES VALEURS - À MODIFIER SELON VOS BESOINS
-# =============================================================================
-
-# Définir les valeurs pour chaque layer (valeurs absolues)
-# Format: (limit_100, attachment_point_100)
-# Les valeurs sont identiques pour USD, CAD, EUR, AUD
 LAYER_VALUES_COMMON = {
     "XOL_1": (65_000_000, 35_000_000),
     "XOL_2": (50_000_000, 65_000_000),
@@ -42,7 +31,6 @@ LAYER_VALUES_COMMON = {
     "XOL_6": (150_000_000, 415_000_000),
 }
 
-# Valeurs spécifiques pour GBP (valeurs absolues)
 LAYER_VALUES_GBP = {
     "XOL_1": (43_333_333, 23_333_333),
     "XOL_2": (33_333_333, 43_333_333),
@@ -52,392 +40,87 @@ LAYER_VALUES_GBP = {
     "XOL_6": (100_000_000, 276_666_666),
 }
 
-# Cession Rate Values (pourcentage cédé au réassureur)
-CESSION_RATE_VALUES = {
-    "QS_1": 0.25,
-    "XOL_1": np.nan,  # XOL n'utilise pas cession_PCT
-    "XOL_2": np.nan,
-    "XOL_3": np.nan,
-    "XOL_4": np.nan,
-    "XOL_5": np.nan,
-    "XOL_6": np.nan,
-}
+CESSION_RATE_QS = 0.25
+REINSURER_SHARE_QS = 0.0165
+REINSURER_SHARE_XOL = 0.05
 
-# Reinsurer Share Values (part du réassureur dans la cession)
-REINSURER_SHARE_VALUES = {
-    "QS_1": 0.0165,  # 1.65% du réassureur dans la cession de 25%
-    "XOL_1": 0.05,
-    "XOL_2": 0.05,
-    "XOL_3": 0.05,
-    "XOL_4": 0.05,
-    "XOL_5": 0.05,
-    "XOL_6": 0.05,
-}
-
-# =============================================================================
-# DÉFINITION DU PROGRAMME
-# =============================================================================
-
-program_data = {
-    "REPROG_ID_PRE": [1],  # Auto-increment key
-    "REPROG_TITLE": ["AVIATION_AXA_XL_2024"],  # Former program_name
-    "CED_ID_PRE": [None],  # TBD
-    "CED_NAME_PRE": [None],  # TBD
-    "REPROG_ACTIVE_IND": [True],  # Default active
-    "REPROG_COMMENT": [None],  # Optional comments
-    "REPROG_UW_DEPARTMENT_CD": [None],  # UW Department Code
-    "REPROG_UW_DEPARTMENT_NAME": [None],  # UW Department Name
-    "REPROG_UW_DEPARTMENT_LOB_CD": ["aviation"],  # UW Department LOB Code
-    "REPROG_UW_DEPARTMENT_LOB_NAME": ["Aviation"],  # UW Department LOB Name
-    "BUSPAR_CED_REG_CLASS_CD": [None],  # Regulatory Class Code
-    "BUSPAR_CED_REG_CLASS_NAME": [None],  # Regulatory Class Name
-    "REPROG_MAIN_CURRENCY_CD": [None],  # Main Currency Code
-    "REPROG_MANAGEMENT_REPORTING_LOB_CD": [None],  # Management Reporting LOB Code
-}
-
-# =============================================================================
-# DÉFINITION DES STRUCTURES (1 Quota Share + 6 layers XOL)
-# =============================================================================
-
-structures_data = {
-    "INSPER_ID_PRE": [1, 2, 3, 4, 5, 6, 7],  # Auto-increment key
-    "BUSINESS_ID_PRE": [None, None, None, None, None, None, None],  # Tnumber
-    "TYPE_OF_PARTICIPATION_CD": [
-        PRODUCT.QUOTA_SHARE,
-        PRODUCT.EXCESS_OF_LOSS,
-        PRODUCT.EXCESS_OF_LOSS,
-        PRODUCT.EXCESS_OF_LOSS,
-        PRODUCT.EXCESS_OF_LOSS,
-        PRODUCT.EXCESS_OF_LOSS,
-        PRODUCT.EXCESS_OF_LOSS,
-    ],  # Former type_of_participation
-    "TYPE_OF_INSURED_PERIOD_CD": [None, None, None, None, None, None, None],  # TBD
-    "ACTIVE_FLAG_CD": [True, True, True, True, True, True, True],  # Default active
-    "INSPER_EFFECTIVE_DATE": [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    ],  # Former inception_date
-    "INSPER_EXPIRY_DATE": [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    ],  # Former expiry_date
-    "REPROG_ID_PRE": [1, 1, 1, 1, 1, 1, 1],  # Reference to program
-    "BUSINESS_TITLE": [
-        "QS_1",
-        "XOL_1",
-        "XOL_2",
-        "XOL_3",
-        "XOL_4",
-        "XOL_5",
-        "XOL_6",
-    ],  # Former structure_name
-    "INSPER_LAYER_NO": [None, None, None, None, None, None, None],  # Layer number
-    "INSPER_MAIN_CURRENCY_CD": [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    ],  # Main currency
-    "INSPER_UW_YEAR": [None, None, None, None, None, None, None],  # UW Year
-    "INSPER_CONTRACT_ORDER": [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    ],  # Deprecated (not used anymore)
-    "INSPER_PREDECESSOR_TITLE": [
-        None,
-        "QS_1",
-        "QS_1",
-        "QS_1",
-        "QS_1",
-        "QS_1",
-        "QS_1",
-    ],  # Inuring: predecessor structure
-    "INSPER_CONTRACT_FORM_CD_SLAV": [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    ],  # Contract form code
-    "INSPER_CONTRACT_LODRA_CD_SLAV": [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    ],  # Contract LODRA code
-    "INSPER_CONTRACT_COVERAGE_CD_SLAV": [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    ],  # Contract coverage code
-    "INSPER_CLAIM_BASIS_CD": [
-        "risk_attaching",
-        "risk_attaching",
-        "risk_attaching",
-        "risk_attaching",
-        "risk_attaching",
-        "risk_attaching",
-        "risk_attaching",
-    ],  # Former claim_basis
-    "INSPER_LODRA_CD_SLAV": [None, None, None, None, None, None, None],  # LODRA code
-    "INSPER_LOD_TO_RA_DATE_SLAV": [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    ],  # LOD to RA date
-    "INSPER_COMMENT": [None, None, None, None, None, None, None],  # Comments
-}
-
-# =============================================================================
-# DÉFINITION DES SECTIONS
-# =============================================================================
-
-# Devises communes (USD, CAD, EUR, AUD)
 COMMON_CURRENCIES = ["USD", "CAD", "EUR", "AUD"]
+ALL_CURRENCIES = COMMON_CURRENCIES + ["GBP"]
 
-# Initialiser les listes pour les sections
-sections_data = {
-    # Keys and References
-    "BUSCL_ID_PRE": [],  # Auto-increment key
-    "REPROG_ID_PRE": [],  # Reference to program
-    "CED_ID_PRE": [],  # Reference to cedant
-    "BUSINESS_ID_PRE": [],  # Reference to business
-    "INSPER_ID_PRE": [],  # Reference to structure
-    # Exclusions and Names
-    "BUSCL_EXCLUDE_CD": [],  # ENUM: INCLUDE or EXCLUDE
-    "BUSCL_ENTITY_NAME_CED": [],  # Cedant entity name
-    "POL_RISK_NAME_CED": [],  # Policy risk name
-    # Geographic and Product Dimensions
-    "BUSCL_COUNTRY_CD": [],  # Former country
-    "BUSCL_COUNTRY": [],  # Country name
-    "BUSCL_REGION": [],  # Former region
-    "BUSCL_CLASS_OF_BUSINESS_1": [],  # Former product_type_1
-    "BUSCL_CLASS_OF_BUSINESS_2": [],  # Former product_type_2
-    "BUSCL_CLASS_OF_BUSINESS_3": [],  # Former product_type_3
-    # Currency and Limits
-    "BUSCL_LIMIT_CURRENCY_CD": [],  # Former currency
-    "AAD_100": [],  # Annual Aggregate Deductible
-    "LIMIT_100": [],  # General limit
-    "LIMIT_FLOATER_100": [],  # Floater limit
-    "ATTACHMENT_POINT_100": [],  # Former attachment_point_100
-    "OLW_100": [],  # Original Line Written
-    "LIMIT_OCCURRENCE_100": [],  # Deprecated - use LIMIT_100 instead
-    "LIMIT_AGG_100": [],  # Aggregate limit
-    # Cession and Retention
-    "CESSION_PCT": [],  # Former cession_PCT
-    "RETENTION_PCT": [],  # Retention percentage
-    "SUPI_100": [],  # SUPI
-    # Premiums
-    "BUSCL_PREMIUM_CURRENCY_CD": [],  # Premium currency
-    "BUSCL_PREMIUM_GROSS_NET_CD": [],  # Gross/Net premium
-    "PREMIUM_RATE_PCT": [],  # Premium rate percentage
-    "PREMIUM_DEPOSIT_100": [],  # Premium deposit
-    "PREMIUM_MIN_100": [],  # Minimum premium
-    # Coverage and Participations
-    "BUSCL_LIABILITY_1_LINE_100": [],  # Liability line 1
-    "MAX_COVER_PCT": [],  # Maximum coverage percentage
-    "MIN_EXCESS_PCT": [],  # Minimum excess percentage
-    "SIGNED_SHARE_PCT": [],  # Former reinsurer_share
-    "AVERAGE_LINE_SLAV_CED": [],  # Average line
-    "PML_DEFAULT_PCT": [],  # PML default percentage
-    "LIMIT_EVENT": [],  # Limit per event
-    "NO_OF_REINSTATEMENTS": [],  # Number of reinstatements
-}
+qs_1 = build_quota_share(
+    name="QS_1",
+    sections_config=[
+        {
+            "cession_pct": CESSION_RATE_QS,
+            "limit": 575_000_000,
+            "signed_share": REINSURER_SHARE_QS,
+            "currency_cd": currency,
+        }
+        for currency in ALL_CURRENCIES
+    ],
+    claim_basis="risk_attaching"
+)
 
-# Counter for section IDs
-section_id_counter = 1
-
-
-# Helper function to add a section
-def add_section(
-    insper_id,
-    cession_pct,
-    attachment_point,
-    limit_100,
-    signed_share,
-    currency_cd,
-):
-    global section_id_counter
-    sections_data["BUSCL_ID_PRE"].append(section_id_counter)
-    sections_data["REPROG_ID_PRE"].append(1)
-    sections_data["CED_ID_PRE"].append(None)
-    sections_data["BUSINESS_ID_PRE"].append(None)
-    sections_data["INSPER_ID_PRE"].append(insper_id)
-    sections_data["BUSCL_EXCLUDE_CD"].append(None)
-    sections_data["BUSCL_ENTITY_NAME_CED"].append(None)
-    sections_data["POL_RISK_NAME_CED"].append(None)
-    sections_data["BUSCL_COUNTRY_CD"].append(None)
-    sections_data["BUSCL_COUNTRY"].append(None)
-    sections_data["BUSCL_REGION"].append(None)
-    sections_data["BUSCL_CLASS_OF_BUSINESS_1"].append(None)
-    sections_data["BUSCL_CLASS_OF_BUSINESS_2"].append(None)
-    sections_data["BUSCL_CLASS_OF_BUSINESS_3"].append(None)
-    sections_data["BUSCL_LIMIT_CURRENCY_CD"].append(currency_cd)
-    sections_data["AAD_100"].append(None)
-    sections_data["LIMIT_100"].append(limit_100)
-    sections_data["LIMIT_FLOATER_100"].append(None)
-    sections_data["ATTACHMENT_POINT_100"].append(attachment_point)
-    sections_data["OLW_100"].append(None)
-    sections_data["LIMIT_OCCURRENCE_100"].append(None)  # Deprecated
-    sections_data["LIMIT_AGG_100"].append(None)
-    sections_data["CESSION_PCT"].append(cession_pct)
-    sections_data["RETENTION_PCT"].append(None)
-    sections_data["SUPI_100"].append(None)
-    sections_data["BUSCL_PREMIUM_CURRENCY_CD"].append(None)
-    sections_data["BUSCL_PREMIUM_GROSS_NET_CD"].append(None)
-    sections_data["PREMIUM_RATE_PCT"].append(None)
-    sections_data["PREMIUM_DEPOSIT_100"].append(None)
-    sections_data["PREMIUM_MIN_100"].append(None)
-    sections_data["BUSCL_LIABILITY_1_LINE_100"].append(None)
-    sections_data["MAX_COVER_PCT"].append(None)
-    sections_data["MIN_EXCESS_PCT"].append(None)
-    sections_data["SIGNED_SHARE_PCT"].append(signed_share)
-    sections_data["AVERAGE_LINE_SLAV_CED"].append(None)
-    sections_data["PML_DEFAULT_PCT"].append(None)
-    sections_data["LIMIT_EVENT"].append(None)
-    sections_data["NO_OF_REINSTATEMENTS"].append(None)
-    section_id_counter += 1
-
-
-# Créer les sections pour la structure Quota Share (QS_1) - toutes devises
-cession_rate_qs = CESSION_RATE_VALUES["QS_1"]
-reinsurer_share_qs = REINSURER_SHARE_VALUES["QS_1"]
-qs_limit = 575_000_000  # Limite du quota share en valeur absolue
-for currency in COMMON_CURRENCIES + ["GBP"]:
-    add_section(
-        insper_id=1,  # QS_1 has INSPER_ID_PRE = 1
-        cession_pct=cession_rate_qs,
-        attachment_point=np.nan,
-        limit_100=qs_limit,
-        signed_share=reinsurer_share_qs,
-        currency_cd=currency,
-    )
-
-# Créer les sections pour les devises communes (USD, CAD, EUR, AUD) - structures XOL
-for idx, layer_name in enumerate(
-    ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], start=2
-):
-    limit_100, attachment_point_100 = LAYER_VALUES_COMMON[layer_name]
-    cession_PCT = CESSION_RATE_VALUES[layer_name]
-    reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
-
+def create_xol_layer(layer_name: str) -> object:
+    sections = []
+    
     for currency in COMMON_CURRENCIES:
-        add_section(
-            insper_id=idx,  # XOL_1=2, XOL_2=3, ..., XOL_6=7
-            cession_pct=cession_PCT,
-            attachment_point=attachment_point_100,
-            limit_100=limit_100,
-            signed_share=reinsurer_share,
-            currency_cd=currency,
-        )
-
-# Créer les sections pour GBP (valeurs spécifiques) - structures XOL
-for idx, layer_name in enumerate(
-    ["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], start=2
-):
-    limit_100, attachment_point_100 = LAYER_VALUES_GBP[layer_name]
-    cession_PCT = CESSION_RATE_VALUES[layer_name]
-    reinsurer_share = REINSURER_SHARE_VALUES[layer_name]
-
-    add_section(
-        insper_id=idx,  # XOL_1=2, XOL_2=3, ..., XOL_6=7
-        cession_pct=cession_PCT,
-        attachment_point=attachment_point_100,
-        limit_100=limit_100,
-        signed_share=reinsurer_share,
-        currency_cd="GBP",
+        limit, attachment = LAYER_VALUES_COMMON[layer_name]
+        sections.append({
+            "attachment": attachment,
+            "limit": limit,
+            "signed_share": REINSURER_SHARE_XOL,
+            "currency_cd": currency,
+        })
+    
+    limit_gbp, attachment_gbp = LAYER_VALUES_GBP[layer_name]
+    sections.append({
+        "attachment": attachment_gbp,
+        "limit": limit_gbp,
+        "signed_share": REINSURER_SHARE_XOL,
+        "currency_cd": "GBP",
+    })
+    
+    return build_excess_of_loss(
+        name=layer_name,
+        sections_config=sections,
+        predecessor_title="QS_1",
+        claim_basis="risk_attaching"
     )
 
-# =============================================================================
-# CRÉATION DES DATAFRAMES
-# =============================================================================
+xol_1 = create_xol_layer("XOL_1")
+xol_2 = create_xol_layer("XOL_2")
+xol_3 = create_xol_layer("XOL_3")
+xol_4 = create_xol_layer("XOL_4")
+xol_5 = create_xol_layer("XOL_5")
+xol_6 = create_xol_layer("XOL_6")
 
-program_df = pd.DataFrame(program_data)
-structures_df = pd.DataFrame(structures_data)
-sections_df = pd.DataFrame(sections_data)
+program = build_program(
+    name="AVIATION_AXA_XL_2024",
+    structures=[qs_1, xol_1, xol_2, xol_3, xol_4, xol_5, xol_6],
+    underwriting_department="aviation"
+)
 
-# =============================================================================
-# GÉNÉRATION DU FICHIER EXCEL
-# =============================================================================
-
-# Créer le dossier programs s'il n'existe pas
 output_dir = "../programs"
 os.makedirs(output_dir, exist_ok=True)
-
 output_file = os.path.join(output_dir, "aviation_axa_xl_2024.xlsx")
 
-with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
-    program_df.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
-    structures_df.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
-    sections_df.to_excel(writer, sheet_name=SHEETS.SECTIONS, index=False)
-
-# Auto-adjust column widths for better readability
-auto_adjust_column_widths(output_file)
+program_to_excel(program, output_file)
 
 print(f"✓ Programme créé: {output_file}")
-
-# =============================================================================
-# AFFICHAGE DES DÉTAILS
-# =============================================================================
 
 print("\n" + "=" * 80)
 print("PROGRAMME AVIATION AXA XL 2024")
 print("=" * 80)
 
-print("\nProgram:")
-print(program_df)
-
-print("\nStructures:")
-print(structures_df)
-
-print("\nSections (premières 10 lignes):")
-print(sections_df.head(10))
-
-print(f"\nTotal sections créées: {len(sections_df)}")
-print(f"Répartition par devise:")
-print(sections_df["BUSCL_LIMIT_CURRENCY_CD"].value_counts())
-
-# =============================================================================
-# RÉSUMÉ DU PROGRAMME
-# =============================================================================
+program.describe()
 
 print("\n" + "=" * 80)
 print("RÉSUMÉ DU PROGRAMME")
 print("=" * 80)
 
 print(
-    """
+    f"""
 Programme: Aviation AXA XL 2024
 Devises: USD, CAD, EUR, AUD, GBP
 
@@ -447,26 +130,26 @@ Structures (empilées selon l'ordre):
 
 print("0. QS_1 (contract_order=0):")
 print(
-    "   - Toutes devises: Quota Share 15% cédé avec limite de 575M, 1.65% reinsurer share (rétention 85%)"
+    f"   - Toutes devises: Quota Share {CESSION_RATE_QS:.1%} cédé avec limite de 575M, {REINSURER_SHARE_QS:.2%} reinsurer share"
 )
 
 for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], 1):
     limit_common, priority_common = LAYER_VALUES_COMMON[layer]
     limit_gbp, priority_gbp = LAYER_VALUES_GBP[layer]
     print(f"{i}. {layer} (contract_order={i}):")
-    print(f"   - USD/CAD/EUR/AUD: {limit_common}M xs {priority_common}M")
-    print(f"   - GBP: {limit_gbp}M xs {priority_gbp}M")
+    print(f"   - USD/CAD/EUR/AUD: {limit_common:,.0f} xs {priority_common:,.0f}")
+    print(f"   - GBP: {limit_gbp:,.0f} xs {priority_gbp:,.0f}")
 
 
 print("\n✓ Le programme Aviation AXA XL 2024 est prêt !")
 print("\nPour modifier les valeurs:")
 print(
-    "1. Éditez le dictionnaire CESSION_RATE_VALUES pour ajuster les pourcentages de cession"
+    "1. Éditez le dictionnaire LAYER_VALUES_COMMON pour ajuster les layers (devises communes)"
 )
 print(
-    "2. Éditez le dictionnaire REINSURER_SHARE_VALUES pour ajuster les parts du réassureur"
+    "2. Éditez le dictionnaire LAYER_VALUES_GBP pour ajuster les layers GBP"
 )
 print(
-    "3. Éditez les dictionnaires LAYER_VALUES_COMMON et LAYER_VALUES_GBP pour les XOL"
+    "3. Éditez CESSION_RATE_QS, REINSURER_SHARE_QS et REINSURER_SHARE_XOL pour les taux"
 )
 print("4. Relancez ce script pour régénérer le fichier Excel")

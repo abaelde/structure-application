@@ -168,38 +168,179 @@ Quand un **Excess of Loss** s'applique après un **Quota Share** :
 
 ## Scripts de Création
 
-Utilisez les scripts Python existants comme modèles :
-- `create_single_quota_share.py` - Exemple simple
-- `create_aviation_AXA_XL.py` - Exemple complexe multi-devises
+### 🚀 Nouvelle approche avec les Builders (Recommandée)
+
+Tous les scripts de création utilisent maintenant les **Builders** pour créer les programmes de manière concise et expressive.
+
+**Avantages :**
+- ✅ **90% moins de code** : Focus sur la logique métier
+- ✅ **Plus lisible** : API fluide et intuitive
+- ✅ **Plus maintenable** : Un seul endroit pour gérer la conversion Excel
+- ✅ **Moins d'erreurs** : IDs et champs gérés automatiquement
+- ✅ **Réutilisable** : Les Builders sont aussi utilisés dans les tests
+
+**Scripts disponibles :**
+- `create_single_quota_share.py` - Exemple simple (61 lignes au lieu de 177)
+- `create_casualty_AIG.py` - QS avec 2 sections (94 lignes au lieu de 236)
+- `create_aviation_old_republic.py` - 3 XOL parallèles (106 lignes au lieu de 248)
+- `create_aviation_AXA_XL.py` - Complexe multi-devises (156 lignes au lieu de 473)
+
+**Utilitaires :**
+- `excel_utils.py` - Fonction `program_to_excel()` pour convertir Program → Excel
 - `regenerate_all_programs.py` - Régénération en lot
 - `combine_all_programs.py` - Combinaison de tous les programmes en une base de données simulée
-- `excel_utils.py` - Utilitaires pour la manipulation des fichiers Excel
+
+### 📝 Comment créer un nouveau programme avec les Builders
+
+#### Exemple 1 : Quota Share simple
+
+```python
+from tests.builders import build_quota_share, build_program
+from excel_utils import program_to_excel
+
+# Créer une structure Quota Share 30%
+qs = build_quota_share(name="QS_30", cession_pct=0.30)
+
+# Créer le programme
+program = build_program(
+    name="MY_PROGRAM_2024",
+    structures=[qs],
+    underwriting_department="aviation"
+)
+
+# Sauvegarder en Excel
+program_to_excel(program, "../programs/my_program.xlsx")
+```
+
+#### Exemple 2 : Quota Share avec plusieurs sections (multi-devises)
+
+```python
+qs = build_quota_share(
+    name="QS_MULTI_CURRENCY",
+    sections_config=[
+        {
+            "cession_pct": 0.25,
+            "limit": 100_000_000,
+            "signed_share": 0.10,
+            "currency_cd": "USD",
+        },
+        {
+            "cession_pct": 0.30,
+            "limit": 75_000_000,
+            "signed_share": 0.10,
+            "currency_cd": "EUR",
+        },
+    ],
+    claim_basis="risk_attaching"
+)
+
+program = build_program(name="QS_MULTI_2024", structures=[qs], underwriting_department="aviation")
+program_to_excel(program, "../programs/qs_multi_currency.xlsx")
+```
+
+#### Exemple 3 : Excess of Loss avec inuring
+
+```python
+from tests.builders import build_quota_share, build_excess_of_loss, build_program
+
+# QS en premier (entry point)
+qs = build_quota_share(name="QS_25", cession_pct=0.25)
+
+# XOL qui s'applique sur la rétention du QS (inuring)
+xol = build_excess_of_loss(
+    name="XOL_50xs20",
+    attachment=20_000_000,
+    limit=50_000_000,
+    predecessor_title="QS_25",  # Inuring: s'applique après QS_25
+    claim_basis="risk_attaching"
+)
+
+program = build_program(
+    name="QS_THEN_XOL_2024",
+    structures=[qs, xol],
+    underwriting_department="aviation"
+)
+program_to_excel(program, "../programs/qs_then_xol.xlsx")
+```
+
+#### Exemple 4 : Plusieurs XOL parallèles avec sections par pays
+
+```python
+# Créer des XOL pour plusieurs pays
+countries = ["United States", "Canada", "Mexico"]
+
+xol_1 = build_excess_of_loss(
+    name="XOL_1",
+    sections_config=[
+        {
+            "attachment": 5_000_000,
+            "limit": 10_000_000,
+            "signed_share": 0.10,
+            "country_cd": country,
+        }
+        for country in countries
+    ],
+    claim_basis="risk_attaching"
+)
+
+xol_2 = build_excess_of_loss(
+    name="XOL_2",
+    sections_config=[
+        {
+            "attachment": 15_000_000,
+            "limit": 20_000_000,
+            "signed_share": 0.10,
+            "country_cd": country,
+        }
+        for country in countries
+    ],
+    claim_basis="risk_attaching"
+)
+
+program = build_program(
+    name="MULTI_XOL_2024",
+    structures=[xol_1, xol_2],
+    underwriting_department="aviation"
+)
+program_to_excel(program, "../programs/multi_xol.xlsx")
+```
+
+#### Exemple 5 : Section avec exclusions
+
+```python
+from tests.builders import build_section, build_quota_share
+
+qs = build_quota_share(
+    name="QS_WITH_EXCLUSIONS",
+    sections_config=[
+        {
+            "cession_pct": 0.30,
+            "signed_share": 0.10,
+            "country_cd": "Iran",
+            "exclude_cd": "exclude",  # Section d'exclusion
+        },
+        {
+            "cession_pct": 0.30,
+            "signed_share": 0.10,
+            # Pas de country_cd = section catch-all pour tous les autres pays
+        },
+    ]
+)
+
+program = build_program(name="QS_EXCL_2024", structures=[qs], underwriting_department="casualty")
+program_to_excel(program, "../programs/qs_exclusions.xlsx")
+```
 
 ### Auto-ajustement des colonnes Excel
 
-Tous les scripts de création utilisent la fonction `auto_adjust_column_widths()` du module `excel_utils` pour ajuster automatiquement la largeur des colonnes en fonction de leur contenu. Cette fonctionnalité améliore considérablement la lisibilité des fichiers générés.
+La fonction `program_to_excel()` appelle automatiquement `auto_adjust_column_widths()` pour ajuster la largeur des colonnes en fonction de leur contenu, améliorant ainsi la lisibilité des fichiers générés.
 
-**Utilisation dans vos propres scripts :**
-
-```python
-from excel_utils import auto_adjust_column_widths
-
-# Après avoir créé votre fichier Excel
-with pd.ExcelWriter("mon_programme.xlsx", engine="openpyxl") as writer:
-    program_df.to_excel(writer, sheet_name="program", index=False)
-    structures_df.to_excel(writer, sheet_name="structures", index=False)
-    sections_df.to_excel(writer, sheet_name="sections", index=False)
-
-# Auto-ajuster les largeurs de colonnes
-auto_adjust_column_widths("mon_programme.xlsx")
-```
-
-**Paramètres optionnels :**
+**Paramètres optionnels de `program_to_excel()` :**
 - `min_width` : Largeur minimale des colonnes (défaut : 10)
 - `max_width` : Largeur maximale des colonnes (défaut : 50)
 
 ```python
-auto_adjust_column_widths("mon_programme.xlsx", min_width=12, max_width=60)
+program_to_excel(program, "output.xlsx", min_width=12, max_width=60)
 ```
 
 ### Base de Données Simulée : all_programs.xlsx
