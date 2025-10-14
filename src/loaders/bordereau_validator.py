@@ -22,8 +22,6 @@ class BordereauValidator:
         FIELDS["CLASS_3"],
         FIELDS["CURRENCY"],
         FIELDS["LINE_OF_BUSINESS"],
-        FIELDS["INDUSTRY"],
-        FIELDS["SIC_CODE"],
     ]
 
     OPTIONAL_COLUMNS = [
@@ -33,19 +31,16 @@ class BordereauValidator:
         "SIC_CODE",
     ]
 
-    EXPOSURE_COLUMNS = [
+    EXPOSURE_COLUMNS_ALL_DEPARTMENTS = [
         "exposure",
         "HULL_LIMIT",
-        "LIAB_LIMIT",
         "LIABILITY_LIMIT",
         "HULL_SHARE",
         "LIABILITY_SHARE",
         "LIMIT",
     ]
 
-    ALLOWED_COLUMNS = REQUIRED_COLUMNS + DIMENSION_COLUMNS + OPTIONAL_COLUMNS + EXPOSURE_COLUMNS
-
-    NUMERIC_COLUMNS = EXPOSURE_COLUMNS
+    ALLOWED_COLUMNS = REQUIRED_COLUMNS + DIMENSION_COLUMNS + OPTIONAL_COLUMNS + EXPOSURE_COLUMNS_ALL_DEPARTMENTS
 
     DATE_COLUMNS = [FIELDS["INCEPTION_DATE"], FIELDS["EXPIRY_DATE"]]
 
@@ -61,9 +56,7 @@ class BordereauValidator:
         self._validate_not_empty()
         self._validate_all_columns_present()
         self._validate_non_null_values()
-        self._validate_data_types()
         self._validate_dates()
-        self._validate_numeric_values()
         self._validate_insured_name_uppercase()
         self._validate_business_logic()
 
@@ -118,28 +111,6 @@ class BordereauValidator:
                     + (f" and {len(null_rows) - 5} more" if len(null_rows) > 5 else "")
                 )
 
-    def _validate_data_types(self):
-        for col in self.NUMERIC_COLUMNS:
-            if col in self.df.columns:
-                non_numeric = []
-                for idx, val in self.df[col].items():
-                    if pd.isna(val):
-                        continue
-                    try:
-                        float(val)
-                    except (ValueError, TypeError):
-                        non_numeric.append(f"row {idx + 2}: '{val}'")
-
-                if non_numeric:
-                    self.validation_errors.append(
-                        f"Column '{col}' contains non-numeric values: {', '.join(non_numeric[:5])}"
-                        + (
-                            f" and {len(non_numeric) - 5} more"
-                            if len(non_numeric) > 5
-                            else ""
-                        )
-                    )
-
     def _validate_dates(self):
         for col in self.DATE_COLUMNS:
             if col not in self.df.columns:
@@ -165,47 +136,6 @@ class BordereauValidator:
                         else ""
                     )
                 )
-
-    def _validate_numeric_values(self):
-        exposure_col = FIELDS["EXPOSURE"]
-        if exposure_col not in self.df.columns:
-            return
-
-        negative_expositions = []
-        zero_expositions = []
-
-        for idx, val in self.df[exposure_col].items():
-            if pd.isna(val):
-                continue
-
-            try:
-                numeric_val = float(val)
-                if numeric_val < 0:
-                    negative_expositions.append(f"row {idx + 2}: {numeric_val}")
-                elif numeric_val == 0:
-                    zero_expositions.append(f"row {idx + 2}")
-            except (ValueError, TypeError):
-                continue
-
-        if negative_expositions:
-            self.validation_errors.append(
-                f"Column '{exposure_col}' contains negative values: {', '.join(negative_expositions[:5])}"
-                + (
-                    f" and {len(negative_expositions) - 5} more"
-                    if len(negative_expositions) > 5
-                    else ""
-                )
-            )
-
-        if zero_expositions:
-            self.validation_warnings.append(
-                f"Column '{exposure_col}' contains zero values: {', '.join(zero_expositions[:5])}"
-                + (
-                    f" and {len(zero_expositions) - 5} more"
-                    if len(zero_expositions) > 5
-                    else ""
-                )
-            )
 
     def _validate_insured_name_uppercase(self):
         insured_col = FIELDS["INSURED_NAME"]

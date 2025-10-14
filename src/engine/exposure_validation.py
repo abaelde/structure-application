@@ -6,7 +6,6 @@ class ExposureValidationError(Exception):
 
 
 REQUIRED_EXPOSURE_COLUMNS = {
-    UNDERWRITING_DEPARTMENT.CASUALTY: ["LIMIT"],
     UNDERWRITING_DEPARTMENT.TEST: ["exposure"],
 }
 
@@ -28,6 +27,8 @@ def validate_exposure_columns(df_columns: list, underwriting_department: str) ->
 
     if uw_dept_lower == UNDERWRITING_DEPARTMENT.AVIATION:
         _validate_aviation_exposure_columns(df_columns)
+    elif uw_dept_lower == UNDERWRITING_DEPARTMENT.CASUALTY:
+        _validate_casualty_exposure_columns(df_columns)
     else:
         required_columns = REQUIRED_EXPOSURE_COLUMNS[uw_dept_lower]
         missing_columns = [col for col in required_columns if col not in df_columns]
@@ -39,6 +40,14 @@ def validate_exposure_columns(df_columns: list, underwriting_department: str) ->
                 f"Missing: {', '.join(missing_columns)}. "
                 f"Found columns: {', '.join(df_columns)}"
             )
+
+
+def _validate_casualty_exposure_columns(df_columns: list) -> None:
+    if "LIMIT" not in df_columns:
+        raise ExposureValidationError(
+            f"Casualty bordereau must have LIMIT column. "
+            f"Found columns: {', '.join(df_columns)}"
+        )
 
 
 def _validate_aviation_exposure_columns(df_columns: list) -> None:
