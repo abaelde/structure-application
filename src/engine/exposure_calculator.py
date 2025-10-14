@@ -26,20 +26,13 @@ class AviationExposureCalculator(ExposureCalculator):
         has_hull = hull_limit is not None
         has_liability = liability_limit is not None
 
-        if not has_hull and not has_liability:
-            raise ExposureCalculationError(
-                f"Missing exposure for Aviation. "
-                f"At least one of HULL_LIMIT or LIABILITY_LIMIT must be provided. "
-                f"Found: HULL_LIMIT={hull_limit}, LIABILITY_LIMIT={liability_limit}"
-            )
-
         total_exposure = 0.0
 
         if has_hull:
             if hull_share is None:
                 raise ExposureCalculationError(
-                    f"HULL_LIMIT requires HULL_SHARE. "
-                    f"Found: HULL_LIMIT={hull_limit}, HULL_SHARE={hull_share}"
+                    f"Missing HULL_SHARE value for this policy. "
+                    f"HULL_LIMIT={hull_limit}, HULL_SHARE={hull_share}"
                 )
             try:
                 hull_limit_float = float(hull_limit)
@@ -53,8 +46,8 @@ class AviationExposureCalculator(ExposureCalculator):
         if has_liability:
             if liability_share is None:
                 raise ExposureCalculationError(
-                    f"LIABILITY_LIMIT requires LIABILITY_SHARE. "
-                    f"Found: LIABILITY_LIMIT={liability_limit}, LIABILITY_SHARE={liability_share}"
+                    f"Missing LIABILITY_SHARE value for this policy. "
+                    f"LIABILITY_LIMIT={liability_limit}, LIABILITY_SHARE={liability_share}"
                 )
             try:
                 liability_limit_float = float(liability_limit)
@@ -75,16 +68,10 @@ class CasualtyExposureCalculator(ExposureCalculator):
         limit = policy_data.get("LIMIT")
         cedent_share = policy_data.get("CEDENT_SHARE")
 
-        if limit is None:
+        if limit is None or cedent_share is None:
             raise ExposureCalculationError(
-                f"Missing required exposure column for Casualty. "
-                f"Required: LIMIT. Found: LIMIT={limit}"
-            )
-
-        if cedent_share is None:
-            raise ExposureCalculationError(
-                f"Missing required exposure column for Casualty. "
-                f"Required: CEDENT_SHARE. Found: CEDENT_SHARE={cedent_share}"
+                f"Missing exposure value for this policy. "
+                f"LIMIT={limit}, CEDENT_SHARE={cedent_share}"
             )
 
         try:
@@ -106,8 +93,7 @@ class TestExposureCalculator(ExposureCalculator):
 
         if exposure is None:
             raise ExposureCalculationError(
-                f"Missing required exposure column for Test. "
-                f"Required: exposure. Found: exposure={exposure}"
+                f"Missing exposure value for this policy. exposure={exposure}"
             )
 
         try:

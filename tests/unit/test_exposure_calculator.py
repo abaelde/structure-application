@@ -72,7 +72,7 @@ class TestAviationExposureCalculator:
         with pytest.raises(ExposureCalculationError) as exc_info:
             calculator.calculate(policy_data)
         
-        assert "HULL_LIMIT requires HULL_SHARE" in str(exc_info.value)
+        assert "Missing HULL_SHARE value" in str(exc_info.value)
         assert "HULL_SHARE" in str(exc_info.value)
 
     def test_calculate_missing_liability_share(self):
@@ -86,7 +86,7 @@ class TestAviationExposureCalculator:
         with pytest.raises(ExposureCalculationError) as exc_info:
             calculator.calculate(policy_data)
         
-        assert "LIABILITY_LIMIT requires LIABILITY_SHARE" in str(exc_info.value)
+        assert "Missing LIABILITY_SHARE value" in str(exc_info.value)
         assert "LIABILITY_SHARE" in str(exc_info.value)
 
     def test_calculate_invalid_numeric_value(self):
@@ -126,16 +126,23 @@ class TestAviationExposureCalculator:
         assert result == 137_500_000
 
     def test_calculate_missing_both_exposures(self):
+        """
+        Test que le calculateur retourne 0.0 quand aucune exposition n'est presente.
+        
+        Note: La validation de la presence des colonnes d'exposition au niveau DataFrame
+        est faite par validate_exposure_columns(). Le calculateur traite ligne par ligne
+        et retourne 0.0 si aucune valeur d'exposition n'est presente sur cette ligne.
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
+            "HULL_LIMIT": None,
+            "LIABILITY_LIMIT": None,
             "HULL_SHARE": 0.15,
             "LIABILITY_SHARE": 0.10,
         }
         
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            calculator.calculate(policy_data)
-        
-        assert "At least one of HULL_LIMIT or LIABILITY_LIMIT must be provided" in str(exc_info.value)
+        result = calculator.calculate(policy_data)
+        assert result == 0.0
 
     def test_calculate_hull_share_without_hull_limit(self):
         calculator = AviationExposureCalculator()
@@ -196,7 +203,7 @@ class TestCasualtyExposureCalculator:
         with pytest.raises(ExposureCalculationError) as exc_info:
             calculator.calculate(policy_data)
         
-        assert "Missing required exposure column" in str(exc_info.value)
+        assert "Missing exposure value" in str(exc_info.value)
         assert "LIMIT" in str(exc_info.value)
 
     def test_calculate_missing_cedent_share(self):
@@ -208,7 +215,7 @@ class TestCasualtyExposureCalculator:
         with pytest.raises(ExposureCalculationError) as exc_info:
             calculator.calculate(policy_data)
         
-        assert "Missing required exposure column" in str(exc_info.value)
+        assert "Missing exposure value" in str(exc_info.value)
         assert "CEDENT_SHARE" in str(exc_info.value)
 
     def test_calculate_invalid_numeric_value(self):
@@ -258,7 +265,7 @@ class TestTestExposureCalculator:
         with pytest.raises(ExposureCalculationError) as exc_info:
             calculator.calculate(policy_data)
         
-        assert "Missing required exposure column" in str(exc_info.value)
+        assert "Missing exposure value" in str(exc_info.value)
         assert "exposure" in str(exc_info.value)
 
     def test_calculate_invalid_numeric_value(self):
