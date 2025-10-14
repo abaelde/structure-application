@@ -98,7 +98,7 @@ Lorsqu'une police est inactive :
     "effective_exposure": 0.0,        # Exposition effective = 0
     "cession_to_layer_100pct": 0.0,   # Pas de cession
     "cession_to_reinsurer": 0.0,      # Pas de cession au réassureur
-    "retained_by_cedant": 0.0,        # Rien retenu (car exposition = 0)
+    "retained_by_cedant": 0.0,        # Rien retenu (car exposure = 0)
     "policy_inception_date": "2024-01-01",
     "policy_expiry_date": "2025-01-01",
     "structures_detail": [],          # Aucune structure appliquée
@@ -160,7 +160,7 @@ Cela permet de :
 1. **Tracer** toutes les polices du bordereau (même expirées)
 2. **Comprendre** pourquoi certaines polices n'ont pas de cession
 3. **Auditer** les calculs avec transparence
-4. **Calculer** l'exposition active à une date donnée
+4. **Calculer** l'exposure active à une date donnée
 
 ## Comparaison avec le mécanisme d'exclusion
 

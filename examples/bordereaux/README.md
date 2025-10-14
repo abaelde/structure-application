@@ -24,7 +24,7 @@ En plus des colonnes minimales, ces colonnes sont également requises :
 
 | Colonne | Nom Exact | Type | Format | Description | Règles de Validation |
 |---------|-----------|------|--------|-------------|----------------------|
-| **Exposition** | `exposition` | Numeric | Nombre positif | Montant d'exposition en valeur absolue | ✅ Obligatoire<br>✅ Valeur positive<br>⚠️ Warning si = 0<br>❌ Erreur si < 0 |
+| **Exposition** | `exposure` | Numeric | Nombre positif | Montant d'exposure en valeur absolue | ✅ Obligatoire<br>✅ Valeur positive<br>⚠️ Warning si = 0<br>❌ Erreur si < 0 |
 | **Line of Business** | `line_of_business` | String | Texte | Ligne de business de la police | ✅ Obligatoire<br>✅ Doit être cohérent avec le dossier |
 
 #### Colonnes Optionnelles Standards
@@ -91,28 +91,28 @@ Pour les bordereaux situés dans `bordereaux/property/` :
 
 ## Noms de Colonnes Alternatifs (Optionnel)
 
-Le système accepte **plusieurs noms possibles** pour la colonne d'exposition selon la ligne de business. Cela permet de travailler avec des bordereaux qui utilisent des conventions de nommage différentes sans avoir à les modifier.
+Le système accepte **plusieurs noms possibles** pour la colonne d'exposure selon la ligne de business. Cela permet de travailler avec des bordereaux qui utilisent des conventions de nommage différentes sans avoir à les modifier.
 
 ### Noms Acceptés par LOB
 
 | Line of Business | Noms de colonnes acceptés |
 |------------------|---------------------------|
-| **Aviation** | `exposition`, 
-| **Casualty** | `exposition`, `limite`, `limit` |
-| **Property** | `exposition`, `exposure` |
-| **Autres** | `exposition`, `exposure` |
+| **Aviation** | `exposure`, 
+| **Casualty** | `exposure`, `limite`, `limit` |
+| **Property** | `exposure`, `exposure` |
+| **Autres** | `exposure`, `exposure` |
 
 ### Fonctionnement
 
 - Le système **détecte automatiquement** quelle colonne est présente dans votre bordereau
-- Si un nom alternatif est utilisé (ex: `limite`), il crée automatiquement la colonne `exposition` pour le moteur de calcul
+- Si un nom alternatif est utilisé (ex: `limite`), il crée automatiquement la colonne `exposure` pour le moteur de calcul
 - **Aucune modification de vos fichiers n'est nécessaire** - utilisez le nom qui vous convient
 
 ### Exemples
 
 **Avec le nom standard** :
 ```csv
-policy_id,INSURED_NAME,exposition,INCEPTION_DT,EXPIRE_DT,line_of_business
+policy_id,INSURED_NAME,exposure,INCEPTION_DT,EXPIRE_DT,line_of_business
 CAS-001,CARREFOUR SA,5000000,2024-01-01,2024-12-31,Casualty
 ```
 
@@ -163,7 +163,7 @@ bordereaux/
 ### Exemple Aviation (avec policy_id optionnel)
 
 ```csv
-policy_id,INSURED_NAME,BUSCL_COUNTRY_CD,line_of_business,exposition,INCEPTION_DT,EXPIRE_DT
+policy_id,INSURED_NAME,BUSCL_COUNTRY_CD,line_of_business,exposure,INCEPTION_DT,EXPIRE_DT
 AVI-2024-001,AIR FRANCE-KLM,France,Aviation,25000000,2024-01-01,2024-12-31
 AVI-2024-002,LUFTHANSA GROUP,Germany,Aviation,30000000,2024-02-15,2025-02-14
 ```
@@ -171,7 +171,7 @@ AVI-2024-002,LUFTHANSA GROUP,Germany,Aviation,30000000,2024-02-15,2025-02-14
 ### Exemple Property (sans policy_id)
 
 ```csv
-INSURED_NAME,BUSCL_REGION,line_of_business,exposition,INCEPTION_DT,EXPIRE_DT
+INSURED_NAME,BUSCL_REGION,line_of_business,exposure,INCEPTION_DT,EXPIRE_DT
 ENTREPRISE DUPONT SAS,EMEA,Property,500000,2024-01-01,2024-12-31
 GLOBAL CORP LTD,APAC,Property,1200000,2024-03-01,2025-02-28
 ```
@@ -184,7 +184,7 @@ Le système valide automatiquement :
 - Présence de toutes les colonnes requises
 - Absence de colonnes inconnues
 - Format des dates (YYYY-MM-DD)
-- Types de données numériques pour l'exposition
+- Types de données numériques pour l'exposure
 
 ✅ **Validations métier** :
 - `insured_name` en MAJUSCULES uniquement

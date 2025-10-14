@@ -16,8 +16,8 @@ def test_exclusion_mechanism():
     - Certaines polices doivent être exclues selon les critères
     
     CALCULS ATTENDUS:
-    - Les polices exclues ont une exposition effective à 0
-    - Les polices incluses ont une cession de 25% de leur exposition
+    - Les polices exclues ont une exposure effective à 0
+    - Les polices incluses ont une cession de 25% de leur exposure
     - Le statut d'exclusion est correctement reporté
     """
     # Créer le programme avec exclusions
@@ -43,7 +43,7 @@ def test_exclusion_mechanism():
         "INSURED_NAME": ["AIR FRANCE", "IRAN AIR", "LUFTHANSA", "AEROFLOT", "EMIRATES", "SANCTIONED AIRLINE", "BRITISH AIRWAYS"],
         "BUSCL_COUNTRY_CD": ["France", "Iran", "Germany", "Russia", "United Arab Emirates", "Syria", "United Kingdom"],
         "BUSCL_REGION": ["Europe", "Middle East", "Europe", "Europe", "Middle East", "Sanctioned", "Europe"],
-        "exposition": [250_000, 30_000, 40_000, 35_000, 52_000, 20_000, 41_000],
+        "exposure": [250_000, 30_000, 40_000, 35_000, 52_000, 20_000, 41_000],
         "INCEPTION_DT": ["2024-01-01", "2024-02-15", "2024-03-01", "2024-01-15", "2024-04-01", "2024-02-01", "2024-05-01"],
         "EXPIRE_DT": ["2025-12-31", "2025-02-14", "2025-02-28", "2025-01-14", "2025-03-31", "2025-01-31", "2025-04-30"],
         "BUSCL_CLASS_OF_BUSINESS_1": [None] * 7,

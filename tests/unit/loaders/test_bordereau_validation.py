@@ -21,7 +21,7 @@ def test_valid_bordereau():
 
 def test_bordereau_with_warnings():
     print("=" * 80)
-    print("TEST 2: Bordereau with Warnings (zero exposition, duplicates)")
+    print("TEST 2: Bordereau with Warnings (zero exposure, duplicates)")
     print("=" * 80)
 
     test_data = pd.DataFrame(
@@ -32,7 +32,7 @@ def test_bordereau_with_warnings():
             "BUSCL_REGION": ["NA", "EU", "EU"],
             "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
             "line_of_business": ["Aviation", "Property", "Aviation"],
-            "exposition": [0, 25.5, 30.0],
+            "exposure": [0, 25.5, 30.0],
             "INCEPTION_DT": ["2024-01-01", "2024-02-01", "2024-03-01"],
             "EXPIRE_DT": ["2024-12-31", "2025-01-31", "2025-02-28"],
         }
@@ -64,7 +64,7 @@ def test_invalid_bordereau():
             "INSURED_NAME": ["COMPANY A", "COMPANY B", "COMPANY C"],
             "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
             "line_of_business": ["Test", "Test", "Test"],
-            "exposition": ["abc", -50, 25.5],
+            "exposure": ["abc", -50, 25.5],
             "INCEPTION_DT": ["2024-01-01", "invalid-date", "2024-03-01"],
             "EXPIRE_DT": ["2024-12-31", "2024-12-31", "2023-12-31"],
         }
@@ -118,7 +118,7 @@ def test_unknown_columns():
             "policy_id": ["POL-001", "POL-002"],
             "INSURED_NAME": ["COMPANY A", "COMPANY B"],
             "line_of_business": ["Test", "Test"],
-            "exposition": [25.5, 30.0],
+            "exposure": [25.5, 30.0],
             "INCEPTION_DT": ["2024-01-01", "2024-02-01"],
             "EXPIRE_DT": ["2024-12-31", "2025-01-31"],
             "unknown_column": ["value1", "value2"],
@@ -148,7 +148,7 @@ def test_only_required_columns():
             "policy_id": ["POL-001", "POL-002"],
             "INSURED_NAME": ["COMPANY A", "COMPANY B"],
             "line_of_business": ["Test", "Test"],
-            "exposition": [25.5, 30.0],
+            "exposure": [25.5, 30.0],
             "INCEPTION_DT": ["2024-01-01", "2024-02-01"],
             "EXPIRE_DT": ["2024-12-31", "2025-01-31"],
         }
@@ -174,7 +174,7 @@ def test_partial_dimensions():
         {
             "policy_id": ["POL-001", "POL-002"],
             "INSURED_NAME": ["COMPANY A", "COMPANY B"],
-            "exposition": [25.5, 30.0],
+            "exposure": [25.5, 30.0],
             "INCEPTION_DT": ["2024-01-01", "2024-02-01"],
             "EXPIRE_DT": ["2024-12-31", "2025-01-31"],
             "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR"],
@@ -205,7 +205,7 @@ def test_null_dimension_columns():
             "BUSCL_COUNTRY_CD": [None, "US"],
             "BUSCL_LIMIT_CURRENCY_CD": [None, "USD"],
             "line_of_business": ["Test", "Test"],
-            "exposition": [25.5, 30.0],
+            "exposure": [25.5, 30.0],
             "INCEPTION_DT": ["2024-01-01", "2024-02-01"],
             "EXPIRE_DT": ["2024-12-31", "2025-01-31"],
         }
@@ -232,7 +232,7 @@ def test_null_required_columns():
             "policy_id": ["POL-001", None, "POL-003"],
             "INSURED_NAME": [None, "COMPANY B", "COMPANY C"],
             "line_of_business": ["Test", "Test", "Test"],
-            "exposition": [25.5, None, 30.0],
+            "exposure": [25.5, None, 30.0],
             "INCEPTION_DT": ["2024-01-01", "2024-02-01", None],
             "EXPIRE_DT": ["2024-12-31", None, "2025-02-28"],
         }

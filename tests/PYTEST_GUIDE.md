@@ -391,7 +391,7 @@ def test_full_workflow():
     bordereau_df = pd.DataFrame({
         "policy_id": ["POL-001", "POL-002"],
         "INSURED_NAME": ["COMPANY A", "COMPANY B"],
-        "exposition": [1_000_000, 2_000_000],
+        "exposure": [1_000_000, 2_000_000],
         "INCEPTION_DT": ["2024-01-01", "2024-01-01"],
         "EXPIRE_DT": ["2025-01-01", "2025-01-01"],
         "BUSCL_COUNTRY_CD": ["US", "FR"],

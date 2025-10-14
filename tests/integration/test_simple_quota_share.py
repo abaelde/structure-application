@@ -11,7 +11,7 @@ def test_single_line_quota_share_basic():
     - QS_30% : Quota Share 30% (reinsurer share 100%)
     
     BORDEREAU:
-    - Une seule police avec 1,000,000 d'exposition
+    - Une seule police avec 1,000,000 d'exposure
     
     CALCUL ATTENDU:
     - Exposition brute: 1,000,000
@@ -31,7 +31,7 @@ def test_single_line_quota_share_basic():
     test_data = {
         "policy_id": ["POL-001"],
         "INSURED_NAME": ["COMPANY TEST"],
-        "exposition": [1_000_000],
+        "exposure": [1_000_000],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-01-01"],
         "BUSCL_EXCLUDE_CD": [None],
@@ -81,7 +81,7 @@ def test_single_line_quota_share_with_currency_matching():
     - Section EUR: QS 35% pour BUSCL_LIMIT_CURRENCY_CD = EUR
     
     BORDEREAU:
-    - Police en USD avec exposition 1,000,000
+    - Police en USD avec exposure 1,000,000
     
     CALCUL ATTENDU:
     - Doit matcher la section USD
@@ -105,7 +105,7 @@ def test_single_line_quota_share_with_currency_matching():
     test_data = {
         "policy_id": ["POL-USD"],
         "INSURED_NAME": ["COMPANY USD"],
-        "exposition": [1_000_000],
+        "exposure": [1_000_000],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-01-01"],
         "BUSCL_EXCLUDE_CD": [None],

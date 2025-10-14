@@ -19,7 +19,7 @@ structure-application/
 │   ├── loaders/                        # Chargement et validation de données
 │   │   ├── program_loader.py          # Chargement de programmes depuis Excel
 │   │   ├── bordereau_loader.py        # Chargement et validation de bordereaux CSV
-│   │   ├── exposure_mapping.py        # Mapping de colonnes d'exposition par LoB
+│   │   ├── exposure_mapping.py        # Mapping de colonnes d'exposure par LoB
 │   │   └── __init__.py
 │   ├── engine/                         # Moteur de calcul et orchestration
 │   │   ├── calculation_engine.py      # Application de programmes, matching de sections
@@ -65,7 +65,7 @@ Fichier CSV contenant les polices d'assurance avec :
 
 **Colonnes requises :**
 - `INSURED_NAME` : Nom de l'assuré (**DOIT être en MAJUSCULES**)
-- `exposition` : Valeur d'exposition (**en millions**)
+- `exposure` : Valeur d'exposure (**en millions**)
 - `INCEPTION_DT` : Date de souscription de la police (**format YYYY-MM-DD**)
 - `EXPIRE_DT` : Date d'expiration de la police (**format YYYY-MM-DD**)
 - `line_of_business` : Ligne de business
@@ -84,12 +84,12 @@ Fichier CSV contenant les polices d'assurance avec :
 
 **Vérification de l'activité des polices :**
 
-Le système vérifie automatiquement si les polices sont encore actives à la date de calcul. Une police est considérée comme **inactive** si `EXPIRE_DT <= calculation_date`. Les polices inactives ont une exposition effective de 0 et ne génèrent aucune cession.
+Le système vérifie automatiquement si les polices sont encore actives à la date de calcul. Une police est considérée comme **inactive** si `EXPIRE_DT <= calculation_date`. Les polices inactives ont une exposure effective de 0 et ne génèrent aucune cession.
 
 Pour plus de détails, consultez [POLICY_EXPIRY_MECHANISM.md](POLICY_EXPIRY_MECHANISM.md).
 
 ### 2. Produits de base
-- **quota-share** : Application d'un pourcentage de cession (cession_PCT) sur l'exposition
+- **quota-share** : Application d'un pourcentage de cession (cession_PCT) sur l'exposure
 - **Excess of Loss (XoL)** : Couverture au-dessus d'une priorité (attachment_point_100) jusqu'à une limite (limit_occurrence_100)
 
 ### 3. Program
@@ -99,7 +99,7 @@ Le programme définit :
 - **Nom** : Identifiant du programme
 - **Mode** : Comment les structures s'appliquent
   - `sequential` : Les structures s'appliquent successivement (la sortie de l'une devient l'entrée de la suivante)
-  - `parallel` : Chaque structure s'applique indépendamment sur l'exposition initiale
+  - `parallel` : Chaque structure s'applique indépendamment sur l'exposure initiale
 
 ### 4. Structures
 Les structures sont les éléments qui composent un programme. Chaque structure :

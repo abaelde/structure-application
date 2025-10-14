@@ -77,7 +77,7 @@ src/engine/
 - `process_structures(structures, policy_data, dimension_columns, exposure)` : Traite toutes les structures
 
 **Fonctions internes** :
-- `_calculate_input_exposure()` : Calcule l'exposition d'entrée pour une structure
+- `_calculate_input_exposure()` : Calcule l'exposure d'entrée pour une structure
 - `_rescale_section_if_needed()` : Rescale les sections XL après QS
 - `_calculate_retention_pct()` : Calcule le pourcentage de rétention
 - `_add_unapplied_structure_detail()` : Ajoute les détails d'une structure non appliquée

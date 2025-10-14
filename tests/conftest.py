@@ -22,7 +22,7 @@ def sample_valid_bordereau_data():
             "BUSCL_REGION": ["NA", "EU", "EU"],
             "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
             "line_of_business": ["Aviation", "Property", "Aviation"],
-            "exposition": [100.5, 25.5, 30.0],
+            "exposure": [100.5, 25.5, 30.0],
             "INCEPTION_DT": ["2024-01-01", "2024-02-01", "2024-03-01"],
             "EXPIRE_DT": ["2024-12-31", "2025-01-31", "2025-02-28"],
         }

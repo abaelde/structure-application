@@ -67,7 +67,7 @@ XOL_50xs20 (Inuring sur QS_30%)
 ### Assertions testées
 
 ✅ **Calculs exacts** : Chaque montant de cession vérifié à 100$ près  
-✅ **Conservation de l'exposition** : `Exposition = Cession + Rétention` pour chaque police  
+✅ **Conservation de l'exposure** : `Exposition = Cession + Rétention` pour chaque police  
 ✅ **Rescaling correct** : Attachment et Limit ajustés selon le facteur de rétention  
 ✅ **Totaux cohérents** : Somme des cessions = 181M (36M + 65M + 80M)  
 
@@ -116,7 +116,7 @@ VÉRIFICATIONS (ASSERTIONS)
   Total attendu:  181,000,000 ✓
   Total calculé: 181,000,000.00 ✓
 
-✓ Conservation de l'exposition:
+✓ Conservation de l'exposure:
   Toutes les polices: Exposition = Cession + Retenu ✓
 
 ================================================================================

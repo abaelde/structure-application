@@ -17,7 +17,7 @@ FIELDS = {
     "INDUSTRY": "industry",
     "SIC_CODE": "sic_code",
     "INCLUDE": "include",
-    "EXPOSURE": "exposition",
+    "EXPOSURE": "exposure",
     "INCEPTION_DATE": "INCEPTION_DT",
     "EXPIRY_DATE": "EXPIRE_DT",
 }

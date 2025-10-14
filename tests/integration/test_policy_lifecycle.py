@@ -23,7 +23,7 @@ def test_policy_expiry_mechanism():
 
     test_data = {
         "INSURED_NAME": ["COMPANY A", "COMPANY B", "COMPANY C", "COMPANY D"],
-        "exposition": [1000000, 2000000, 500000, 750000],
+        "exposure": [1000000, 2000000, 500000, 750000],
         "INCEPTION_DT": ["2024-01-01", "2024-06-01", "2023-01-01", "2025-01-01"],
         "EXPIRE_DT": ["2025-01-01", "2025-06-01", "2024-01-01", "2026-01-01"],
         "line_of_business": ["Aviation", "Aviation", "Aviation", "Aviation"],

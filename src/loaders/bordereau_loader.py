@@ -72,7 +72,7 @@ class BordereauLoader:
                 if found_column and found_column != target_column:
                     df = df.rename(columns={found_column: target_column})
                     print(
-                        f"ℹ️  Colonne d'exposition '{found_column}' mappée vers '{target_column}'"
+                        f"ℹ️  Colonne d'exposure '{found_column}' mappée vers '{target_column}'"
                     )
 
                 return df

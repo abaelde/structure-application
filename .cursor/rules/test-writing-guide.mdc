@@ -57,7 +57,7 @@ def test_single_line_quota_share_basic():
     - QS_30% : Quota Share 30% (reinsurer share 100%)
     
     BORDEREAU:
-    - Une seule police avec 1,000,000 d'exposition
+    - Une seule police avec 1,000,000 d'exposure
     
     CALCUL ATTENDU:
     - Exposition brute: 1,000,000
@@ -87,7 +87,7 @@ def test_integration_scenario():
     test_data = {
         "policy_id": ["POL-001"],
         "INSURED_NAME": ["COMPANY"],
-        "exposition": [1_000_000],
+        "exposure": [1_000_000],
         # ... autres colonnes requises
     }
     bordereau_df = pd.DataFrame(test_data)
@@ -123,7 +123,7 @@ test_data = {
     "INSURED_NAME": [...],
     
     # Montants
-    "exposition": [...],
+    "exposure": [...],
     
     # Dates
     "INCEPTION_DT": [...],

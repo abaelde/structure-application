@@ -12,7 +12,7 @@ def test_double_quota_share_parallel():
     - QS_15% : Quota Share 15% (reinsurer share 100%)
     
     BORDEREAU:
-    - Une seule police avec 1,000,000 d'exposition
+    - Une seule police avec 1,000,000 d'exposure
     
     CALCUL ATTENDU:
     - Exposition brute: 1,000,000
@@ -22,7 +22,7 @@ def test_double_quota_share_parallel():
     - Retenu (75%): 750,000
     
     PRINCIPE:
-    - Les deux quota shares s'appliquent sur la même exposition brute
+    - Les deux quota shares s'appliquent sur la même exposure brute
     - Les cessions s'additionnent
     - Retenu = Exposition brute - Total des cessions
     """
@@ -37,7 +37,7 @@ def test_double_quota_share_parallel():
     test_data = {
         "policy_id": ["POL-001"],
         "INSURED_NAME": ["COMPANY TEST"],
-        "exposition": [1_000_000],
+        "exposure": [1_000_000],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-01-01"],
         "BUSCL_EXCLUDE_CD": [None],

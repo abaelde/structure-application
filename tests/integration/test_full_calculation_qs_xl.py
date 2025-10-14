@@ -61,7 +61,7 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     test_data = {
         "policy_id": ["POL-A", "POL-B", "POL-C"],
         "INSURED_NAME": ["Company A", "Company B", "Company C"],
-        "exposition": [50_000_000, 100_000_000, 150_000_000],
+        "exposure": [50_000_000, 100_000_000, 150_000_000],
         "INCEPTION_DT": ["2024-01-01", "2024-01-01", "2024-01-01"],
         "EXPIRE_DT": ["2025-01-01", "2025-01-01", "2025-01-01"],
         # Toutes les colonnes dimensionnelles requises
@@ -124,7 +124,7 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     expected_total = expected_cession_a + expected_cession_b + expected_cession_c
     assert abs(total_cession_layer - expected_total) < tolerance * 3
     
-    # Vérification de la conservation de l'exposition
+    # Vérification de la conservation de l'exposure
     for idx in range(len(results_df)):
         result = results_df.iloc[idx]
         exposure = result["exposure"]

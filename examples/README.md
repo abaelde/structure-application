@@ -110,7 +110,7 @@ uv run python examples/scripts/create_program_config.py
 
 Colonnes requises :
 - `policy_id` : Numéro de la police
-- `exposition` : Montant de l'exposition
+- `exposure` : Montant de l'exposure
 - `inception_date` : Date de souscription
 - `expiry_date` : Date d'expiration
 - Colonnes de dimensions pour le matching

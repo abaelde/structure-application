@@ -9,7 +9,7 @@ Le système de réassurance supporte maintenant un mécanisme d'exclusion permet
 ### Principe
 
 Lorsqu'une police matche une section d'exclusion :
-- **L'exposition effective devient 0**
+- **L'exposure effective devient 0**
 - Aucune cession n'est calculée
 - La police est marquée comme "excluded" dans les résultats
 
@@ -18,7 +18,7 @@ Lorsqu'une police matche une section d'exclusion :
 Pour chaque police du bordereau, le système vérifie **dans cet ordre** :
 
 1. **Exclusions** : La police matche-t-elle une section d'exclusion ?
-   - Si OUI → exposition = 0, arrêt du traitement
+   - Si OUI → exposure = 0, arrêt du traitement
    - Si NON → continuer
 
 2. **Cas particuliers** : Sections avec conditions spécifiques (haute spécificité)
@@ -168,7 +168,7 @@ Modifiée pour vérifier les exclusions **en premier** avant d'appliquer le prog
 
 2. **Matching** : Les sections d'exclusion utilisent le même mécanisme de matching par spécificité que les sections normales
 
-3. **Exposition** : L'exposition originale est conservée pour tracking, mais l'exposition effective est mise à 0
+3. **Exposition** : L'exposure originale est conservée pour tracking, mais l'exposure effective est mise à 0
 
 4. **Rétrocompatibilité** : Les programmes sans exclusions fonctionnent normalement (tous les champs `BUSCL_EXCLUDE_CD` sont vides)
 

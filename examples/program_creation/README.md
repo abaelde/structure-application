@@ -116,7 +116,7 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 Le **mécanisme d'inuring** permet de chaîner les structures de réassurance :
 
 1. **Entry points** : Structures sans prédécesseur (INSPER_PREDECESSOR_TITLE = NULL)
-   - S'appliquent directement sur l'exposition initiale de la police
+   - S'appliquent directement sur l'exposure initiale de la police
    - Peuvent être multiples (structures parallèles)
 
 2. **Structures chaînées** : Structures avec prédécesseur
@@ -129,7 +129,7 @@ Le **mécanisme d'inuring** permet de chaîner les structures de réassurance :
 
 **Exemple :**
 ```
-QS_1 (predecessor: None)     → Entry point, appliqué sur exposition initiale
+QS_1 (predecessor: None)     → Entry point, appliqué sur exposure initiale
 ├─ XOL_1 (predecessor: QS_1) → Appliqué sur rétention du QS_1
 ├─ XOL_2 (predecessor: QS_1) → Appliqué sur rétention du QS_1 (parallèle à XOL_1)
 └─ XOL_3 (predecessor: QS_1) → Appliqué sur rétention du QS_1 (parallèle à XOL_1 et XOL_2)

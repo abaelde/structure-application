@@ -31,7 +31,7 @@ src/loaders/
 **Fonctionnalités** :
 - Détection automatique du type de fichier (CSV)
 - Détection automatique de la ligne métier depuis le path
-- Mapping automatique des colonnes d'exposition (via `exposure_mapping.py`)
+- Mapping automatique des colonnes d'exposure (via `exposure_mapping.py`)
 - Option pour valider ou non lors du chargement
 
 **Classe principale** : `BordereauLoader`
@@ -142,7 +142,7 @@ bordereau_validator.py
 
 2. BordereauLoader.load()
    ├── _load_from_csv()
-   │   └── Mappe les colonnes d'exposition
+   │   └── Mappe les colonnes d'exposure
    └── Si validate=True:
        └── BordereauValidator.validate()
            ├── Exécute toutes les validations

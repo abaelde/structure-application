@@ -309,7 +309,7 @@ Scénarios de test manquants:
 # Tests pour BordereauLoader:
 - ✗ Chargement CSV valide
 - ✗ Détection automatique de line_of_business depuis path
-- ✗ Mapping des colonnes d'exposition (exposure_mapping)
+- ✗ Mapping des colonnes d'exposure (exposure_mapping)
 - ✗ Conversion de types
 - ✗ Génération de policy_id si manquant
 - ✗ Fichier avec encodage différent
@@ -331,7 +331,7 @@ Scénarios de test manquants:
 - ✗ Aviation avec "hull_limit" trouvé
 - ✗ Aviation avec "liab_limit" trouvé
 - ✗ Casualty avec "limit" trouvé
-- ✗ Test avec "expo"/"exposition"
+- ✗ Test avec "expo"/"exposure"
 - ✗ LOB inconnu (retourne None)
 - ✗ LOB = None
 - ✗ Colonne non trouvée dans le DF
