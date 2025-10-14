@@ -29,9 +29,18 @@ def validate_exposure_columns(df_columns: list, underwriting_department: str) ->
 
 
 def _validate_casualty_exposure_columns(df_columns: list) -> None:
+    missing_columns = []
+    
     if "LIMIT" not in df_columns:
+        missing_columns.append("LIMIT")
+    
+    if "CEDENT_SHARE" not in df_columns:
+        missing_columns.append("CEDENT_SHARE")
+    
+    if missing_columns:
         raise ExposureValidationError(
-            f"Casualty bordereau must have LIMIT column. "
+            f"Casualty bordereau must have LIMIT and CEDENT_SHARE columns. "
+            f"Missing: {', '.join(missing_columns)}. "
             f"Found columns: {', '.join(df_columns)}"
         )
 

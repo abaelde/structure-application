@@ -169,25 +169,29 @@ class TestCasualtyExposureCalculator:
         calculator = CasualtyExposureCalculator()
         policy_data = {
             "LIMIT": 1_000_000,
+            "CEDENT_SHARE": 0.75,
         }
         
         result = calculator.calculate(policy_data)
         
-        assert result == 1_000_000
+        assert result == 750_000
 
     def test_calculate_with_string_value(self):
         calculator = CasualtyExposureCalculator()
         policy_data = {
             "LIMIT": "1000000",
+            "CEDENT_SHARE": "0.75",
         }
         
         result = calculator.calculate(policy_data)
         
-        assert result == 1_000_000
+        assert result == 750_000
 
     def test_calculate_missing_limit(self):
         calculator = CasualtyExposureCalculator()
-        policy_data = {}
+        policy_data = {
+            "CEDENT_SHARE": 0.75,
+        }
         
         with pytest.raises(ExposureCalculationError) as exc_info:
             calculator.calculate(policy_data)
@@ -195,10 +199,23 @@ class TestCasualtyExposureCalculator:
         assert "Missing required exposure column" in str(exc_info.value)
         assert "LIMIT" in str(exc_info.value)
 
+    def test_calculate_missing_cedent_share(self):
+        calculator = CasualtyExposureCalculator()
+        policy_data = {
+            "LIMIT": 1_000_000,
+        }
+        
+        with pytest.raises(ExposureCalculationError) as exc_info:
+            calculator.calculate(policy_data)
+        
+        assert "Missing required exposure column" in str(exc_info.value)
+        assert "CEDENT_SHARE" in str(exc_info.value)
+
     def test_calculate_invalid_numeric_value(self):
         calculator = CasualtyExposureCalculator()
         policy_data = {
             "LIMIT": "invalid",
+            "CEDENT_SHARE": 0.75,
         }
         
         with pytest.raises(ExposureCalculationError) as exc_info:
@@ -210,7 +227,7 @@ class TestCasualtyExposureCalculator:
         calculator = CasualtyExposureCalculator()
         required = calculator.get_required_columns()
         
-        assert required == ["LIMIT"]
+        assert required == ["LIMIT", "CEDENT_SHARE"]
 
 
 class TestTestExposureCalculator:

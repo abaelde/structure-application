@@ -73,6 +73,7 @@ class AviationExposureCalculator(ExposureCalculator):
 class CasualtyExposureCalculator(ExposureCalculator):
     def calculate(self, policy_data: Dict[str, Any]) -> float:
         limit = policy_data.get("LIMIT")
+        cedent_share = policy_data.get("CEDENT_SHARE")
 
         if limit is None:
             raise ExposureCalculationError(
@@ -80,15 +81,23 @@ class CasualtyExposureCalculator(ExposureCalculator):
                 f"Required: LIMIT. Found: LIMIT={limit}"
             )
 
+        if cedent_share is None:
+            raise ExposureCalculationError(
+                f"Missing required exposure column for Casualty. "
+                f"Required: CEDENT_SHARE. Found: CEDENT_SHARE={cedent_share}"
+            )
+
         try:
-            return float(limit)
+            limit_float = float(limit)
+            cedent_share_float = float(cedent_share)
+            return limit_float * cedent_share_float
         except (ValueError, TypeError) as e:
             raise ExposureCalculationError(
-                f"Invalid numeric value in Casualty exposure column LIMIT: {e}"
+                f"Invalid numeric value in Casualty exposure columns: {e}"
             )
 
     def get_required_columns(self) -> list[str]:
-        return ["LIMIT"]
+        return ["LIMIT", "CEDENT_SHARE"]
 
 
 class TestExposureCalculator(ExposureCalculator):
