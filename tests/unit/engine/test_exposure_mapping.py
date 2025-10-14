@@ -29,21 +29,10 @@ def test_exposure_mapping_success_aviation():
     )
     
     bordereau_df = pd.DataFrame({
-        "policy_id": ["POL-001"],
         "INSURED_NAME": ["TEST COMPANY"],
         "HULL_LIMIT": [1_000_000],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-01-01"],
-        "line_of_business": ["aviation"],
-        "BUSCL_EXCLUDE_CD": [None],
-        "BUSCL_ENTITY_NAME_CED": [None],
-        "POL_RISK_NAME_CED": [None],
-        "BUSCL_COUNTRY_CD": [None],
-        "BUSCL_REGION": [None],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None],
-        "BUSCL_LIMIT_CURRENCY_CD": [None],
     })
     
     calculation_date = "2024-06-01"
@@ -79,12 +68,10 @@ def test_exposure_mapping_failure_wrong_column():
     )
     
     bordereau_df = pd.DataFrame({
-        "policy_id": ["POL-001"],
         "INSURED_NAME": ["TEST COMPANY"],
         "LIMIT": [1_000_000],
         "INCEPTION_DT": ["2024-01-01"],
-        "EXPIRE_DT": ["2024-12-31"],
-        "line_of_business": ["aviation"],
+        "EXPIRE_DT": ["2025-01-01"],
     })
     
     with pytest.raises(ExposureMappingError) as exc_info:
