@@ -29,20 +29,10 @@ def test_single_line_quota_share_basic():
     )
     
     test_data = {
-        "policy_id": ["POL-001"],
         "INSURED_NAME": ["COMPANY TEST"],
         "exposure": [1_000_000],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-01-01"],
-        "BUSCL_EXCLUDE_CD": [None],
-        "BUSCL_ENTITY_NAME_CED": [None],
-        "POL_RISK_NAME_CED": [None],
-        "BUSCL_COUNTRY_CD": ["US"],
-        "BUSCL_REGION": [None],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None],
-        "BUSCL_LIMIT_CURRENCY_CD": ["USD"],
     }
     
     bordereau_df = pd.DataFrame(test_data)
@@ -103,19 +93,10 @@ def test_single_line_quota_share_with_currency_matching():
     )
     
     test_data = {
-        "policy_id": ["POL-USD"],
         "INSURED_NAME": ["COMPANY USD"],
         "exposure": [1_000_000],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-01-01"],
-        "BUSCL_EXCLUDE_CD": [None],
-        "BUSCL_ENTITY_NAME_CED": [None],
-        "POL_RISK_NAME_CED": [None],
-        "BUSCL_COUNTRY_CD": [None],
-        "BUSCL_REGION": [None],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None],
         "BUSCL_LIMIT_CURRENCY_CD": ["USD"],
     }
     

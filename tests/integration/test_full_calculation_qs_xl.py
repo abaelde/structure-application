@@ -59,21 +59,10 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     # 2. Créer le bordereau de test
     
     test_data = {
-        "policy_id": ["POL-A", "POL-B", "POL-C"],
         "INSURED_NAME": ["Company A", "Company B", "Company C"],
         "exposure": [50_000_000, 100_000_000, 150_000_000],
         "INCEPTION_DT": ["2024-01-01", "2024-01-01", "2024-01-01"],
         "EXPIRE_DT": ["2025-01-01", "2025-01-01", "2025-01-01"],
-        # Toutes les colonnes dimensionnelles requises
-        "BUSCL_EXCLUDE_CD": [None, None, None],
-        "BUSCL_ENTITY_NAME_CED": [None, None, None],
-        "POL_RISK_NAME_CED": [None, None, None],
-        "BUSCL_COUNTRY_CD": ["US", "US", "US"],
-        "BUSCL_REGION": [None, None, None],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None, None, None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None, None, None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None, None, None],
-        "BUSCL_LIMIT_CURRENCY_CD": ["USD", "USD", "USD"],
     }
     
     bordereau_df = pd.DataFrame(test_data)
