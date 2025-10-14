@@ -10,7 +10,6 @@ from .exposure_calculator import (
 )
 from .exposure_validation import (
     validate_exposure_columns,
-    REQUIRED_EXPOSURE_COLUMNS,
     ExposureValidationError,
 )
 
@@ -24,6 +23,5 @@ __all__ = [
     "TestExposureCalculator",
     "ExposureCalculationError",
     "validate_exposure_columns",
-    "REQUIRED_EXPOSURE_COLUMNS",
     "ExposureValidationError",
 ]
