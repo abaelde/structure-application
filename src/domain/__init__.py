@@ -1,6 +1,8 @@
 from .constants import (
     FIELDS,
     DIMENSIONS,
+    LINE_OF_BUSINESS,
+    LINE_OF_BUSINESS_VALUES,
     PRODUCT,
     PRODUCT_TYPES,
     CLAIM_BASIS,
@@ -15,6 +17,8 @@ from .models import Program, Structure, Section
 __all__ = [
     "FIELDS",
     "DIMENSIONS",
+    "LINE_OF_BUSINESS",
+    "LINE_OF_BUSINESS_VALUES",
     "PRODUCT",
     "PRODUCT_TYPES",
     "CLAIM_BASIS",

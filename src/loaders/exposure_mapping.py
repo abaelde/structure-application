@@ -1,11 +1,14 @@
+from src.domain import LINE_OF_BUSINESS, LINE_OF_BUSINESS_VALUES
+
+
 class ExposureMappingError(Exception):
     pass
 
 
 EXPOSURE_COLUMN_ALIASES = {
-    "aviation": ["hull_limit", "liab_limit"],
-    "casualty": ["limit"],
-    "test": ["expo", "exposure"],
+    LINE_OF_BUSINESS.AVIATION: ["HULL_LIMIT", "LIAB_LIMIT"],
+    LINE_OF_BUSINESS.CASUALTY: ["LIMIT"],
+    LINE_OF_BUSINESS.TEST: ["expo", "exposure"],
 }
 
 
@@ -19,10 +22,10 @@ def find_exposure_column(df_columns: list, line_of_business: str) -> tuple:
 
     lob_lower = line_of_business.lower()
     
-    if lob_lower not in EXPOSURE_COLUMN_ALIASES:
+    if lob_lower not in LINE_OF_BUSINESS_VALUES:
         raise ExposureMappingError(
             f"Unknown line of business '{line_of_business}'. "
-            f"Supported lines of business: {', '.join(EXPOSURE_COLUMN_ALIASES.keys())}"
+            f"Supported lines of business: {', '.join(sorted(LINE_OF_BUSINESS_VALUES))}"
         )
 
     available_names = EXPOSURE_COLUMN_ALIASES[lob_lower]

@@ -36,6 +36,20 @@ DIMENSIONS = [
 ]
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Lines of Business (LOB)
+# ──────────────────────────────────────────────────────────────────────────────
+LINE_OF_BUSINESS = SimpleNamespace(
+    AVIATION="aviation",
+    CASUALTY="casualty",
+    TEST="test",
+)
+LINE_OF_BUSINESS_VALUES = {
+    LINE_OF_BUSINESS.AVIATION,
+    LINE_OF_BUSINESS.CASUALTY,
+    LINE_OF_BUSINESS.TEST,
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Types produits / claim basis (avec noms symboliques + ensembles de validation)
 # ──────────────────────────────────────────────────────────────────────────────
 PRODUCT = SimpleNamespace(
