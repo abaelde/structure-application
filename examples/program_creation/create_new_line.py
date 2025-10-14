@@ -81,8 +81,6 @@ for currency in CURRENCIES:
             "signed_share": REINSURER_SHARE,
             "currency_cd": currency,
             "class_of_business_1": lob,
-            "includes_hull": True,
-            "includes_liability": True,
         })
 
 for currency in CURRENCIES:
@@ -94,8 +92,6 @@ for currency in CURRENCIES:
             "signed_share": REINSURER_SHARE,
             "currency_cd": currency,
             "class_of_business_1": lob,
-            "includes_hull": True,
-            "includes_liability": True,
         })
 
 layer_1 = build_excess_of_loss(
@@ -112,8 +108,6 @@ for currency in CURRENCIES:
         "limit": limit,
         "signed_share": REINSURER_SHARE,
         "currency_cd": currency,
-        "includes_hull": True,
-        "includes_liability": True,
     })
 
 layer_2 = build_excess_of_loss(
@@ -130,8 +124,6 @@ for currency in CURRENCIES:
         "limit": limit,
         "signed_share": REINSURER_SHARE,
         "currency_cd": currency,
-        "includes_hull": True,
-        "includes_liability": True,
     })
 
 layer_3 = build_excess_of_loss(

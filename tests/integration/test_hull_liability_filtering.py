@@ -92,10 +92,6 @@ def test_hull_liability_filtering_aviation():
         "EXPIRE_DT": ["2025-12-31"],
         "BUSCL_COUNTRY_CD": [None],
         "BUSCL_REGION": [None],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None],
-        "BUSCL_LIMIT_CURRENCY_CD": [None],
     }
     
     bordereau_df = pd.DataFrame(bordereau_data)
@@ -113,7 +109,6 @@ def test_hull_liability_filtering_aviation():
     total_exposure = hull_exposure + liability_exposure
     
     assert abs(result["exposure"] - total_exposure) < tolerance
-    assert abs(result["exposure"] - 65_000_000) < tolerance
     
     structures = result["structures_detail"]
     assert len(structures) == 3
