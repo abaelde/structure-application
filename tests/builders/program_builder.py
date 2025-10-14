@@ -7,6 +7,7 @@ def build_program(
     name: str,
     structures: List[Structure],
     dimension_columns: Optional[List[str]] = None,
+    underwriting_department: str = "test",
 ) -> Program:
     """
     Build a Program object directly in memory.
@@ -16,6 +17,7 @@ def build_program(
         structures: List of Structure objects
         dimension_columns: List of dimension column names.
             If None, uses the default DIMENSIONS from constants.
+        underwriting_department: Underwriting department (defaults to "test" for tests)
     
     Returns:
         Program object ready to use
@@ -24,7 +26,8 @@ def build_program(
         qs = build_quota_share(name="QS_30", cession_pct=0.30)
         program = build_program(
             name="SINGLE_QS_2024",
-            structures=[qs]
+            structures=[qs],
+            underwriting_department="aviation"
         )
     """
     if dimension_columns is None:
@@ -34,5 +37,6 @@ def build_program(
         name=name,
         structures=structures,
         dimension_columns=dimension_columns,
+        underwriting_department=underwriting_department,
     )
 

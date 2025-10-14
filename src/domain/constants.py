@@ -36,17 +36,17 @@ DIMENSIONS = [
 ]
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Lines of Business (LOB)
+# Underwriting Departments (valeurs possibles au niveau programme)
 # ──────────────────────────────────────────────────────────────────────────────
-LINE_OF_BUSINESS = SimpleNamespace(
+UNDERWRITING_DEPARTMENT = SimpleNamespace(
     AVIATION="aviation",
     CASUALTY="casualty",
     TEST="test",
 )
-LINE_OF_BUSINESS_VALUES = {
-    LINE_OF_BUSINESS.AVIATION,
-    LINE_OF_BUSINESS.CASUALTY,
-    LINE_OF_BUSINESS.TEST,
+UNDERWRITING_DEPARTMENT_VALUES = {
+    UNDERWRITING_DEPARTMENT.AVIATION,
+    UNDERWRITING_DEPARTMENT.CASUALTY,
+    UNDERWRITING_DEPARTMENT.TEST,
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ SHEETS = SimpleNamespace(
 
 PROGRAM_COLS = SimpleNamespace(
     TITLE="REPROG_TITLE",
-    LINE_OF_BUSINESS="REPROG_UW_DEPARTMENT_LOB_CD",
+    UNDERWRITING_DEPARTMENT="REPROG_UW_DEPARTMENT_LOB_CD",
 )
 
 STRUCTURE_COLS = SimpleNamespace(

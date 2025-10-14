@@ -12,7 +12,6 @@ class BordereauValidator:
         FIELDS["INSURED_NAME"],
         FIELDS["INCEPTION_DATE"],
         FIELDS["EXPIRY_DATE"],
-        FIELDS["LINE_OF_BUSINESS"], # AURE to delete ?
     ]
 
     DIMENSION_COLUMNS = [
@@ -35,12 +34,8 @@ class BordereauValidator:
     EXPOSURE_COLUMNS = [
         "exposure",
         "HULL_LIMIT",
-        "hull_limit",
         "LIAB_LIMIT",
-        "liab_limit",
         "LIMIT",
-        "limit",
-        "expo",
     ]
 
     ALLOWED_COLUMNS = REQUIRED_COLUMNS + DIMENSION_COLUMNS + OPTIONAL_COLUMNS + EXPOSURE_COLUMNS

@@ -104,9 +104,17 @@ class ProgramLoader:
 
         # Step 3: Convert DataFrames to native Python types
         program_name = convert_pandas_to_native(program_df.iloc[0][PROGRAM_COLS.TITLE])
-        program_lob = convert_pandas_to_native(
-            program_df.iloc[0].get(PROGRAM_COLS.LINE_OF_BUSINESS)
+        program_uw_dept = convert_pandas_to_native(
+            program_df.iloc[0].get(PROGRAM_COLS.UNDERWRITING_DEPARTMENT)
         )
+        
+        # Validate that underwriting_department is present (mandatory)
+        if not program_uw_dept:
+            raise ValueError(
+                f"Underwriting department is mandatory for program '{program_name}'. "
+                f"Expected column '{PROGRAM_COLS.UNDERWRITING_DEPARTMENT}' in program sheet."
+            )
+        
         structures_data = dataframe_to_dict_list(structures_df)
         sections_data = dataframe_to_dict_list(sections_df)
 
@@ -138,7 +146,7 @@ class ProgramLoader:
             name=program_name,
             structures=structures,
             dimension_columns=self.dimension_columns,
-            line_of_business=program_lob,
+            underwriting_department=program_uw_dept,
         )
 
     def _load_from_file(self):
