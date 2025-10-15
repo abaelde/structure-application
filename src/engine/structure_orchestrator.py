@@ -10,6 +10,7 @@ def process_structures(
     policy_data: Dict[str, Any],
     dimension_columns: List[str],
     exposure: float,
+    line_of_business: str = None,
 ) -> tuple[List[Dict[str, Any]], float, float]:
     structure_outputs = {}
     structures_detail = []
@@ -22,7 +23,7 @@ def process_structures(
         _process_predecessor_if_needed(structure)
 
         matched_condition = match_condition(
-            policy_data, structure.conditions, dimension_columns
+            policy_data, structure.conditions, dimension_columns, line_of_business
         )
 
         if matched_condition is None:
