@@ -25,7 +25,7 @@ class TestMapCurrencyCondition:
         assert result is True
     
     def test_aviation_matching_liability_currency(self):
-        """Test aviation matching when liability currency matches"""
+        """Test aviation when liability currency matches but hull doesn't - should use hull currency (USD)"""
         condition_value = "EUR"
         policy_data = {
             "HULL_CURRENCY": "USD",
@@ -35,7 +35,8 @@ class TestMapCurrencyCondition:
         
         result = map_currency_condition(condition_value, policy_data, line_of_business)
         
-        assert result is True
+        # With simplified system, we only use HULL_CURRENCY, so USD != EUR
+        assert result is False
     
     def test_aviation_no_match(self):
         """Test aviation when neither currency matches"""

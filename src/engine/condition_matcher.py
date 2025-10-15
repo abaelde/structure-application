@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import Dict, Any, Optional, List
-from src.domain import condition, CURRENCY_COLUMN_ALIASES
+from src.domain import condition
+from src.domain.dimension_mapping import get_policy_value
 
 
 def map_currency_condition(
@@ -10,7 +11,7 @@ def map_currency_condition(
 ) -> bool:
     """
     Map currency condition from program (BUSCL_LIMIT_CURRENCY_CD) to bordereau columns
-    based on line of business.
+    using the new dimension mapping system.
     
     Args:
         condition_value: The currency value from the program condition
@@ -23,27 +24,14 @@ def map_currency_condition(
     if pd.isna(condition_value):
         return True
     
-    line_of_business_lower = line_of_business.lower() if line_of_business else ""
+    # Use the new dimension mapping system
+    policy_currency = get_policy_value(policy_data, "BUSCL_LIMIT_CURRENCY_CD", line_of_business)
     
-    if line_of_business_lower == "aviation":
-        # Aviation: Check if condition currency matches either HULL_CURRENCY or LIABILITY_CURRENCY
-        hull_currency = policy_data.get("HULL_CURRENCY")
-        liability_currency = policy_data.get("LIABILITY_CURRENCY")
-        
-        return (hull_currency == condition_value or liability_currency == condition_value)
+    # If currency is not found in bordereau, condition matches (default regime)
+    if policy_currency is None:
+        return True
     
-    elif line_of_business_lower == "casualty":
-        # Casualty: Check if condition currency matches CURRENCY
-        currency = policy_data.get("CURRENCY")
-        return currency == condition_value
-    
-    # Fallback: try to match with any currency column
-    currency_columns = CURRENCY_COLUMN_ALIASES.get(line_of_business_lower, ["CURRENCY"])
-    for col in currency_columns:
-        if policy_data.get(col) == condition_value:
-            return True
-    
-    return False
+    return policy_currency == condition_value
 
 
 def check_exclusion(
@@ -66,8 +54,8 @@ def check_exclusion(
                         matches = False
                         break
                 else:
-                    # Standard dimension matching
-                    policy_value = policy_data.get(dimension)
+                    # Standard dimension matching using new mapping system
+                    policy_value = get_policy_value(policy_data, dimension, line_of_business)
                     if policy_value != condition_value:
                         matches = False
                         break
@@ -100,8 +88,8 @@ def match_condition(
                         matches = False
                         break
                 else:
-                    # Standard dimension matching
-                    policy_value = policy_data.get(dimension)
+                    # Standard dimension matching using new mapping system
+                    policy_value = get_policy_value(policy_data, dimension, line_of_business)
                     if policy_value != condition_value:
                         matches = False
                         break
