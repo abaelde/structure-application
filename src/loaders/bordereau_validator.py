@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import List
-from src.domain import FIELDS
+from src.domain import FIELDS, CURRENCY_COLUMN_ALIASES
 
 
 class BordereauValidationError(Exception):
@@ -21,6 +21,8 @@ class BordereauValidator:
         FIELDS["CLASS_2"],
         FIELDS["CLASS_3"],
         FIELDS["CURRENCY"],
+        FIELDS["HULL_CURRENCY"],
+        FIELDS["LIABILITY_CURRENCY"],
         FIELDS["LINE_OF_BUSINESS"],
     ]
 
@@ -45,8 +47,13 @@ class BordereauValidator:
 
     DATE_COLUMNS = [FIELDS["INCEPTION_DATE"], FIELDS["EXPIRY_DATE"]]
 
-    def __init__(self, df: pd.DataFrame):
+    # Currency columns by line of business
+    AVIATION_CURRENCY_COLUMNS = ["HULL_CURRENCY", "LIABILITY_CURRENCY"]
+    CASUALTY_CURRENCY_COLUMNS = ["CURRENCY"]
+
+    def __init__(self, df: pd.DataFrame, line_of_business: str = None):
         self.df = df
+        self.line_of_business = line_of_business
         self.validation_warnings: List[str] = []
         self.validation_errors: List[str] = []
 
@@ -60,6 +67,7 @@ class BordereauValidator:
         self._validate_dates()
         self._validate_insured_name_uppercase()
         self._validate_business_logic()
+        self._validate_currency_presence()
 
         if self.validation_errors:
             raise BordereauValidationError(
@@ -192,7 +200,45 @@ class BordereauValidator:
                 )
             )
 
+    def _validate_currency_presence(self):
+        if not self.line_of_business:
+            return
 
-def validate_bordereau(df: pd.DataFrame) -> bool:
-    validator = BordereauValidator(df)
+        line_of_business_lower = self.line_of_business.lower()
+        
+        if line_of_business_lower == "aviation":
+            self._validate_aviation_currency()
+        elif line_of_business_lower == "casualty":
+            self._validate_casualty_currency()
+
+    def _validate_aviation_currency(self):
+        hull_present = "HULL_CURRENCY" in self.df.columns
+        liability_present = "LIABILITY_CURRENCY" in self.df.columns
+        
+        if not (hull_present or liability_present):
+            self.validation_errors.append(
+                "Aviation bordereau must have at least HULL_CURRENCY or LIABILITY_CURRENCY"
+            )
+        
+        # Check for old currency column
+        if "BUSCL_LIMIT_CURRENCY_CD" in self.df.columns:
+            self.validation_errors.append(
+                "BUSCL_LIMIT_CURRENCY_CD not allowed in aviation, use HULL_CURRENCY/LIABILITY_CURRENCY"
+            )
+
+    def _validate_casualty_currency(self):
+        if "CURRENCY" not in self.df.columns:
+            self.validation_errors.append(
+                "Casualty bordereau must have CURRENCY column"
+            )
+        
+        # Check for old currency column
+        if "BUSCL_LIMIT_CURRENCY_CD" in self.df.columns:
+            self.validation_errors.append(
+                "BUSCL_LIMIT_CURRENCY_CD not allowed in casualty, use CURRENCY"
+            )
+
+
+def validate_bordereau(df: pd.DataFrame, line_of_business: str = None) -> bool:
+    validator = BordereauValidator(df, line_of_business)
     return validator.validate()

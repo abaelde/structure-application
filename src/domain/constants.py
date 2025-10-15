@@ -12,7 +12,9 @@ FIELDS = {
     "CLASS_1": "BUSCL_CLASS_OF_BUSINESS_1",
     "CLASS_2": "BUSCL_CLASS_OF_BUSINESS_2",
     "CLASS_3": "BUSCL_CLASS_OF_BUSINESS_3",
-    "CURRENCY": "BUSCL_LIMIT_CURRENCY_CD",
+    "CURRENCY": "CURRENCY",
+    "HULL_CURRENCY": "HULL_CURRENCY",
+    "LIABILITY_CURRENCY": "LIABILITY_CURRENCY",
     "LINE_OF_BUSINESS": "line_of_business",
     "INDUSTRY": "industry",
     "SIC_CODE": "sic_code",
@@ -32,7 +34,9 @@ DIMENSIONS = [
     "BUSCL_CLASS_OF_BUSINESS_1",
     "BUSCL_CLASS_OF_BUSINESS_2",
     "BUSCL_CLASS_OF_BUSINESS_3",
-    "BUSCL_LIMIT_CURRENCY_CD",
+    "CURRENCY",
+    "HULL_CURRENCY",
+    "LIABILITY_CURRENCY",
 ]
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -63,6 +67,20 @@ CLAIM_BASIS = SimpleNamespace(
     LOSS_OCCURRING="loss_occurring",
 )
 CLAIM_BASIS_VALUES = {CLAIM_BASIS.RISK_ATTACHING, CLAIM_BASIS.LOSS_OCCURRING}
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Currency validation by line of business
+# ──────────────────────────────────────────────────────────────────────────────
+CURRENCY_FIELDS = {
+    "AVIATION_HULL": "HULL_CURRENCY",
+    "AVIATION_LIABILITY": "LIABILITY_CURRENCY", 
+    "CASUALTY": "CURRENCY",
+}
+
+CURRENCY_COLUMN_ALIASES = {
+    "aviation": ["HULL_CURRENCY", "LIABILITY_CURRENCY"],
+    "casualty": ["CURRENCY"],
+}
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Excel: noms des feuilles et colonnes
