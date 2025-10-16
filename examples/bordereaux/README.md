@@ -254,6 +254,6 @@ from src.domain.bordereau import Bordereau
 bordereau = Bordereau.from_csv("examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv")
 
 # Ou spécification manuelle
-bordereau = Bordereau.from_csv("path/to/bordereau.csv", line_of_business="aviation")
+bordereau = Bordereau.from_csv("path/to/bordereau.csv", uw_dept="aviation")
 ```
 

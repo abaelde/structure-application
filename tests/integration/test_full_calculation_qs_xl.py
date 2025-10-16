@@ -83,7 +83,7 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     bordereau_df = pd.DataFrame(test_data)
 
     # 3. Application du programme
-    bordereau = Bordereau(bordereau_df, line_of_business="test")
+    bordereau = Bordereau(bordereau_df, uw_dept="test")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
         bordereau, program, calculation_date=calculation_date

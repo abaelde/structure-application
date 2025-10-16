@@ -13,7 +13,7 @@ def test_policy_exposure_bundle_aviation():
         "LIABILITY_SHARE": 0.10,
     }
     
-    policy = Policy(raw=policy_data, lob="aviation")
+    policy = Policy(raw=policy_data, uw_dept="aviation")
     
     bundle = policy.exposure_bundle("aviation")
     
@@ -32,7 +32,7 @@ def test_policy_exposure_bundle_casualty():
         "CEDENT_SHARE": 0.5,
     }
     
-    policy = Policy(raw=policy_data, lob="casualty")
+    policy = Policy(raw=policy_data, uw_dept="casualty")
     
     bundle = policy.exposure_bundle("casualty")
     
@@ -49,7 +49,7 @@ def test_policy_exposure_bundle_test():
         "exposure": 75_000_000,
     }
     
-    policy = Policy(raw=policy_data, lob="test")
+    policy = Policy(raw=policy_data, uw_dept="test")
     
     bundle = policy.exposure_bundle("test")
     
@@ -69,7 +69,7 @@ def test_policy_exposure_bundle_caching():
         "LIABILITY_SHARE": 0.10,
     }
     
-    policy = Policy(raw=policy_data, lob="aviation")
+    policy = Policy(raw=policy_data, uw_dept="aviation")
     
     # Premier appel
     bundle1 = policy.exposure_bundle("aviation")

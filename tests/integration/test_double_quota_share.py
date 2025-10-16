@@ -62,7 +62,7 @@ def test_double_quota_share_parallel():
     }
 
     bordereau_df = pd.DataFrame(test_data)
-    bordereau = Bordereau(bordereau_df, line_of_business="test")
+    bordereau = Bordereau(bordereau_df, uw_dept="test")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
         bordereau, program, calculation_date=calculation_date

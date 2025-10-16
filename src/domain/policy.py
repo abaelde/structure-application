@@ -18,7 +18,7 @@ class Policy:
     """
 
     raw: Dict[str, Any]
-    lob: Optional[str] = None  # "aviation" | "casualty" | "test"
+    uw_dept: Optional[str] = None  # "aviation" | "casualty" | "test" - underwriting department
 
     _inception: Optional[pd.Timestamp] = field(default=None, init=False, repr=False)
     _expiry: Optional[pd.Timestamp] = field(default=None, init=False, repr=False)
@@ -68,7 +68,7 @@ class Policy:
         """Utilise le mapping de dimensions pour récupérer la valeur."""
         from src.domain.dimension_mapping import get_policy_value
 
-        return get_policy_value(self.raw, dimension, self.lob)
+        return get_policy_value(self.raw, dimension, self.uw_dept)
 
     # --- Exposition (et composants) ---
     def exposure_bundle(self, uw_dept: str) -> ExposureBundle:

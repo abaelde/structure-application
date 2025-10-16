@@ -17,8 +17,8 @@ class StructureProcessor:
         self.program = program
         self.structures = program.structures
         self.dimension_columns = program.dimension_columns
-        self.line_of_business = program.underwriting_department
-        self.base_bundle = policy.exposure_bundle(self.line_of_business)
+        self.uw_dept = program.underwriting_department
+        self.base_bundle = policy.exposure_bundle(self.uw_dept)
 
         # Mémorise l'état utile pour le chaînage (retention, type, etc.)
         self._state_by_structure: Dict[str, Dict[str, Any]] = {}
@@ -124,7 +124,7 @@ class StructureProcessor:
 
     def _components_set(self, matched: Optional[Condition]) -> Set[str]:
         """Scope d'exposition explicite pour Aviation ; vide = 'total'."""
-        if (self.line_of_business or "").lower() != "aviation":
+        if (self.uw_dept or "").lower() != "aviation": # AURE cas  vide ?
             return set()
         inc_h = True if matched is None or matched.includes_hull is None else bool(matched.includes_hull)
         inc_l = True if matched is None or matched.includes_liability is None else bool(matched.includes_liability)

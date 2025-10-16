@@ -103,7 +103,7 @@ def test_hull_liability_filtering_aviation():
 
     bordereau_df = pd.DataFrame(bordereau_data)
 
-    bordereau = Bordereau(bordereau_df, line_of_business="aviation")
+    bordereau = Bordereau(bordereau_df, uw_dept="aviation")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
         bordereau, program, calculation_date=calculation_date
@@ -232,7 +232,7 @@ def test_hull_only_structure():
 
     bordereau_df = pd.DataFrame(bordereau_data)
 
-    bordereau = Bordereau(bordereau_df, line_of_business="aviation")
+    bordereau = Bordereau(bordereau_df, uw_dept="aviation")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
         bordereau, program, calculation_date=calculation_date
@@ -309,7 +309,7 @@ def test_liability_only_structure():
 
     bordereau_df = pd.DataFrame(bordereau_data)
 
-    bordereau = Bordereau(bordereau_df, line_of_business="aviation")
+    bordereau = Bordereau(bordereau_df, uw_dept="aviation")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
         bordereau, program, calculation_date=calculation_date
@@ -378,7 +378,7 @@ def test_casualty_unaffected_by_hull_liability_flags():
 
     bordereau_df = pd.DataFrame(bordereau_data)
 
-    bordereau = Bordereau(bordereau_df, line_of_business="casualty")
+    bordereau = Bordereau(bordereau_df, uw_dept="casualty")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
         bordereau, program, calculation_date=calculation_date

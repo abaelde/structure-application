@@ -83,7 +83,7 @@ def test_exclusion_mechanism():
     }
 
     bordereau_df = pd.DataFrame(test_data)
-    bordereau = Bordereau(bordereau_df, line_of_business="test")
+    bordereau = Bordereau(bordereau_df, uw_dept="test")
 
     __, results = apply_program_to_bordereau(
         bordereau, program, calculation_date="2024-06-01"

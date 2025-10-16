@@ -49,7 +49,7 @@ def test_exposure_mapping_success_aviation():
         }
     )
 
-    bordereau = Bordereau(bordereau_df, line_of_business="aviation")
+    bordereau = Bordereau(bordereau_df, uw_dept="aviation")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
         bordereau, program, calculation_date=calculation_date
@@ -101,7 +101,7 @@ def test_exposure_mapping_failure_wrong_column():
         }
     )
 
-    bordereau = Bordereau(bordereau_df, line_of_business="aviation")
+    bordereau = Bordereau(bordereau_df, uw_dept="aviation")
     with pytest.raises(BordereauValidationError) as exc_info:
         apply_program_to_bordereau(bordereau, program, calculation_date="2024-06-01")
 

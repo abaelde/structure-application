@@ -3,11 +3,12 @@ from typing import Dict, Any
 from .calculation_engine import apply_program
 from ..domain.bordereau import Bordereau
 from ..domain.policy import Policy
+from ..domain.models import Program
 
 
 def apply_program_to_row(
     row_data: Dict[str, Any],
-    program: Dict[str, Any],
+    program: Program,
     calculation_date: str,
 ) -> Dict[str, Any]:
     """
@@ -15,8 +16,9 @@ def apply_program_to_row(
     Compatible avec l'approche DataFrame.apply() pour Snowpark.
     """
     # Créer une Policy temporaire pour cette ligne
-    lob = getattr(program, "underwriting_department", "test")
-    policy = Policy(raw=row_data, lob=lob)
+    # Utilise l'underwriting_department du programme (pas le line of business de la police)
+    uw_dept = program.underwriting_department
+    policy = Policy(raw=row_data, uw_dept=uw_dept)
 
     # Appliquer le programme
     return apply_program(policy, program, calculation_date)
@@ -24,7 +26,7 @@ def apply_program_to_row(
 
 def apply_program_to_bordereau(
     bordereau: Bordereau,
-    program: Dict[str, Any],
+    program: Program,
     calculation_date: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
 

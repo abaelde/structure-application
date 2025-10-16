@@ -18,10 +18,10 @@ class TestCurrencyMapping:
             "HULL_CURRENCY": "USD",
             "LIABILITY_CURRENCY": "EUR",
         }
-        line_of_business = "aviation"
+        uw_departement = "aviation"
 
         result = get_policy_value(
-            policy_data, "BUSCL_LIMIT_CURRENCY_CD", line_of_business
+            policy_data, "BUSCL_LIMIT_CURRENCY_CD", uw_departement
         )
 
         assert result == "USD"
@@ -31,10 +31,10 @@ class TestCurrencyMapping:
         policy_data = {
             "CURRENCY": "USD",
         }
-        line_of_business = "casualty"
+        uw_departement = "casualty"
 
         result = get_policy_value(
-            policy_data, "BUSCL_LIMIT_CURRENCY_CD", line_of_business
+            policy_data, "BUSCL_LIMIT_CURRENCY_CD", uw_departement
         )
 
         assert result == "USD"
@@ -44,10 +44,10 @@ class TestCurrencyMapping:
         policy_data = {
             "CURRENCY": "USD",
         }
-        line_of_business = "unknown"
+        uw_departement = "unknown"
 
         result = get_policy_value(
-            policy_data, "BUSCL_LIMIT_CURRENCY_CD", line_of_business
+            policy_data, "BUSCL_LIMIT_CURRENCY_CD", uw_departement
         )
 
         # Should fallback to direct dimension name
@@ -58,10 +58,10 @@ class TestCurrencyMapping:
         policy_data = {
             "BUSCL_COUNTRY_CD": "France",
         }
-        line_of_business = "aviation"
+        uw_departement = "aviation"
 
         result = get_policy_value(
-            policy_data, "BUSCL_LIMIT_CURRENCY_CD", line_of_business
+            policy_data, "BUSCL_LIMIT_CURRENCY_CD", uw_departement
         )
 
         assert result is None
@@ -88,9 +88,9 @@ class TestMatchConditionWithCurrencyMapping:
         }
 
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
-        line_of_business = "aviation"
+        uw_departement = "aviation"
 
-        policy = Policy(raw=policy_data, lob=line_of_business)
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = match_condition(
             policy, [test_condition], dimension_columns
         )
@@ -116,9 +116,9 @@ class TestMatchConditionWithCurrencyMapping:
         }
 
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
-        line_of_business = "aviation"
+        uw_departement = "aviation"
 
-        policy = Policy(raw=policy_data, lob=line_of_business)
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = match_condition(
             policy, [test_condition], dimension_columns
         )
@@ -142,9 +142,9 @@ class TestMatchConditionWithCurrencyMapping:
         }
 
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
-        line_of_business = "casualty"
+        uw_departement = "casualty"
 
-        policy = Policy(raw=policy_data, lob=line_of_business)
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = match_condition(
             policy, [test_condition], dimension_columns
         )
@@ -169,9 +169,9 @@ class TestMatchConditionWithCurrencyMapping:
         }
 
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
-        line_of_business = "casualty"
+        uw_departement = "casualty"
 
-        policy = Policy(raw=policy_data, lob=line_of_business)
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = match_condition(
             policy, [test_condition], dimension_columns
         )
@@ -196,9 +196,9 @@ class TestMatchConditionWithCurrencyMapping:
         }
 
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
-        line_of_business = "aviation"
+        uw_departement = "aviation"
 
-        policy = Policy(raw=policy_data, lob=line_of_business)
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = match_condition(
             policy, [test_condition], dimension_columns
         )
@@ -233,9 +233,9 @@ class TestMatchConditionWithCurrencyMapping:
         }
 
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
-        line_of_business = "aviation"
+        uw_departement = "aviation"
 
-        policy = Policy(raw=policy_data, lob=line_of_business)
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = match_condition(
             policy,
             [condition_general, condition_specific],
@@ -267,9 +267,9 @@ class TestCheckExclusionWithCurrencyMapping:
         }
 
         dimension_columns = ["BUSCL_EXCLUDE_CD", "BUSCL_LIMIT_CURRENCY_CD"]
-        line_of_business = "aviation"
+        uw_departement = "aviation"
 
-        policy = Policy(raw=policy_data, lob=line_of_business)
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = check_exclusion(
             policy, [exclusion_condition], dimension_columns
         )
@@ -292,9 +292,9 @@ class TestCheckExclusionWithCurrencyMapping:
         }
 
         dimension_columns = ["BUSCL_EXCLUDE_CD", "BUSCL_LIMIT_CURRENCY_CD"]
-        line_of_business = "aviation"
+        uw_departement = "aviation"
 
-        policy = Policy(raw=policy_data, lob=line_of_business)
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = check_exclusion(
             policy, [exclusion_condition], dimension_columns
         )
@@ -318,9 +318,9 @@ class TestCheckExclusionWithCurrencyMapping:
         }
 
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD"]
-        line_of_business = "aviation"
+        uw_departement = "aviation"
 
-        policy = Policy(raw=policy_data, lob=line_of_business)
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = check_exclusion(
             policy, [normal_condition], dimension_columns
         )

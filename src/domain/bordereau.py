@@ -31,20 +31,20 @@ class Bordereau:
         self,
         df: pd.DataFrame,
         *,
-        line_of_business: Optional[str] = None,
+        uw_dept: Optional[str] = None,
         source: Optional[str] = None,
         program: Optional[Any] = None,
     ):
         self._raw_df = df.copy()
         self._df = self._normalize_columns(self._raw_df)
-        self.line_of_business = line_of_business or self._infer_lob(self._df)
+        self.uw_dept = uw_dept or self._infer_uw_dept(self._df)
         self.source = source
         self.program = program  # Référence vers le programme associé
         self.validation_warnings: List[str] = []
         self.validation_errors: List[str] = []
 
-        # Si LOB non fourni, on tente de l'inférer depuis la colonne FIELDS["LINE_OF_BUSINESS"]
-        if self.line_of_business is None and FIELDS["LINE_OF_BUSINESS"] in df.columns:
+        # Si uw_dept non fourni, on tente de l'inférer depuis la colonne FIELDS["LINE_OF_BUSINESS"]
+        if self.uw_dept is None and FIELDS["LINE_OF_BUSINESS"] in df.columns:
             vals = (
                 df[FIELDS["LINE_OF_BUSINESS"]]
                 .dropna()
@@ -54,7 +54,7 @@ class Bordereau:
                 .tolist()
             )
             if len(vals) == 1:
-                self.line_of_business = vals[0]  # ex: "aviation", "casualty", "test"
+                self.uw_dept = vals[0]  # ex: "aviation", "casualty", "test"
 
     # ──────────────────────────────────────────────────────────────────────
     # Chargement
@@ -64,13 +64,13 @@ class Bordereau:
         cls,
         path: Union[str, Path],
         *,
-        line_of_business: Optional[str] = None,
+        uw_dept: Optional[str] = None,
         validate: bool = True,
         read_csv_kwargs: Optional[Dict[str, Any]] = None,
     ) -> "Bordereau":
         read_csv_kwargs = read_csv_kwargs or {}
         df = pd.read_csv(path, **read_csv_kwargs)
-        obj = cls(df, line_of_business=line_of_business, source=str(path))
+        obj = cls(df, uw_dept=uw_dept, source=str(path))
         if validate:
             obj.validate()
         return obj
@@ -90,9 +90,9 @@ class Bordereau:
         self._validate_not_empty()
         self._validate_all_columns_present_via_schema()
 
-        # En plus : validation des colonnes d'exposition selon LOB, si connue
-        if check_exposure_columns and self.line_of_business:
-            self._validate_exposure_columns_via_schema(self.line_of_business)
+        # En plus : validation des colonnes d'exposition selon uw_dept, si connue
+        if check_exposure_columns and self.uw_dept:
+            self._validate_exposure_columns_via_schema(self.uw_dept)
 
         # Raise exception if there are errors
         if self.validation_errors:
@@ -144,7 +144,7 @@ class Bordereau:
                 df2[name] = df2[name].map(spec.coerce)
         return df2
 
-    def _infer_lob(self, df: pd.DataFrame) -> Optional[str]:
+    def _infer_uw_dept(self, df: pd.DataFrame) -> Optional[str]:
         col = (
             FIELDS["LINE_OF_BUSINESS"]
             if FIELDS["LINE_OF_BUSINESS"] in df.columns
@@ -275,7 +275,7 @@ class Bordereau:
         Retourne {dimension_programme -> colonne_bordereau} pour les dimensions présentes.
         Utilise le mapping centralisé (dimension_mapping.py).
         """
-        return get_all_mappable_dimensions(self.columns, self.line_of_business)
+        return get_all_mappable_dimensions(self.columns, self.uw_dept)
 
     def dimension_columns(self) -> List[str]:
         """
@@ -309,7 +309,7 @@ class Bordereau:
     def __iter__(self) -> Iterable[Policy]:
         for _, row in self._df.iterrows():
             # Les colonnes sont déjà canonisées/typées par _normalize_columns
-            yield Policy(raw=row.to_dict(), lob=self.line_of_business)
+            yield Policy(raw=row.to_dict(), uw_dept=self.uw_dept)
 
     def policies(self) -> Iterable[Policy]:
         return iter(self)
@@ -317,7 +317,7 @@ class Bordereau:
     def head(self, n: int = 5) -> "Bordereau":
         return Bordereau(
             self._df.head(n).copy(),
-            line_of_business=self.line_of_business,
+            uw_dept=self.uw_dept,
             source=self.source,
         )
 
@@ -325,15 +325,15 @@ class Bordereau:
         """Filtre via DataFrame.query et retourne un nouveau Bordereau."""
         return Bordereau(
             self._df.query(expr).copy(),
-            line_of_business=self.line_of_business,
+            uw_dept=self.uw_dept,
             source=self.source,
         )
 
-    def with_line_of_business(self, lob: str) -> "Bordereau":
-        """Clone avec LOB fixé/écrasé (utile si non inférable)."""
-        return Bordereau(self._df.copy(), line_of_business=lob, source=self.source)
+    def with_uw_dept(self, uw_dept: str) -> "Bordereau":
+        """Clone avec underwriting department fixé/écrasé (utile si non inférable)."""
+        return Bordereau(self._df.copy(), uw_dept=uw_dept, source=self.source)
 
     def __repr__(self) -> str:
         src = f"source='{self.source}', " if self.source else ""
-        lob = f"lob='{self.line_of_business}'" if self.line_of_business else "lob=None"
-        return f"Bordereau({src}{lob}, rows={len(self)})"
+        uw_dept = f"uw_dept='{self.uw_dept}'" if self.uw_dept else "uw_dept=None"
+        return f"Bordereau({src}{uw_dept}, rows={len(self)})"
