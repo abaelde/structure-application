@@ -6,7 +6,6 @@ This module tests the new configuration-driven dimension mapping between program
 
 import pytest
 from src.domain.dimension_mapping import (
-    validate_aviation_currency_consistency,
     get_all_mappable_dimensions,
 )
 from src.domain.policy import Policy
@@ -76,43 +75,6 @@ class TestPolicyDimensionValue:
         assert result == "USD"  # Should take HULL_CURRENCY
 
 
-
-class TestValidateAviationCurrencyConsistency:
-    """Test the aviation currency consistency validation."""
-
-    def test_aviation_with_both_currency_columns(self):
-        """Test aviation validation when both currency columns are present."""
-        bordereau_columns = ["HULL_CURRENCY", "LIABILITY_CURRENCY"]
-
-        warnings = validate_aviation_currency_consistency(bordereau_columns, "aviation")
-
-        assert len(warnings) > 0
-        assert "HULL_CURRENCY" in warnings[0]
-        assert "LIABILITY_CURRENCY" in warnings[0]
-
-    def test_aviation_with_one_currency_column(self):
-        """Test aviation validation with only one currency column."""
-        bordereau_columns = ["HULL_CURRENCY"]
-
-        warnings = validate_aviation_currency_consistency(bordereau_columns, "aviation")
-
-        assert warnings == []  # No warning if only one column
-
-    def test_casualty_no_warning(self):
-        """Test that casualty line of business generates no warnings."""
-        bordereau_columns = ["CURRENCY"]
-
-        warnings = validate_aviation_currency_consistency(bordereau_columns, "casualty")
-
-        assert warnings == []
-
-    def test_no_currency_columns(self):
-        """Test when no currency columns are present."""
-        bordereau_columns = ["BUSCL_COUNTRY_CD"]
-
-        warnings = validate_aviation_currency_consistency(bordereau_columns, "aviation")
-
-        assert warnings == []  # No warning if no currency columns
 
 
 class TestGetAllMappableDimensions:

@@ -15,7 +15,6 @@ from .constants import (
     condition_COLS,
 )
 from .dimension_mapping import (
-    validate_aviation_currency_consistency,
     get_all_mappable_dimensions,
 )
 from .models import Program, Structure, Condition
@@ -39,6 +38,5 @@ __all__ = [
     "Structure",
     "Condition",
     # New dimension mapping functions
-    "validate_aviation_currency_consistency",
     "get_all_mappable_dimensions",
 ]
