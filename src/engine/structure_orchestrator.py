@@ -1,5 +1,5 @@
 from typing import Dict, Any, List, Set, Optional
-from src.domain import PRODUCT, Structure, Condition
+from src.domain import PRODUCT, Structure, Condition, Program
 from src.domain.policy import Policy
 from .condition_matcher import match_condition
 from .cession_calculator import apply_condition
@@ -7,12 +7,15 @@ from src.domain.exposure_bundle import ExposureBundle
 
 
 def process_structures(
-    structures: List[Structure],
     policy: Policy,
-    dimension_columns: List[str],
-    exposure: float,
-    line_of_business: str = None,
+    program: Program,
 ) -> tuple[List[Dict[str, Any]], float, float]:
+    # Extraction des données nécessaires
+    structures = program.structures
+    dimension_columns = program.dimension_columns
+    line_of_business = program.underwriting_department
+    base_bundle = policy.exposure_bundle(line_of_business)
+    
     structure_outputs = {}
     structures_detail = []
     processed: Set[str] = set()
@@ -69,11 +72,9 @@ def process_structures(
         structure: Structure, matched_condition: Condition
     ) -> Dict[str, Any]:
         base_input_exposure = _calculate_input_exposure(
-            exposure, structure, structure_outputs
+            base_bundle.total, structure, structure_outputs
         )
-        bundle_scaled = _build_scaled_bundle(
-            policy, base_input_exposure, line_of_business
-        )
+        bundle_scaled = base_bundle.fraction_to(base_input_exposure)
 
         includes_hull = (
             matched_condition.includes_hull
@@ -145,13 +146,6 @@ def process_structures(
             total_cession_to_reinsurer += result["cession_to_reinsurer"]
 
     return structures_detail, total_cession_to_layer_100pct, total_cession_to_reinsurer
-
-
-def _build_scaled_bundle(policy: Policy, new_total: float, uw: str) -> ExposureBundle:
-    base = policy.exposure_bundle(uw)
-    if base.total == 0.0:
-        return ExposureBundle(total=0.0, components={})
-    return base.fraction_to(new_total)
 
 
 def _calculate_input_exposure(

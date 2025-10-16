@@ -26,19 +26,13 @@ def apply_program(
     ):
         return create_excluded_result(policy.raw)
 
-    bundle = policy.exposure_bundle(program.underwriting_department)
-    exposure = bundle.total
-
     structures_detail, total_cession_to_layer_100pct, total_cession_to_reinsurer = (
-        process_structures(
-            program.structures,
-            policy,
-            program.dimension_columns,
-            exposure,
-            program.underwriting_department,
-        )
+        process_structures(policy, program)
     )
 
+    # Récupérer l'exposition pour le résultat
+    exposure = policy.exposure_bundle(program.underwriting_department).total
+    
     return {
         FIELDS["INSURED_NAME"]: policy.get(FIELDS["INSURED_NAME"]),
         "exposure": exposure,
