@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.loaders import load_bordereau, BordereauLoader, BordereauValidationError
+from src.domain.bordereau import Bordereau, BordereauValidationError
 
 
 def test_valid_bordereau():
@@ -9,11 +9,11 @@ def test_valid_bordereau():
     print("=" * 80)
 
     try:
-        df = load_bordereau(
+        bordereau = Bordereau.from_csv(
             "examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv"
         )
-        print(f"✓ Success: Loaded {len(df)} policies")
-        print(df.head())
+        print(f"✓ Success: Loaded {len(bordereau)} policies")
+        print(bordereau.df.head())
     except BordereauValidationError as e:
         print(f"✗ Failed: {e}")
     print()
@@ -42,11 +42,10 @@ def test_bordereau_with_warnings():
     test_data.to_csv(test_file, index=False)
 
     try:
-        loader = BordereauLoader(test_file)
-        df = loader.load()
-        print(f"✓ Success: Loaded {len(df)} policies")
-        print(f"Warnings: {len(loader.validation_warnings)}")
-        for warning in loader.validation_warnings:
+        bordereau = Bordereau.from_csv(test_file)
+        print(f"✓ Success: Loaded {len(bordereau)} policies")
+        print(f"Warnings: {len(bordereau.validation_warnings)}")
+        for warning in bordereau.validation_warnings:
             print(f"  - {warning}")
     except BordereauValidationError as e:
         print(f"✗ Failed: {e}")
@@ -74,8 +73,8 @@ def test_invalid_bordereau():
     test_data.to_csv(test_file, index=False)
 
     try:
-        df = load_bordereau(test_file)
-        print(f"✗ Unexpected: Loaded {len(df)} policies (should have failed)")
+        bordereau = Bordereau.from_csv(test_file)
+        print(f"✗ Unexpected: Loaded {len(bordereau)} policies (should have failed)")
     except BordereauValidationError as e:
         print(f"✓ Expected failure:")
         print(str(e))
@@ -100,8 +99,8 @@ def test_missing_required_columns():
     test_data.to_csv(test_file, index=False)
 
     try:
-        df = load_bordereau(test_file)
-        print(f"✗ Unexpected: Loaded {len(df)} policies (should have failed)")
+        bordereau = Bordereau.from_csv(test_file)
+        print(f"✗ Unexpected: Loaded {len(bordereau)} policies (should have failed)")
     except BordereauValidationError as e:
         print(f"✓ Expected failure:")
         print(str(e))
@@ -130,8 +129,8 @@ def test_unknown_columns():
     test_data.to_csv(test_file, index=False)
 
     try:
-        df = load_bordereau(test_file)
-        print(f"✗ Unexpected: Loaded {len(df)} policies (should have failed)")
+        bordereau = Bordereau.from_csv(test_file)
+        print(f"✗ Unexpected: Loaded {len(bordereau)} policies (should have failed)")
     except BordereauValidationError as e:
         print(f"✓ Expected failure:")
         print(str(e))
@@ -158,8 +157,8 @@ def test_only_required_columns():
     test_data.to_csv(test_file, index=False)
 
     try:
-        df = load_bordereau(test_file)
-        print(f"✓ Success: Loaded {len(df)} policies (dimension columns are optional)")
+        bordereau = Bordereau.from_csv(test_file)
+        print(f"✓ Success: Loaded {len(bordereau)} policies (dimension columns are optional)")
     except BordereauValidationError as e:
         print(f"✗ Unexpected failure: {e}")
     print()
@@ -186,8 +185,8 @@ def test_partial_dimensions():
     test_data.to_csv(test_file, index=False)
 
     try:
-        df = load_bordereau(test_file)
-        print(f"✓ Success: Loaded {len(df)} policies (can have some dimension columns)")
+        bordereau = Bordereau.from_csv(test_file)
+        print(f"✓ Success: Loaded {len(bordereau)} policies (can have some dimension columns)")
     except BordereauValidationError as e:
         print(f"✗ Unexpected failure: {e}")
     print()
@@ -215,8 +214,8 @@ def test_null_dimension_columns():
     test_data.to_csv(test_file, index=False)
 
     try:
-        df = load_bordereau(test_file)
-        print(f"✓ Success: Loaded {len(df)} policies (dimension columns can be null)")
+        bordereau = Bordereau.from_csv(test_file)
+        print(f"✓ Success: Loaded {len(bordereau)} policies (dimension columns can be null)")
     except BordereauValidationError as e:
         print(f"✗ Unexpected failure: {e}")
     print()
@@ -242,8 +241,8 @@ def test_null_required_columns():
     test_data.to_csv(test_file, index=False)
 
     try:
-        df = load_bordereau(test_file)
-        print(f"✗ Unexpected: Loaded {len(df)} policies (should have failed)")
+        bordereau = Bordereau.from_csv(test_file)
+        print(f"✗ Unexpected: Loaded {len(bordereau)} policies (should have failed)")
     except BordereauValidationError as e:
         print(f"✓ Expected failure:")
         print(str(e))

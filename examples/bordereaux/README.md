@@ -248,12 +248,12 @@ Si vous avez des bordereaux avec l'ancien format :
 ## Chargement Programmatique
 
 ```python
-from src.loaders import load_bordereau
+from src.domain.bordereau import Bordereau
 
 # Chargement automatique avec détection de la ligne de business
-df = load_bordereau("examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv")
+bordereau = Bordereau.from_csv("examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv")
 
 # Ou spécification manuelle
-df = load_bordereau("path/to/bordereau.csv", line_of_business="Aviation")
+bordereau = Bordereau.from_csv("path/to/bordereau.csv", line_of_business="aviation")
 ```
 

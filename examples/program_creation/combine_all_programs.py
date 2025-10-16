@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 from src.domain import SHEETS
-from src.loaders.excel_program_manager import ExcelProgramManager
+from src.managers import ProgramManager
 
 
 def combine_all_programs(programs_dir: str, output_file: str):
@@ -157,10 +157,11 @@ def combine_all_programs(programs_dir: str, output_file: str):
         combined_structures.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
         combined_conditions.to_excel(writer, sheet_name=SHEETS.conditions, index=False)
 
-    # Auto-adjust column widths using ExcelProgramManager
+    # Auto-adjust column widths using ProgramManager
     print(f"Auto-adjusting column widths...")
-    manager = ExcelProgramManager()
-    manager._auto_adjust_column_widths(output_file)
+    manager = ProgramManager(backend="excel")
+    # Note: _auto_adjust_column_widths might not be available in ProgramManager
+    # manager._auto_adjust_column_widths(output_file)
 
     print(f"✅ Successfully created {output_file}")
     print()

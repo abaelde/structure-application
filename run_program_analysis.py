@@ -3,10 +3,7 @@ import argparse
 import sys
 from pathlib import Path
 from datetime import datetime
-from src.loaders import (
-    load_bordereau,
-    BordereauValidationError,
-)
+from src.domain.bordereau import Bordereau
 from src.managers import ProgramManager
 from src.engine import apply_program_to_bordereau
 from src.presentation import generate_detailed_report
@@ -49,28 +46,17 @@ def main():
     print(f"📁 Output directory: {analysis_subdir}")
     print()
 
-    try:
-        print("1. Loading and validating bordereau...")
-        bordereau_df = load_bordereau(args.bordereau)
-        print(f"   ✓ Bordereau loaded successfully: {len(bordereau_df)} policies")
-        print()
+    print("1. Loading and validating bordereau...")
+    bordereau_df = Bordereau.from_csv(args.bordereau)
+    print(f"   ✓ Bordereau loaded successfully: {len(bordereau_df)} policies")
+    print()
 
-        print("2. Loading program configuration...")
-        manager = ProgramManager(backend="excel")
-        program = manager.load(args.program)
-        print(f"   ✓ Program loaded: {program.name}")
-        print(f"   ✓ Number of structures: {len(program.structures)}")
-        print()
-
-    except FileNotFoundError as e:
-        print(f"❌ Error: File not found - {e}")
-        sys.exit(1)
-    except BordereauValidationError as e:
-        print(f"❌ Error: Bordereau validation failed:\n{e}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"❌ Error loading files: {e}")
-        sys.exit(1)
+    print("2. Loading program configuration...")
+    manager = ProgramManager(backend="excel")
+    program = manager.load(args.program)
+    print(f"   ✓ Program loaded: {program.name}")
+    print(f"   ✓ Number of structures: {len(program.structures)}")
+    print()
 
     print("3. Program configuration:")
     print("-" * 80)

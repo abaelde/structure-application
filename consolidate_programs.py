@@ -18,7 +18,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
-from src.loaders import ProgramLoader
+from src.managers import ProgramManager
 from src.engine import apply_program_to_bordereau
 from src.domain import FIELDS
 from examples.program_bordereau_mapping import (
@@ -118,8 +118,8 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
     print(f"📋 Bordereau: {bordereau_path.name}")
 
     # Load program
-    loader = ProgramLoader(str(program_path))
-    program = loader.get_program()
+    manager = ProgramManager(backend="excel")
+    program = manager.load(str(program_path))
     print(
         f"   Loaded program '{program.name}' with {len(program.structures)} structures"
     )

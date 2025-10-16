@@ -3,11 +3,8 @@ import pandas as pd
 from pathlib import Path
 from io import StringIO
 import tempfile
-from src.loaders import (
-    ProgramLoader,
-    load_bordereau,
-    BordereauValidationError,
-)
+from src.managers import ProgramManager
+from src.domain.bordereau import Bordereau
 from src.engine import apply_program_to_bordereau
 from src.domain import FIELDS, PRODUCT
 
@@ -100,9 +97,9 @@ if program_file and bordereau_file:
                 tmp_bordereau.write(bordereau_file.read().decode('utf-8'))
                 tmp_bordereau_path = tmp_bordereau.name
             
-            bordereau_df = load_bordereau(tmp_bordereau_path)
-            loader = ProgramLoader(tmp_program_path)
-            program = loader.get_program()
+            bordereau_df = Bordereau.from_csv(tmp_bordereau_path)
+            manager = ProgramManager(backend="excel")
+            program = manager.load(tmp_program_path)
             
             Path(tmp_program_path).unlink()
             Path(tmp_bordereau_path).unlink()
@@ -310,8 +307,6 @@ if program_file and bordereau_file:
                 use_container_width=True,
             )
     
-    except BordereauValidationError as e:
-        st.error(f"❌ Bordereau validation error:\n{e}")
     except Exception as e:
         st.error(f"❌ Processing error: {e}")
         st.exception(e)
