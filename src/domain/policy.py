@@ -59,14 +59,6 @@ class Policy:
         return True, None
 
     # --- Dimensions & valeurs ---
-    def get_values(self, key: str) -> Optional[List[str]]:
-        v = self.raw.get(key)
-        if v is None or (isinstance(v, float) and pd.isna(v)):
-            return None
-        if isinstance(v, (list, tuple, set)):
-            return list(v)
-        return [str(v)]
-
     def get_dimension_value(self, dimension: str) -> Any:
         """Utilise le mapping de dimensions pour récupérer la valeur."""
 

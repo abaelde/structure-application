@@ -103,8 +103,6 @@ class TestAviationExposureCalculator:
 
         assert "Invalid numeric values" in str(exc_info.value)
 
-    # test_get_required_columns supprimé - méthode retirée du code
-
     def test_realistic_aviation_exposure(self):
         calculator = AviationExposureCalculator()
         policy_data = {
@@ -325,8 +323,6 @@ class TestCasualtyExposureCalculator:
 
         assert "Invalid numeric value" in str(exc_info.value)
 
-    # test_get_required_columns supprimé - méthode retirée du code
-
 
 class TestTestExposureCalculator:
     def test_calculate_valid_exposure(self):
@@ -369,8 +365,6 @@ class TestTestExposureCalculator:
             calculator.calculate(policy_data)
 
         assert "Invalid numeric value" in str(exc_info.value)
-
-    # test_get_required_columns supprimé - méthode retirée du code
 
 
 class TestGetExposureCalculator:
