@@ -14,7 +14,7 @@ structure-application/
 │   │   │   ├── quota_share.py
 │   │   │   ├── excess_of_loss.py
 │   │   │   └── __init__.py
-│   │   ├── constants.py                # Constantes métier (FIELDS, DIMENSIONS, PRODUCT)
+│   │   ├── constants.py                # Constantes métier (PRODUCT, CLAIM_BASIS, etc.)
 │   │   └── __init__.py
 │   ├── loaders/                        # Chargement et validation de données
 │   │   ├── program_loader.py          # Chargement de programmes depuis Excel

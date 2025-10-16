@@ -1,6 +1,5 @@
 from typing import Optional, Dict, Any
 from src.domain.models import Condition
-# DIMENSIONS supprimé - utilisation directe des clés canoniques
 
 
 def _as_list(x):

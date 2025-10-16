@@ -54,7 +54,7 @@ COLUMNS: Dict[str, ColumnSpec] = {
         "EXPIRE_DT", "meta", required=True, coerce=_to_date
     ),
     "line_of_business": ColumnSpec("line_of_business", "meta"),
-    # DIMENSIONS
+    # Dimension mappings
     "BUSCL_COUNTRY_CD": ColumnSpec("BUSCL_COUNTRY_CD", "dimension"),
     "BUSCL_REGION": ColumnSpec("BUSCL_REGION", "dimension"),
     "BUSCL_CLASS_OF_BUSINESS_1": ColumnSpec("BUSCL_CLASS_OF_BUSINESS_1", "dimension"),

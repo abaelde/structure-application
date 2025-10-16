@@ -1,13 +1,12 @@
 from typing import List, Optional
 from src.domain.models import Program, Structure
-# DIMENSIONS supprimé - utilisation directe des clés canoniques
 from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 
 def build_program(
     name: str,
     structures: List[Structure],
-    dimension_columns: Optional[List[str]] = None,
+        dimension_columns: Optional[List[str]] = None,
     underwriting_department: str = "test",
 ) -> Program:
     """
@@ -17,7 +16,7 @@ def build_program(
         name: Program name
         structures: List of Structure objects
         dimension_columns: List of dimension column names.
-            If None, uses the default DIMENSIONS from constants.
+            If None, uses the default dimensions from PROGRAM_TO_BORDEREAU_DIMENSIONS.
         underwriting_department: Underwriting department (defaults to "test" for tests)
 
     Returns:
