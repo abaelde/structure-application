@@ -13,7 +13,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from tests.builders import build_excess_of_loss, build_program
-from src.loaders.excel_program_manager import save_program_to_excel
+from src.managers import ProgramManager
 
 print("Création du programme Aviation Old Republic 2024...")
 
@@ -81,7 +81,8 @@ program = build_program(
 
 output_file = "../programs/aviation_old_republic_2024.xlsx"
 
-save_program_to_excel(program, output_file)
+manager = ProgramManager(backend="excel")
+manager.save(program, output_file)
 
 print(f"✓ Programme créé: {output_file}")
 

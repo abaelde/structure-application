@@ -12,7 +12,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from tests.builders import build_quota_share, build_program
-from src.loaders.excel_program_manager import save_program_to_excel
+from src.managers import ProgramManager
 
 print("Création du programme Quota Share with Exclusions...")
 
@@ -52,7 +52,8 @@ output_dir = "../programs"
 os.makedirs(output_dir, exist_ok=True)
 output_file = os.path.join(output_dir, "quota_share_with_exclusion.xlsx")
 
-save_program_to_excel(program, output_file)
+manager = ProgramManager(backend="excel")
+manager.save(program, output_file)
 
 print(f"✓ Programme créé: {output_file}")
 print("\nStructure du programme:")

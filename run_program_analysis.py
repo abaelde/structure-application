@@ -4,10 +4,10 @@ import sys
 from pathlib import Path
 from datetime import datetime
 from src.loaders import (
-    ProgramLoader,
     load_bordereau,
     BordereauValidationError,
 )
+from src.managers import ProgramManager
 from src.engine import apply_program_to_bordereau
 from src.presentation import generate_detailed_report
 
@@ -56,8 +56,8 @@ def main():
         print()
 
         print("2. Loading program configuration...")
-        loader = ProgramLoader(args.program)
-        program = loader.get_program()
+        manager = ProgramManager(backend="excel")
+        program = manager.load(args.program)
         print(f"   ✓ Program loaded: {program.name}")
         print(f"   ✓ Number of structures: {len(program.structures)}")
         print()
