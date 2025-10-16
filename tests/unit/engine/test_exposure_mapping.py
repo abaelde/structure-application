@@ -1,8 +1,7 @@
 import pandas as pd
 import pytest
 from src.engine import apply_program_to_bordereau
-from src.domain.bordereau import Bordereau
-from src.engine.exposure_validation import ExposureValidationError
+from src.domain.bordereau import Bordereau, BordereauValidationError
 from tests.builders import build_program, build_quota_share
 
 
@@ -98,7 +97,7 @@ def test_exposure_mapping_failure_wrong_column():
     })
     
     bordereau = Bordereau(bordereau_df, line_of_business="aviation")
-    with pytest.raises(ExposureValidationError) as exc_info:
+    with pytest.raises(BordereauValidationError) as exc_info:
         apply_program_to_bordereau(bordereau, program, calculation_date="2024-06-01")
     
     error_message = str(exc_info.value)

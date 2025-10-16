@@ -13,6 +13,7 @@ from src.domain.dimension_mapping import (
     validate_program_bordereau_compatibility,
     validate_aviation_currency_consistency,
 )
+from src.domain import UNDERWRITING_DEPARTMENT_VALUES
 
 class BordereauValidationError(Exception):
     pass
@@ -48,11 +49,13 @@ class Bordereau:
         *,
         line_of_business: Optional[str] = None,
         source: Optional[str] = None,
+        program: Optional[Any] = None,
     ):
         self._raw_df = df.copy()
         self._df = self._normalize_columns(self._raw_df)
         self.line_of_business = line_of_business or self._infer_lob(self._df)
         self.source = source
+        self.program = program  # Référence vers le programme associé
         self.validation_warnings: List[str] = []
         self.validation_errors: List[str] = []
 
@@ -305,43 +308,168 @@ class Bordereau:
                 return vals[0]
         return None
 
-    def _validate_exposure_columns_via_schema(self, lob: str):
+    def get_underwriting_department(self) -> str:
+        """
+        Retourne l'underwriting_department du programme associé.
+        
+        Returns:
+            str: L'underwriting_department du programme
+            
+        Raises:
+            BordereauValidationError: Si aucun programme n'est associé ou si le programme n'a pas d'underwriting_department
+        """
+        if not self.program:
+            raise BordereauValidationError(
+                "No program associated with this bordereau. "
+                "Cannot determine underwriting_department."
+            )
+        
+        # Support pour dict et objet Program
+        if isinstance(self.program, dict):
+            underwriting_department = self.program.get('underwriting_department')
+        else:
+            underwriting_department = getattr(self.program, 'underwriting_department', None)
+        
+        if not underwriting_department:
+            raise BordereauValidationError(
+                "Associated program must specify an underwriting_department."
+            )
+        
+        return underwriting_department
+
+    def validate_exposure_columns(self, underwriting_department: Optional[str] = None) -> None:
+        """
+        Valide les colonnes d'exposition selon l'underwriting_department.
+        
+        Args:
+            underwriting_department: Si fourni, utilise cette valeur. Sinon, utilise celle du programme associé.
+        """
+        
+        
+        # Si pas fourni, récupère depuis le programme associé
+        if not underwriting_department:
+            underwriting_department = self.get_underwriting_department()
+
+        uw_dept_lower = underwriting_department.lower()
+        
+        if uw_dept_lower not in UNDERWRITING_DEPARTMENT_VALUES:
+            raise BordereauValidationError(
+                f"Unknown underwriting department '{underwriting_department}'. "
+                f"Supported underwriting departments: {', '.join(sorted(UNDERWRITING_DEPARTMENT_VALUES))}"
+            )
+
+        self._validate_exposure_via_schema(uw_dept_lower)
+
+    def _validate_exposure_via_schema(self, lob: str) -> None:
+        """Méthode privée pour valider les colonnes d'exposition selon le schéma."""
+        
+        
+        cols = set(self.columns)
         rules = exposure_rules_for_lob(lob)
-        cols = set(self._df.columns)
+
         # requis par LOB
         missing = [name for name, spec in COLUMNS.items()
                    if spec.required_by_lob.get(lob) and name not in cols]
         if missing:
-            self.validation_errors.append(f"{lob.title()} bordereau missing: {', '.join(missing)}")
-        # at least one of (aviation)
+            raise BordereauValidationError(
+                f"{lob.title()} bordereau must have: {', '.join(missing)}. "
+                f"Found columns: {', '.join(self.columns)}"
+            )
+
+        # at least one of
         atleast = rules.get("at_least_one_of")
         if atleast:
             groups = [set(g.split("|")) for g in atleast.split(";")] if ";" in atleast else [set(atleast.split("|"))]
             for g in groups:
                 if not any(x in cols for x in g):
-                    self.validation_errors.append(f"{lob.title()} requires at least one of: {', '.join(sorted(g))}")
-        # paires (aviation)
+                    raise BordereauValidationError(
+                        f"{lob.title()} bordereau must have at least one of: {', '.join(sorted(g))}. "
+                        f"Found columns: {', '.join(self.columns)}"
+                    )
+
+        # pairs (co-dépendance)
         pairs = rules.get("pairs")
         if pairs:
+            errors = []
             for pair in pairs.split(";"):
                 left, right = map(str.strip, pair.split("<->"))
                 if (left in cols) ^ (right in cols):
-                    self.validation_errors.append(f"{lob.title()} pair mismatch: {left} requires {right} and vice versa")
+                    errors.append(f"{left} requires {right} (and vice versa)")
+            if errors:
+                raise BordereauValidationError(
+                    f"Invalid {lob.title()} exposure columns. "
+                    f"Errors: {'; '.join(errors)}. "
+                    f"Found columns: {', '.join(self.columns)}"
+                )
 
-    def compatibility_report(self, program) -> Dict[str, Any]:
+    def _validate_exposure_columns_via_schema(self, lob: str):
+        """Méthode privée utilisée par validate() - utilise la logique interne."""
+        try:
+            self._validate_exposure_via_schema(lob)
+        except BordereauValidationError as e:
+            # Convertit l'exception en ajout d'erreur pour la validation globale
+            self.validation_errors.append(str(e))
+
+    def compatibility_report(self, program=None) -> Dict[str, Any]:
         """
         Informe sur la compatibilité program ↔︎ bordereau (dimensions mappables, warnings…).
         N'affecte pas l'engine, purement diagnostique.
+        
+        Args:
+            program: Programme à analyser. Si None, utilise le programme associé au bordereau.
         """
-        lob = program.underwriting_department or self.line_of_business
+        # Utilise le programme fourni ou celui associé au bordereau
+        target_program = program or self.program
+        if not target_program:
+            return {
+                "underwriting_department": None,
+                "mapped_dimensions": {},
+                "warnings": ["No program associated with bordereau"],
+                "errors": ["Cannot generate compatibility report without a program"],
+            }
+        
+        # Récupère l'underwriting_department
+        try:
+            if isinstance(target_program, dict):
+                underwriting_department = target_program.get('underwriting_department')
+                dimension_columns = target_program.get('dimension_columns', [])
+            else:
+                underwriting_department = getattr(target_program, 'underwriting_department', None)
+                dimension_columns = getattr(target_program, 'dimension_columns', [])
+        except Exception:
+            return {
+                "underwriting_department": None,
+                "mapped_dimensions": {},
+                "warnings": ["Error accessing program properties"],
+                "errors": ["Invalid program object"],
+            }
+        
+        if not underwriting_department:
+            return {
+                "underwriting_department": None,
+                "mapped_dimensions": {},
+                "warnings": ["Program must specify an underwriting_department"],
+                "errors": ["Missing underwriting_department in program"],
+            }
+        
         errors, warnings = validate_program_bordereau_compatibility(
-            program_dimensions=program.dimension_columns,
+            program_dimensions=dimension_columns,
             bordereau_columns=self.columns,
-            line_of_business=lob,
+            line_of_business=underwriting_department,
         )
-        warnings += validate_aviation_currency_consistency(self.columns, lob)
+        warnings += validate_aviation_currency_consistency(self.columns, underwriting_department)
+        
+        # Warning si le bordereau a une line_of_business différente
+        if self.line_of_business and self.line_of_business.lower() != underwriting_department.lower():
+            warnings.append(
+                f"Bordereau line_of_business '{self.line_of_business}' differs from "
+                f"program underwriting_department '{underwriting_department}'. "
+                f"Program underwriting_department will be used for processing."
+            )
+        
         return {
-            "line_of_business": lob,
+            "underwriting_department": underwriting_department,
+            "bordereau_line_of_business": self.line_of_business,
             "mapped_dimensions": self.dimension_mapping(),  # program-dimension -> bordereau column
             "warnings": warnings,
             "errors": errors,  # devrait rester vide (design optionnel des dimensions)

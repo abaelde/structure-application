@@ -9,10 +9,6 @@ from .exposure_calculator import (
     ExposureCalculationError,
     ExposureComponents,
 )
-from .exposure_validation import (
-    validate_exposure_columns,
-    ExposureValidationError,
-)
 
 __all__ = [
     "apply_program",
@@ -23,6 +19,4 @@ __all__ = [
     "CasualtyExposureCalculator",
     "TestExposureCalculator",
     "ExposureCalculationError",
-    "validate_exposure_columns",
-    "ExposureValidationError",
 ]

@@ -1,7 +1,6 @@
 import pandas as pd
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from .calculation_engine import apply_program
-from .exposure_validation import validate_exposure_columns
 from ..domain.bordereau import Bordereau
 
 
@@ -11,15 +10,20 @@ def apply_program_to_bordereau(
     calculation_date: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     
-    # Utilise le DataFrame canonique de l'objet Bordereau
     df = bordereau.to_engine_dataframe().copy()
-    # LOB la plus fiable dispo
-    lob = bordereau.line_of_business or program.underwriting_department
     
-    validate_exposure_columns(df.columns.tolist(), lob)
+    # Associe le programme au bordereau si pas déjà fait
+    if not bordereau.program:
+        bordereau.program = program
+    
+    # Validation avec l'underwriting_department du programme associé
+    bordereau.validate_exposure_columns()
+    
+    # Récupère l'underwriting_department pour les logs
+    underwriting_department = bordereau.get_underwriting_department()
     
     print(
-        f"ℹ️  Colonnes d'exposure validées pour underwriting department: {lob}"
+        f"ℹ️  Colonnes d'exposure validées pour underwriting department: {underwriting_department}"
     )
 
     results_df = df.apply(
