@@ -56,6 +56,15 @@ class RunTotals:
 class ProgramRunResult:
     structures: List[StructureReport] = field(default_factory=list)
     totals: RunTotals = field(default_factory=RunTotals)
+    
+    # Métadonnées pour les cas d'exclusion/inactivité
+    exclusion_status: str = "included"  # "included", "inactive", "excluded"
+    exclusion_reason: Optional[str] = None
+    exposure: Optional[float] = None
+    effective_exposure: Optional[float] = None
+    insured_name: Optional[str] = None
+    policy_inception_date: Optional[str] = None
+    policy_expiry_date: Optional[str] = None
 
     def to_flat_dicts(self) -> List[Dict[str, float | str | bool]]:
         """Vue plate et facile à exporter / logger."""
@@ -75,3 +84,23 @@ class ProgramRunResult:
                 "retained_after": r.outcome.retained_after,
             })
         return out
+
+    def to_dict(self) -> Dict[str, any]:
+        """Convertit le résultat en dictionnaire pour compatibilité avec l'API existante."""
+        retained_by_cedant = 0.0
+        if self.exposure is not None and self.totals.cession_to_layer_100pct is not None:
+            retained_by_cedant = self.exposure - self.totals.cession_to_layer_100pct
+            
+        return {
+            "INSURED_NAME": self.insured_name,
+            "exposure": self.exposure,
+            "effective_exposure": self.effective_exposure if self.effective_exposure is not None else self.exposure,
+            "cession_to_layer_100pct": self.totals.cession_to_layer_100pct,
+            "cession_to_reinsurer": self.totals.cession_to_reinsurer,
+            "retained_by_cedant": retained_by_cedant,
+            "policy_inception_date": self.policy_inception_date,
+            "policy_expiry_date": self.policy_expiry_date,
+            "structures_detail": self.to_flat_dicts(),
+            "exclusion_status": self.exclusion_status,
+            "exclusion_reason": self.exclusion_reason,
+        }

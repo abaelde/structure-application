@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import Dict, Any
 from .calculation_engine import apply_program
+from .results import ProgramRunResult
 from ..domain.bordereau import Bordereau
 from ..domain.policy import Policy
 from ..domain.models import Program
@@ -21,7 +22,10 @@ def apply_program_to_row(
     policy = Policy(raw=row_data, uw_dept=uw_dept)
 
     # Appliquer le programme
-    return apply_program(policy, program, calculation_date)
+    result = apply_program(policy, program, calculation_date)
+    
+    # Convertir ProgramRunResult en dictionnaire pour compatibilité
+    return result.to_dict()
 
 
 def apply_program_to_bordereau(
