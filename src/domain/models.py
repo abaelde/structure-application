@@ -83,6 +83,20 @@ class Condition:
     def has_cession_pct(self) -> bool:
         return self.cession_pct is not None
 
+    def get_values(self, key: str) -> list[str] | None:
+        v = self._data.get(key)
+        if v is None or (isinstance(v, float) and pd.isna(v)):
+            return None
+        # En mémoire on s'assure déjà d'avoir list[str] via le loader,
+        # mais on reste tolérant si des tests injectent un scalaire.
+        if isinstance(v, (list, tuple, set)):
+            return list(v)
+        return [str(v)]
+
+    def has_dimension(self, key: str) -> bool:
+        vals = self.get_values(key)
+        return vals is not None and len(vals) > 0
+
     def is_exclusion(self) -> bool:
         return self.get("BUSCL_EXCLUDE_CD") == "exclude"
 
@@ -135,9 +149,9 @@ class Condition:
 
         conditions = []
         for dim in dimension_columns:
-            value = self.get(dim)
-            if pd.notna(value):
-                conditions.append(f"{dim}={value}")
+            vals = self.get_values(dim)
+            if vals:
+                conditions.append(f"{dim}=" + ";".join(map(str, vals)))
 
         if conditions:
             lines.append(f"{indent}Matching conditions: {', '.join(conditions)}")

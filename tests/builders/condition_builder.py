@@ -3,6 +3,15 @@ from src.domain.models import Condition
 from src.domain.constants import DIMENSIONS
 
 
+def _as_list(x):
+    """Convert value to list format for multi-value dimensions."""
+    if x is None:
+        return None
+    if isinstance(x, (list, tuple, set)):
+        return list(x)
+    return [x]
+
+
 def build_condition(
     cession_pct: Optional[float] = None,
     attachment: Optional[float] = None,
@@ -11,12 +20,12 @@ def build_condition(
     exclude_cd: Optional[str] = None,
     entity_name_ced: Optional[str] = None,
     pol_risk_name_ced: Optional[str] = None,
-    country_cd: Optional[str] = None,
-    region: Optional[str] = None,
-    class_of_business_1: Optional[str] = None,
-    class_of_business_2: Optional[str] = None,
-    class_of_business_3: Optional[str] = None,
-    currency_cd: Optional[str] = None,
+    country_cd: Optional[str | list[str]] = None,
+    region: Optional[str | list[str]] = None,
+    class_of_business_1: Optional[str | list[str]] = None,
+    class_of_business_2: Optional[str | list[str]] = None,
+    class_of_business_3: Optional[str | list[str]] = None,
+    currency_cd: Optional[str | list[str]] = None,
     includes_hull: Optional[bool] = None,
     includes_liability: Optional[bool] = None,
     **kwargs
@@ -32,12 +41,12 @@ def build_condition(
         exclude_cd: Exclusion code ("exclude" for exclusion conditions)
         entity_name_ced: Entity name
         pol_risk_name_ced: Policy risk name
-        country_cd: Country code
-        region: Region
-        class_of_business_1: Class of business level 1
-        class_of_business_2: Class of business level 2
-        class_of_business_3: Class of business level 3
-        currency_cd: Currency code
+        country_cd: Country code (string or list of strings for multi-value conditions)
+        region: Region (string or list of strings for multi-value conditions)
+        class_of_business_1: Class of business level 1 (string or list of strings for multi-value conditions)
+        class_of_business_2: Class of business level 2 (string or list of strings for multi-value conditions)
+        class_of_business_3: Class of business level 3 (string or list of strings for multi-value conditions)
+        currency_cd: Currency code (string or list of strings for multi-value conditions)
         includes_hull: Whether to include Hull exposure (default True, for Aviation only)
         includes_liability: Whether to include Liability exposure (default True, for Aviation only)
         **kwargs: Additional fields to include in condition data
@@ -51,14 +60,14 @@ def build_condition(
         "LIMIT_100": limit,
         "SIGNED_SHARE_PCT": signed_share,
         "BUSCL_EXCLUDE_CD": exclude_cd,
-        "BUSCL_ENTITY_NAME_CED": entity_name_ced,
-        "POL_RISK_NAME_CED": pol_risk_name_ced,
-        "BUSCL_COUNTRY_CD": country_cd,
-        "BUSCL_REGION": region,
-        "BUSCL_CLASS_OF_BUSINESS_1": class_of_business_1,
-        "BUSCL_CLASS_OF_BUSINESS_2": class_of_business_2,
-        "BUSCL_CLASS_OF_BUSINESS_3": class_of_business_3,
-        "BUSCL_LIMIT_CURRENCY_CD": currency_cd,
+        "BUSCL_ENTITY_NAME_CED": _as_list(entity_name_ced),
+        "POL_RISK_NAME_CED": _as_list(pol_risk_name_ced),
+        "BUSCL_COUNTRY_CD": _as_list(country_cd),
+        "BUSCL_REGION": _as_list(region),
+        "BUSCL_CLASS_OF_BUSINESS_1": _as_list(class_of_business_1),
+        "BUSCL_CLASS_OF_BUSINESS_2": _as_list(class_of_business_2),
+        "BUSCL_CLASS_OF_BUSINESS_3": _as_list(class_of_business_3),
+        "BUSCL_LIMIT_CURRENCY_CD": _as_list(currency_cd),
         "INCLUDES_HULL": includes_hull,
         "INCLUDES_LIABILITY": includes_liability,
     }
@@ -69,12 +78,12 @@ def build_condition(
 
 
 def build_exclusion_condition(
-    country_cd: Optional[str] = None,
-    region: Optional[str] = None,
-    class_of_business_1: Optional[str] = None,
-    class_of_business_2: Optional[str] = None,
-    class_of_business_3: Optional[str] = None,
-    currency_cd: Optional[str] = None,
+    country_cd: Optional[str | list[str]] = None,
+    region: Optional[str | list[str]] = None,
+    class_of_business_1: Optional[str | list[str]] = None,
+    class_of_business_2: Optional[str | list[str]] = None,
+    class_of_business_3: Optional[str | list[str]] = None,
+    currency_cd: Optional[str | list[str]] = None,
     entity_name_ced: Optional[str] = None,
     pol_risk_name_ced: Optional[str] = None,
     **kwargs

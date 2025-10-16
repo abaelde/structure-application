@@ -1,6 +1,7 @@
 from typing import List, Optional
 from src.domain.models import Program, Structure
 from src.domain.constants import DIMENSIONS
+from src.domain.dimension_mapping import DIMENSION_COLUMN_MAPPING
 
 
 def build_program(
@@ -31,7 +32,9 @@ def build_program(
         )
     """
     if dimension_columns is None:
-        dimension_columns = DIMENSIONS.copy()
+        # Aligne le comportement des builders sur le loader :
+        # union des dimensions "bordereau" + clés de mapping programme (ex: BUSCL_LIMIT_CURRENCY_CD)
+        dimension_columns = sorted(set(DIMENSIONS) | set(DIMENSION_COLUMN_MAPPING.keys()))
     
     return Program(
         name=name,

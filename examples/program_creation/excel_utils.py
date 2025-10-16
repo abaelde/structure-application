@@ -14,6 +14,15 @@ import pandas as pd
 import numpy as np
 from src.domain import PRODUCT, SHEETS
 
+# Séparateur pour les dimensions multiples (cohérent avec program_loader.py)
+MULTI_VALUE_SEPARATOR = ";"
+
+def _convert_list_to_excel_string(value):
+    """Convert list values to semicolon-separated strings for Excel export"""
+    if isinstance(value, list):
+        return MULTI_VALUE_SEPARATOR.join(map(str, value))
+    return value
+
 
 def auto_adjust_column_widths(
     excel_path: str, min_width: int = 10, max_width: int = 50
@@ -240,15 +249,17 @@ def program_to_excel(
             conditions_data["BUSINESS_ID_PRE"].append(None)
             conditions_data["INSPER_ID_PRE"].append(insper_id)
             conditions_data["BUSCL_EXCLUDE_CD"].append(condition_dict.get("BUSCL_EXCLUDE_CD"))
-            conditions_data["BUSCL_ENTITY_NAME_CED"].append(condition_dict.get("BUSCL_ENTITY_NAME_CED"))
-            conditions_data["POL_RISK_NAME_CED"].append(condition_dict.get("POL_RISK_NAME_CED"))
-            conditions_data["BUSCL_COUNTRY_CD"].append(condition_dict.get("BUSCL_COUNTRY_CD"))
-            conditions_data["BUSCL_COUNTRY"].append(condition_dict.get("BUSCL_COUNTRY"))
-            conditions_data["BUSCL_REGION"].append(condition_dict.get("BUSCL_REGION"))
-            conditions_data["BUSCL_CLASS_OF_BUSINESS_1"].append(condition_dict.get("BUSCL_CLASS_OF_BUSINESS_1"))
-            conditions_data["BUSCL_CLASS_OF_BUSINESS_2"].append(condition_dict.get("BUSCL_CLASS_OF_BUSINESS_2"))
-            conditions_data["BUSCL_CLASS_OF_BUSINESS_3"].append(condition_dict.get("BUSCL_CLASS_OF_BUSINESS_3"))
-            conditions_data["BUSCL_LIMIT_CURRENCY_CD"].append(condition_dict.get("BUSCL_LIMIT_CURRENCY_CD"))
+            
+            # Convertir les listes en chaînes séparées par ; pour les dimensions
+            conditions_data["BUSCL_ENTITY_NAME_CED"].append(_convert_list_to_excel_string(condition_dict.get("BUSCL_ENTITY_NAME_CED")))
+            conditions_data["POL_RISK_NAME_CED"].append(_convert_list_to_excel_string(condition_dict.get("POL_RISK_NAME_CED")))
+            conditions_data["BUSCL_COUNTRY_CD"].append(_convert_list_to_excel_string(condition_dict.get("BUSCL_COUNTRY_CD")))
+            conditions_data["BUSCL_COUNTRY"].append(_convert_list_to_excel_string(condition_dict.get("BUSCL_COUNTRY")))
+            conditions_data["BUSCL_REGION"].append(_convert_list_to_excel_string(condition_dict.get("BUSCL_REGION")))
+            conditions_data["BUSCL_CLASS_OF_BUSINESS_1"].append(_convert_list_to_excel_string(condition_dict.get("BUSCL_CLASS_OF_BUSINESS_1")))
+            conditions_data["BUSCL_CLASS_OF_BUSINESS_2"].append(_convert_list_to_excel_string(condition_dict.get("BUSCL_CLASS_OF_BUSINESS_2")))
+            conditions_data["BUSCL_CLASS_OF_BUSINESS_3"].append(_convert_list_to_excel_string(condition_dict.get("BUSCL_CLASS_OF_BUSINESS_3")))
+            conditions_data["BUSCL_LIMIT_CURRENCY_CD"].append(_convert_list_to_excel_string(condition_dict.get("BUSCL_LIMIT_CURRENCY_CD")))
             conditions_data["AAD_100"].append(condition_dict.get("AAD_100"))
             conditions_data["LIMIT_100"].append(condition_dict.get("LIMIT_100"))
             conditions_data["LIMIT_FLOATER_100"].append(condition_dict.get("LIMIT_FLOATER_100"))

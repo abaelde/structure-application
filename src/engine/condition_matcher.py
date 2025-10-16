@@ -4,34 +4,22 @@ from src.domain import Condition
 from src.domain.dimension_mapping import get_policy_value
 
 
-def map_currency_condition(
-    condition_value: Any,
-    policy_data: Dict[str, Any],
-    line_of_business: str
-) -> bool:
-    """
-    Map currency condition from program (BUSCL_LIMIT_CURRENCY_CD) to bordereau columns
-    using the new dimension mapping system.
-    
-    Args:
-        condition_value: The currency value from the program condition
-        policy_data: The policy data from the bordereau
-        line_of_business: The line of business (aviation/casualty)
-    
-    Returns:
-        bool: True if the currency condition matches, False otherwise
-    """
-    if pd.isna(condition_value):
-        return True
-    
-    # Use the new dimension mapping system
-    policy_currency = get_policy_value(policy_data, "BUSCL_LIMIT_CURRENCY_CD", line_of_business)
-    
-    # If currency is not found in bordereau, condition matches (default regime)
-    if policy_currency is None:
-        return True
-    
-    return policy_currency == condition_value
+def _values_match(condition_values: list[str] | None, policy_value) -> bool:
+    if condition_values is None:
+        return True  # dimension non contrainte
+    pv = None if policy_value is None or (isinstance(policy_value, float) and pd.isna(policy_value)) else str(policy_value)
+    if pv is None:
+        return False  # condition impose un ensemble, mais la police n'a pas de valeur
+    # Normalisation légère (au besoin, on peut upper())
+    pv = pv.strip()
+    # Convert list -> set pour membership O(1)
+    return pv in set(str(v).strip() for v in condition_values)
+
+def _specificity_increment(condition_values: list[str] | None) -> float:
+    if not condition_values:
+        return 0.0
+    n = len(condition_values)
+    return 1.0 / n  # 1 si 1 valeur, 0.5 si 2, etc.
 
 
 def check_exclusion(
@@ -40,66 +28,41 @@ def check_exclusion(
     for condition in conditions:
         if not condition.is_exclusion():
             continue
-
         matches = True
         for dimension in dimension_columns:
             if dimension == "BUSCL_EXCLUDE_CD":
                 continue
-
-            condition_value = condition.get(dimension)
-            if pd.notna(condition_value):
-                # Special handling for currency matching
-                if dimension == "BUSCL_LIMIT_CURRENCY_CD":
-                    if not map_currency_condition(condition_value, policy_data, line_of_business):
-                        matches = False
-                        break
-                else:
-                    # Standard dimension matching using new mapping system
-                    policy_value = get_policy_value(policy_data, dimension, line_of_business)
-                    if policy_value != condition_value:
-                        matches = False
-                        break
-
+            cond_vals = condition.get_values(dimension)
+            if cond_vals is not None and len(cond_vals) > 0:
+                policy_val = get_policy_value(policy_data, dimension, line_of_business)
+                if not _values_match(cond_vals, policy_val):
+                    matches = False
+                    break
         if matches:
             return True
-
     return False
 
 
 def match_condition(
     policy_data: Dict[str, Any], conditions: List[Condition], dimension_columns: List[str], line_of_business: str = None
 ) -> Optional[Condition]:
-    matched_conditions = []
-
+    matched = []
     for condition in conditions:
         if condition.is_exclusion():
             continue
-
-        matches = True
-        specificity = 0
-
+        ok = True
+        score = 0.0
         for dimension in dimension_columns:
-            condition_value = condition.get(dimension)
-
-            if pd.notna(condition_value):
-                # Special handling for currency matching
-                if dimension == "BUSCL_LIMIT_CURRENCY_CD":
-                    if not map_currency_condition(condition_value, policy_data, line_of_business):
-                        matches = False
-                        break
-                else:
-                    # Standard dimension matching using new mapping system
-                    policy_value = get_policy_value(policy_data, dimension, line_of_business)
-                    if policy_value != condition_value:
-                        matches = False
-                        break
-                specificity += 1
-
-        if matches:
-            matched_conditions.append((condition, specificity))
-
-    if not matched_conditions:
+            cond_vals = condition.get_values(dimension)
+            if cond_vals is not None and len(cond_vals) > 0:
+                policy_val = get_policy_value(policy_data, dimension, line_of_business)
+                if not _values_match(cond_vals, policy_val):
+                    ok = False
+                    break
+                score += _specificity_increment(cond_vals)
+        if ok:
+            matched.append((condition, score))
+    if not matched:
         return None
-
-    matched_conditions.sort(key=lambda x: x[1], reverse=True)
-    return matched_conditions[0][0]
+    matched.sort(key=lambda x: x[1], reverse=True)
+    return matched[0][0]

@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Iterable
 
 from src.domain import (
     DIMENSIONS,
@@ -9,6 +9,7 @@ from src.domain import (
     Program,
     Structure,
 )
+from src.domain.dimension_mapping import DIMENSION_COLUMN_MAPPING
 
 
 # Keys and relations - foreign keys between Excel sheets (tables)
@@ -67,8 +68,33 @@ PARAMETERS = [
 ]
 
 
+MULTI_VALUE_SEPARATOR = ";"
+
+def _split_to_list_strict(cell) -> list[str] | None:
+    # None / NaN -> None
+    if pd.isna(cell):
+        return None
+    # Force string, split sur ';', trim, drop vides
+    tokens = [t.strip() for t in str(cell).split(MULTI_VALUE_SEPARATOR)]
+    tokens = [t for t in tokens if t]  # enlève vides
+    if not tokens:
+        return None
+    # Toujours une liste (même pour 1 seul élément)
+    return tokens
+
+def _program_dimension_candidates(conditions_df: pd.DataFrame) -> list[str]:
+    # Union des dimensions "bordereau" + clés programme du mapping
+    program_dims = set(DIMENSIONS) | set(DIMENSION_COLUMN_MAPPING.keys())
+    # On ne traite pas les flags booléens en multi-valeurs
+    program_dims -= {"INCLUDES_HULL", "INCLUDES_LIABILITY"}
+    # On ne garde que celles présentes dans la feuille conditions
+    return [c for c in program_dims if c in conditions_df.columns]
+
 def convert_pandas_to_native(value):
     """Convert pandas null values (pd.NA, np.nan) to Python None"""
+    # Si c'est déjà une liste (après parsing multi-valeurs), on la garde telle quelle
+    if isinstance(value, list):
+        return value
     if pd.isna(value):
         return None
     return value
@@ -100,10 +126,8 @@ class ProgramLoader:
         else:
             raise ValueError(f"Unknown data_source: {self.data_source}")
 
-        # Step 2: Determine dimension columns
-        self.dimension_columns = [
-            col for col in DIMENSIONS if col in conditions_df.columns
-        ]
+        # Step 2: Determine dimension columns (incluant BUSCL_LIMIT_CURRENCY_CD si présente)
+        self.dimension_columns = _program_dimension_candidates(conditions_df)
 
         # Step 3: Convert DataFrames to native Python types
         program_name = convert_pandas_to_native(program_df.iloc[0][PROGRAM_COLS.TITLE])
@@ -168,6 +192,11 @@ class ProgramLoader:
         )
         
         conditions_df = self._process_boolean_columns(conditions_df, program_uw_dept)
+        
+        # Parse multi-valeurs -> listes
+        dimension_cols = _program_dimension_candidates(conditions_df)
+        for col in dimension_cols:
+            conditions_df[col] = conditions_df[col].map(_split_to_list_strict, na_action='ignore')
         
         return program_df, structures_df, conditions_df
     
