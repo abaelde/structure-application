@@ -1,5 +1,6 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
 from src.domain import FIELDS, Program
+from src.domain.policy import Policy
 from .condition_matcher import check_exclusion
 from .policy_lifecycle import (
     check_policy_status,
@@ -7,42 +8,40 @@ from .policy_lifecycle import (
     create_excluded_result,
 )
 from .structure_orchestrator import process_structures
-from .exposure_calculator import get_exposure_calculator
 
 
 def apply_program(
-    policy_data: Dict[str, Any],
+    policy: Policy,
     program: Program,
     calculation_date: Optional[str] = None,
-) -> Dict[str, Any]:
-    calculator = get_exposure_calculator(program.underwriting_department)
-    exposure = calculator.calculate(policy_data)
+) -> Dict[str, any]:
+    # Exposition (et composants) calculés côté Policy
+    components = policy.exposure_components(program.underwriting_department)
+    exposure = components.total
     structures = program.structures
     dimension_columns = program.dimension_columns
 
-    is_policy_active, inactive_reason = check_policy_status(
-        policy_data, calculation_date
-    )
+    is_policy_active, inactive_reason = check_policy_status(policy, calculation_date) # AURE devrait être une method ed epolicy
 
     if not is_policy_active:
-        return create_inactive_result(policy_data, inactive_reason)
+        return create_inactive_result(policy.raw, inactive_reason)
 
-    if check_exclusion(policy_data, program.all_conditions, dimension_columns, program.underwriting_department):
-        return create_excluded_result(policy_data)
+    if check_exclusion(policy, program.all_conditions, dimension_columns, program.underwriting_department):
+        return create_excluded_result(policy.raw)
 
     structures_detail, total_cession_to_layer_100pct, total_cession_to_reinsurer = (
-        process_structures(structures, policy_data, dimension_columns, exposure, program.underwriting_department)
+        process_structures(structures, policy, dimension_columns, exposure, program.underwriting_department)
     )
 
     return {
-        FIELDS["INSURED_NAME"]: policy_data.get(FIELDS["INSURED_NAME"]),
+        FIELDS["INSURED_NAME"]: policy.get(FIELDS["INSURED_NAME"]),
         "exposure": exposure,
         "effective_exposure": exposure,
         "cession_to_layer_100pct": total_cession_to_layer_100pct,
         "cession_to_reinsurer": total_cession_to_reinsurer,
         "retained_by_cedant": exposure - total_cession_to_layer_100pct,
-        "policy_inception_date": policy_data.get(FIELDS["INCEPTION_DATE"]),
-        "policy_expiry_date": policy_data.get(FIELDS["EXPIRY_DATE"]),
+        "policy_inception_date": policy.get(FIELDS["INCEPTION_DATE"]),
+        "policy_expiry_date": policy.get(FIELDS["EXPIRY_DATE"]),
         "structures_detail": structures_detail,
         "exclusion_status": "included",
     }

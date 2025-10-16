@@ -1,6 +1,5 @@
 # src/domain/bordereau.py
 from __future__ import annotations
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Union
 
@@ -12,24 +11,10 @@ from src.domain.dimension_mapping import (
     get_all_mappable_dimensions,
 )
 from src.domain import UNDERWRITING_DEPARTMENT_VALUES
+from src.domain.policy import Policy  # ⬅️ nouveau
 
 class BordereauValidationError(Exception):
     pass
-
-
-@dataclass(frozen=True)
-class Policy:
-    """Représente une ligne de bordereau (compat. avec dict attendu par l'engine)."""
-    data: Dict[str, Any]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return dict(self.data)
-
-    def get(self, key: str, default=None) -> Any:
-        return self.data.get(key, default)
-
-    def __getitem__(self, key: str) -> Any:
-        return self.data[key]
 
 
 class Bordereau:
@@ -307,7 +292,8 @@ class Bordereau:
 
     def __iter__(self) -> Iterable[Policy]:
         for _, row in self._df.iterrows():
-            yield Policy(row.to_dict())
+            # Les colonnes sont déjà canonisées/typées par _normalize_columns
+            yield Policy(raw=row.to_dict(), lob=self.line_of_business)
 
     def policies(self) -> Iterable[Policy]:
         return iter(self)

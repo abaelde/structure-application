@@ -1,13 +1,14 @@
 from typing import Dict, Any, List, Set, Optional
 from src.domain import PRODUCT, Structure, Condition
+from src.domain.policy import Policy
 from .condition_matcher import match_condition
 from .cession_calculator import apply_condition
-from .exposure_calculator import AviationExposureCalculator, ExposureComponents
+from src.domain.exposure_components import ExposureComponents
 
 
 def process_structures(
     structures: List[Structure],
-    policy_data: Dict[str, Any],
+    policy: Policy,
     dimension_columns: List[str],
     exposure: float,
     line_of_business: str = None,
@@ -23,7 +24,7 @@ def process_structures(
         _process_predecessor_if_needed(structure)
 
         matched_condition = match_condition(
-            policy_data, structure.conditions, dimension_columns, line_of_business
+            policy, structure.conditions, dimension_columns, line_of_business
         )
 
         if matched_condition is None:
@@ -63,8 +64,8 @@ def process_structures(
         structure: Structure, matched_condition: Condition
     ) -> Dict[str, Any]:
         base_input_exposure = _calculate_input_exposure(exposure, structure, structure_outputs)
-        
-        exposure_components = _calculate_exposure_components(policy_data, base_input_exposure)
+
+        exposure_components = _calculate_exposure_components(policy, base_input_exposure, line_of_business)
         
         includes_hull = matched_condition.includes_hull if matched_condition.includes_hull is not None else True
         includes_liability = matched_condition.includes_liability if matched_condition.includes_liability is not None else True
@@ -125,25 +126,18 @@ def process_structures(
 
 
 def _calculate_exposure_components(
-    policy_data: Dict[str, Any],
-    total_exposure: float
+    policy: Policy,
+    total_exposure: float,
+    uw: Optional[str],
 ) -> ExposureComponents:
-    if "HULL_LIMIT" in policy_data or "LIABILITY_LIMIT" in policy_data:
-        calculator = AviationExposureCalculator()
-        raw_components = calculator.calculate_components(policy_data)
-        
-        if raw_components.total == 0:
-            return ExposureComponents(hull=0.0, liability=0.0)
-        
-        ratio_hull = raw_components.hull / raw_components.total
-        ratio_liability = raw_components.liability / raw_components.total
-        
-        return ExposureComponents(
-            hull=total_exposure * ratio_hull,
-            liability=total_exposure * ratio_liability
-        )
-    
-    return ExposureComponents(hull=total_exposure, liability=0.0)
+    comps = policy.exposure_components(uw or (policy.lob or ""))
+    tot = comps.total or 0.0
+    if tot == 0.0:
+        return ExposureComponents(hull=0.0, liability=0.0)
+    return ExposureComponents(
+        hull=total_exposure * (comps.hull / tot),
+        liability=total_exposure * (comps.liability / tot)
+    )
 
 
 def _calculate_input_exposure(

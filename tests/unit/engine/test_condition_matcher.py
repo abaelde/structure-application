@@ -5,6 +5,7 @@ from src.engine.condition_matcher import (
     check_exclusion,
 )
 from src.domain import Condition
+from src.domain.policy import Policy
 from src.domain.dimension_mapping import get_policy_value
 
 
@@ -81,7 +82,8 @@ class TestMatchConditionWithCurrencyMapping:
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
         line_of_business = "aviation"
         
-        result = match_condition(policy_data, [test_condition], dimension_columns, line_of_business)
+        policy = Policy(raw=policy_data, lob=line_of_business)
+        result = match_condition(policy, [test_condition], dimension_columns, line_of_business)
         
         assert result is not None
         assert result.get("BUSCL_LIMIT_CURRENCY_CD") == "USD"
@@ -106,7 +108,8 @@ class TestMatchConditionWithCurrencyMapping:
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
         line_of_business = "aviation"
         
-        result = match_condition(policy_data, [test_condition], dimension_columns, line_of_business)
+        policy = Policy(raw=policy_data, lob=line_of_business)
+        result = match_condition(policy, [test_condition], dimension_columns, line_of_business)
         
         assert result is None
     
@@ -129,7 +132,8 @@ class TestMatchConditionWithCurrencyMapping:
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
         line_of_business = "casualty"
         
-        result = match_condition(policy_data, [test_condition], dimension_columns, line_of_business)
+        policy = Policy(raw=policy_data, lob=line_of_business)
+        result = match_condition(policy, [test_condition], dimension_columns, line_of_business)
         
         assert result is not None
         assert result.get("BUSCL_LIMIT_CURRENCY_CD") == "USD"
@@ -153,7 +157,8 @@ class TestMatchConditionWithCurrencyMapping:
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
         line_of_business = "casualty"
         
-        result = match_condition(policy_data, [test_condition], dimension_columns, line_of_business)
+        policy = Policy(raw=policy_data, lob=line_of_business)
+        result = match_condition(policy, [test_condition], dimension_columns, line_of_business)
         
         assert result is None
     
@@ -177,7 +182,8 @@ class TestMatchConditionWithCurrencyMapping:
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
         line_of_business = "aviation"
         
-        result = match_condition(policy_data, [test_condition], dimension_columns, line_of_business)
+        policy = Policy(raw=policy_data, lob=line_of_business)
+        result = match_condition(policy, [test_condition], dimension_columns, line_of_business)
         
         assert result is not None
         assert result.get("BUSCL_COUNTRY_CD") == "France"
@@ -207,8 +213,9 @@ class TestMatchConditionWithCurrencyMapping:
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD", "BUSCL_COUNTRY_CD"]
         line_of_business = "aviation"
         
+        policy = Policy(raw=policy_data, lob=line_of_business)
         result = match_condition(
-            policy_data, 
+            policy, 
             [condition_general, condition_specific], 
             dimension_columns, 
             line_of_business
@@ -241,7 +248,8 @@ class TestCheckExclusionWithCurrencyMapping:
         dimension_columns = ["BUSCL_EXCLUDE_CD", "BUSCL_LIMIT_CURRENCY_CD"]
         line_of_business = "aviation"
         
-        result = check_exclusion(policy_data, [exclusion_condition], dimension_columns, line_of_business)
+        policy = Policy(raw=policy_data, lob=line_of_business)
+        result = check_exclusion(policy, [exclusion_condition], dimension_columns, line_of_business)
         
         assert result is True
     
@@ -263,7 +271,8 @@ class TestCheckExclusionWithCurrencyMapping:
         dimension_columns = ["BUSCL_EXCLUDE_CD", "BUSCL_LIMIT_CURRENCY_CD"]
         line_of_business = "aviation"
         
-        result = check_exclusion(policy_data, [exclusion_condition], dimension_columns, line_of_business)
+        policy = Policy(raw=policy_data, lob=line_of_business)
+        result = check_exclusion(policy, [exclusion_condition], dimension_columns, line_of_business)
         
         assert result is False
     
@@ -284,6 +293,7 @@ class TestCheckExclusionWithCurrencyMapping:
         dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD"]
         line_of_business = "aviation"
         
-        result = check_exclusion(policy_data, [normal_condition], dimension_columns, line_of_business)
+        policy = Policy(raw=policy_data, lob=line_of_business)
+        result = check_exclusion(policy, [normal_condition], dimension_columns, line_of_business)
         
         assert result is False

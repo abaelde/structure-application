@@ -1,32 +1,13 @@
 import pandas as pd
 from typing import Dict, Any, Tuple, Optional
-from datetime import datetime
 from src.domain import FIELDS
+from src.domain.policy import Policy
 
 
 def check_policy_status(
-    policy_data: Dict[str, Any], calculation_date: Optional[str] = None
+    policy: Policy, calculation_date: Optional[str] = None
 ) -> Tuple[bool, Optional[str]]:
-    policy_expiry_date = policy_data.get(FIELDS["EXPIRY_DATE"])
-
-    if calculation_date is None:
-        calculation_date = datetime.now().strftime("%Y-%m-%d")
-
-    is_policy_active = True
-    inactive_reason = None
-
-    if policy_expiry_date:
-        try:
-            expiry_dt = pd.to_datetime(policy_expiry_date)
-            calc_dt = pd.to_datetime(calculation_date)
-
-            if expiry_dt <= calc_dt:
-                is_policy_active = False
-                inactive_reason = f"Policy expired on {expiry_dt.date()} (calculation date: {calc_dt.date()})"
-        except Exception as e:
-            pass
-
-    return is_policy_active, inactive_reason
+    return policy.is_active(calculation_date)
 
 
 def create_non_covered_result(

@@ -2,6 +2,7 @@ import pandas as pd
 from typing import Dict, Any
 from .calculation_engine import apply_program
 from ..domain.bordereau import Bordereau
+from ..domain.policy import Policy
 
 
 def apply_program_to_bordereau(
@@ -18,10 +19,14 @@ def apply_program_to_bordereau(
     bordereau.validate_exposure_columns()
 
     df = bordereau.to_engine_dataframe().copy()
-    results_df = df.apply(
-        lambda row: pd.Series(apply_program(row.to_dict(), program, calculation_date)),
-        axis=1
-    )
+
+    # Calcul ligne à ligne avec des Policy riches # AURE non car on va faire du snowpark
+    results_list = []
+    for pol in bordereau.policies():  # -> Policy
+        result = apply_program(pol, program, calculation_date)
+        results_list.append(result)
+
+    results_df = pd.DataFrame(results_list, index=df.index)
 
     bordereau_with_net = df.copy()
     bordereau_with_net["cession_to_reinsurer"] = results_df["cession_to_reinsurer"]
