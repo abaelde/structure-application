@@ -155,7 +155,7 @@ class ProgramLoader:
     def _load_from_file(self):
         program_df = pd.read_excel(self.source, sheet_name=SHEETS.PROGRAM)
         structures_df = pd.read_excel(self.source, sheet_name=SHEETS.STRUCTURES)
-        conditions_df = pd.read_excel(self.source, sheet_name=SHEETS.conditionS)
+        conditions_df = pd.read_excel(self.source, sheet_name=SHEETS.conditions)
         
         program_uw_dept = convert_pandas_to_native(
             program_df.iloc[0].get(PROGRAM_COLS.UNDERWRITING_DEPARTMENT)

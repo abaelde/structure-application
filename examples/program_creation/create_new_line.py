@@ -197,7 +197,7 @@ LAYER 3 - conditions par Devise uniquement:
     
   Total conditions Layer 3: {len(layer_3_conditions)} (5 devises)
 
-TOTAL conditionS: {len(layer_1_conditions) + len(layer_2_conditions) + len(layer_3_conditions)}
+TOTAL conditions: {len(layer_1_conditions) + len(layer_2_conditions) + len(layer_3_conditions)}
 
 Reinsurer share: {REINSURER_SHARE:.1%} pour toutes les conditions
 """)

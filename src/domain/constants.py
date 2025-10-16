@@ -91,7 +91,7 @@ CURRENCY_COLUMN_ALIASES = {
 SHEETS = SimpleNamespace(
     PROGRAM="program",
     STRUCTURES="structures",
-    conditionS="sections",
+    conditions="conditions",
 )
 
 PROGRAM_COLS = SimpleNamespace(

@@ -291,6 +291,6 @@ def program_to_excel(
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
         program_df.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
         structures_df.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
-        conditions_df.to_excel(writer, sheet_name=SHEETS.conditionS, index=False)
+        conditions_df.to_excel(writer, sheet_name=SHEETS.conditions, index=False)
     
     auto_adjust_column_widths(output_path, min_width=min_width, max_width=max_width)

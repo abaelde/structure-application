@@ -64,7 +64,7 @@ def combine_all_programs(programs_dir: str, output_file: str):
             # Read the three sheets
             program_df = pd.read_excel(program_file, sheet_name=SHEETS.PROGRAM)
             structures_df = pd.read_excel(program_file, sheet_name=SHEETS.STRUCTURES)
-            conditions_df = pd.read_excel(program_file, sheet_name=SHEETS.conditionS)
+            conditions_df = pd.read_excel(program_file, sheet_name=SHEETS.conditions)
 
             # Get original IDs
             old_reprog_id = program_df["REPROG_ID_PRE"].iloc[0]
@@ -155,7 +155,7 @@ def combine_all_programs(programs_dir: str, output_file: str):
     with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
         combined_programs.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
         combined_structures.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
-        combined_conditions.to_excel(writer, sheet_name=SHEETS.conditionS, index=False)
+        combined_conditions.to_excel(writer, sheet_name=SHEETS.conditions, index=False)
 
     # Auto-adjust column widths
     print(f"Auto-adjusting column widths...")
