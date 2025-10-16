@@ -6,7 +6,7 @@ from .policy_lifecycle import (
     create_inactive_result,
     create_excluded_result,
 )
-from .structure_orchestrator import process_structures
+from .structure_orchestrator import StructureProcessor
 
 
 def apply_program(
@@ -26,22 +26,19 @@ def apply_program(
     ):
         return create_excluded_result(policy.raw)
 
-    structures_detail, total_cession_to_layer_100pct, total_cession_to_reinsurer = (
-        process_structures(policy, program)
-    )
+    run = StructureProcessor(policy, program).process_structures()
 
-    # Récupérer l'exposition pour le résultat
     exposure = policy.exposure_bundle(program.underwriting_department).total
-    
     return {
         FIELDS["INSURED_NAME"]: policy.get(FIELDS["INSURED_NAME"]),
         "exposure": exposure,
         "effective_exposure": exposure,
-        "cession_to_layer_100pct": total_cession_to_layer_100pct,
-        "cession_to_reinsurer": total_cession_to_reinsurer,
-        "retained_by_cedant": exposure - total_cession_to_layer_100pct,
+        "cession_to_layer_100pct": run.totals.cession_to_layer_100pct,
+        "cession_to_reinsurer": run.totals.cession_to_reinsurer,
+        "retained_by_cedant": exposure - run.totals.cession_to_layer_100pct,
         "policy_inception_date": policy.get(FIELDS["INCEPTION_DATE"]),
         "policy_expiry_date": policy.get(FIELDS["EXPIRY_DATE"]),
-        "structures_detail": structures_detail,
+        # Détail homogène, exploitable dans des DataFrames/logs
+        "structures_detail": run.to_flat_dicts(),
         "exclusion_status": "included",
     }

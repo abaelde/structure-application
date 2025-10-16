@@ -4,7 +4,7 @@ import numpy as np
 from typing import Dict, Any, List
 from src.domain import DIMENSIONS, Program, Structure
 from src.domain.constants import PROGRAM_COLS, STRUCTURE_COLS, condition_COLS
-from src.domain.dimension_mapping import DIMENSION_COLUMN_MAPPING
+from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 MULTI_VALUE_SEPARATOR = ";"
 
@@ -46,7 +46,7 @@ class ProgramSerializer:
 
     @staticmethod
     def _dimension_candidates(conditions_df: pd.DataFrame) -> list[str]:
-        program_dims = set(DIMENSIONS) | set(DIMENSION_COLUMN_MAPPING.keys())
+        program_dims = set(DIMENSIONS) | set(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
         program_dims -= {"INCLUDES_HULL", "INCLUDES_LIABILITY"}  # flags booléens
         return [c for c in program_dims if c in conditions_df.columns]
 
