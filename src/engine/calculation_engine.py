@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict
 from src.domain import FIELDS, Program
 from src.domain.policy import Policy
 from .condition_matcher import check_exclusion
@@ -12,7 +12,7 @@ from .structure_orchestrator import process_structures
 def apply_program(
     policy: Policy,
     program: Program,
-    calculation_date: Optional[str] = None,
+    calculation_date: str,
 ) -> Dict[str, any]:
     # Exposition (et composants) calculés côté Policy
     components = policy.exposure_components(program.underwriting_department)

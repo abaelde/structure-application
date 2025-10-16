@@ -46,8 +46,8 @@ class Policy:
             self._expiry = pd.to_datetime(val) if val is not None else None
         return self._expiry
 
-    def is_active(self, calculation_date: Optional[str]) -> tuple[bool, Optional[str]]:
-        calc = pd.to_datetime(calculation_date) if calculation_date else pd.Timestamp.today().normalize()
+    def is_active(self, calculation_date: str) -> tuple[bool, Optional[str]]:
+        calc = pd.to_datetime(calculation_date)
         if self.expiry is not None and self.expiry <= calc:
             return False, f"Policy expired on {self.expiry.date()} (calculation date: {calc.date()})"
         return True, None
