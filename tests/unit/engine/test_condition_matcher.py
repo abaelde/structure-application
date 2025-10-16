@@ -1,117 +1,61 @@
 import pytest
 import pandas as pd
 from src.engine.condition_matcher import (
-    map_currency_condition,
     match_condition,
     check_exclusion,
 )
 from src.domain import Condition
+from src.domain.dimension_mapping import get_policy_value
 
 
-class TestMapCurrencyCondition:
-    """Tests for the currency mapping logic"""
+class TestCurrencyMapping:
+    """Tests for the currency mapping logic via get_policy_value"""
     
-    def test_aviation_matching_hull_currency(self):
-        """Test aviation matching when hull currency matches"""
-        condition_value = "USD"
+    def test_aviation_mapping_hull_currency(self):
+        """Test aviation mapping returns HULL_CURRENCY"""
         policy_data = {
             "HULL_CURRENCY": "USD",
             "LIABILITY_CURRENCY": "EUR",
         }
         line_of_business = "aviation"
         
-        result = map_currency_condition(condition_value, policy_data, line_of_business)
+        result = get_policy_value(policy_data, "BUSCL_LIMIT_CURRENCY_CD", line_of_business)
         
-        assert result is True
+        assert result == "USD"
     
-    def test_aviation_matching_liability_currency(self):
-        """Test aviation when liability currency matches but hull doesn't - should use hull currency (USD)"""
-        condition_value = "EUR"
-        policy_data = {
-            "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "EUR",
-        }
-        line_of_business = "aviation"
-        
-        result = map_currency_condition(condition_value, policy_data, line_of_business)
-        
-        # With simplified system, we only use HULL_CURRENCY, so USD != EUR
-        assert result is False
-    
-    def test_aviation_no_match(self):
-        """Test aviation when neither currency matches"""
-        condition_value = "GBP"
-        policy_data = {
-            "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "EUR",
-        }
-        line_of_business = "aviation"
-        
-        result = map_currency_condition(condition_value, policy_data, line_of_business)
-        
-        assert result is False
-    
-    def test_casualty_matching(self):
-        """Test casualty matching when currency matches"""
-        condition_value = "USD"
+    def test_casualty_mapping_currency(self):
+        """Test casualty mapping returns CURRENCY"""
         policy_data = {
             "CURRENCY": "USD",
         }
         line_of_business = "casualty"
         
-        result = map_currency_condition(condition_value, policy_data, line_of_business)
+        result = get_policy_value(policy_data, "BUSCL_LIMIT_CURRENCY_CD", line_of_business)
         
-        assert result is True
-    
-    def test_casualty_no_match(self):
-        """Test casualty when currency doesn't match"""
-        condition_value = "EUR"
-        policy_data = {
-            "CURRENCY": "USD",
-        }
-        line_of_business = "casualty"
-        
-        result = map_currency_condition(condition_value, policy_data, line_of_business)
-        
-        assert result is False
-    
-    def test_condition_value_none(self):
-        """Test when condition value is None/NaN (should match everything)"""
-        condition_value = None
-        policy_data = {
-            "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "EUR",
-        }
-        line_of_business = "aviation"
-        
-        result = map_currency_condition(condition_value, policy_data, line_of_business)
-        
-        assert result is True
-    
-    def test_condition_value_nan(self):
-        """Test when condition value is NaN (should match everything)"""
-        condition_value = pd.NA
-        policy_data = {
-            "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "EUR",
-        }
-        line_of_business = "aviation"
-        
-        result = map_currency_condition(condition_value, policy_data, line_of_business)
-        
-        assert result is True
+        assert result == "USD"
     
     def test_unknown_line_of_business_fallback(self):
         """Test fallback for unknown line of business"""
-        condition_value = "USD"
         policy_data = {
             "CURRENCY": "USD",
         }
         line_of_business = "unknown"
         
-        result = map_currency_condition(condition_value, policy_data, line_of_business)
+        result = get_policy_value(policy_data, "BUSCL_LIMIT_CURRENCY_CD", line_of_business)
         
-        assert result is True
+        # Should fallback to direct dimension name
+        assert result is None  # BUSCL_LIMIT_CURRENCY_CD not in policy_data
+    
+    def test_missing_currency_data(self):
+        """Test when currency data is missing"""
+        policy_data = {
+            "BUSCL_COUNTRY_CD": "France",
+        }
+        line_of_business = "aviation"
+        
+        result = get_policy_value(policy_data, "BUSCL_LIMIT_CURRENCY_CD", line_of_business)
+        
+        assert result is None
 
 
 class TestMatchConditionWithCurrencyMapping:
