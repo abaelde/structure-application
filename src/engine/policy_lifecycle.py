@@ -1,5 +1,5 @@
 from typing import Dict
-from src.domain import FIELDS
+# FIELDS supprimé - utilisation directe des clés canoniques
 from src.domain.models import Program
 from src.domain.policy import Policy
 from .results import ProgramRunResult, RunTotals
@@ -20,9 +20,9 @@ def create_non_covered_result(
     run_result.effective_exposure = (
         0.0  # Pour les politiques inactives/exclues, effective_exposure = 0
     )
-    run_result.insured_name = policy.get(FIELDS["INSURED_NAME"])
-    run_result.policy_inception_date = policy.get(FIELDS["INCEPTION_DATE"])
-    run_result.policy_expiry_date = policy.get(FIELDS["EXPIRY_DATE"])
+    run_result.insured_name = policy.get("INSURED_NAME")
+    run_result.policy_inception_date = policy.get("INCEPTION_DT")
+    run_result.policy_expiry_date = policy.get("EXPIRE_DT")
 
     return run_result
 

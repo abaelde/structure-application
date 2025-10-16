@@ -2,44 +2,6 @@
 from types import SimpleNamespace
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Bordereau / colonnes d'entrée (CSV)
-# ──────────────────────────────────────────────────────────────────────────────
-FIELDS = {
-    "POLICY_NUMBER": "policy_id",
-    "INSURED_NAME": "INSURED_NAME",
-    "COUNTRY": "BUSCL_COUNTRY_CD",
-    "REGION": "BUSCL_REGION",
-    "CLASS_1": "BUSCL_CLASS_OF_BUSINESS_1",
-    "CLASS_2": "BUSCL_CLASS_OF_BUSINESS_2",
-    "CLASS_3": "BUSCL_CLASS_OF_BUSINESS_3",
-    "CURRENCY": "CURRENCY",
-    "HULL_CURRENCY": "HULL_CURRENCY",
-    "LIABILITY_CURRENCY": "LIABILITY_CURRENCY",
-    "LINE_OF_BUSINESS": "line_of_business",
-    "INDUSTRY": "industry",
-    "SIC_CODE": "sic_code",
-    "INCLUDE": "include",
-    "EXPOSURE": "exposure",
-    "INCEPTION_DATE": "INCEPTION_DT",
-    "EXPIRY_DATE": "EXPIRE_DT",
-}
-
-# Seules les dimensions ci-dessous sont considérées au matching
-DIMENSIONS = [
-    "BUSCL_EXCLUDE_CD",
-    "BUSCL_ENTITY_NAME_CED",
-    "POL_RISK_NAME_CED",
-    "BUSCL_COUNTRY_CD",
-    "BUSCL_REGION",
-    "BUSCL_CLASS_OF_BUSINESS_1",
-    "BUSCL_CLASS_OF_BUSINESS_2",
-    "BUSCL_CLASS_OF_BUSINESS_3",
-    "CURRENCY",
-    "HULL_CURRENCY",
-    "LIABILITY_CURRENCY",
-]
-
-# ──────────────────────────────────────────────────────────────────────────────
 # Underwriting Departments (valeurs possibles au niveau programme)
 # ──────────────────────────────────────────────────────────────────────────────
 UNDERWRITING_DEPARTMENT = SimpleNamespace(

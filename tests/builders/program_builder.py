@@ -1,6 +1,6 @@
 from typing import List, Optional
 from src.domain.models import Program, Structure
-from src.domain.constants import DIMENSIONS
+# DIMENSIONS supprimé - utilisation directe des clés canoniques
 from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 
@@ -32,10 +32,9 @@ def build_program(
         )
     """
     if dimension_columns is None:
-        # Aligne le comportement des builders sur le loader :
-        # union des dimensions "bordereau" + clés de mapping programme (ex: BUSCL_LIMIT_CURRENCY_CD)
+        # Utilise uniquement le schéma comme source de vérité pour les dimensions
         dimension_columns = sorted(
-            set(DIMENSIONS) | set(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
+            set(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()) | {"BUSCL_EXCLUDE_CD"}
         )
 
     return Program(

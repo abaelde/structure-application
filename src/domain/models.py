@@ -32,12 +32,10 @@ class Condition:
                 f"SIGNED_SHARE_PCT must be between 0 and 1, got {self.signed_share}"
             )
 
-        if self.includes_hull is not None and self.includes_liability is not None:
-            if not self.includes_hull and not self.includes_liability:
-                raise ValueError(
-                    f"At least one of INCLUDES_HULL or INCLUDES_LIABILITY must be True. "
-                    f"condition data: {self._data}"
-                )
+        # Si un des deux flags est fourni, exiger qu'au moins un soit True
+        if (self.includes_hull is not None or self.includes_liability is not None):
+            if not bool(self.includes_hull) and not bool(self.includes_liability):
+                raise ValueError("At least one of INCLUDES_HULL / INCLUDES_LIABILITY must be True")
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Condition":

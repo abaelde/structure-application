@@ -103,16 +103,7 @@ class TestAviationExposureCalculator:
 
         assert "Invalid numeric values" in str(exc_info.value)
 
-    def test_get_required_columns(self):
-        calculator = AviationExposureCalculator()
-        required = calculator.get_required_columns()
-
-        assert required == [
-            "HULL_LIMIT",
-            "LIABILITY_LIMIT",
-            "HULL_SHARE",
-            "LIABILITY_SHARE",
-        ]
+    # test_get_required_columns supprimé - méthode retirée du code
 
     def test_realistic_aviation_exposure(self):
         calculator = AviationExposureCalculator()
@@ -334,11 +325,7 @@ class TestCasualtyExposureCalculator:
 
         assert "Invalid numeric value" in str(exc_info.value)
 
-    def test_get_required_columns(self):
-        calculator = CasualtyExposureCalculator()
-        required = calculator.get_required_columns()
-
-        assert required == ["LIMIT", "CEDENT_SHARE"]
+    # test_get_required_columns supprimé - méthode retirée du code
 
 
 class TestTestExposureCalculator:
@@ -383,11 +370,7 @@ class TestTestExposureCalculator:
 
         assert "Invalid numeric value" in str(exc_info.value)
 
-    def test_get_required_columns(self):
-        calculator = TestExposureCalculator()
-        required = calculator.get_required_columns()
-
-        assert required == ["exposure"]
+    # test_get_required_columns supprimé - méthode retirée du code
 
 
 class TestGetExposureCalculator:

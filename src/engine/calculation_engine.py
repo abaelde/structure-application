@@ -1,5 +1,6 @@
 from typing import Dict
-from src.domain import FIELDS, Program
+from src.domain import Program
+# FIELDS supprimé - utilisation directe des clés canoniques
 from src.domain.policy import Policy
 from .condition_matcher import check_exclusion
 from .policy_lifecycle import (
@@ -34,9 +35,9 @@ def apply_program(
     # Enrichir le ProgramRunResult avec les métadonnées de la politique
     run.exposure = exposure
     run.effective_exposure = exposure
-    run.insured_name = policy.get(FIELDS["INSURED_NAME"])
-    run.policy_inception_date = policy.get(FIELDS["INCEPTION_DATE"])
-    run.policy_expiry_date = policy.get(FIELDS["EXPIRY_DATE"])
+    run.insured_name = policy.get("INSURED_NAME")
+    run.policy_inception_date = policy.get("INCEPTION_DT")
+    run.policy_expiry_date = policy.get("EXPIRE_DT")
     run.exclusion_status = "included"
 
     return run

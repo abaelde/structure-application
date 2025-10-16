@@ -5,12 +5,11 @@ from typing import Dict, Iterable, List, Optional, Union
 
 import pandas as pd
 
-from src.domain.constants import FIELDS
 from src.domain.schema import COLUMNS, exposure_rules_for_lob, build_alias_to_canonical
 from src.domain.schema import (
     get_all_mappable_dimensions,
 )
-from src.domain import UNDERWRITING_DEPARTMENT_VALUES, Program
+from src.domain import Program
 from src.domain.policy import Policy  # ⬅️ nouveau
 
 
@@ -20,11 +19,11 @@ class BordereauValidationError(Exception):
 
 class Bordereau:
     """
-    Petit wrapper autour d'un DataFrame pour :
+    Wrapper autour d'un DataFrame pour :
       - Charger (CSV) et valider le bordereau
       - Exposer les colonnes de dimension réellement disponibles
-      - Itérer sous forme d'objets Policy
-      - Rester 100% compatible avec l'engine actuel (on peut toujours passer un DataFrame)
+      - Itérer sous forme d'objets Policy typés
+      - Valider les données d'entrée selon le schéma métier
     """
 
     def __init__(
@@ -37,16 +36,16 @@ class Bordereau:
     ):
         self._raw_df = df.copy()
         self._df = self._normalize_columns(self._raw_df)
-        self.uw_dept = uw_dept or self._infer_uw_dept(self._df)
+        self.uw_dept = uw_dept or self._infer_uw_dept(self._df) or self._get_underwriting_department()
         self.source = source
         self.program = program  # Référence vers le programme associé
         self.validation_warnings: List[str] = []
         self.validation_errors: List[str] = []
 
-        # Si uw_dept non fourni, on tente de l'inférer depuis la colonne FIELDS["LINE_OF_BUSINESS"]
-        if self.uw_dept is None and FIELDS["LINE_OF_BUSINESS"] in df.columns:
+        # Si uw_dept non fourni, on tente de l'inférer depuis la colonne line_of_business
+        if self.uw_dept is None and "line_of_business" in df.columns:
             vals = (
-                df[FIELDS["LINE_OF_BUSINESS"]]
+                df["line_of_business"]
                 .dropna()
                 .astype(str)
                 .str.lower()
@@ -145,11 +144,7 @@ class Bordereau:
         return df2
 
     def _infer_uw_dept(self, df: pd.DataFrame) -> Optional[str]:
-        col = (
-            FIELDS["LINE_OF_BUSINESS"]
-            if FIELDS["LINE_OF_BUSINESS"] in df.columns
-            else "line_of_business"
-        )
+        col = "line_of_business"
         if col in df.columns:
             vals = df[col].dropna().astype(str).str.lower().unique().tolist()
             if len(vals) == 1:

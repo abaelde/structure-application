@@ -1,6 +1,4 @@
 from .constants import (
-    FIELDS,
-    DIMENSIONS,
     UNDERWRITING_DEPARTMENT,
     UNDERWRITING_DEPARTMENT_VALUES,
     PRODUCT,
@@ -15,8 +13,6 @@ from .constants import (
 from .models import Program, Structure, Condition
 
 __all__ = [
-    "FIELDS",
-    "DIMENSIONS",
     "UNDERWRITING_DEPARTMENT",
     "UNDERWRITING_DEPARTMENT_VALUES",
     "PRODUCT",

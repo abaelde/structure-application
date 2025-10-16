@@ -143,22 +143,19 @@ class StructureProcessor:
 
     def _components_set(self, matched: Optional[Condition]) -> Set[str]:
         """Scope d'exposition explicite pour Aviation ; vide = 'total'."""
-        if self.uw_dept.lower() != "aviation":  # AURE : use of enuls ?
+        # Hors aviation : pas de composants
+        if self.uw_dept.lower() != "aviation":
             return set()
-        inc_h = (
-            True
-            if matched is None or matched.includes_hull is None
-            else bool(matched.includes_hull)
-        )
-        inc_l = (
-            True
-            if matched is None or matched.includes_liability is None
-            else bool(matched.includes_liability)
-        )
-        include: Set[str] = set()
-        if inc_h:
+        
+        # Si aucune condition ne matche, on applique sur le total (hull+liab)
+        if matched is None:
+            return {"hull", "liability"}
+        
+        # Ici, on exige des bool explicites (serializer les garantit)
+        include = set()
+        if matched.includes_hull:
             include.add("hull")
-        if inc_l:
+        if matched.includes_liability:
             include.add("liability")
         return include
 

@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, List
 import pandas as pd
 
-from src.domain.constants import FIELDS
 from src.domain.exposure_bundle import ExposureBundle
 from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 
@@ -39,14 +38,14 @@ class Policy:
     @property
     def inception(self) -> Optional[pd.Timestamp]:
         if self._inception is None:
-            val = self.get(FIELDS["INCEPTION_DATE"])
+            val = self.get("INCEPTION_DT")
             self._inception = pd.to_datetime(val) if val is not None else None
         return self._inception
 
     @property
     def expiry(self) -> Optional[pd.Timestamp]:
         if self._expiry is None:
-            val = self.get(FIELDS["EXPIRY_DATE"])
+            val = self.get("EXPIRE_DT")
             self._expiry = pd.to_datetime(val) if val is not None else None
         return self._expiry
 

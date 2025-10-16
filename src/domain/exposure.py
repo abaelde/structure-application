@@ -12,9 +12,6 @@ class ExposureCalculator(ABC):
     @abstractmethod
     def calculate(self, policy_data: Dict[str, Any]) -> float: ...
 
-    @abstractmethod
-    def get_required_columns(self) -> list[str]: ...
-
     # Ajout : constructeur générique de bundle (par défaut : total seul)
     def bundle(self, policy_data: Dict[str, Any]) -> ExposureBundle:
         return ExposureBundle(total=self.calculate(policy_data))
@@ -67,9 +64,6 @@ class AviationExposureCalculator(ExposureCalculator):
     def calculate(self, policy_data: Dict[str, Any]) -> float:
         return self.bundle(policy_data).total
 
-    def get_required_columns(self) -> list[str]:
-        return ["HULL_LIMIT", "LIABILITY_LIMIT", "HULL_SHARE", "LIABILITY_SHARE"]
-
 
 class CasualtyExposureCalculator(ExposureCalculator):
     def calculate(self, policy_data: Dict[str, Any]) -> float:
@@ -89,8 +83,6 @@ class CasualtyExposureCalculator(ExposureCalculator):
                 f"Invalid numeric value in Casualty exposure columns: {e}"
             )
 
-    def get_required_columns(self) -> list[str]:
-        return ["LIMIT", "CEDENT_SHARE"]
 
 
 class TestExposureCalculator(ExposureCalculator):
@@ -107,8 +99,7 @@ class TestExposureCalculator(ExposureCalculator):
                 f"Invalid numeric value in Test exposure column: {e}"
             )
 
-    def get_required_columns(self) -> list[str]:
-        return ["exposure"]
+    # get_required_columns() supprimé - validation centralisée dans schema.py
 
 
 def get_exposure_calculator(underwriting_department: str) -> ExposureCalculator:
