@@ -1,13 +1,5 @@
-import pandas as pd
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any
 from src.domain import FIELDS
-from src.domain.policy import Policy
-
-
-def check_policy_status(
-    policy: Policy, calculation_date: Optional[str] = None
-) -> Tuple[bool, Optional[str]]:
-    return policy.is_active(calculation_date)
 
 
 def create_non_covered_result(

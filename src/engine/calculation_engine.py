@@ -3,7 +3,6 @@ from src.domain import FIELDS, Program
 from src.domain.policy import Policy
 from .condition_matcher import check_exclusion
 from .policy_lifecycle import (
-    check_policy_status,
     create_inactive_result,
     create_excluded_result,
 )
@@ -21,7 +20,7 @@ def apply_program(
     structures = program.structures
     dimension_columns = program.dimension_columns
 
-    is_policy_active, inactive_reason = check_policy_status(policy, calculation_date) # AURE devrait être une method ed epolicy
+    is_policy_active, inactive_reason = policy.is_active(calculation_date)
 
     if not is_policy_active:
         return create_inactive_result(policy.raw, inactive_reason)
