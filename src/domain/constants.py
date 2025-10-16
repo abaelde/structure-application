@@ -68,22 +68,6 @@ CLAIM_BASIS = SimpleNamespace(
 )
 CLAIM_BASIS_VALUES = {CLAIM_BASIS.RISK_ATTACHING, CLAIM_BASIS.LOSS_OCCURRING}
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Currency validation by line of business (DEPRECATED - use dimension_mapping.py)
-# ──────────────────────────────────────────────────────────────────────────────
-# Note: These are kept for backward compatibility but should be replaced
-# with the new dimension mapping system in dimension_mapping.py
-
-CURRENCY_FIELDS = {
-    "AVIATION_HULL": "HULL_CURRENCY",
-    "AVIATION_LIABILITY": "LIABILITY_CURRENCY",
-    "CASUALTY": "CURRENCY",
-}
-
-CURRENCY_COLUMN_ALIASES = {
-    "aviation": ["HULL_CURRENCY", "LIABILITY_CURRENCY"],
-    "casualty": ["CURRENCY"],
-}
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Excel: noms des feuilles et colonnes

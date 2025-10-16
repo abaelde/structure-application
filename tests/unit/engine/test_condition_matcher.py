@@ -46,7 +46,7 @@ class TestCurrencyMapping:
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
 
-        # Should fallback to direct dimension name # AURE
+        # Should fallback to direct dimension name 
         assert result is None  # BUSCL_LIMIT_CURRENCY_CD not in policy_data
 
     def test_missing_currency_data(self):

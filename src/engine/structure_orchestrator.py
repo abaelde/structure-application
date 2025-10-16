@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Set, Optional
+from typing import Dict, Any, Set, Optional
 from src.domain import PRODUCT, Structure, Condition, Program
 from src.domain.policy import Policy
 from .condition_matcher import match_condition

@@ -285,9 +285,6 @@ class Bordereau:
     def df(self) -> pd.DataFrame:
         return self._df
 
-    def to_dataframe(self) -> pd.DataFrame:
-        """Alias explicite (pour duck typing dans l'engine)."""
-        return self._df
 
     def to_engine_dataframe(self) -> pd.DataFrame:
         """DF **canonique** (noms & types) prêt pour l'engine."""
