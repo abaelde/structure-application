@@ -32,7 +32,6 @@ def check_exclusion(
     policy: Policy,
     conditions: List[Condition],
     dimension_columns: List[str],
-    line_of_business: str = None,
 ) -> bool:
     for condition in conditions:
         if not condition.is_exclusion():
@@ -56,7 +55,6 @@ def match_condition(
     policy: Policy,
     conditions: List[Condition],
     dimension_columns: List[str],
-    line_of_business: str = None,
 ) -> Optional[Condition]:
     matched = []
     for condition in conditions:

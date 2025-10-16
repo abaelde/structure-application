@@ -5,6 +5,7 @@ import pandas as pd
 
 from src.domain.constants import FIELDS
 from src.domain.exposure_components import ExposureComponents
+from src.domain.exposure import ExposureCalculationError
 
 
 @dataclass
@@ -79,29 +80,24 @@ class Policy:
 
         if uw == "aviation":
             if self._aviation_components is None:
-                # Import paresseux pour éviter la dépendance circulaire
-                from src.engine.exposure_calculator import AviationExposureCalculator
-
+                from src.domain.exposure import AviationExposureCalculator
                 calc = AviationExposureCalculator()
                 self._aviation_components = calc.calculate_components(self.raw)
             return self._aviation_components
 
         if uw == "casualty":
             if self._casualty_total is None:
-                # Import paresseux pour éviter la dépendance circulaire
-                from src.engine.exposure_calculator import CasualtyExposureCalculator
-
+                from src.domain.exposure import CasualtyExposureCalculator
                 self._casualty_total = CasualtyExposureCalculator().calculate(self.raw)
             return ExposureComponents(hull=self._casualty_total, liability=0.0)
 
         if uw == "test":
             if self._test_total is None:
-                # Import paresseux pour éviter la dépendance circulaire
-                from src.engine.exposure_calculator import TestExposureCalculator
-
+                from src.domain.exposure import TestExposureCalculator
                 self._test_total = TestExposureCalculator().calculate(self.raw)
             return ExposureComponents(hull=self._test_total, liability=0.0)
-
-        # Fallback neutre si UW non reconnu
-        total = float(self.raw.get("exposure") or 0.0)
-        return ExposureComponents(hull=total, liability=0.0)
+        
+        raise ExposureCalculationError(
+            f"Unknown underwriting department '{uw_dept}'. "
+            f"Supported departments: aviation, casualty, test"
+        )

@@ -92,7 +92,7 @@ class TestMatchConditionWithCurrencyMapping:
 
         policy = Policy(raw=policy_data, lob=line_of_business)
         result = match_condition(
-            policy, [test_condition], dimension_columns, line_of_business
+            policy, [test_condition], dimension_columns
         )
 
         assert result is not None
@@ -120,7 +120,7 @@ class TestMatchConditionWithCurrencyMapping:
 
         policy = Policy(raw=policy_data, lob=line_of_business)
         result = match_condition(
-            policy, [test_condition], dimension_columns, line_of_business
+            policy, [test_condition], dimension_columns
         )
 
         assert result is None
@@ -146,7 +146,7 @@ class TestMatchConditionWithCurrencyMapping:
 
         policy = Policy(raw=policy_data, lob=line_of_business)
         result = match_condition(
-            policy, [test_condition], dimension_columns, line_of_business
+            policy, [test_condition], dimension_columns
         )
 
         assert result is not None
@@ -173,7 +173,7 @@ class TestMatchConditionWithCurrencyMapping:
 
         policy = Policy(raw=policy_data, lob=line_of_business)
         result = match_condition(
-            policy, [test_condition], dimension_columns, line_of_business
+            policy, [test_condition], dimension_columns
         )
 
         assert result is None
@@ -200,7 +200,7 @@ class TestMatchConditionWithCurrencyMapping:
 
         policy = Policy(raw=policy_data, lob=line_of_business)
         result = match_condition(
-            policy, [test_condition], dimension_columns, line_of_business
+            policy, [test_condition], dimension_columns
         )
 
         assert result is not None
@@ -240,7 +240,6 @@ class TestMatchConditionWithCurrencyMapping:
             policy,
             [condition_general, condition_specific],
             dimension_columns,
-            line_of_business,
         )
 
         assert result is not None
@@ -272,7 +271,7 @@ class TestCheckExclusionWithCurrencyMapping:
 
         policy = Policy(raw=policy_data, lob=line_of_business)
         result = check_exclusion(
-            policy, [exclusion_condition], dimension_columns, line_of_business
+            policy, [exclusion_condition], dimension_columns
         )
 
         assert result is True
@@ -297,7 +296,7 @@ class TestCheckExclusionWithCurrencyMapping:
 
         policy = Policy(raw=policy_data, lob=line_of_business)
         result = check_exclusion(
-            policy, [exclusion_condition], dimension_columns, line_of_business
+            policy, [exclusion_condition], dimension_columns
         )
 
         assert result is False
@@ -323,7 +322,7 @@ class TestCheckExclusionWithCurrencyMapping:
 
         policy = Policy(raw=policy_data, lob=line_of_business)
         result = check_exclusion(
-            policy, [normal_condition], dimension_columns, line_of_business
+            policy, [normal_condition], dimension_columns
         )
 
         assert result is False

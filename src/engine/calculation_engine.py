@@ -19,24 +19,21 @@ def apply_program(
     if not is_policy_active:
         return create_inactive_result(policy.raw, inactive_reason)
 
-    components = policy.exposure_components(program.underwriting_department)
-    exposure = components.total
-    structures = program.structures
-    dimension_columns = program.dimension_columns
-
     if check_exclusion(
         policy,
         program.all_conditions,
         program.dimension_columns,
-        program.underwriting_department,
     ):
         return create_excluded_result(policy.raw)
 
+    components = policy.exposure_components(program.underwriting_department)
+    exposure = components.total
+
     structures_detail, total_cession_to_layer_100pct, total_cession_to_reinsurer = (
         process_structures(
-            structures,
+            program.structures,
             policy,
-            dimension_columns,
+            program.dimension_columns,
             exposure,
             program.underwriting_department,
         )

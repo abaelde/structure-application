@@ -146,8 +146,8 @@ Le module exporte les fonctions suivantes via `__init__.py` :
 
 ```python
 from src.engine import (
-    apply_program,                      # calculation_engine
-    apply_program_to_bordereau,         # bordereau_processor
+    apply_program,
+    apply_program_to_bordereau,
 )
 ```
 
@@ -276,7 +276,7 @@ Pour une police avec :
 #### Classe `ExposureComponents`
 
 ```python
-from src.engine import ExposureComponents
+from src.domain.exposure_components import ExposureComponents
 
 components = ExposureComponents(hull=15_000_000, liability=50_000_000)
 
@@ -294,7 +294,7 @@ components.apply_filters(includes_hull=True, includes_liability=True)   # 65_000
 #### Calculateur d'exposition
 
 ```python
-from src.engine import AviationExposureCalculator
+from src.domain.exposure import AviationExposureCalculator
 
 calculator = AviationExposureCalculator()
 policy_data = {

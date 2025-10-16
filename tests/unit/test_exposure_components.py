@@ -1,4 +1,4 @@
-from src.engine import ExposureComponents
+from src.domain.exposure_components import ExposureComponents
 
 
 def test_exposure_components_creation():

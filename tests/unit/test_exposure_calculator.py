@@ -1,5 +1,5 @@
 import pytest
-from src.engine.exposure_calculator import (
+from src.domain.exposure import (
     get_exposure_calculator,
     AviationExposureCalculator,
     CasualtyExposureCalculator,

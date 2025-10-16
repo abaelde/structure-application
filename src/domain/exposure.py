@@ -1,3 +1,4 @@
+# src/domain/exposure.py
 from typing import Dict, Any
 from abc import ABC, abstractmethod
 from src.domain.exposure_components import ExposureComponents
@@ -10,11 +11,11 @@ class ExposureCalculationError(Exception):
 class ExposureCalculator(ABC):
     @abstractmethod
     def calculate(self, policy_data: Dict[str, Any]) -> float:
-        pass
+        ...
 
     @abstractmethod
     def get_required_columns(self) -> list[str]:
-        pass
+        ...
 
 
 class AviationExposureCalculator(ExposureCalculator):
@@ -41,9 +42,7 @@ class AviationExposureCalculator(ExposureCalculator):
                     f"HULL_LIMIT={hull_limit}, HULL_SHARE={hull_share}"
                 )
             try:
-                hull_limit_float = float(hull_limit)
-                hull_share_float = float(hull_share)
-                hull_exposure = hull_limit_float * hull_share_float
+                hull_exposure = float(hull_limit) * float(hull_share)
             except (ValueError, TypeError) as e:
                 raise ExposureCalculationError(
                     f"Invalid numeric values for Hull exposure: {e}"
@@ -56,9 +55,7 @@ class AviationExposureCalculator(ExposureCalculator):
                     f"LIABILITY_LIMIT={liability_limit}, LIABILITY_SHARE={liability_share}"
                 )
             try:
-                liability_limit_float = float(liability_limit)
-                liability_share_float = float(liability_share)
-                liability_exposure = liability_limit_float * liability_share_float
+                liability_exposure = float(liability_limit) * float(liability_share)
             except (ValueError, TypeError) as e:
                 raise ExposureCalculationError(
                     f"Invalid numeric values for Liability exposure: {e}"
@@ -82,9 +79,7 @@ class CasualtyExposureCalculator(ExposureCalculator):
             )
 
         try:
-            limit_float = float(limit)
-            cedent_share_float = float(cedent_share)
-            return limit_float * cedent_share_float
+            return float(limit) * float(cedent_share)
         except (ValueError, TypeError) as e:
             raise ExposureCalculationError(
                 f"Invalid numeric value in Casualty exposure columns: {e}"
@@ -97,12 +92,10 @@ class CasualtyExposureCalculator(ExposureCalculator):
 class TestExposureCalculator(ExposureCalculator):
     def calculate(self, policy_data: Dict[str, Any]) -> float:
         exposure = policy_data.get("exposure")
-
         if exposure is None:
             raise ExposureCalculationError(
                 f"Missing exposure value for this policy. exposure={exposure}"
             )
-
         try:
             return float(exposure)
         except (ValueError, TypeError) as e:
@@ -115,20 +108,16 @@ class TestExposureCalculator(ExposureCalculator):
 
 
 def get_exposure_calculator(underwriting_department: str) -> ExposureCalculator:
-    uw_dept_lower = underwriting_department.lower() if underwriting_department else ""
-
+    uw = (underwriting_department or "").lower()
     calculators = {
         "aviation": AviationExposureCalculator,
         "casualty": CasualtyExposureCalculator,
         "test": TestExposureCalculator,
     }
-
-    calculator_class = calculators.get(uw_dept_lower)
-
-    if calculator_class is None:
+    cls = calculators.get(uw)
+    if cls is None:
         raise ExposureCalculationError(
             f"Unknown underwriting department '{underwriting_department}'. "
             f"Supported departments: {', '.join(sorted(calculators.keys()))}"
         )
-
-    return calculator_class()
+    return cls()

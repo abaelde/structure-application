@@ -24,7 +24,7 @@ def process_structures(
         _process_predecessor_if_needed(structure)
 
         matched_condition = match_condition(
-            policy, structure.conditions, dimension_columns, line_of_business
+            policy, structure.conditions, dimension_columns
         )
 
         if matched_condition is None:
