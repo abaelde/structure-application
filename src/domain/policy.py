@@ -5,7 +5,7 @@ import pandas as pd
 
 from src.domain.constants import FIELDS
 from src.domain.exposure_bundle import ExposureBundle
-from src.domain.exposure import ExposureCalculationError
+from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 
 @dataclass
@@ -66,9 +66,17 @@ class Policy:
 
     def get_dimension_value(self, dimension: str) -> Any:
         """Utilise le mapping de dimensions pour récupérer la valeur."""
-        from src.domain.dimension_mapping import get_policy_value
-
-        return get_policy_value(self.raw, dimension, self.uw_dept)
+        
+        
+        mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS.get(dimension)
+        if mapping is None:
+            return self.raw.get(dimension)
+        if isinstance(mapping, str):
+            return self.raw.get(mapping)
+        if isinstance(mapping, dict):
+            if self.uw_dept in mapping:
+                return self.raw.get(mapping[self.uw_dept])
+        return None
 
     # --- Exposition (et composants) ---
     def exposure_bundle(self, uw_dept: str) -> ExposureBundle:

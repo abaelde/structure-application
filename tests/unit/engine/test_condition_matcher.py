@@ -6,11 +6,10 @@ from src.engine.condition_matcher import (
 )
 from src.domain import Condition
 from src.domain.policy import Policy
-from src.domain.dimension_mapping import get_policy_value
 
 
 class TestCurrencyMapping:
-    """Tests for the currency mapping logic via get_policy_value"""
+    """Tests for the currency mapping logic via Policy.get_dimension_value"""
 
     def test_aviation_mapping_hull_currency(self):
         """Test aviation mapping returns HULL_CURRENCY"""
@@ -20,9 +19,8 @@ class TestCurrencyMapping:
         }
         uw_departement = "aviation"
 
-        result = get_policy_value(
-            policy_data, "BUSCL_LIMIT_CURRENCY_CD", uw_departement
-        )
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
+        result = policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
 
         assert result == "USD"
 
@@ -33,9 +31,8 @@ class TestCurrencyMapping:
         }
         uw_departement = "casualty"
 
-        result = get_policy_value(
-            policy_data, "BUSCL_LIMIT_CURRENCY_CD", uw_departement
-        )
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
+        result = policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
 
         assert result == "USD"
 
@@ -46,11 +43,10 @@ class TestCurrencyMapping:
         }
         uw_departement = "unknown"
 
-        result = get_policy_value(
-            policy_data, "BUSCL_LIMIT_CURRENCY_CD", uw_departement
-        )
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
+        result = policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
 
-        # Should fallback to direct dimension name
+        # Should fallback to direct dimension name # AURE
         assert result is None  # BUSCL_LIMIT_CURRENCY_CD not in policy_data
 
     def test_missing_currency_data(self):
@@ -60,9 +56,8 @@ class TestCurrencyMapping:
         }
         uw_departement = "aviation"
 
-        result = get_policy_value(
-            policy_data, "BUSCL_LIMIT_CURRENCY_CD", uw_departement
-        )
+        policy = Policy(raw=policy_data, uw_dept=uw_departement)
+        result = policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
 
         assert result is None
 

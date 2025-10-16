@@ -197,14 +197,7 @@ from src.engine import (
 from src.engine.condition_matcher import check_exclusion, match_condition
 ```
 
-## Compatibilité
 
-Le refactoring est **rétro-compatible** :
-- Toutes les fonctions publiques sont toujours accessibles via `src.engine`
-- Les signatures de fonctions n'ont pas changé
-- Les résultats sont identiques
-
-Les seuls changements nécessaires concernent les imports directs depuis `calculation_engine` qui doivent maintenant utiliser les modules spécialisés.
 
 ## Filtrage Hull/Liability pour Aviation
 
@@ -303,7 +296,6 @@ policy_data = {
     "LIABILITY_SHARE": 0.10,
 }
 
-# Exposition totale (méthode existante, rétro-compatible)
 total = calculator.calculate(policy_data)  # 65_000_000
 
 # Bundle avec composants détaillés (nouvelle méthode)
@@ -341,7 +333,6 @@ condition({"INCLUDES_HULL": False, "INCLUDES_LIABILITY": False, "SIGNED_SHARE_PC
 
 ### Compatibilité
 
-- **Rétrocompatible** : Si les colonnes `INCLUDES_HULL` et `INCLUDES_LIABILITY` sont absentes, le comportement par défaut est de tout inclure (comme avant)
 - **Casualty non affecté** : Pour les programmes Casualty, ces flags sont ignorés car il n'y a qu'une seule notion d'exposition
 - **Tests existants** : Tous les tests existants continuent de passer sans modification
 

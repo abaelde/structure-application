@@ -15,8 +15,6 @@ from .constants import (
     condition_COLS,
 )
 from .dimension_mapping import (
-    get_policy_value,
-    validate_program_bordereau_compatibility,
     validate_aviation_currency_consistency,
     get_all_mappable_dimensions,
 )
@@ -41,8 +39,6 @@ __all__ = [
     "Structure",
     "Condition",
     # New dimension mapping functions
-    "get_policy_value",
-    "validate_program_bordereau_compatibility",
     "validate_aviation_currency_consistency",
     "get_all_mappable_dimensions",
 ]
