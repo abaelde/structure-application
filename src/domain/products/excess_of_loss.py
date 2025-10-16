@@ -1,6 +1,6 @@
 import pandas as pd
 from .base import Product
-from src.domain.models import condition
+from src.domain.models import Condition
 
 
 def excess_of_loss(
@@ -17,7 +17,7 @@ def excess_of_loss(
 
 
 class ExcessOfLoss(Product):
-    def apply(self, exposure: float, condition: condition) -> float:
+    def apply(self, exposure: float, condition: Condition) -> float:
         if pd.isna(condition.attachment) or pd.isna(condition.limit):
             raise ValueError(
                 "ATTACHMENT_POINT_100 and LIMIT_100 are required for excess_of_loss"

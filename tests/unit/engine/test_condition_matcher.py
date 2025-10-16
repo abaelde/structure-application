@@ -5,7 +5,7 @@ from src.engine.condition_matcher import (
     match_condition,
     check_exclusion,
 )
-from src.domain import condition
+from src.domain import Condition
 
 
 class TestMapCurrencyCondition:
@@ -125,7 +125,7 @@ class TestMatchConditionWithCurrencyMapping:
             "CESSION_PCT": 0.25,
             "SIGNED_SHARE_PCT": 0.5,
         }
-        test_condition = condition(condition_data)
+        test_condition = Condition(condition_data)
         
         # Policy with HULL_CURRENCY=USD (should match)
         policy_data = {
@@ -150,7 +150,7 @@ class TestMatchConditionWithCurrencyMapping:
             "CESSION_PCT": 0.25,
             "SIGNED_SHARE_PCT": 0.5,
         }
-        test_condition = condition(condition_data)
+        test_condition = Condition(condition_data)
         
         # Policy with different currencies (should not match)
         policy_data = {
@@ -174,7 +174,7 @@ class TestMatchConditionWithCurrencyMapping:
             "CESSION_PCT": 0.30,
             "SIGNED_SHARE_PCT": 0.6,
         }
-        test_condition = condition(condition_data)
+        test_condition = Condition(condition_data)
         
         # Policy with CURRENCY=USD (should match)
         policy_data = {
@@ -198,7 +198,7 @@ class TestMatchConditionWithCurrencyMapping:
             "CESSION_PCT": 0.30,
             "SIGNED_SHARE_PCT": 0.6,
         }
-        test_condition = condition(condition_data)
+        test_condition = Condition(condition_data)
         
         # Policy with different currency (should not match)
         policy_data = {
@@ -221,7 +221,7 @@ class TestMatchConditionWithCurrencyMapping:
             "CESSION_PCT": 0.25,
             "SIGNED_SHARE_PCT": 0.5,
         }
-        test_condition = condition(condition_data)
+        test_condition = Condition(condition_data)
         
         # Any policy should match
         policy_data = {
@@ -241,13 +241,13 @@ class TestMatchConditionWithCurrencyMapping:
     def test_multiple_conditions_specificity(self):
         """Test that the most specific condition is chosen"""
         # Create two conditions with different specificity
-        condition_general = condition({
+        condition_general = Condition({
             "BUSCL_LIMIT_CURRENCY_CD": "USD",
             "CESSION_PCT": 0.20,
             "SIGNED_SHARE_PCT": 0.4,
         })
         
-        condition_specific = condition({
+        condition_specific = Condition({
             "BUSCL_LIMIT_CURRENCY_CD": "USD",
             "BUSCL_COUNTRY_CD": "France",
             "CESSION_PCT": 0.25,
@@ -286,7 +286,7 @@ class TestCheckExclusionWithCurrencyMapping:
             "BUSCL_EXCLUDE_CD": "exclude",
             "BUSCL_LIMIT_CURRENCY_CD": "USD",
         }
-        exclusion_condition = condition(exclusion_data)
+        exclusion_condition = Condition(exclusion_data)
         
         # Policy that matches the exclusion (should be excluded)
         policy_data = {
@@ -308,7 +308,7 @@ class TestCheckExclusionWithCurrencyMapping:
             "BUSCL_EXCLUDE_CD": "exclude",
             "BUSCL_LIMIT_CURRENCY_CD": "USD",
         }
-        exclusion_condition = condition(exclusion_data)
+        exclusion_condition = Condition(exclusion_data)
         
         # Policy that doesn't match the exclusion (should not be excluded)
         policy_data = {
@@ -326,7 +326,7 @@ class TestCheckExclusionWithCurrencyMapping:
     def test_non_exclusion_condition_ignored(self):
         """Test that non-exclusion conditions are ignored in check_exclusion"""
         # Create a non-exclusion condition
-        normal_condition = condition({
+        normal_condition = Condition({
             "BUSCL_LIMIT_CURRENCY_CD": "USD",
             "CESSION_PCT": 0.25,
             "SIGNED_SHARE_PCT": 0.5,

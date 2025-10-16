@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from src.domain.models import Structure, condition
+from src.domain.models import Structure
 from src.domain.constants import PRODUCT
 from .condition_builder import build_condition
 

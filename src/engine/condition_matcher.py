@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import Dict, Any, Optional, List
-from src.domain import condition
+from src.domain import Condition
 from src.domain.dimension_mapping import get_policy_value
 
 
@@ -35,7 +35,7 @@ def map_currency_condition(
 
 
 def check_exclusion(
-    policy_data: Dict[str, Any], conditions: List[condition], dimension_columns: List[str], line_of_business: str = None
+    policy_data: Dict[str, Any], conditions: List[Condition], dimension_columns: List[str], line_of_business: str = None
 ) -> bool:
     for condition in conditions:
         if not condition.is_exclusion():
@@ -67,8 +67,8 @@ def check_exclusion(
 
 
 def match_condition(
-    policy_data: Dict[str, Any], conditions: List[condition], dimension_columns: List[str], line_of_business: str = None
-) -> Optional[condition]:
+    policy_data: Dict[str, Any], conditions: List[Condition], dimension_columns: List[str], line_of_business: str = None
+) -> Optional[Condition]:
     matched_conditions = []
 
     for condition in conditions:

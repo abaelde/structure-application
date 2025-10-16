@@ -20,7 +20,7 @@ from .dimension_mapping import (
     validate_aviation_currency_consistency,
     get_all_mappable_dimensions,
 )
-from .models import Program, Structure, condition
+from .models import Program, Structure, Condition
 
 __all__ = [
     "FIELDS",
@@ -39,7 +39,7 @@ __all__ = [
     "condition_COLS",
     "Program",
     "Structure",
-    "condition",
+    "Condition",
     # New dimension mapping functions
     "get_policy_value",
     "validate_program_bordereau_compatibility",

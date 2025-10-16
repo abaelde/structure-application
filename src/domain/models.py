@@ -4,7 +4,7 @@ import sys
 from .constants import condition_COLS, PRODUCT
 
 
-class condition:
+class Condition:
     def __init__(self, data: Dict[str, Any]):
         self._data = data.copy()
         self.cession_pct = data.get(condition_COLS.CESSION_PCT)
@@ -40,7 +40,7 @@ class condition:
                 )
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "condition":
+    def from_dict(cls, data: Dict[str, Any]) -> "Condition":
         """Factory method: create condition from dictionary"""
         return cls(data)
 
@@ -68,8 +68,8 @@ class condition:
     def __contains__(self, key: str) -> bool:
         return key in self._data
 
-    def copy(self) -> "condition":
-        return condition(self._data.copy())
+    def copy(self) -> "Condition":
+        return Condition(self._data.copy())
 
     def to_dict(self) -> Dict[str, Any]:
         return self._data.copy()
@@ -146,7 +146,7 @@ class condition:
         
         return "\n".join(lines)
 
-    def rescale_for_predecessor(self, retention_factor: float) -> tuple["condition", Dict[str, Any]]:
+    def rescale_for_predecessor(self, retention_factor: float) -> tuple["Condition", Dict[str, Any]]:
         rescaled_condition = self.copy()
         rescaling_info = {
             "retention_factor": retention_factor,
@@ -175,7 +175,7 @@ class Structure:
         structure_name: str,
         contract_order: int,
         type_of_participation: str,
-        conditions: List["condition"],
+        conditions: List[Condition],
         predecessor_title: Optional[str] = None,
         claim_basis: Optional[str] = None,
         inception_date: Optional[str] = None,
@@ -202,7 +202,7 @@ class Structure:
         The Structure knows how to find and link its own conditions.
         """
         # Create condition objects
-        conditions = [condition.from_dict(s) for s in conditions_data]
+        conditions = [Condition.from_dict(s) for s in conditions_data]
 
         # Create and return Structure
         return cls(
@@ -245,7 +245,7 @@ class Structure:
     def is_excess_of_loss(self) -> bool:
         return self.type_of_participation == PRODUCT.EXCESS_OF_LOSS
 
-    def calculate_retention_pct(self, matched_condition: condition) -> float:
+    def calculate_retention_pct(self, matched_condition: Condition) -> float:
         if self.is_quota_share() and matched_condition.has_cession_pct():
             return 1.0 - matched_condition.cession_pct
         return 1.0
@@ -316,7 +316,7 @@ class Program:
         return getattr(self, key)
 
     @property
-    def all_conditions(self) -> List[condition]:
+    def all_conditions(self) -> List[Condition]:
         """Returns all conditions from all structures"""
         conditions = []
         for structure in self.structures:

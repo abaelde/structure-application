@@ -1,10 +1,10 @@
 from typing import Dict
 from src.domain.products import PRODUCT_REGISTRY
-from src.domain.models import condition
+from src.domain.models import Condition
 
 
 def apply_condition(
-    exposure: float, condition: condition, type_of_participation: str
+    exposure: float, condition: Condition, type_of_participation: str
 ) -> Dict[str, float]:
     product = PRODUCT_REGISTRY.get(type_of_participation)
     if product is None:

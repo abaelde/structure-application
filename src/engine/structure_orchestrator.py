@@ -1,5 +1,5 @@
 from typing import Dict, Any, List, Set, Optional
-from src.domain import PRODUCT, Structure, condition
+from src.domain import PRODUCT, Structure, Condition
 from .condition_matcher import match_condition
 from .cession_calculator import apply_condition
 from .exposure_calculator import AviationExposureCalculator, ExposureComponents
@@ -60,7 +60,7 @@ def process_structures(
         return _no_cession_result()
 
     def _apply_structure_and_calculate_cession(
-        structure: Structure, matched_condition: condition
+        structure: Structure, matched_condition: Condition
     ) -> Dict[str, Any]:
         base_input_exposure = _calculate_input_exposure(exposure, structure, structure_outputs)
         
@@ -157,10 +157,10 @@ def _calculate_input_exposure(
 
 
 def _rescale_condition_if_needed(
-    matched_condition: condition,
+    matched_condition: Condition,
     structure: Structure,
     structure_outputs: Dict[str, Dict[str, Any]],
-) -> tuple[condition, Optional[Dict[str, Any]]]:
+) -> tuple[Condition, Optional[Dict[str, Any]]]:
     if not structure.has_predecessor() or structure.predecessor_title not in structure_outputs:
         return matched_condition.copy(), None
 
@@ -174,7 +174,7 @@ def _rescale_condition_if_needed(
     return matched_condition.copy(), None
 
 
-def _calculate_retention_pct(structure: Structure, matched_condition: condition) -> float:
+def _calculate_retention_pct(structure: Structure, matched_condition: Condition) -> float:
     return structure.calculate_retention_pct(matched_condition)
 
 
@@ -184,8 +184,8 @@ def _add_structure_detail(
     applied: bool,
     input_exposure: float = 0.0,
     ceded_result: Optional[Dict[str, float]] = None,
-    matched_condition: Optional[condition] = None,
-    condition_to_apply: Optional[condition] = None,
+    matched_condition: Optional[Condition] = None,
+    condition_to_apply: Optional[Condition] = None,
     rescaling_info: Optional[Dict[str, Any]] = None,
 ) -> None:
     detail = {

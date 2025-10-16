@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from src.domain.models import condition
+from src.domain.models import Condition
 from src.domain.constants import DIMENSIONS
 
 
@@ -20,7 +20,7 @@ def build_condition(
     includes_hull: Optional[bool] = None,
     includes_liability: Optional[bool] = None,
     **kwargs
-) -> condition:
+) -> Condition:
     """
     Build a condition object directly in memory.
     
@@ -65,7 +65,7 @@ def build_condition(
     
     condition_data.update(kwargs)
     
-    return condition(condition_data)
+    return Condition(condition_data)
 
 
 def build_exclusion_condition(
@@ -78,7 +78,7 @@ def build_exclusion_condition(
     entity_name_ced: Optional[str] = None,
     pol_risk_name_ced: Optional[str] = None,
     **kwargs
-) -> condition:
+) -> Condition:
     """
     Build an exclusion condition.
     
