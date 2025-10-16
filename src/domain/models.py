@@ -90,12 +90,14 @@ class Condition:
         if isinstance(v, (float, int)) and pd.isna(v):
             return None
         # Handle pandas NA specifically
-        if hasattr(pd, 'NA') and v is pd.NA:
+        if hasattr(pd, "NA") and v is pd.NA:
             return None
         if isinstance(v, list):
             return v
         # Éventuellement, si tu veux fail-fast plutôt que convertir implicitement :
-        raise ValueError(f"Dimension values must be a list[str]; got {type(v)} for key={key}")
+        raise ValueError(
+            f"Dimension values must be a list[str]; got {type(v)} for key={key}"
+        )
 
     def has_dimension(self, key: str) -> bool:
         vals = self.get_values(key)

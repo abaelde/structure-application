@@ -7,16 +7,16 @@ from src.domain.policy import Policy
 def _values_match(condition_values: list[str] | None, policy_value) -> bool:
     if condition_values is None:
         return True  # dimension non contrainte
-    pv = (
-        None
-        if policy_value is None
-        or (isinstance(policy_value, float) and pd.isna(policy_value))
-        else str(policy_value)
-    )
-    if pv is None:
+    
+    # Policy value must be a string (no automatic conversion from scalars)
+    if policy_value is None or (isinstance(policy_value, float) and pd.isna(policy_value)):
         return False  # condition impose un ensemble, mais la police n'a pas de valeur
-    # Normalisation légère (au besoin, on peut upper()) # AURE : pourquo i ! condition a bien validé avant ?
-    pv = pv.strip()
+    
+    if not isinstance(policy_value, str):
+        return False  # Strict: policy value must be a string
+    
+    # Normalisation légère
+    pv = policy_value.strip()
     # Convert list -> set pour membership O(1)
     return pv in set(str(v).strip() for v in condition_values)
 

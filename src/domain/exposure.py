@@ -10,12 +10,10 @@ class ExposureCalculationError(Exception):
 
 class ExposureCalculator(ABC):
     @abstractmethod
-    def calculate(self, policy_data: Dict[str, Any]) -> float:
-        ...
+    def calculate(self, policy_data: Dict[str, Any]) -> float: ...
 
     @abstractmethod
-    def get_required_columns(self) -> list[str]:
-        ...
+    def get_required_columns(self) -> list[str]: ...
 
     # Ajout : constructeur générique de bundle (par défaut : total seul)
     def bundle(self, policy_data: Dict[str, Any]) -> ExposureBundle:

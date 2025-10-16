@@ -30,7 +30,7 @@ def apply_program(
     run = StructureProcessor(policy, program).process_structures()
 
     exposure = policy.exposure_bundle(program.underwriting_department).total
-    
+
     # Enrichir le ProgramRunResult avec les métadonnées de la politique
     run.exposure = exposure
     run.effective_exposure = exposure
@@ -38,5 +38,5 @@ def apply_program(
     run.policy_inception_date = policy.get(FIELDS["INCEPTION_DATE"])
     run.policy_expiry_date = policy.get(FIELDS["EXPIRY_DATE"])
     run.exclusion_status = "included"
-    
+
     return run

@@ -1,17 +1,16 @@
 import pandas as pd
-from typing import Dict, Any
+from typing import Dict
 from .calculation_engine import apply_program
-from .results import ProgramRunResult
 from ..domain.bordereau import Bordereau
 from ..domain.policy import Policy
 from ..domain.models import Program
 
 
 def apply_program_to_row(
-    row_data: Dict[str, Any],
+    row_data: Dict[str, any],
     program: Program,
     calculation_date: str,
-) -> Dict[str, Any]:
+) -> Dict[str, any]:
     """
     Applique un programme à une ligne de bordereau (dict).
     Compatible avec l'approche DataFrame.apply() pour Snowpark.
@@ -23,7 +22,7 @@ def apply_program_to_row(
 
     # Appliquer le programme
     result = apply_program(policy, program, calculation_date)
-    
+
     # Convertir ProgramRunResult en dictionnaire pour compatibilité
     return result.to_dict()
 

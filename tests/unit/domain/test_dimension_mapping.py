@@ -75,8 +75,6 @@ class TestPolicyDimensionValue:
         assert result == "USD"  # Should take HULL_CURRENCY
 
 
-
-
 class TestGetAllMappableDimensions:
     """Test the get_all_mappable_dimensions function."""
 
@@ -204,4 +202,3 @@ class TestIntegrationScenarios:
         assert policy.get_dimension_value("BUSCL_COUNTRY_CD") is None
         assert policy.get_dimension_value("BUSCL_REGION") is None
         assert policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD") == "USD"
-

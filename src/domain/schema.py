@@ -157,11 +157,11 @@ def get_all_mappable_dimensions(
     """
     Retourne le mapping des dimensions de programme vers les colonnes de bordereau
     pour les dimensions présentes dans le bordereau.
-    
+
     Args:
         bordereau_columns: Liste des colonnes disponibles dans le bordereau
         uw_dept: Département underwriting (aviation, casualty, test)
-        
+
     Returns:
         Dict mapping dimension_programme -> colonne_bordereau
     """

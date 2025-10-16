@@ -18,11 +18,15 @@ class Policy:
     """
 
     raw: Dict[str, Any]
-    uw_dept: Optional[str] = None  # "aviation" | "casualty" | "test" - underwriting department
+    uw_dept: Optional[str] = (
+        None  # "aviation" | "casualty" | "test" - underwriting department
+    )
 
     _inception: Optional[pd.Timestamp] = field(default=None, init=False, repr=False)
     _expiry: Optional[pd.Timestamp] = field(default=None, init=False, repr=False)
-    _bundles: Dict[str, ExposureBundle] = field(default_factory=dict, init=False, repr=False)
+    _bundles: Dict[str, ExposureBundle] = field(
+        default_factory=dict, init=False, repr=False
+    )
 
     # --- Accès de type mapping (compat utile en interne) ---
     def get(self, key: str, default=None) -> Any:
@@ -66,10 +70,12 @@ class Policy:
 
     def get_dimension_value(self, dimension: str) -> Any:
         """Utilise le mapping de dimensions pour récupérer la valeur."""
-        
+
         mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS.get(dimension)
         if mapping is None:
-            raise ValueError(f"Unknown dimension '{dimension}'. Only configured dimensions are allowed.")
+            raise ValueError(
+                f"Unknown dimension '{dimension}'. Only configured dimensions are allowed."
+            )
         if isinstance(mapping, str):
             return self.raw.get(mapping)
         if isinstance(mapping, dict):
@@ -83,6 +89,7 @@ class Policy:
         if uw in self._bundles:
             return self._bundles[uw]
         from src.domain.exposure import get_exposure_calculator
+
         calc = get_exposure_calculator(uw)
         bundle = calc.bundle(self.raw)
         self._bundles[uw] = bundle

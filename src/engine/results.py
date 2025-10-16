@@ -26,7 +26,9 @@ class StructureInput:
     predecessor_title: Optional[str]
     type_of_participation: str
     input_exposure: float
-    scope_components: Set[str] = field(default_factory=set)  # {"hull","liability"} ou vide => "total"
+    scope_components: Set[str] = field(
+        default_factory=set
+    )  # {"hull","liability"} ou vide => "total"
 
 
 @dataclass(frozen=True)
@@ -56,7 +58,7 @@ class RunTotals:
 class ProgramRunResult:
     structures: List[StructureReport] = field(default_factory=list)
     totals: RunTotals = field(default_factory=RunTotals)
-    
+
     # Métadonnées pour les cas d'exclusion/inactivité
     exclusion_status: str = "included"  # "included", "inactive", "excluded"
     exclusion_reason: Optional[str] = None
@@ -70,31 +72,44 @@ class ProgramRunResult:
         """Vue plate et facile à exporter / logger."""
         out = []
         for r in self.structures:
-            out.append({
-                "structure_name": r.input.structure_name,
-                "type_of_participation": r.input.type_of_participation,
-                "predecessor_title": r.input.predecessor_title,
-                "input_exposure": r.input.input_exposure,
-                "scope": ";".join(sorted(r.input.scope_components)) if r.input.scope_components else "total",
-                "applied": r.outcome.applied,
-                "reason": r.outcome.reason or "",
-                "cession_to_layer_100pct": r.outcome.cession.to_layer_100pct,
-                "cession_to_reinsurer": r.outcome.cession.to_reinsurer,
-                "reinsurer_share": r.outcome.cession.reinsurer_share,
-                "retained_after": r.outcome.retained_after,
-            })
+            out.append(
+                {
+                    "structure_name": r.input.structure_name,
+                    "type_of_participation": r.input.type_of_participation,
+                    "predecessor_title": r.input.predecessor_title,
+                    "input_exposure": r.input.input_exposure,
+                    "scope": (
+                        ";".join(sorted(r.input.scope_components))
+                        if r.input.scope_components
+                        else "total"
+                    ),
+                    "applied": r.outcome.applied,
+                    "reason": r.outcome.reason or "",
+                    "cession_to_layer_100pct": r.outcome.cession.to_layer_100pct,
+                    "cession_to_reinsurer": r.outcome.cession.to_reinsurer,
+                    "reinsurer_share": r.outcome.cession.reinsurer_share,
+                    "retained_after": r.outcome.retained_after,
+                }
+            )
         return out
 
     def to_dict(self) -> Dict[str, any]:
         """Convertit le résultat en dictionnaire pour compatibilité avec l'API existante."""
         retained_by_cedant = 0.0
-        if self.exposure is not None and self.totals.cession_to_layer_100pct is not None:
+        if (
+            self.exposure is not None
+            and self.totals.cession_to_layer_100pct is not None
+        ):
             retained_by_cedant = self.exposure - self.totals.cession_to_layer_100pct
-            
+
         return {
             "INSURED_NAME": self.insured_name,
             "exposure": self.exposure,
-            "effective_exposure": self.effective_exposure if self.effective_exposure is not None else self.exposure,
+            "effective_exposure": (
+                self.effective_exposure
+                if self.effective_exposure is not None
+                else self.exposure
+            ),
             "cession_to_layer_100pct": self.totals.cession_to_layer_100pct,
             "cession_to_reinsurer": self.totals.cession_to_reinsurer,
             "retained_by_cedant": retained_by_cedant,

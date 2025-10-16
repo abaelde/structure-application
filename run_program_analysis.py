@@ -47,8 +47,8 @@ def main():
     print()
 
     print("1. Loading and validating bordereau...")
-    bordereau_df = Bordereau.from_csv(args.bordereau)
-    print(f"   ✓ Bordereau loaded successfully: {len(bordereau_df)} policies")
+    bordereau = Bordereau.from_csv(args.bordereau)
+    print(f"   ✓ Bordereau loaded successfully: {len(bordereau)} policies")
     print()
 
     print("2. Loading program configuration...")
@@ -66,7 +66,7 @@ def main():
     print("4. Applying program to bordereau...")
     calculation_date = "2024-06-01"  # Date de calcul par défaut
     bordereau_with_net, results = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date
+        bordereau, program, calculation_date
     )
     print(f"   ✓ Program applied to {len(results)} policies")
     print()

@@ -46,7 +46,7 @@ class TestCurrencyMapping:
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
         result = policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
 
-        # Should fallback to direct dimension name 
+        # Should fallback to direct dimension name
         assert result is None  # BUSCL_LIMIT_CURRENCY_CD not in policy_data
 
     def test_missing_currency_data(self):
@@ -86,9 +86,7 @@ class TestMatchConditionWithCurrencyMapping:
         uw_departement = "aviation"
 
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = match_condition(
-            policy, [test_condition], dimension_columns
-        )
+        result = match_condition(policy, [test_condition], dimension_columns)
 
         assert result is not None
         assert result.get("BUSCL_LIMIT_CURRENCY_CD") == ["USD"]
@@ -114,9 +112,7 @@ class TestMatchConditionWithCurrencyMapping:
         uw_departement = "aviation"
 
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = match_condition(
-            policy, [test_condition], dimension_columns
-        )
+        result = match_condition(policy, [test_condition], dimension_columns)
 
         assert result is None
 
@@ -140,9 +136,7 @@ class TestMatchConditionWithCurrencyMapping:
         uw_departement = "casualty"
 
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = match_condition(
-            policy, [test_condition], dimension_columns
-        )
+        result = match_condition(policy, [test_condition], dimension_columns)
 
         assert result is not None
         assert result.get("BUSCL_LIMIT_CURRENCY_CD") == ["USD"]
@@ -167,9 +161,7 @@ class TestMatchConditionWithCurrencyMapping:
         uw_departement = "casualty"
 
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = match_condition(
-            policy, [test_condition], dimension_columns
-        )
+        result = match_condition(policy, [test_condition], dimension_columns)
 
         assert result is None
 
@@ -194,9 +186,7 @@ class TestMatchConditionWithCurrencyMapping:
         uw_departement = "aviation"
 
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = match_condition(
-            policy, [test_condition], dimension_columns
-        )
+        result = match_condition(policy, [test_condition], dimension_columns)
 
         assert result is not None
         assert result.get("BUSCL_COUNTRY_CD") == ["France"]
@@ -265,9 +255,7 @@ class TestCheckExclusionWithCurrencyMapping:
         uw_departement = "aviation"
 
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = check_exclusion(
-            policy, [exclusion_condition], dimension_columns
-        )
+        result = check_exclusion(policy, [exclusion_condition], dimension_columns)
 
         assert result is True
 
@@ -290,9 +278,7 @@ class TestCheckExclusionWithCurrencyMapping:
         uw_departement = "aviation"
 
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = check_exclusion(
-            policy, [exclusion_condition], dimension_columns
-        )
+        result = check_exclusion(policy, [exclusion_condition], dimension_columns)
 
         assert result is False
 
@@ -316,8 +302,6 @@ class TestCheckExclusionWithCurrencyMapping:
         uw_departement = "aviation"
 
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = check_exclusion(
-            policy, [normal_condition], dimension_columns
-        )
+        result = check_exclusion(policy, [normal_condition], dimension_columns)
 
         assert result is False

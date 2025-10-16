@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Optional, Set
 
+
 @dataclass
 class ExposureBundle:
     """Conteneur générique d'exposition.
@@ -8,6 +9,7 @@ class ExposureBundle:
     - components : sous-composantes nommées (ex. {"hull": 15e6, "liability": 50e6})
       Vide pour les LOB qui n'en ont pas besoin (Casualty/Test).
     """
+
     total: float = 0.0
     components: Dict[str, float] = field(default_factory=dict)
 

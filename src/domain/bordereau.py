@@ -181,7 +181,6 @@ class Bordereau:
 
         return underwriting_department
 
-
     def _validate_exposure_via_schema(self, lob: str) -> None:
         """Méthode privée pour valider les colonnes d'exposition selon le schéma."""
 
@@ -261,7 +260,6 @@ class Bordereau:
     @property
     def df(self) -> pd.DataFrame:
         return self._df
-
 
     def to_engine_dataframe(self) -> pd.DataFrame:
         """DF **canonique** (noms & types) prêt pour l'engine."""
