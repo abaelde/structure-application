@@ -37,13 +37,11 @@ qs = build_quota_share(
             "exclude_cd": "INCLUDE",
         },
     ],
-    claim_basis="risk_attaching"
+    claim_basis="risk_attaching",
 )
 
 program = build_program(
-    name="CASUALTY_AIG_2024",
-    structures=[qs],
-    underwriting_department="casualty"
+    name="CASUALTY_AIG_2024", structures=[qs], underwriting_department="casualty"
 )
 
 output_dir = "../programs"

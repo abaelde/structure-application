@@ -36,14 +36,19 @@ def process_structures(
         return structure_name in processed
 
     def _no_cession_result() -> Dict[str, Any]:
-        return {"applied": False, "cession_to_layer_100pct": 0.0, "cession_to_reinsurer": 0.0}
+        return {
+            "applied": False,
+            "cession_to_layer_100pct": 0.0,
+            "cession_to_reinsurer": 0.0,
+        }
 
     def _process_predecessor_if_needed(structure: Structure) -> None:
         if not structure.has_predecessor():
             return
 
         predecessor = next(
-            (s for s in structures if s.structure_name == structure.predecessor_title), None
+            (s for s in structures if s.structure_name == structure.predecessor_title),
+            None,
         )
         if predecessor:
             process_structure(predecessor)
@@ -63,18 +68,29 @@ def process_structures(
     def _apply_structure_and_calculate_cession(
         structure: Structure, matched_condition: Condition
     ) -> Dict[str, Any]:
-        base_input_exposure = _calculate_input_exposure(exposure, structure, structure_outputs)
-
-        exposure_components = _calculate_exposure_components(policy, base_input_exposure, line_of_business)
-        
-        includes_hull = matched_condition.includes_hull if matched_condition.includes_hull is not None else True
-        includes_liability = matched_condition.includes_liability if matched_condition.includes_liability is not None else True
-        
-        filtered_exposure = exposure_components.apply_filters(
-            includes_hull=includes_hull,
-            includes_liability=includes_liability
+        base_input_exposure = _calculate_input_exposure(
+            exposure, structure, structure_outputs
         )
-        
+
+        exposure_components = _calculate_exposure_components(
+            policy, base_input_exposure, line_of_business
+        )
+
+        includes_hull = (
+            matched_condition.includes_hull
+            if matched_condition.includes_hull is not None
+            else True
+        )
+        includes_liability = (
+            matched_condition.includes_liability
+            if matched_condition.includes_liability is not None
+            else True
+        )
+
+        filtered_exposure = exposure_components.apply_filters(
+            includes_hull=includes_hull, includes_liability=includes_liability
+        )
+
         condition_to_apply, rescaling_info = _rescale_condition_if_needed(
             matched_condition, structure, structure_outputs
         )
@@ -106,11 +122,11 @@ def process_structures(
         )
 
         processed.add(structure.structure_name)
-        
+
         return {
             "applied": True,
             "cession_to_layer_100pct": ceded_result["cession_to_layer_100pct"],
-            "cession_to_reinsurer": ceded_result["cession_to_reinsurer"]
+            "cession_to_reinsurer": ceded_result["cession_to_reinsurer"],
         }
 
     total_cession_to_layer_100pct = 0.0
@@ -136,7 +152,7 @@ def _calculate_exposure_components(
         return ExposureComponents(hull=0.0, liability=0.0)
     return ExposureComponents(
         hull=total_exposure * (comps.hull / tot),
-        liability=total_exposure * (comps.liability / tot)
+        liability=total_exposure * (comps.liability / tot),
     )
 
 
@@ -155,7 +171,10 @@ def _rescale_condition_if_needed(
     structure: Structure,
     structure_outputs: Dict[str, Dict[str, Any]],
 ) -> tuple[Condition, Optional[Dict[str, Any]]]:
-    if not structure.has_predecessor() or structure.predecessor_title not in structure_outputs:
+    if (
+        not structure.has_predecessor()
+        or structure.predecessor_title not in structure_outputs
+    ):
         return matched_condition.copy(), None
 
     predecessor_info = structure_outputs[structure.predecessor_title]
@@ -168,7 +187,9 @@ def _rescale_condition_if_needed(
     return matched_condition.copy(), None
 
 
-def _calculate_retention_pct(structure: Structure, matched_condition: Condition) -> float:
+def _calculate_retention_pct(
+    structure: Structure, matched_condition: Condition
+) -> float:
     return structure.calculate_retention_pct(matched_condition)
 
 
@@ -190,24 +211,30 @@ def _add_structure_detail(
         "expiry_date": structure.expiry_date,
         "input_exposure": input_exposure,
         "applied": applied,
-        "predecessor_title": structure.predecessor_title if structure.has_predecessor() else None,
+        "predecessor_title": (
+            structure.predecessor_title if structure.has_predecessor() else None
+        ),
     }
 
     if applied and ceded_result:
-        detail.update({
-            "cession_to_layer_100pct": ceded_result["cession_to_layer_100pct"],
-            "cession_to_reinsurer": ceded_result["cession_to_reinsurer"],
-            "reinsurer_share": ceded_result["reinsurer_share"],
-            "condition": matched_condition,
-            "condition_rescaled": condition_to_apply,
-            "rescaling_info": rescaling_info,
-        })
+        detail.update(
+            {
+                "cession_to_layer_100pct": ceded_result["cession_to_layer_100pct"],
+                "cession_to_reinsurer": ceded_result["cession_to_reinsurer"],
+                "reinsurer_share": ceded_result["reinsurer_share"],
+                "condition": matched_condition,
+                "condition_rescaled": condition_to_apply,
+                "rescaling_info": rescaling_info,
+            }
+        )
     else:
-        detail.update({
-            "cession_to_layer_100pct": 0.0,
-            "cession_to_reinsurer": 0.0,
-            "reinsurer_share": 0.0,
-            "condition": None,
-        })
+        detail.update(
+            {
+                "cession_to_layer_100pct": 0.0,
+                "cession_to_reinsurer": 0.0,
+                "reinsurer_share": 0.0,
+                "condition": None,
+            }
+        )
 
     structures_detail.append(detail)

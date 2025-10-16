@@ -16,12 +16,12 @@ class Condition:
         self._validate()
 
     def _validate(self):
-        
+
         # Les conditions d'exclusion n'ont pas besoin de SIGNED_SHARE_PCT ni de INCLUDES_HULL/LIABILITY
         is_exclusion = self._data.get("BUSCL_EXCLUDE_CD") == "exclude"
         if is_exclusion:
             return
-        
+
         if self.signed_share is None:
             raise ValueError(
                 f"SIGNED_SHARE_PCT is required for all non-exclusion conditions. "
@@ -31,7 +31,7 @@ class Condition:
             raise ValueError(
                 f"SIGNED_SHARE_PCT must be between 0 and 1, got {self.signed_share}"
             )
-        
+
         if self.includes_hull is not None and self.includes_liability is not None:
             if not self.includes_hull and not self.includes_liability:
                 raise ValueError(
@@ -108,7 +108,7 @@ class Condition:
     ) -> str:
         """Generate a text description of this condition"""
         lines = []
-        
+
         if type_of_participation == PRODUCT.QUOTA_SHARE:
             if pd.notna(self.get(condition_COLS.CESSION_PCT)):
                 cession_pct = self[condition_COLS.CESSION_PCT]
@@ -120,7 +120,9 @@ class Condition:
                 lines.append(f"{indent}Limit: {self[condition_COLS.LIMIT]:,.2f}M")
 
         elif type_of_participation == PRODUCT.EXCESS_OF_LOSS:
-            if pd.notna(self.get(condition_COLS.ATTACHMENT)) and pd.notna(self.get(condition_COLS.LIMIT)):
+            if pd.notna(self.get(condition_COLS.ATTACHMENT)) and pd.notna(
+                self.get(condition_COLS.LIMIT)
+            ):
                 attachment = self[condition_COLS.ATTACHMENT]
                 limit = self[condition_COLS.LIMIT]
                 lines.append(f"{indent}Coverage: {limit:,.2f}M xs {attachment:,.2f}M")
@@ -140,7 +142,7 @@ class Condition:
                 coverage_parts.append("Hull")
             if self.includes_liability is True:
                 coverage_parts.append("Liability")
-            
+
             if coverage_parts:
                 coverage_str = " + ".join(coverage_parts)
                 lines.append(f"{indent}Coverage scope: {coverage_str}")
@@ -157,10 +159,12 @@ class Condition:
             lines.append(f"{indent}Matching conditions: {', '.join(conditions)}")
         else:
             lines.append(f"{indent}Matching conditions: None (applies to all policies)")
-        
+
         return "\n".join(lines)
 
-    def rescale_for_predecessor(self, retention_factor: float) -> tuple["Condition", Dict[str, Any]]:
+    def rescale_for_predecessor(
+        self, retention_factor: float
+    ) -> tuple["Condition", Dict[str, Any]]:
         rescaled_condition = self.copy()
         rescaling_info = {
             "retention_factor": retention_factor,
@@ -172,7 +176,9 @@ class Condition:
 
         if self.has_attachment():
             rescaling_info["original_attachment"] = self.attachment
-            rescaled_condition[condition_COLS.ATTACHMENT] = self.attachment * retention_factor
+            rescaled_condition[condition_COLS.ATTACHMENT] = (
+                self.attachment * retention_factor
+            )
             rescaling_info["rescaled_attachment"] = rescaled_condition.attachment
 
         if self.has_limit():
@@ -267,7 +273,7 @@ class Structure:
     def describe(self, dimension_columns: list, structure_number: int) -> str:
         """Generate a text description of this structure"""
         lines = []
-        
+
         lines.append(f"\nStructure {structure_number}: {self.structure_name}")
         lines.append(f"   Type: {self.type_of_participation}")
 
@@ -307,7 +313,7 @@ class Structure:
                         indent="         ",
                     )
                 )
-        
+
         return "\n".join(lines)
 
 
@@ -349,7 +355,7 @@ class Program:
         """Generate a complete text description of the program"""
         if file is None:
             file = sys.stdout
-        
+
         lines = []
         lines.append("=" * 80)
         lines.append("PROGRAM CONFIGURATION")
@@ -372,7 +378,7 @@ class Program:
             lines.append(structure.describe(self.dimension_columns, i))
 
         lines.append("\n" + "=" * 80)
-        
+
         description = "\n".join(lines)
         file.write(description + "\n")
         return description

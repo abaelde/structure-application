@@ -6,4 +6,3 @@ class Product(ABC):
     @abstractmethod
     def apply(self, exposure: float, condition: Condition) -> float:
         pass
-

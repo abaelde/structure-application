@@ -22,7 +22,7 @@ class QuotaShare(Product):
     def apply(self, exposure: float, condition: Condition) -> float:
         if pd.isna(condition.cession_pct):
             raise ValueError("CESSION_PCT is required for quota_share")
-        
+
         if pd.notna(condition.limit):
             return quota_share(exposure, condition.cession_pct, condition.limit)
         else:

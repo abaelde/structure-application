@@ -22,5 +22,5 @@ class ExcessOfLoss(Product):
             raise ValueError(
                 "ATTACHMENT_POINT_100 and LIMIT_100 are required for excess_of_loss"
             )
-        
+
         return excess_of_loss(exposure, condition.attachment, condition.limit)

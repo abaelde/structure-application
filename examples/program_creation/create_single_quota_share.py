@@ -17,15 +17,15 @@ print("Création du programme Single Quota share...")
 
 qs = build_quota_share(
     name="QS_30",
-    conditions_config=[{
-        "cession_pct": 0.30,
-    }]
+    conditions_config=[
+        {
+            "cession_pct": 0.30,
+        }
+    ],
 )
 
 program = build_program(
-    name="SINGLE_QUOTA_SHARE_2024",
-    structures=[qs],
-    underwriting_department="test"
+    name="SINGLE_QUOTA_SHARE_2024", structures=[qs], underwriting_department="test"
 )
 
 output_dir = "../programs"

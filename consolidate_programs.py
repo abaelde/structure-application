@@ -131,7 +131,9 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
 
     # Apply program to bordereau
     calculation_date = "2024-06-01"  # Date de calcul par défaut
-    bordereau_with_net, results = apply_program_to_bordereau(bordereau_df, program, calculation_date)
+    bordereau_with_net, results = apply_program_to_bordereau(
+        bordereau_df, program, calculation_date
+    )
 
     # Add cedant identifier to results
     results["cedant_program"] = program_name

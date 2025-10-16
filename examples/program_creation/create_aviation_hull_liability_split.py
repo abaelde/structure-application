@@ -23,46 +23,52 @@ print("Création du programme Aviation avec filtrage Hull/Liability...")
 
 qs_all = build_quota_share(
     name="QS_ALL",
-    conditions_config=[{
-        "cession_pct": 0.25,
-        "limit": 575_000_000,
-        "signed_share": 0.0165,
-        "includes_hull": True,
-        "includes_liability": True,
-    }],
-    claim_basis="risk_attaching"
+    conditions_config=[
+        {
+            "cession_pct": 0.25,
+            "limit": 575_000_000,
+            "signed_share": 0.0165,
+            "includes_hull": True,
+            "includes_liability": True,
+        }
+    ],
+    claim_basis="risk_attaching",
 )
 
 xol_hull = build_excess_of_loss(
     name="XOL_HULL",
-    conditions_config=[{
-        "attachment": 5_000_000,
-        "limit": 10_000_000,
-        "signed_share": 0.05,
-        "includes_hull": True,
-        "includes_liability": False,
-    }],
+    conditions_config=[
+        {
+            "attachment": 5_000_000,
+            "limit": 10_000_000,
+            "signed_share": 0.05,
+            "includes_hull": True,
+            "includes_liability": False,
+        }
+    ],
     predecessor_title="QS_ALL",
-    claim_basis="risk_attaching"
+    claim_basis="risk_attaching",
 )
 
 xol_liability = build_excess_of_loss(
     name="XOL_LIABILITY",
-    conditions_config=[{
-        "attachment": 10_000_000,
-        "limit": 40_000_000,
-        "signed_share": 0.05,
-        "includes_hull": False,
-        "includes_liability": True,
-    }],
+    conditions_config=[
+        {
+            "attachment": 10_000_000,
+            "limit": 40_000_000,
+            "signed_share": 0.05,
+            "includes_hull": False,
+            "includes_liability": True,
+        }
+    ],
     predecessor_title="QS_ALL",
-    claim_basis="risk_attaching"
+    claim_basis="risk_attaching",
 )
 
 program = build_program(
     name="AVIATION_HULL_LIABILITY_SPLIT",
     structures=[qs_all, xol_hull, xol_liability],
-    underwriting_department="aviation"
+    underwriting_department="aviation",
 )
 
 output_dir = "../programs"
@@ -84,7 +90,8 @@ print("\n" + "=" * 80)
 print("RÉSUMÉ DU MÉCANISME")
 print("=" * 80)
 
-print("""
+print(
+    """
 Ce programme illustre le nouveau mécanisme de filtrage Hull/Liability :
 
 1. QS_ALL (Structure par défaut):
@@ -122,7 +129,7 @@ ATTENTION:
 
 Ce mécanisme est UNIQUEMENT pour Aviation. Pour Casualty, ces colonnes
 sont ignorées car il n'y a qu'une seule notion d'exposition.
-""")
+"""
+)
 
 print("✓ Le programme Aviation Hull/Liability Split est prêt !")
-

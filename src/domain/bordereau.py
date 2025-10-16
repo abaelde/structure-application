@@ -13,6 +13,7 @@ from src.domain.dimension_mapping import (
 from src.domain import UNDERWRITING_DEPARTMENT_VALUES
 from src.domain.policy import Policy  # ⬅️ nouveau
 
+
 class BordereauValidationError(Exception):
     pass
 
@@ -116,20 +117,22 @@ class Bordereau:
     def _validate_all_columns_present_via_schema(self):
         cols = set(self._df.columns)
         # requis globaux
-        missing_required = [spec.canonical for spec in COLUMNS.values()
-                            if spec.required and spec.canonical not in cols]
+        missing_required = [
+            spec.canonical
+            for spec in COLUMNS.values()
+            if spec.required and spec.canonical not in cols
+        ]
         if missing_required:
-            self.validation_errors.append(f"Missing required columns: {', '.join(missing_required)}")
+            self.validation_errors.append(
+                f"Missing required columns: {', '.join(missing_required)}"
+            )
         # colonnes inconnues -> warning (tolérance)
         known = set(COLUMNS.keys())
         unknown = [c for c in cols if c not in known]
         if unknown:
-            self.validation_warnings.append(f"Ignored unknown columns: {', '.join(unknown)}")
-
-
-
-
-
+            self.validation_warnings.append(
+                f"Ignored unknown columns: {', '.join(unknown)}"
+            )
 
     def _normalize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Renomme les alias -> noms canoniques et applique les coercions déclarées dans schema."""
@@ -142,7 +145,11 @@ class Bordereau:
         return df2
 
     def _infer_lob(self, df: pd.DataFrame) -> Optional[str]:
-        col = FIELDS["LINE_OF_BUSINESS"] if FIELDS["LINE_OF_BUSINESS"] in df.columns else "line_of_business"
+        col = (
+            FIELDS["LINE_OF_BUSINESS"]
+            if FIELDS["LINE_OF_BUSINESS"] in df.columns
+            else "line_of_business"
+        )
         if col in df.columns:
             vals = df[col].dropna().astype(str).str.lower().unique().tolist()
             if len(vals) == 1:
@@ -152,10 +159,10 @@ class Bordereau:
     def get_underwriting_department(self) -> str:
         """
         Retourne l'underwriting_department du programme associé.
-        
+
         Returns:
             str: L'underwriting_department du programme
-            
+
         Raises:
             BordereauValidationError: Si aucun programme n'est associé ou si le programme n'a pas d'underwriting_department
         """
@@ -164,35 +171,38 @@ class Bordereau:
                 "No program associated with this bordereau. "
                 "Cannot determine underwriting_department."
             )
-        
+
         # Support pour dict et objet Program
         if isinstance(self.program, dict):
-            underwriting_department = self.program.get('underwriting_department')
+            underwriting_department = self.program.get("underwriting_department")
         else:
-            underwriting_department = getattr(self.program, 'underwriting_department', None)
-        
+            underwriting_department = getattr(
+                self.program, "underwriting_department", None
+            )
+
         if not underwriting_department:
             raise BordereauValidationError(
                 "Associated program must specify an underwriting_department."
             )
-        
+
         return underwriting_department
 
-    def validate_exposure_columns(self, underwriting_department: Optional[str] = None) -> None:
+    def validate_exposure_columns(
+        self, underwriting_department: Optional[str] = None
+    ) -> None:
         """
         Valide les colonnes d'exposition selon l'underwriting_department.
-        
+
         Args:
             underwriting_department: Si fourni, utilise cette valeur. Sinon, utilise celle du programme associé.
         """
-        
-        
+
         # Si pas fourni, récupère depuis le programme associé
         if not underwriting_department:
             underwriting_department = self.get_underwriting_department()
 
         uw_dept_lower = underwriting_department.lower()
-        
+
         if uw_dept_lower not in UNDERWRITING_DEPARTMENT_VALUES:
             raise BordereauValidationError(
                 f"Unknown underwriting department '{underwriting_department}'. "
@@ -203,14 +213,16 @@ class Bordereau:
 
     def _validate_exposure_via_schema(self, lob: str) -> None:
         """Méthode privée pour valider les colonnes d'exposition selon le schéma."""
-        
-        
+
         cols = set(self.columns)
         rules = exposure_rules_for_lob(lob)
 
         # requis par LOB
-        missing = [name for name, spec in COLUMNS.items()
-                   if spec.required_by_lob.get(lob) and name not in cols]
+        missing = [
+            name
+            for name, spec in COLUMNS.items()
+            if spec.required_by_lob.get(lob) and name not in cols
+        ]
         if missing:
             raise BordereauValidationError(
                 f"{lob.title()} bordereau must have: {', '.join(missing)}. "
@@ -220,7 +232,11 @@ class Bordereau:
         # at least one of
         atleast = rules.get("at_least_one_of")
         if atleast:
-            groups = [set(g.split("|")) for g in atleast.split(";")] if ";" in atleast else [set(atleast.split("|"))]
+            groups = (
+                [set(g.split("|")) for g in atleast.split(";")]
+                if ";" in atleast
+                else [set(atleast.split("|"))]
+            )
             for g in groups:
                 if not any(x in cols for x in g):
                     raise BordereauValidationError(
@@ -299,11 +315,19 @@ class Bordereau:
         return iter(self)
 
     def head(self, n: int = 5) -> "Bordereau":
-        return Bordereau(self._df.head(n).copy(), line_of_business=self.line_of_business, source=self.source)
+        return Bordereau(
+            self._df.head(n).copy(),
+            line_of_business=self.line_of_business,
+            source=self.source,
+        )
 
     def filter(self, expr: str) -> "Bordereau":
         """Filtre via DataFrame.query et retourne un nouveau Bordereau."""
-        return Bordereau(self._df.query(expr).copy(), line_of_business=self.line_of_business, source=self.source)
+        return Bordereau(
+            self._df.query(expr).copy(),
+            line_of_business=self.line_of_business,
+            source=self.source,
+        )
 
     def with_line_of_business(self, lob: str) -> "Bordereau":
         """Clone avec LOB fixé/écrasé (utile si non inférable)."""
@@ -313,5 +337,3 @@ class Bordereau:
         src = f"source='{self.source}', " if self.source else ""
         lob = f"lob='{self.line_of_business}'" if self.line_of_business else "lob=None"
         return f"Bordereau({src}{lob}, rows={len(self)})"
-
-

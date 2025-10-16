@@ -60,39 +60,45 @@ qs_1 = build_quota_share(
         }
         for currency in ALL_CURRENCIES
     ],
-    claim_basis="risk_attaching"
+    claim_basis="risk_attaching",
 )
+
 
 def create_xol_layer(layer_name: str) -> object:
     conditions = []
-    
+
     for currency in COMMON_CURRENCIES:
         limit, attachment = LAYER_VALUES_COMMON[layer_name]
-        conditions.append({
-            "attachment": attachment,
-            "limit": limit,
+        conditions.append(
+            {
+                "attachment": attachment,
+                "limit": limit,
+                "signed_share": REINSURER_SHARE_XOL,
+                "currency_cd": currency,
+                "includes_hull": True,
+                "includes_liability": True,
+            }
+        )
+
+    limit_gbp, attachment_gbp = LAYER_VALUES_GBP[layer_name]
+    conditions.append(
+        {
+            "attachment": attachment_gbp,
+            "limit": limit_gbp,
             "signed_share": REINSURER_SHARE_XOL,
-            "currency_cd": currency,
+            "currency_cd": "GBP",
             "includes_hull": True,
             "includes_liability": True,
-        })
-    
-    limit_gbp, attachment_gbp = LAYER_VALUES_GBP[layer_name]
-    conditions.append({
-        "attachment": attachment_gbp,
-        "limit": limit_gbp,
-        "signed_share": REINSURER_SHARE_XOL,
-        "currency_cd": "GBP",
-        "includes_hull": True,
-        "includes_liability": True,
-    })
-    
+        }
+    )
+
     return build_excess_of_loss(
         name=layer_name,
         conditions_config=conditions,
         predecessor_title="QS_1",
-        claim_basis="risk_attaching"
+        claim_basis="risk_attaching",
     )
+
 
 xol_1 = create_xol_layer("XOL_1")
 xol_2 = create_xol_layer("XOL_2")
@@ -104,7 +110,7 @@ xol_6 = create_xol_layer("XOL_6")
 program = build_program(
     name="AVIATION_AXA_XL_2024",
     structures=[qs_1, xol_1, xol_2, xol_3, xol_4, xol_5, xol_6],
-    underwriting_department="aviation"
+    underwriting_department="aviation",
 )
 
 output_dir = "../programs"

@@ -28,11 +28,11 @@ def build_condition(
     currency_cd: Optional[str | list[str]] = None,
     includes_hull: Optional[bool] = None,
     includes_liability: Optional[bool] = None,
-    **kwargs
+    **kwargs,
 ) -> Condition:
     """
     Build a condition object directly in memory.
-    
+
     Args:
         cession_pct: Cession percentage (for quota share)
         attachment: Attachment point (for excess of loss)
@@ -50,7 +50,7 @@ def build_condition(
         includes_hull: Whether to include Hull exposure (default True, for Aviation only)
         includes_liability: Whether to include Liability exposure (default True, for Aviation only)
         **kwargs: Additional fields to include in condition data
-    
+
     Returns:
         condition object ready to use
     """
@@ -71,9 +71,9 @@ def build_condition(
         "INCLUDES_HULL": includes_hull,
         "INCLUDES_LIABILITY": includes_liability,
     }
-    
+
     condition_data.update(kwargs)
-    
+
     return Condition(condition_data)
 
 
@@ -86,11 +86,11 @@ def build_exclusion_condition(
     currency_cd: Optional[str | list[str]] = None,
     entity_name_ced: Optional[str] = None,
     pol_risk_name_ced: Optional[str] = None,
-    **kwargs
+    **kwargs,
 ) -> Condition:
     """
     Build an exclusion condition.
-    
+
     Exclusion conditions don't have cession_pct, attachment, limit, or signed_share.
     They only define what to exclude based on dimensions.
     """
@@ -108,6 +108,5 @@ def build_exclusion_condition(
         attachment=None,
         limit=None,
         signed_share=None,
-        **kwargs
+        **kwargs,
     )
-

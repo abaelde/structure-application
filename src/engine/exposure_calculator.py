@@ -21,7 +21,7 @@ class AviationExposureCalculator(ExposureCalculator):
     def calculate(self, policy_data: Dict[str, Any]) -> float:
         components = self.calculate_components(policy_data)
         return components.total
-    
+
     def calculate_components(self, policy_data: Dict[str, Any]) -> ExposureComponents:
         hull_limit = policy_data.get("HULL_LIMIT")
         liability_limit = policy_data.get("LIABILITY_LIMIT")
@@ -68,6 +68,7 @@ class AviationExposureCalculator(ExposureCalculator):
 
     def get_required_columns(self) -> list[str]:
         return ["HULL_LIMIT", "LIABILITY_LIMIT", "HULL_SHARE", "LIABILITY_SHARE"]
+
 
 class CasualtyExposureCalculator(ExposureCalculator):
     def calculate(self, policy_data: Dict[str, Any]) -> float:

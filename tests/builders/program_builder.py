@@ -12,17 +12,17 @@ def build_program(
 ) -> Program:
     """
     Build a Program object directly in memory.
-    
+
     Args:
         name: Program name
         structures: List of Structure objects
         dimension_columns: List of dimension column names.
             If None, uses the default DIMENSIONS from constants.
         underwriting_department: Underwriting department (defaults to "test" for tests)
-    
+
     Returns:
         Program object ready to use
-    
+
     Example:
         qs = build_quota_share(name="QS_30", cession_pct=0.30)
         program = build_program(
@@ -34,12 +34,13 @@ def build_program(
     if dimension_columns is None:
         # Aligne le comportement des builders sur le loader :
         # union des dimensions "bordereau" + clés de mapping programme (ex: BUSCL_LIMIT_CURRENCY_CD)
-        dimension_columns = sorted(set(DIMENSIONS) | set(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()))
-    
+        dimension_columns = sorted(
+            set(DIMENSIONS) | set(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
+        )
+
     return Program(
         name=name,
         structures=structures,
         dimension_columns=dimension_columns,
         underwriting_department=underwriting_department,
     )
-

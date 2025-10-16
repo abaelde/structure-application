@@ -15,12 +15,15 @@ class Policy:
     - Expose les composants d'exposition (Hull / Liability / Total)
     - Expose les valeurs de dimensions (accès direct à raw, déjà canonisé)
     """
+
     raw: Dict[str, Any]
     lob: Optional[str] = None  # "aviation" | "casualty" | "test"
 
     _inception: Optional[pd.Timestamp] = field(default=None, init=False, repr=False)
     _expiry: Optional[pd.Timestamp] = field(default=None, init=False, repr=False)
-    _aviation_components: Optional[ExposureComponents] = field(default=None, init=False, repr=False)
+    _aviation_components: Optional[ExposureComponents] = field(
+        default=None, init=False, repr=False
+    )
     _casualty_total: Optional[float] = field(default=None, init=False, repr=False)
     _test_total: Optional[float] = field(default=None, init=False, repr=False)
 
@@ -49,7 +52,10 @@ class Policy:
     def is_active(self, calculation_date: str) -> tuple[bool, Optional[str]]:
         calc = pd.to_datetime(calculation_date)
         if self.expiry is not None and self.expiry <= calc:
-            return False, f"Policy expired on {self.expiry.date()} (calculation date: {calc.date()})"
+            return (
+                False,
+                f"Policy expired on {self.expiry.date()} (calculation date: {calc.date()})",
+            )
         return True, None
 
     # --- Dimensions & valeurs ---
@@ -64,6 +70,7 @@ class Policy:
     def get_dimension_value(self, dimension: str) -> Any:
         """Utilise le mapping de dimensions pour récupérer la valeur."""
         from src.domain.dimension_mapping import get_policy_value
+
         return get_policy_value(self.raw, dimension, self.lob)
 
     # --- Exposition (et composants) ---
@@ -74,6 +81,7 @@ class Policy:
             if self._aviation_components is None:
                 # Import paresseux pour éviter la dépendance circulaire
                 from src.engine.exposure_calculator import AviationExposureCalculator
+
                 calc = AviationExposureCalculator()
                 self._aviation_components = calc.calculate_components(self.raw)
             return self._aviation_components
@@ -82,6 +90,7 @@ class Policy:
             if self._casualty_total is None:
                 # Import paresseux pour éviter la dépendance circulaire
                 from src.engine.exposure_calculator import CasualtyExposureCalculator
+
                 self._casualty_total = CasualtyExposureCalculator().calculate(self.raw)
             return ExposureComponents(hull=self._casualty_total, liability=0.0)
 
@@ -89,6 +98,7 @@ class Policy:
             if self._test_total is None:
                 # Import paresseux pour éviter la dépendance circulaire
                 from src.engine.exposure_calculator import TestExposureCalculator
+
                 self._test_total = TestExposureCalculator().calculate(self.raw)
             return ExposureComponents(hull=self._test_total, liability=0.0)
 

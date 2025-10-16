@@ -17,7 +17,7 @@ def build_quota_share(
 ) -> Structure:
     """
     Build a Quota Share structure directly in memory.
-    
+
     Args:
         name: Structure name
         cession_pct: Default cession percentage (if conditions_config is None)
@@ -31,14 +31,14 @@ def build_quota_share(
         inception_date: Effective date
         expiry_date: Expiry date
         signed_share: Default signed share if not specified in conditions_config
-    
+
     Returns:
         Structure object ready to use
-    
+
     Example:
         # Simple QS 30%
         qs = build_quota_share(name="QS_30", cession_pct=0.30)
-        
+
         # QS with multiple conditions by currency
         qs = build_quota_share(
             name="QS_BY_CURRENCY",
@@ -52,15 +52,15 @@ def build_quota_share(
         if cession_pct is None:
             raise ValueError("Either cession_pct or conditions_config must be provided")
         conditions_config = [{"cession_pct": cession_pct}]
-    
+
     conditions = []
     for condition_config in conditions_config:
         if "signed_share" not in condition_config:
             condition_config["signed_share"] = signed_share
-        
+
         condition = build_condition(**condition_config)
         conditions.append(condition)
-    
+
     return Structure(
         structure_name=name,
         contract_order=contract_order,
@@ -87,7 +87,7 @@ def build_excess_of_loss(
 ) -> Structure:
     """
     Build an Excess of Loss structure directly in memory.
-    
+
     Args:
         name: Structure name
         attachment: Default attachment point (if conditions_config is None)
@@ -103,10 +103,10 @@ def build_excess_of_loss(
         inception_date: Effective date
         expiry_date: Expiry date
         signed_share: Default signed share if not specified in conditions_config
-    
+
     Returns:
         Structure object ready to use
-    
+
     Example:
         # Simple XL 50M xs 20M
         xl = build_excess_of_loss(
@@ -114,7 +114,7 @@ def build_excess_of_loss(
             attachment=20_000_000,
             limit=50_000_000
         )
-        
+
         # XL with multiple conditions by currency
         xl = build_excess_of_loss(
             name="XL_BY_CURRENCY",
@@ -126,17 +126,19 @@ def build_excess_of_loss(
     """
     if conditions_config is None:
         if attachment is None or limit is None:
-            raise ValueError("Either (attachment, limit) or conditions_config must be provided")
+            raise ValueError(
+                "Either (attachment, limit) or conditions_config must be provided"
+            )
         conditions_config = [{"attachment": attachment, "limit": limit}]
-    
+
     conditions = []
     for condition_config in conditions_config:
         if "signed_share" not in condition_config:
             condition_config["signed_share"] = signed_share
-        
+
         condition = build_condition(**condition_config)
         conditions.append(condition)
-    
+
     return Structure(
         structure_name=name,
         contract_order=contract_order,
@@ -147,4 +149,3 @@ def build_excess_of_loss(
         inception_date=inception_date,
         expiry_date=expiry_date,
     )
-

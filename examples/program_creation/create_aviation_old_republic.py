@@ -38,7 +38,7 @@ xol_1 = build_excess_of_loss(
         }
         for country in COUNTRIES
     ],
-    claim_basis="risk_attaching"
+    claim_basis="risk_attaching",
 )
 
 xol_2 = build_excess_of_loss(
@@ -54,7 +54,7 @@ xol_2 = build_excess_of_loss(
         }
         for country in COUNTRIES
     ],
-    claim_basis="risk_attaching"
+    claim_basis="risk_attaching",
 )
 
 xol_3 = build_excess_of_loss(
@@ -70,13 +70,13 @@ xol_3 = build_excess_of_loss(
         }
         for country in COUNTRIES
     ],
-    claim_basis="risk_attaching"
+    claim_basis="risk_attaching",
 )
 
 program = build_program(
     name="AVIATION_OLD_REPUBLIC_2024",
     structures=[xol_1, xol_2, xol_3],
-    underwriting_department="aviation"
+    underwriting_department="aviation",
 )
 
 output_file = "../programs/aviation_old_republic_2024.xlsx"

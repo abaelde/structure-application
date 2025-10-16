@@ -14,22 +14,32 @@ def apply_program(
     program: Program,
     calculation_date: str,
 ) -> Dict[str, any]:
-    # Exposition (et composants) calculés côté Policy
+
+    is_policy_active, inactive_reason = policy.is_active(calculation_date)
+    if not is_policy_active:
+        return create_inactive_result(policy.raw, inactive_reason)
+
     components = policy.exposure_components(program.underwriting_department)
     exposure = components.total
     structures = program.structures
     dimension_columns = program.dimension_columns
 
-    is_policy_active, inactive_reason = policy.is_active(calculation_date)
-
-    if not is_policy_active:
-        return create_inactive_result(policy.raw, inactive_reason)
-
-    if check_exclusion(policy, program.all_conditions, dimension_columns, program.underwriting_department):
+    if check_exclusion(
+        policy,
+        program.all_conditions,
+        program.dimension_columns,
+        program.underwriting_department,
+    ):
         return create_excluded_result(policy.raw)
 
     structures_detail, total_cession_to_layer_100pct, total_cession_to_reinsurer = (
-        process_structures(structures, policy, dimension_columns, exposure, program.underwriting_department)
+        process_structures(
+            structures,
+            policy,
+            dimension_columns,
+            exposure,
+            program.underwriting_department,
+        )
     )
 
     return {

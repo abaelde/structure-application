@@ -9,7 +9,7 @@ def apply_condition(
     product = PRODUCT_REGISTRY.get(type_of_participation)
     if product is None:
         raise ValueError(f"Unknown product type: {type_of_participation}")
-    
+
     cession_to_layer_100pct = product.apply(exposure, condition)
     cession_to_reinsurer = cession_to_layer_100pct * condition.signed_share
 

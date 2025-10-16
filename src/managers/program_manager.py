@@ -9,40 +9,41 @@ from src.domain.models import Program
 # Backends supportés par ProgramManager
 Backend = Literal["excel", "snowflake"]
 
+
 class ProgramManager:
     """
     Unified Program Manager that handles import/export for multiple backends.
-    
+
     This is the main entry point for all program operations (load, save) across
     different backends (Excel, Snowflake, etc.).
-    
+
     Features:
     - Load programs from Excel or Snowflake
     - Save programs to Excel or Snowflake
     - Switch backends dynamically
     - Consistent API across all backends
     - State management (track loaded program and source)
-    
+
     Examples:
         # Excel operations
         manager = ProgramManager(backend="excel")
         program = manager.load("program.xlsx")
         manager.save(program, "output.xlsx")
-        
+
         # Snowflake operations (when implemented)
         manager = ProgramManager(backend="snowflake")
         program = manager.load("snowflake://database.schema.table")
         manager.save(program, "snowflake://database.schema.output_table")
-        
+
         # Switch backends
         manager.switch_backend("excel")
         manager.save(program, "backup.xlsx")
     """
-    
+
     def __init__(self, backend: Backend = "excel"):
         """
         Initialize the program manager.
-        
+
         Args:
             backend: Default backend to use ("excel" or "snowflake")
         """
@@ -64,22 +65,24 @@ class ProgramManager:
     def load(self, source: str) -> Program:
         """
         Load a program from the specified source.
-        
+
         Args:
             source: Source path/identifier for the program data
-            
+
         Returns:
             The loaded Program object
         """
         program_df, structures_df, conditions_df = self.io.read(source)
-        self._loaded_program = self.serializer.dataframes_to_program(program_df, structures_df, conditions_df)
+        self._loaded_program = self.serializer.dataframes_to_program(
+            program_df, structures_df, conditions_df
+        )
         self._loaded_source = source
         return self._loaded_program
 
     def save(self, program: Program, dest: str) -> None:
         """
         Save a program to the specified destination.
-        
+
         Args:
             program: The Program object to save
             dest: Destination path/identifier
@@ -90,10 +93,10 @@ class ProgramManager:
     def save_current(self, dest: str) -> None:
         """
         Save the currently loaded program to the specified destination.
-        
+
         Args:
             dest: Destination path/identifier
-            
+
         Raises:
             ValueError: If no program is currently loaded
         """
@@ -104,10 +107,10 @@ class ProgramManager:
     def get_current_program(self) -> Program:
         """
         Get the currently loaded program.
-        
+
         Returns:
             The currently loaded Program object
-            
+
         Raises:
             ValueError: If no program is currently loaded
         """
@@ -118,10 +121,10 @@ class ProgramManager:
     def get_current_source(self) -> str:
         """
         Get the source of the currently loaded program.
-        
+
         Returns:
             The source path/identifier of the currently loaded program
-            
+
         Raises:
             ValueError: If no program is currently loaded
         """
@@ -132,7 +135,7 @@ class ProgramManager:
     def switch_backend(self, backend: Backend) -> None:
         """
         Switch to a different backend.
-        
+
         Args:
             backend: The new backend to use
         """
@@ -145,10 +148,10 @@ class ProgramManager:
     def reload(self) -> Program:
         """
         Reload the program from the current source.
-        
+
         Returns:
             The reloaded Program object
-            
+
         Raises:
             ValueError: If no program is currently loaded
         """
@@ -159,7 +162,7 @@ class ProgramManager:
     def copy_to_backend(self, program: Program, dest: str, backend: Backend) -> None:
         """
         Copy a program to a different backend.
-        
+
         Args:
             program: The Program object to copy
             dest: Destination path/identifier
@@ -167,20 +170,20 @@ class ProgramManager:
         """
         # Save current backend
         current_backend = self.backend
-        
+
         # Switch to target backend
         self.switch_backend(backend)
-        
+
         # Save the program
         self.save(program, dest)
-        
+
         # Restore original backend
         self.switch_backend(current_backend)
 
     def is_loaded(self) -> bool:
         """
         Check if a program is currently loaded.
-        
+
         Returns:
             True if a program is loaded, False otherwise
         """
@@ -192,5 +195,3 @@ class ProgramManager:
         """
         self._loaded_program = None
         self._loaded_source = None
-
-

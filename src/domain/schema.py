@@ -4,6 +4,7 @@ from typing import Callable, Dict, Set, Optional, Literal, List
 
 ColumnKind = Literal["dimension", "exposure", "meta"]
 
+
 @dataclass(frozen=True)
 class ColumnSpec:
     canonical: str
@@ -14,18 +15,22 @@ class ColumnSpec:
     coerce: Optional[Callable] = None
     notes: str = ""
 
+
 def _to_upper(x):
     if x is None:
         return x
     s = str(x)
     return s.upper()
 
+
 def _to_date(x):
     import pandas as pd
+
     try:
         return pd.to_datetime(x)
     except Exception:
         return None
+
 
 def _to_float(x):
     try:
@@ -33,42 +38,74 @@ def _to_float(x):
     except Exception:
         return None
 
+
 # ——— Colonnes canoniques alignées avec l'engine ———
 COLUMNS: Dict[str, ColumnSpec] = {
     # META / BASE
-    "policy_id": ColumnSpec("policy_id", "meta", aliases={"POLICY_ID", "policy_number", "POLICY_NUMBER"}),
+    "policy_id": ColumnSpec(
+        "policy_id", "meta", aliases={"POLICY_ID", "policy_number", "POLICY_NUMBER"}
+    ),
     "INSURED_NAME": ColumnSpec("INSURED_NAME", "meta", required=True, coerce=_to_upper),
-    "INCEPTION_DT": ColumnSpec("INCEPTION_DT", "meta", aliases={"INCEPTION_DATE"}, required=True, coerce=_to_date),
-    "EXPIRE_DT":   ColumnSpec("EXPIRE_DT",   "meta", aliases={"EXPIRY_DATE"},   required=True, coerce=_to_date),
-    "line_of_business": ColumnSpec("line_of_business", "meta", aliases={"LINE_OF_BUSINESS"}),
-
+    "INCEPTION_DT": ColumnSpec(
+        "INCEPTION_DT",
+        "meta",
+        aliases={"INCEPTION_DATE"},
+        required=True,
+        coerce=_to_date,
+    ),
+    "EXPIRE_DT": ColumnSpec(
+        "EXPIRE_DT", "meta", aliases={"EXPIRY_DATE"}, required=True, coerce=_to_date
+    ),
+    "line_of_business": ColumnSpec(
+        "line_of_business", "meta", aliases={"LINE_OF_BUSINESS"}
+    ),
     # DIMENSIONS
     "BUSCL_COUNTRY_CD": ColumnSpec("BUSCL_COUNTRY_CD", "dimension"),
-    "BUSCL_REGION":     ColumnSpec("BUSCL_REGION",     "dimension"),
+    "BUSCL_REGION": ColumnSpec("BUSCL_REGION", "dimension"),
     "BUSCL_CLASS_OF_BUSINESS_1": ColumnSpec("BUSCL_CLASS_OF_BUSINESS_1", "dimension"),
     "BUSCL_CLASS_OF_BUSINESS_2": ColumnSpec("BUSCL_CLASS_OF_BUSINESS_2", "dimension"),
     "BUSCL_CLASS_OF_BUSINESS_3": ColumnSpec("BUSCL_CLASS_OF_BUSINESS_3", "dimension"),
     "BUSCL_ENTITY_NAME_CED": ColumnSpec("BUSCL_ENTITY_NAME_CED", "dimension"),
-    "POL_RISK_NAME_CED":    ColumnSpec("POL_RISK_NAME_CED", "dimension"),
-    "BUSCL_EXCLUDE_CD":     ColumnSpec("BUSCL_EXCLUDE_CD", "dimension"),
+    "POL_RISK_NAME_CED": ColumnSpec("POL_RISK_NAME_CED", "dimension"),
+    "BUSCL_EXCLUDE_CD": ColumnSpec("BUSCL_EXCLUDE_CD", "dimension"),
     # currency (dimension logique unique ; représentation selon LOB)
-    "CURRENCY":            ColumnSpec("CURRENCY", "dimension", aliases={"BUSCL_LIMIT_CURRENCY_CD"}),
-    "HULL_CURRENCY":       ColumnSpec("HULL_CURRENCY", "dimension"),
-    "LIABILITY_CURRENCY":  ColumnSpec("LIABILITY_CURRENCY", "dimension"),
-
+    "CURRENCY": ColumnSpec(
+        "CURRENCY", "dimension", aliases={"BUSCL_LIMIT_CURRENCY_CD"}
+    ),
+    "HULL_CURRENCY": ColumnSpec("HULL_CURRENCY", "dimension"),
+    "LIABILITY_CURRENCY": ColumnSpec("LIABILITY_CURRENCY", "dimension"),
     # EXPOSURE — Casualty
-    "LIMIT":        ColumnSpec("LIMIT", "exposure", required_by_lob={"casualty": True}, coerce=_to_float),
-    "CEDENT_SHARE": ColumnSpec("CEDENT_SHARE", "exposure", required_by_lob={"casualty": True}, coerce=_to_float),
-
+    "LIMIT": ColumnSpec(
+        "LIMIT", "exposure", required_by_lob={"casualty": True}, coerce=_to_float
+    ),
+    "CEDENT_SHARE": ColumnSpec(
+        "CEDENT_SHARE", "exposure", required_by_lob={"casualty": True}, coerce=_to_float
+    ),
     # EXPOSURE — Aviation
-    "HULL_LIMIT":      ColumnSpec("HULL_LIMIT", "exposure", required_by_lob={"aviation": False}, coerce=_to_float),
-    "HULL_SHARE":      ColumnSpec("HULL_SHARE", "exposure", required_by_lob={"aviation": False}, coerce=_to_float),
-    "LIABILITY_LIMIT": ColumnSpec("LIABILITY_LIMIT", "exposure", required_by_lob={"aviation": False}, coerce=_to_float),
-    "LIABILITY_SHARE": ColumnSpec("LIABILITY_SHARE", "exposure", required_by_lob={"aviation": False}, coerce=_to_float),
-
+    "HULL_LIMIT": ColumnSpec(
+        "HULL_LIMIT", "exposure", required_by_lob={"aviation": False}, coerce=_to_float
+    ),
+    "HULL_SHARE": ColumnSpec(
+        "HULL_SHARE", "exposure", required_by_lob={"aviation": False}, coerce=_to_float
+    ),
+    "LIABILITY_LIMIT": ColumnSpec(
+        "LIABILITY_LIMIT",
+        "exposure",
+        required_by_lob={"aviation": False},
+        coerce=_to_float,
+    ),
+    "LIABILITY_SHARE": ColumnSpec(
+        "LIABILITY_SHARE",
+        "exposure",
+        required_by_lob={"aviation": False},
+        coerce=_to_float,
+    ),
     # EXPOSURE — Test
-    "exposure": ColumnSpec("exposure", "exposure", required_by_lob={"test": True}, coerce=_to_float),
+    "exposure": ColumnSpec(
+        "exposure", "exposure", required_by_lob={"test": True}, coerce=_to_float
+    ),
 }
+
 
 # ——— Règles d'exposition par LOB (déclaratives) ———
 def exposure_rules_for_lob(lob: str) -> Dict[str, str]:
@@ -86,6 +123,7 @@ def exposure_rules_for_lob(lob: str) -> Dict[str, str]:
         return {"required": "exposure"}
     return {}
 
+
 # ——— Mapping Program -> Bordereau (source de vérité unique) ———
 PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, object] = {
     # identiques
@@ -98,8 +136,13 @@ PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, object] = {
     "POL_RISK_NAME_CED": "POL_RISK_NAME_CED",
     "BUSCL_EXCLUDE_CD": "BUSCL_EXCLUDE_CD",
     # currency logique unique -> dépend du LOB
-    "BUSCL_LIMIT_CURRENCY_CD": {"aviation": "HULL_CURRENCY", "casualty": "CURRENCY", "test": "CURRENCY"},
+    "BUSCL_LIMIT_CURRENCY_CD": {
+        "aviation": "HULL_CURRENCY",
+        "casualty": "CURRENCY",
+        "test": "CURRENCY",
+    },
 }
+
 
 # ——— Helpers normalisation ———
 def build_alias_to_canonical() -> Dict[str, str]:

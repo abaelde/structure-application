@@ -16,4 +16,3 @@ __all__ = [
     "build_excess_of_loss",
     "build_program",
 ]
-

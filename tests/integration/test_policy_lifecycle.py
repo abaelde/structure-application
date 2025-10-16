@@ -7,13 +7,13 @@ from tests.builders import build_quota_share, build_program
 def test_policy_expiry_mechanism():
     """
     Test du mécanisme d'expiration des polices
-    
+
     STRUCTURE DU PROGRAMME:
     - QS_30% : Quota Share 30%
-    
+
     BORDEREAU:
     - 4 polices avec différentes dates d'expiration
-    
+
     CALCULS ATTENDUS:
     - Les polices expirées sont marquées "inactive"
     - Les polices actives sont marquées "included"
@@ -21,16 +21,16 @@ def test_policy_expiry_mechanism():
     """
     qs = build_quota_share(
         name="QS_30",
-        conditions_config=[{
-            "cession_pct": 0.30,
-            "includes_hull": True,
-            "includes_liability": True,
-        }]
+        conditions_config=[
+            {
+                "cession_pct": 0.30,
+                "includes_hull": True,
+                "includes_liability": True,
+            }
+        ],
     )
     program = build_program(
-        name="TEST_LIFECYCLE",
-        structures=[qs],
-        underwriting_department="test"
+        name="TEST_LIFECYCLE", structures=[qs], underwriting_department="test"
     )
 
     test_data = {

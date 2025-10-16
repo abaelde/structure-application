@@ -7,13 +7,19 @@ from src.domain.policy import Policy
 def _values_match(condition_values: list[str] | None, policy_value) -> bool:
     if condition_values is None:
         return True  # dimension non contrainte
-    pv = None if policy_value is None or (isinstance(policy_value, float) and pd.isna(policy_value)) else str(policy_value)
+    pv = (
+        None
+        if policy_value is None
+        or (isinstance(policy_value, float) and pd.isna(policy_value))
+        else str(policy_value)
+    )
     if pv is None:
         return False  # condition impose un ensemble, mais la police n'a pas de valeur
     # Normalisation légère (au besoin, on peut upper()) # AURE : pourquo i ! condition a bien validé avant ?
     pv = pv.strip()
     # Convert list -> set pour membership O(1)
     return pv in set(str(v).strip() for v in condition_values)
+
 
 def _specificity_increment(condition_values: list[str] | None) -> float:
     if not condition_values:
@@ -23,7 +29,10 @@ def _specificity_increment(condition_values: list[str] | None) -> float:
 
 
 def check_exclusion(
-    policy: Policy, conditions: List[Condition], dimension_columns: List[str], line_of_business: str = None
+    policy: Policy,
+    conditions: List[Condition],
+    dimension_columns: List[str],
+    line_of_business: str = None,
 ) -> bool:
     for condition in conditions:
         if not condition.is_exclusion():
@@ -44,7 +53,10 @@ def check_exclusion(
 
 
 def match_condition(
-    policy: Policy, conditions: List[Condition], dimension_columns: List[str], line_of_business: str = None
+    policy: Policy,
+    conditions: List[Condition],
+    dimension_columns: List[str],
+    line_of_business: str = None,
 ) -> Optional[Condition]:
     matched = []
     for condition in conditions:

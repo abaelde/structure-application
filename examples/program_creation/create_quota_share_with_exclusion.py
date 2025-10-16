@@ -26,7 +26,7 @@ qs = build_quota_share(
             "cession_pct": None,
         },
         {
-            "exclude_cd": "exclude", 
+            "exclude_cd": "exclude",
             "country_cd": "Russia",
             "cession_pct": None,
         },
@@ -35,17 +35,17 @@ qs = build_quota_share(
             "country_cd": None,
             "cession_pct": 0.25,
             "signed_share": 1.0,
-        }
+        },
     ],
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
-    expiry_date="2024-12-31"
+    expiry_date="2024-12-31",
 )
 
 program = build_program(
     name="Quota Share with Exclusions Test",
     structures=[qs],
-    underwriting_department="aviation"
+    underwriting_department="aviation",
 )
 
 output_dir = "../programs"
