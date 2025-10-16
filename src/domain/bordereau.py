@@ -10,8 +10,6 @@ from src.domain.constants import FIELDS
 from src.domain.schema import COLUMNS, exposure_rules_for_lob, build_alias_to_canonical
 from src.domain.dimension_mapping import (
     get_all_mappable_dimensions,
-    validate_program_bordereau_compatibility,
-    validate_aviation_currency_consistency,
 )
 from src.domain import UNDERWRITING_DEPARTMENT_VALUES
 
@@ -105,11 +103,6 @@ class Bordereau:
         # Run all validation checks
         self._validate_not_empty()
         self._validate_all_columns_present_via_schema()
-        self._validate_non_null_values()
-        self._validate_dates()
-        self._validate_insured_name_uppercase()
-        self._validate_business_logic()
-        self._validate_currency_presence()
 
         # En plus : validation des colonnes d'exposition selon LOB, si connue
         if check_exposure_columns and self.line_of_business:
@@ -148,147 +141,10 @@ class Bordereau:
         if unknown:
             self.validation_warnings.append(f"Ignored unknown columns: {', '.join(unknown)}")
 
-    def _validate_non_null_values(self):
-        required_columns = [
-            FIELDS["INSURED_NAME"],
-            FIELDS["INCEPTION_DATE"],
-            FIELDS["EXPIRY_DATE"],
-        ]
-        
-        for col in required_columns:
-            if col not in self._df.columns:
-                continue
 
-            null_rows = []
-            for idx, val in self._df[col].items():
-                if pd.isna(val) or (isinstance(val, str) and val.strip() == ""):
-                    null_rows.append(f"row {idx + 2}")
 
-            if null_rows:
-                self.validation_errors.append(
-                    f"Column '{col}' contains null or empty values: {', '.join(null_rows[:5])}"
-                    + (f" and {len(null_rows) - 5} more" if len(null_rows) > 5 else "")
-                )
 
-    def _validate_dates(self):
-        date_columns = [FIELDS["INCEPTION_DATE"], FIELDS["EXPIRY_DATE"]]
-        
-        for col in date_columns:
-            if col not in self._df.columns:
-                continue
 
-            invalid_dates = []
-            for idx, val in self._df[col].items():
-                if pd.isna(val):
-                    invalid_dates.append(f"row {idx + 2}: empty date")
-                    continue
-
-                try:
-                    pd.to_datetime(val)
-                except Exception:
-                    invalid_dates.append(f"row {idx + 2}: '{val}'")
-
-            if invalid_dates:
-                self.validation_errors.append(
-                    f"Column '{col}' contains invalid dates: {', '.join(invalid_dates[:5])}"
-                    + (
-                        f" and {len(invalid_dates) - 5} more"
-                        if len(invalid_dates) > 5
-                        else ""
-                    )
-                )
-
-    def _validate_insured_name_uppercase(self):
-        insured_col = FIELDS["INSURED_NAME"]
-        if insured_col not in self._df.columns:
-            return
-
-        non_uppercase = []
-        for idx, val in self._df[insured_col].items():
-            if pd.isna(val):
-                continue
-
-            str_val = str(val)
-            if str_val != str_val.upper():
-                non_uppercase.append(f"row {idx + 2}: '{str_val}'")
-
-        if non_uppercase:
-            self.validation_errors.append(
-                f"Column '{insured_col}' must contain only uppercase values: {', '.join(non_uppercase[:5])}"
-                + (
-                    f" and {len(non_uppercase) - 5} more"
-                    if len(non_uppercase) > 5
-                    else ""
-                )
-            )
-
-    def _validate_business_logic(self):
-        inception_col = FIELDS["INCEPTION_DATE"]
-        expiry_col = FIELDS["EXPIRY_DATE"]
-
-        if inception_col not in self._df.columns or expiry_col not in self._df.columns:
-            return
-
-        invalid_periods = []
-        for idx, row in self._df.iterrows():
-            try:
-                inception = pd.to_datetime(row[inception_col])
-                expiry = pd.to_datetime(row[expiry_col])
-
-                if expiry <= inception:
-                    invalid_periods.append(
-                        f"row {idx + 2}: expiry ({expiry.date()}) <= inception ({inception.date()})"
-                    )
-            except Exception:
-                continue
-
-        if invalid_periods:
-            self.validation_errors.append(
-                f"Invalid policy periods (expiry <= inception): {', '.join(invalid_periods[:5])}"
-                + (
-                    f" and {len(invalid_periods) - 5} more"
-                    if len(invalid_periods) > 5
-                    else ""
-                )
-            )
-
-    def _validate_currency_presence(self):
-        if not self.line_of_business:
-            return
-
-        line_of_business_lower = self.line_of_business.lower()
-        
-        if line_of_business_lower == "aviation":
-            self._validate_aviation_currency()
-        elif line_of_business_lower == "casualty":
-            self._validate_casualty_currency()
-
-    def _validate_aviation_currency(self):
-        hull_present = "HULL_CURRENCY" in self._df.columns
-        liability_present = "LIABILITY_CURRENCY" in self._df.columns
-        
-        if not (hull_present or liability_present):
-            self.validation_errors.append(
-                "Aviation bordereau must have at least HULL_CURRENCY or LIABILITY_CURRENCY"
-            )
-        
-        # Check for old currency column
-        if "BUSCL_LIMIT_CURRENCY_CD" in self._df.columns:
-            self.validation_errors.append(
-                "BUSCL_LIMIT_CURRENCY_CD not allowed in aviation, use HULL_CURRENCY/LIABILITY_CURRENCY"
-            )
-
-    def _validate_casualty_currency(self):
-        if "CURRENCY" not in self._df.columns:
-            self.validation_errors.append(
-                "Casualty bordereau must have CURRENCY column"
-            )
-        
-        # Check for old currency column
-        if "BUSCL_LIMIT_CURRENCY_CD" in self._df.columns:
-            self.validation_errors.append(
-                "BUSCL_LIMIT_CURRENCY_CD not allowed in casualty, use CURRENCY"
-            )
 
     def _normalize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Renomme les alias -> noms canoniques et applique les coercions déclarées dans schema."""
@@ -409,71 +265,6 @@ class Bordereau:
         except BordereauValidationError as e:
             # Convertit l'exception en ajout d'erreur pour la validation globale
             self.validation_errors.append(str(e))
-
-    def compatibility_report(self, program=None) -> Dict[str, Any]:
-        """
-        Informe sur la compatibilité program ↔︎ bordereau (dimensions mappables, warnings…).
-        N'affecte pas l'engine, purement diagnostique.
-        
-        Args:
-            program: Programme à analyser. Si None, utilise le programme associé au bordereau.
-        """
-        # Utilise le programme fourni ou celui associé au bordereau
-        target_program = program or self.program
-        if not target_program:
-            return {
-                "underwriting_department": None,
-                "mapped_dimensions": {},
-                "warnings": ["No program associated with bordereau"],
-                "errors": ["Cannot generate compatibility report without a program"],
-            }
-        
-        # Récupère l'underwriting_department
-        try:
-            if isinstance(target_program, dict):
-                underwriting_department = target_program.get('underwriting_department')
-                dimension_columns = target_program.get('dimension_columns', [])
-            else:
-                underwriting_department = getattr(target_program, 'underwriting_department', None)
-                dimension_columns = getattr(target_program, 'dimension_columns', [])
-        except Exception:
-            return {
-                "underwriting_department": None,
-                "mapped_dimensions": {},
-                "warnings": ["Error accessing program properties"],
-                "errors": ["Invalid program object"],
-            }
-        
-        if not underwriting_department:
-            return {
-                "underwriting_department": None,
-                "mapped_dimensions": {},
-                "warnings": ["Program must specify an underwriting_department"],
-                "errors": ["Missing underwriting_department in program"],
-            }
-        
-        errors, warnings = validate_program_bordereau_compatibility(
-            program_dimensions=dimension_columns,
-            bordereau_columns=self.columns,
-            line_of_business=underwriting_department,
-        )
-        warnings += validate_aviation_currency_consistency(self.columns, underwriting_department)
-        
-        # Warning si le bordereau a une line_of_business différente
-        if self.line_of_business and self.line_of_business.lower() != underwriting_department.lower():
-            warnings.append(
-                f"Bordereau line_of_business '{self.line_of_business}' differs from "
-                f"program underwriting_department '{underwriting_department}'. "
-                f"Program underwriting_department will be used for processing."
-            )
-        
-        return {
-            "underwriting_department": underwriting_department,
-            "bordereau_line_of_business": self.line_of_business,
-            "mapped_dimensions": self.dimension_mapping(),  # program-dimension -> bordereau column
-            "warnings": warnings,
-            "errors": errors,  # devrait rester vide (design optionnel des dimensions)
-        }
 
     # ──────────────────────────────────────────────────────────────────────
     # Exposition des dimensions
