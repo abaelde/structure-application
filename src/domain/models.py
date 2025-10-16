@@ -85,13 +85,17 @@ class Condition:
 
     def get_values(self, key: str) -> list[str] | None:
         v = self._data.get(key)
-        if v is None or (isinstance(v, float) and pd.isna(v)):
+        if v is None:
             return None
-        # En mémoire on s'assure déjà d'avoir list[str] via le loader,
-        # mais on reste tolérant si des tests injectent un scalaire.
-        if isinstance(v, (list, tuple, set)):
-            return list(v)
-        return [str(v)]
+        if isinstance(v, (float, int)) and pd.isna(v):
+            return None
+        # Handle pandas NA specifically
+        if hasattr(pd, 'NA') and v is pd.NA:
+            return None
+        if isinstance(v, list):
+            return v
+        # Éventuellement, si tu veux fail-fast plutôt que convertir implicitement :
+        raise ValueError(f"Dimension values must be a list[str]; got {type(v)} for key={key}")
 
     def has_dimension(self, key: str) -> bool:
         vals = self.get_values(key)

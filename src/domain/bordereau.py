@@ -1,7 +1,7 @@
 # src/domain/bordereau.py
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Dict, Iterable, List, Optional, Union
 
 import pandas as pd
 
@@ -10,7 +10,7 @@ from src.domain.schema import COLUMNS, exposure_rules_for_lob, build_alias_to_ca
 from src.domain.schema import (
     get_all_mappable_dimensions,
 )
-from src.domain import UNDERWRITING_DEPARTMENT_VALUES
+from src.domain import UNDERWRITING_DEPARTMENT_VALUES, Program
 from src.domain.policy import Policy  # ⬅️ nouveau
 
 
@@ -33,7 +33,7 @@ class Bordereau:
         *,
         uw_dept: Optional[str] = None,
         source: Optional[str] = None,
-        program: Optional[Any] = None,
+        program: Optional[Program] = None,
     ):
         self._raw_df = df.copy()
         self._df = self._normalize_columns(self._raw_df)
@@ -66,7 +66,7 @@ class Bordereau:
         *,
         uw_dept: Optional[str] = None,
         validate: bool = True,
-        read_csv_kwargs: Optional[Dict[str, Any]] = None,
+        read_csv_kwargs: Optional[Dict[str, object]] = None,
     ) -> "Bordereau":
         read_csv_kwargs = read_csv_kwargs or {}
         df = pd.read_csv(path, **read_csv_kwargs)
