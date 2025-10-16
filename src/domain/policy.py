@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, List
 import pandas as pd
 
 from src.domain.constants import FIELDS
-from src.domain.exposure_components import ExposureComponents
+from src.domain.exposure_bundle import ExposureBundle
 from src.domain.exposure import ExposureCalculationError
 
 
@@ -22,11 +22,7 @@ class Policy:
 
     _inception: Optional[pd.Timestamp] = field(default=None, init=False, repr=False)
     _expiry: Optional[pd.Timestamp] = field(default=None, init=False, repr=False)
-    _aviation_components: Optional[ExposureComponents] = field(
-        default=None, init=False, repr=False
-    )
-    _casualty_total: Optional[float] = field(default=None, init=False, repr=False)
-    _test_total: Optional[float] = field(default=None, init=False, repr=False)
+    _bundles: Dict[str, ExposureBundle] = field(default_factory=dict, init=False, repr=False)
 
     # --- Accès de type mapping (compat utile en interne) ---
     def get(self, key: str, default=None) -> Any:
@@ -75,29 +71,12 @@ class Policy:
         return get_policy_value(self.raw, dimension, self.lob)
 
     # --- Exposition (et composants) ---
-    def exposure_components(self, uw_dept: str) -> ExposureComponents:
-        uw = (uw_dept or (self.lob or "")).lower()
-
-        if uw == "aviation":
-            if self._aviation_components is None:
-                from src.domain.exposure import AviationExposureCalculator
-                calc = AviationExposureCalculator()
-                self._aviation_components = calc.calculate_components(self.raw)
-            return self._aviation_components
-
-        if uw == "casualty":
-            if self._casualty_total is None:
-                from src.domain.exposure import CasualtyExposureCalculator
-                self._casualty_total = CasualtyExposureCalculator().calculate(self.raw)
-            return ExposureComponents(hull=self._casualty_total, liability=0.0)
-
-        if uw == "test":
-            if self._test_total is None:
-                from src.domain.exposure import TestExposureCalculator
-                self._test_total = TestExposureCalculator().calculate(self.raw)
-            return ExposureComponents(hull=self._test_total, liability=0.0)
-        
-        raise ExposureCalculationError(
-            f"Unknown underwriting department '{uw_dept}'. "
-            f"Supported departments: aviation, casualty, test"
-        )
+    def exposure_bundle(self, uw_dept: str) -> ExposureBundle:
+        uw = uw_dept.lower()
+        if uw in self._bundles:
+            return self._bundles[uw]
+        from src.domain.exposure import get_exposure_calculator
+        calc = get_exposure_calculator(uw)
+        bundle = calc.bundle(self.raw)
+        self._bundles[uw] = bundle
+        return bundle

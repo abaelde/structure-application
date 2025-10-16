@@ -1,7 +1,7 @@
 # src/domain/exposure.py
 from typing import Dict, Any
 from abc import ABC, abstractmethod
-from src.domain.exposure_components import ExposureComponents
+from src.domain.exposure_bundle import ExposureBundle
 
 
 class ExposureCalculationError(Exception):
@@ -17,13 +17,13 @@ class ExposureCalculator(ABC):
     def get_required_columns(self) -> list[str]:
         ...
 
+    # Ajout : constructeur générique de bundle (par défaut : total seul)
+    def bundle(self, policy_data: Dict[str, Any]) -> ExposureBundle:
+        return ExposureBundle(total=self.calculate(policy_data))
+
 
 class AviationExposureCalculator(ExposureCalculator):
-    def calculate(self, policy_data: Dict[str, Any]) -> float:
-        components = self.calculate_components(policy_data)
-        return components.total
-
-    def calculate_components(self, policy_data: Dict[str, Any]) -> ExposureComponents:
+    def bundle(self, policy_data: Dict[str, Any]) -> ExposureBundle:
         hull_limit = policy_data.get("HULL_LIMIT")
         liability_limit = policy_data.get("LIABILITY_LIMIT")
         hull_share = policy_data.get("HULL_SHARE")
@@ -61,7 +61,13 @@ class AviationExposureCalculator(ExposureCalculator):
                     f"Invalid numeric values for Liability exposure: {e}"
                 )
 
-        return ExposureComponents(hull=hull_exposure, liability=liability_exposure)
+        return ExposureBundle(
+            total=hull_exposure + liability_exposure,
+            components={"hull": hull_exposure, "liability": liability_exposure},
+        )
+
+    def calculate(self, policy_data: Dict[str, Any]) -> float:
+        return self.bundle(policy_data).total
 
     def get_required_columns(self) -> list[str]:
         return ["HULL_LIMIT", "LIABILITY_LIMIT", "HULL_SHARE", "LIABILITY_SHARE"]

@@ -273,22 +273,21 @@ Pour une police avec :
 
 ### Implémentation
 
-#### Classe `ExposureComponents`
+#### Classe `ExposureBundle`
 
 ```python
-from src.domain.exposure_components import ExposureComponents
+from src.domain.exposure_bundle import ExposureBundle
 
-components = ExposureComponents(hull=15_000_000, liability=50_000_000)
+bundle = ExposureBundle(total=65_000_000, components={"hull": 15_000_000, "liability": 50_000_000})
 
 # Propriétés
-components.total  # 65_000_000
-components.hull  # 15_000_000
-components.liability  # 50_000_000
+bundle.total  # 65_000_000
+bundle.components  # {"hull": 15_000_000, "liability": 50_000_000}
 
 # Filtrage
-components.apply_filters(includes_hull=True, includes_liability=False)  # 15_000_000
-components.apply_filters(includes_hull=False, includes_liability=True)  # 50_000_000
-components.apply_filters(includes_hull=True, includes_liability=True)   # 65_000_000
+bundle.select({"hull"})       # 15_000_000
+bundle.select({"liability"})  # 50_000_000
+bundle.total                  # 65_000_000
 ```
 
 #### Calculateur d'exposition
@@ -307,10 +306,11 @@ policy_data = {
 # Exposition totale (méthode existante, rétro-compatible)
 total = calculator.calculate(policy_data)  # 65_000_000
 
-# Composants détaillés (nouvelle méthode)
-components = calculator.calculate_components(policy_data)
-print(components.hull)       # 15_000_000
-print(components.liability)  # 50_000_000
+# Bundle avec composants détaillés (nouvelle méthode)
+bundle = calculator.bundle(policy_data)
+print(bundle.total)                    # 65_000_000
+print(bundle.components["hull"])       # 15_000_000
+print(bundle.components["liability"])  # 50_000_000
 ```
 
 ### Orchestration

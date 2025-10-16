@@ -26,8 +26,8 @@ def apply_program(
     ):
         return create_excluded_result(policy.raw)
 
-    components = policy.exposure_components(program.underwriting_department)
-    exposure = components.total
+    bundle = policy.exposure_bundle(program.underwriting_department)
+    exposure = bundle.total
 
     structures_detail, total_cession_to_layer_100pct, total_cession_to_reinsurer = (
         process_structures(

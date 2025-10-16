@@ -3,7 +3,7 @@ from src.domain import PRODUCT, Structure, Condition
 from src.domain.policy import Policy
 from .condition_matcher import match_condition
 from .cession_calculator import apply_condition
-from src.domain.exposure_components import ExposureComponents
+from src.domain.exposure_bundle import ExposureBundle
 
 
 def process_structures(
@@ -71,8 +71,7 @@ def process_structures(
         base_input_exposure = _calculate_input_exposure(
             exposure, structure, structure_outputs
         )
-
-        exposure_components = _calculate_exposure_components(
+        bundle_scaled = _build_scaled_bundle(
             policy, base_input_exposure, line_of_business
         )
 
@@ -87,9 +86,16 @@ def process_structures(
             else True
         )
 
-        filtered_exposure = exposure_components.apply_filters(
-            includes_hull=includes_hull, includes_liability=includes_liability
-        )
+        if (line_of_business or "").lower() == "aviation":
+            include = set()
+            if includes_hull:
+                include.add("hull")
+            if includes_liability:
+                include.add("liability")
+            filtered_exposure = bundle_scaled.select(include if include else None)
+        else:
+            # Non-aviation : les flags sont ignorés → total
+            filtered_exposure = bundle_scaled.total
 
         condition_to_apply, rescaling_info = _rescale_condition_if_needed(
             matched_condition, structure, structure_outputs
@@ -141,19 +147,11 @@ def process_structures(
     return structures_detail, total_cession_to_layer_100pct, total_cession_to_reinsurer
 
 
-def _calculate_exposure_components(
-    policy: Policy,
-    total_exposure: float,
-    uw: Optional[str],
-) -> ExposureComponents:
-    comps = policy.exposure_components(uw or (policy.lob or ""))
-    tot = comps.total or 0.0
-    if tot == 0.0:
-        return ExposureComponents(hull=0.0, liability=0.0)
-    return ExposureComponents(
-        hull=total_exposure * (comps.hull / tot),
-        liability=total_exposure * (comps.liability / tot),
-    )
+def _build_scaled_bundle(policy: Policy, new_total: float, uw: str) -> ExposureBundle:
+    base = policy.exposure_bundle(uw)
+    if base.total == 0.0:
+        return ExposureBundle(total=0.0, components={})
+    return base.fraction_to(new_total)
 
 
 def _calculate_input_exposure(

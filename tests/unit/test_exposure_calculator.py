@@ -196,11 +196,11 @@ class TestAviationExposureCalculator:
             "LIABILITY_SHARE": 0.10,
         }
 
-        components = calculator.calculate_components(policy_data)
+        bundle = calculator.bundle(policy_data)
 
-        assert components.hull == 15_000_000
-        assert components.liability == 50_000_000
-        assert components.total == 65_000_000
+        assert bundle.components["hull"] == 15_000_000
+        assert bundle.components["liability"] == 50_000_000
+        assert bundle.total == 65_000_000
 
     def test_calculate_components_hull_only(self):
         """
@@ -221,11 +221,11 @@ class TestAviationExposureCalculator:
             "HULL_SHARE": 0.15,
         }
 
-        components = calculator.calculate_components(policy_data)
+        bundle = calculator.bundle(policy_data)
 
-        assert components.hull == 15_000_000
-        assert components.liability == 0.0
-        assert components.total == 15_000_000
+        assert bundle.components["hull"] == 15_000_000
+        assert bundle.components["liability"] == 0.0
+        assert bundle.total == 15_000_000
 
     def test_calculate_components_liability_only(self):
         """
@@ -246,11 +246,11 @@ class TestAviationExposureCalculator:
             "LIABILITY_SHARE": 0.10,
         }
 
-        components = calculator.calculate_components(policy_data)
+        bundle = calculator.bundle(policy_data)
 
-        assert components.hull == 0.0
-        assert components.liability == 50_000_000
-        assert components.total == 50_000_000
+        assert bundle.components["hull"] == 0.0
+        assert bundle.components["liability"] == 50_000_000
+        assert bundle.total == 50_000_000
 
     def test_calculate_components_none(self):
         """
@@ -268,11 +268,11 @@ class TestAviationExposureCalculator:
         calculator = AviationExposureCalculator()
         policy_data = {}
 
-        components = calculator.calculate_components(policy_data)
+        bundle = calculator.bundle(policy_data)
 
-        assert components.hull == 0.0
-        assert components.liability == 0.0
-        assert components.total == 0.0
+        assert bundle.components["hull"] == 0.0
+        assert bundle.components["liability"] == 0.0
+        assert bundle.total == 0.0
 
 
 class TestCasualtyExposureCalculator:
