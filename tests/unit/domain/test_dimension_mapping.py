@@ -55,13 +55,13 @@ class TestPolicyDimensionValue:
         result = policy_aviation.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
         assert result is None
 
-    def test_fallback_to_direct_name(self): # AURE
-        """Test fallback to direct column name if not in mapping."""
+    def test_unknown_dimension_raises_error(self):
+        """Test that unknown dimensions raise a clear error."""
         policy_data = {"CUSTOM_DIMENSION": "custom_value"}
 
         policy = Policy(raw=policy_data)
-        result = policy.get_dimension_value("CUSTOM_DIMENSION")
-        assert result == "custom_value"
+        with pytest.raises(ValueError, match="Unknown dimension 'CUSTOM_DIMENSION'"):
+            policy.get_dimension_value("CUSTOM_DIMENSION")
 
     def test_aviation_currency_inconsistency_uses_hull(self):
         """Test that aviation currency inconsistency uses HULL_CURRENCY."""

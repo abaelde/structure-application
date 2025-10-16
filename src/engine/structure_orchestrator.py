@@ -17,6 +17,9 @@ class StructureProcessor:
         self.program = program
         self.structures = program.structures
         self.dimension_columns = program.dimension_columns
+        
+        if not program.underwriting_department:
+            raise ValueError("Program must have an underwriting_department")
         self.uw_dept = program.underwriting_department
         self.base_bundle = policy.exposure_bundle(self.uw_dept)
 
@@ -124,7 +127,7 @@ class StructureProcessor:
 
     def _components_set(self, matched: Optional[Condition]) -> Set[str]:
         """Scope d'exposition explicite pour Aviation ; vide = 'total'."""
-        if (self.uw_dept or "").lower() != "aviation": # AURE cas  vide ?
+        if self.uw_dept.lower() != "aviation": # AURE : use of enuls ?
             return set()
         inc_h = True if matched is None or matched.includes_hull is None else bool(matched.includes_hull)
         inc_l = True if matched is None or matched.includes_liability is None else bool(matched.includes_liability)

@@ -67,10 +67,9 @@ class Policy:
     def get_dimension_value(self, dimension: str) -> Any:
         """Utilise le mapping de dimensions pour récupérer la valeur."""
         
-        
         mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS.get(dimension)
         if mapping is None:
-            return self.raw.get(dimension)
+            raise ValueError(f"Unknown dimension '{dimension}'. Only configured dimensions are allowed.")
         if isinstance(mapping, str):
             return self.raw.get(mapping)
         if isinstance(mapping, dict):
