@@ -17,14 +17,14 @@ def apply_program(
 
     is_policy_active, inactive_reason = policy.is_active(calculation_date)
     if not is_policy_active:
-        return create_inactive_result(policy.raw, inactive_reason)
+        return create_inactive_result(policy, program, inactive_reason)
 
     if check_exclusion(
         policy,
         program.all_conditions,
         program.dimension_columns,
     ):
-        return create_excluded_result(policy.raw)
+        return create_excluded_result(policy, program)
 
     run = StructureProcessor(policy, program).process_structures()
 
