@@ -42,23 +42,18 @@ def _to_float(x):
 # ——— Colonnes canoniques alignées avec l'engine ———
 COLUMNS: Dict[str, ColumnSpec] = {
     # META / BASE
-    "policy_id": ColumnSpec(
-        "policy_id", "meta", aliases={"POLICY_ID", "policy_number", "POLICY_NUMBER"}
-    ),
+    "policy_id": ColumnSpec("policy_id", "meta"),
     "INSURED_NAME": ColumnSpec("INSURED_NAME", "meta", required=True, coerce=_to_upper),
     "INCEPTION_DT": ColumnSpec(
         "INCEPTION_DT",
         "meta",
-        aliases={"INCEPTION_DATE"},
         required=True,
         coerce=_to_date,
     ),
     "EXPIRE_DT": ColumnSpec(
-        "EXPIRE_DT", "meta", aliases={"EXPIRY_DATE"}, required=True, coerce=_to_date
+        "EXPIRE_DT", "meta", required=True, coerce=_to_date
     ),
-    "line_of_business": ColumnSpec(
-        "line_of_business", "meta", aliases={"LINE_OF_BUSINESS"}
-    ),
+    "line_of_business": ColumnSpec("line_of_business", "meta"),
     # DIMENSIONS
     "BUSCL_COUNTRY_CD": ColumnSpec("BUSCL_COUNTRY_CD", "dimension"),
     "BUSCL_REGION": ColumnSpec("BUSCL_REGION", "dimension"),
@@ -69,9 +64,7 @@ COLUMNS: Dict[str, ColumnSpec] = {
     "POL_RISK_NAME_CED": ColumnSpec("POL_RISK_NAME_CED", "dimension"),
     "BUSCL_EXCLUDE_CD": ColumnSpec("BUSCL_EXCLUDE_CD", "dimension"),
     # currency (dimension logique unique ; représentation selon LOB)
-    "CURRENCY": ColumnSpec(
-        "CURRENCY", "dimension", aliases={"BUSCL_LIMIT_CURRENCY_CD"}
-    ),
+    "CURRENCY": ColumnSpec("CURRENCY", "dimension"),
     "HULL_CURRENCY": ColumnSpec("HULL_CURRENCY", "dimension"),
     "LIABILITY_CURRENCY": ColumnSpec("LIABILITY_CURRENCY", "dimension"),
     # EXPOSURE — Casualty
@@ -140,15 +133,6 @@ PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, object] = {
         "test": "CURRENCY",
     },
 }
-
-
-# ——— Helpers normalisation ———
-def build_alias_to_canonical() -> Dict[str, str]:
-    m: Dict[str, str] = {}
-    for canon, spec in COLUMNS.items():
-        for alias in spec.aliases:
-            m[alias] = canon
-    return m
 
 
 def get_all_mappable_dimensions(

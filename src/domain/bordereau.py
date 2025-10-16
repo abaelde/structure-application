@@ -5,7 +5,7 @@ from typing import Dict, Iterable, List, Optional, Union
 
 import pandas as pd
 
-from src.domain.schema import COLUMNS, exposure_rules_for_lob, build_alias_to_canonical
+from src.domain.schema import COLUMNS, exposure_rules_for_lob
 from src.domain.schema import (
     get_all_mappable_dimensions,
 )
@@ -134,9 +134,8 @@ class Bordereau:
             )
 
     def _normalize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Renomme les alias -> noms canoniques et applique les coercions déclarées dans schema."""
-        rename_map = build_alias_to_canonical()
-        df2 = df.rename(columns=rename_map).copy()
+        """Applique les coercions déclarées dans schema."""
+        df2 = df.copy()
         # coercions par colonne
         for name, spec in COLUMNS.items():
             if spec.coerce and name in df2.columns:
