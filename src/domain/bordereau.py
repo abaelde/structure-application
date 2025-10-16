@@ -36,7 +36,7 @@ class Bordereau:
     ):
         self._raw_df = df.copy()
         self._df = self._normalize_columns(self._raw_df)
-        self.uw_dept = uw_dept or self._infer_uw_dept(self._df) or self._get_underwriting_department()
+        self.uw_dept = uw_dept or self._infer_uw_dept(self._df)
         self.source = source
         self.program = program  # Référence vers le programme associé
         self.validation_warnings: List[str] = []
