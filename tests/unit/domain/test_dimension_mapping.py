@@ -5,7 +5,7 @@ This module tests the new configuration-driven dimension mapping between program
 """
 
 import pytest
-from src.domain.dimension_mapping import (
+from src.domain.schema import (
     get_all_mappable_dimensions,
 )
 from src.domain.policy import Policy

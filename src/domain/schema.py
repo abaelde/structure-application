@@ -151,3 +151,30 @@ def build_alias_to_canonical() -> Dict[str, str]:
         for alias in spec.aliases:
             m[alias] = canon
     return m
+
+
+def get_all_mappable_dimensions(
+    bordereau_columns: List[str], uw_dept: Optional[str]
+) -> Dict[str, str]:
+    """
+    Retourne le mapping des dimensions de programme vers les colonnes de bordereau
+    pour les dimensions présentes dans le bordereau.
+    
+    Args:
+        bordereau_columns: Liste des colonnes disponibles dans le bordereau
+        uw_dept: Département underwriting (aviation, casualty, test)
+        
+    Returns:
+        Dict mapping dimension_programme -> colonne_bordereau
+    """
+    out: Dict[str, str] = {}
+    for dim, mapping in PROGRAM_TO_BORDEREAU_DIMENSIONS.items():
+        if isinstance(mapping, str):
+            if mapping in bordereau_columns:
+                out[dim] = mapping
+        elif isinstance(mapping, dict):
+            if uw_dept in mapping:
+                m = mapping[uw_dept]
+                if m in bordereau_columns:
+                    out[dim] = m
+    return out

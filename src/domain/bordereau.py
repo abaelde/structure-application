@@ -7,7 +7,7 @@ import pandas as pd
 
 from src.domain.constants import FIELDS
 from src.domain.schema import COLUMNS, exposure_rules_for_lob, build_alias_to_canonical
-from src.domain.dimension_mapping import (
+from src.domain.schema import (
     get_all_mappable_dimensions,
 )
 from src.domain import UNDERWRITING_DEPARTMENT_VALUES
@@ -172,13 +172,7 @@ class Bordereau:
                 "Cannot determine underwriting_department."
             )
 
-        # Support pour dict et objet Program
-        if isinstance(self.program, dict):
-            underwriting_department = self.program.get("underwriting_department")
-        else:
-            underwriting_department = getattr(
-                self.program, "underwriting_department", None
-            )
+        underwriting_department = self.program.underwriting_department
 
         if not underwriting_department:
             raise BordereauValidationError(

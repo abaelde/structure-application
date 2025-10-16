@@ -14,9 +14,6 @@ from .constants import (
     STRUCTURE_COLS,
     condition_COLS,
 )
-from .dimension_mapping import (
-    get_all_mappable_dimensions,
-)
 from .models import Program, Structure, Condition
 
 __all__ = [
@@ -37,6 +34,4 @@ __all__ = [
     "Program",
     "Structure",
     "Condition",
-    # New dimension mapping functions
-    "get_all_mappable_dimensions",
 ]
