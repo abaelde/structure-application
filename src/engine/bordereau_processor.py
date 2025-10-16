@@ -34,8 +34,8 @@ def apply_program_to_bordereau(
     if not bordereau.program:
         bordereau.program = program
 
-    # Validation avec l'underwriting_department du programme associé
-    bordereau.validate_exposure_columns()
+    # Validation complète du bordereau (inclut la validation des colonnes d'exposition)
+    bordereau.validate()
 
     df = bordereau.to_engine_dataframe().copy()
 

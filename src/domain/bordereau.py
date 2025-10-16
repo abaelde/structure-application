@@ -92,7 +92,7 @@ class Bordereau:
 
         # En plus : validation des colonnes d'exposition selon uw_dept, si connue
         if check_exposure_columns and self.uw_dept:
-            self._validate_exposure_columns_via_schema(self.uw_dept)
+            self._accumulate_exposure_errors(self.uw_dept)
 
         # Raise exception if there are errors
         if self.validation_errors:
@@ -181,29 +181,6 @@ class Bordereau:
 
         return underwriting_department
 
-    def validate_exposure_columns(
-        self, underwriting_department: Optional[str] = None
-    ) -> None:
-        """
-        Valide les colonnes d'exposition selon l'underwriting_department.
-
-        Args:
-            underwriting_department: Si fourni, utilise cette valeur. Sinon, utilise celle du programme associé.
-        """
-
-        # Si pas fourni, récupère depuis le programme associé
-        if not underwriting_department:
-            underwriting_department = self.get_underwriting_department()
-
-        uw_dept_lower = underwriting_department.lower()
-
-        if uw_dept_lower not in UNDERWRITING_DEPARTMENT_VALUES:
-            raise BordereauValidationError(
-                f"Unknown underwriting department '{underwriting_department}'. "
-                f"Supported underwriting departments: {', '.join(sorted(UNDERWRITING_DEPARTMENT_VALUES))}"
-            )
-
-        self._validate_exposure_via_schema(uw_dept_lower)
 
     def _validate_exposure_via_schema(self, lob: str) -> None:
         """Méthode privée pour valider les colonnes d'exposition selon le schéma."""
@@ -253,8 +230,8 @@ class Bordereau:
                     f"Found columns: {', '.join(self.columns)}"
                 )
 
-    def _validate_exposure_columns_via_schema(self, lob: str):
-        """Méthode privée utilisée par validate() - utilise la logique interne."""
+    def _accumulate_exposure_errors(self, lob: str):
+        """Méthode privée utilisée par validate() - accumule les erreurs d'exposition."""
         try:
             self._validate_exposure_via_schema(lob)
         except BordereauValidationError as e:

@@ -135,7 +135,7 @@ class TestAviationExposureCalculator:
         Test que le calculateur retourne 0.0 quand aucune exposition n'est presente.
 
         Note: La validation de la presence des colonnes d'exposition au niveau DataFrame
-        est faite par validate_exposure_columns(). Le calculateur traite ligne par ligne
+        est faite par validate(). Le calculateur traite ligne par ligne
         et retourne 0.0 si aucune valeur d'exposition n'est presente sur cette ligne.
         """
         calculator = AviationExposureCalculator()
