@@ -84,7 +84,6 @@ class CasualtyExposureCalculator(ExposureCalculator):
             )
 
 
-
 class TestExposureCalculator(ExposureCalculator):
     def calculate(self, policy_data: Dict[str, Any]) -> float:
         exposure = policy_data.get("exposure")
@@ -98,8 +97,6 @@ class TestExposureCalculator(ExposureCalculator):
             raise ExposureCalculationError(
                 f"Invalid numeric value in Test exposure column: {e}"
             )
-
-    # get_required_columns() supprimé - validation centralisée dans schema.py
 
 
 def get_exposure_calculator(underwriting_department: str) -> ExposureCalculator:

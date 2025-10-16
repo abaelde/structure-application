@@ -34,7 +34,7 @@ CLAIM_BASIS_VALUES = {CLAIM_BASIS.RISK_ATTACHING, CLAIM_BASIS.LOSS_OCCURRING}
 # ──────────────────────────────────────────────────────────────────────────────
 # Excel: noms des feuilles et colonnes
 # ──────────────────────────────────────────────────────────────────────────────
-SHEETS = SimpleNamespace(
+SHEETS = SimpleNamespace( # PAd deja dans l'adapteur de excel ? Relation avec snowflake ?
     PROGRAM="program",
     STRUCTURES="structures",
     conditions="conditions",
