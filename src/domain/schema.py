@@ -117,10 +117,8 @@ def exposure_rules_for_lob(lob: str) -> Dict[str, str]:
             "at_least_one_of": "HULL_LIMIT|LIABILITY_LIMIT",
             "pairs": "HULL_LIMIT<->HULL_SHARE;LIABILITY_LIMIT<->LIABILITY_SHARE",
         }
-    if lob == "casualty":
-        return {"required": "LIMIT;CEDENT_SHARE"}
-    if lob == "test":
-        return {"required": "exposure"}
+    if lob in ("casualty", "test"):
+        return {}
     return {}
 
 
