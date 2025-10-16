@@ -126,7 +126,10 @@ class ProgramLoader:
         for condition in conditions_data:
             structure_key = condition.get(STRUCTURE_COLS.INSPER_ID)
             if structure_key is None:
-                structure_key = condition.get(STRUCTURE_COLS.NAME)
+                raise ValueError(
+                    f"Structure key (INSPER_ID_PRE) is mandatory for all conditions. "
+                    f"Found condition without structure key: {condition}"
+                )
             
             if structure_key not in conditions_by_structure:
                 conditions_by_structure[structure_key] = []
@@ -137,7 +140,10 @@ class ProgramLoader:
         for structure_dict in structures_data:
             structure_key = structure_dict.get(STRUCTURE_COLS.INSPER_ID)
             if structure_key is None:
-                structure_key = structure_dict[STRUCTURE_COLS.NAME]
+                raise ValueError(
+                    f"Structure key (INSPER_ID_PRE) is mandatory for all structures. "
+                    f"Found structure without structure key: {structure_dict}"
+                )
             
             conditions_data_for_structure = conditions_by_structure.get(structure_key, [])
             structures.append(
