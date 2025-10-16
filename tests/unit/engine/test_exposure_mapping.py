@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 from src.engine import apply_program_to_bordereau
+from src.domain.bordereau import Bordereau
 from src.engine.exposure_validation import ExposureValidationError
 from tests.builders import build_program, build_quota_share
 
@@ -46,10 +47,12 @@ def test_exposure_mapping_success_aviation():
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-01-01"],
     })
+
     
+    bordereau = Bordereau(bordereau_df, line_of_business="aviation")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date=calculation_date
+        bordereau, program, calculation_date=calculation_date
     )
     
     expected_exposure = (10_000_000 * 0.20) + (50_000_000 * 0.10)
@@ -94,8 +97,9 @@ def test_exposure_mapping_failure_wrong_column():
         "EXPIRE_DT": ["2025-01-01"],
     })
     
+    bordereau = Bordereau(bordereau_df, line_of_business="aviation")
     with pytest.raises(ExposureValidationError) as exc_info:
-        apply_program_to_bordereau(bordereau_df, program)
+        apply_program_to_bordereau(bordereau, program, calculation_date="2024-06-01")
     
     error_message = str(exc_info.value)
     assert "at least one of" in error_message.lower()

@@ -8,17 +8,11 @@ import pandas as pd
 
 from src.domain.constants import FIELDS
 from src.domain.schema import COLUMNS, exposure_rules_for_lob, build_alias_to_canonical
-from src.engine.exposure_validation import (
-    validate_exposure_columns,
-    ExposureValidationError,
-)
 from src.domain.dimension_mapping import (
     get_all_mappable_dimensions,
     validate_program_bordereau_compatibility,
     validate_aviation_currency_consistency,
 )
-# NOTE: on n'importe PAS l'engine ici → pas de dépendance circulaire
-
 
 class BordereauValidationError(Exception):
     pass

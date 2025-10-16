@@ -1,5 +1,6 @@
 import pandas as pd
 from src.engine import apply_program_to_bordereau
+from src.domain.bordereau import Bordereau
 from tests.builders import build_quota_share, build_program
 
 
@@ -40,9 +41,10 @@ def test_policy_expiry_mechanism():
     }
 
     bordereau_df = pd.DataFrame(test_data)
+    bordereau = Bordereau(bordereau_df, line_of_business="test")
 
     _, results_df = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date="2024-06-01"
+        bordereau, program, calculation_date="2024-06-01"
     )
     assert results_df.loc[0, "exclusion_status"] == "included"
     assert results_df.loc[1, "exclusion_status"] == "included"
@@ -53,7 +55,7 @@ def test_policy_expiry_mechanism():
     assert results_df.loc[2, "cession_to_reinsurer"] == 0
 
     _, results_df = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date="2024-12-31"
+        bordereau, program, calculation_date="2024-12-31"
     )
     assert results_df.loc[0, "exclusion_status"] == "included"
     assert results_df.loc[1, "exclusion_status"] == "included"
@@ -63,7 +65,7 @@ def test_policy_expiry_mechanism():
     assert (results_df["exclusion_status"] == "inactive").sum() == 1
 
     _, results_df = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date="2025-01-01"
+        bordereau, program, calculation_date="2025-01-01"
     )
     assert results_df.loc[0, "exclusion_status"] == "inactive"
     assert results_df.loc[1, "exclusion_status"] == "included"
@@ -75,7 +77,7 @@ def test_policy_expiry_mechanism():
     assert results_df.loc[2, "cession_to_reinsurer"] == 0
 
     _, results_df = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date="2025-07-01"
+        bordereau, program, calculation_date="2025-07-01"
     )
     assert results_df.loc[0, "exclusion_status"] == "inactive"
     assert results_df.loc[1, "exclusion_status"] == "inactive"

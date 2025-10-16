@@ -1,5 +1,6 @@
 import pandas as pd
 from src.engine import apply_program_to_bordereau
+from src.domain.bordereau import Bordereau
 from tests.builders import build_quota_share, build_exclusion_condition, build_condition, build_program
 
 
@@ -52,8 +53,9 @@ def test_exclusion_mechanism():
     }
     
     bordereau_df = pd.DataFrame(test_data)
+    bordereau = Bordereau(bordereau_df, line_of_business="test")
 
-    __, results = apply_program_to_bordereau(bordereau_df, program, calculation_date="2024-06-01")
+    __, results = apply_program_to_bordereau(bordereau, program, calculation_date="2024-06-01")
 
     excluded_count = (results["exclusion_status"] == "excluded").sum()
     included_count = (results["exclusion_status"] == "included").sum()

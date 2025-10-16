@@ -1,5 +1,6 @@
 import pandas as pd
 from src.engine import apply_program_to_bordereau
+from src.domain.bordereau import Bordereau
 from tests.builders import build_quota_share, build_excess_of_loss, build_program
 
 
@@ -80,9 +81,10 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     bordereau_df = pd.DataFrame(test_data)
     
     # 3. Application du programme
+    bordereau = Bordereau(bordereau_df, line_of_business="test")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date=calculation_date
+        bordereau, program, calculation_date=calculation_date
     )
     
     # Policy A (50M)

@@ -20,6 +20,7 @@ from pathlib import Path
 from datetime import datetime
 from src.managers import ProgramManager
 from src.engine import apply_program_to_bordereau
+from src.domain.bordereau import Bordereau
 from src.domain import FIELDS
 from examples.program_bordereau_mapping import (
     get_ready_pairs,
@@ -125,11 +126,12 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
     )
 
     # Load bordereau
-    bordereau_df = pd.read_csv(bordereau_path)
+    bordereau_df = Bordereau.from_csv(bordereau_path)
     print(f"   Loaded {len(bordereau_df)} policies from bordereau")
 
     # Apply program to bordereau
-    bordereau_with_net, results = apply_program_to_bordereau(bordereau_df, program)
+    calculation_date = "2024-06-01"  # Date de calcul par défaut
+    bordereau_with_net, results = apply_program_to_bordereau(bordereau_df, program, calculation_date)
 
     # Add cedant identifier to results
     results["cedant_program"] = program_name

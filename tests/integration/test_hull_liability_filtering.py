@@ -1,6 +1,7 @@
 import pandas as pd
 from tests.builders import build_quota_share, build_excess_of_loss, build_program
 from src.engine import apply_program_to_bordereau
+from src.domain.bordereau import Bordereau
 
 
 def test_hull_liability_filtering_aviation():
@@ -95,10 +96,12 @@ def test_hull_liability_filtering_aviation():
     }
     
     bordereau_df = pd.DataFrame(bordereau_data)
+
     
+    bordereau = Bordereau(bordereau_df, line_of_business="aviation")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date=calculation_date
+        bordereau, program, calculation_date=calculation_date
     )
     
     tolerance = 0.1
@@ -195,10 +198,12 @@ def test_hull_only_structure():
     }
     
     bordereau_df = pd.DataFrame(bordereau_data)
+
     
+    bordereau = Bordereau(bordereau_df, line_of_business="aviation")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date=calculation_date
+        bordereau, program, calculation_date=calculation_date
     )
     
     tolerance = 0.1
@@ -269,10 +274,12 @@ def test_liability_only_structure():
     }
     
     bordereau_df = pd.DataFrame(bordereau_data)
+
     
+    bordereau = Bordereau(bordereau_df, line_of_business="aviation")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date=calculation_date
+        bordereau, program, calculation_date=calculation_date
     )
     
     tolerance = 0.1
@@ -337,10 +344,12 @@ def test_casualty_unaffected_by_hull_liability_flags():
     }
     
     bordereau_df = pd.DataFrame(bordereau_data)
+
     
+    bordereau = Bordereau(bordereau_df, line_of_business="casualty")
     calculation_date = "2024-06-01"
     bordereau_with_net, results_df = apply_program_to_bordereau(
-        bordereau_df, program, calculation_date=calculation_date
+        bordereau, program, calculation_date=calculation_date
     )
     
     tolerance = 0.1

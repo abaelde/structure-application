@@ -1,28 +1,20 @@
 import pandas as pd
-from typing import Dict, Any, Optional, Union
+from typing import Dict, Any, Optional
 from .calculation_engine import apply_program
-from .exposure_validation import validate_exposure_columns, ExposureValidationError
+from .exposure_validation import validate_exposure_columns
+from ..domain.bordereau import Bordereau
 
 
 def apply_program_to_bordereau(
-    bordereau_df: Union[pd.DataFrame, Any],  # Any pour éviter l'import circulaire avec Bordereau
+    bordereau: Bordereau,
     program: Dict[str, Any],
-    calculation_date: Optional[str] = None,
+    calculation_date: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     
-    # Duck typing : détecte si c'est notre wrapper Bordereau
-    if hasattr(bordereau_df, "to_dataframe"):
-        # C'est un objet Bordereau : privilégier le DF **canonique**
-        if hasattr(bordereau_df, "to_engine_dataframe"):
-            df = bordereau_df.to_engine_dataframe().copy()
-        else:
-            df = bordereau_df.to_dataframe().copy()
-        # LOB la plus fiable dispo
-        lob = getattr(bordereau_df, "line_of_business", None) or program.underwriting_department
-    else:
-        # C'est un DataFrame classique
-        df = bordereau_df.copy()
-        lob = program.underwriting_department
+    # Utilise le DataFrame canonique de l'objet Bordereau
+    df = bordereau.to_engine_dataframe().copy()
+    # LOB la plus fiable dispo
+    lob = bordereau.line_of_business or program.underwriting_department
     
     validate_exposure_columns(df.columns.tolist(), lob)
     

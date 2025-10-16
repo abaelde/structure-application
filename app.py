@@ -126,7 +126,8 @@ if program_file and bordereau_file:
         st.markdown("## ⚙️ Program Application")
         
         with st.spinner("🔄 Calculating..."):
-            bordereau_with_net, results = apply_program_to_bordereau(bordereau_df, program)
+            calculation_date = "2024-06-01"  # Date de calcul par défaut
+            bordereau_with_net, results = apply_program_to_bordereau(bordereau_df, program, calculation_date)
         
         st.success(f"✅ Program successfully applied to {len(results)} policies")
         

@@ -1,4 +1,4 @@
-from src.domain import UNDERWRITING_DEPARTMENT, UNDERWRITING_DEPARTMENT_VALUES
+from src.domain import UNDERWRITING_DEPARTMENT_VALUES
 from src.domain.schema import COLUMNS, exposure_rules_for_lob
 
 
