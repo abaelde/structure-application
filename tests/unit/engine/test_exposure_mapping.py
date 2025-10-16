@@ -98,7 +98,7 @@ def test_exposure_mapping_failure_wrong_column():
         apply_program_to_bordereau(bordereau_df, program)
     
     error_message = str(exc_info.value)
-    assert "at least one exposure type" in error_message.lower()
+    assert "at least one of" in error_message.lower()
     assert "HULL_LIMIT" in error_message
     assert "LIABILITY_LIMIT" in error_message
     assert "aviation" in error_message.lower()

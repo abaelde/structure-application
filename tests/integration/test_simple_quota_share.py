@@ -113,7 +113,7 @@ def test_single_line_quota_share_with_currency_matching():
         "exposure": [1_000_000],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-01-01"],
-        "BUSCL_LIMIT_CURRENCY_CD": ["USD"],
+        "CURRENCY": ["USD"],
     }
     
     bordereau_df = pd.DataFrame(test_data)

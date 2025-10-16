@@ -1,4 +1,5 @@
 from src.domain import UNDERWRITING_DEPARTMENT, UNDERWRITING_DEPARTMENT_VALUES
+from src.domain.schema import COLUMNS, exposure_rules_for_lob
 
 
 class ExposureValidationError(Exception):
@@ -20,69 +21,44 @@ def validate_exposure_columns(df_columns: list, underwriting_department: str) ->
             f"Supported underwriting departments: {', '.join(sorted(UNDERWRITING_DEPARTMENT_VALUES))}"
         )
 
-    if uw_dept_lower == UNDERWRITING_DEPARTMENT.AVIATION:
-        _validate_aviation_exposure_columns(df_columns)
-    elif uw_dept_lower == UNDERWRITING_DEPARTMENT.CASUALTY:
-        _validate_casualty_exposure_columns(df_columns)
-    elif uw_dept_lower == UNDERWRITING_DEPARTMENT.TEST:
-        _validate_test_exposure_columns(df_columns)
+    _validate_via_schema(df_columns, uw_dept_lower)
 
 
-def _validate_casualty_exposure_columns(df_columns: list) -> None:
-    missing_columns = []
-    
-    if "LIMIT" not in df_columns:
-        missing_columns.append("LIMIT")
-    
-    if "CEDENT_SHARE" not in df_columns:
-        missing_columns.append("CEDENT_SHARE")
-    
-    if missing_columns:
+def _validate_via_schema(df_columns: list, lob: str) -> None:
+    cols = set(df_columns)
+    rules = exposure_rules_for_lob(lob)
+
+    # requis par LOB
+    missing = [name for name, spec in COLUMNS.items()
+               if spec.required_by_lob.get(lob) and name not in cols]
+    if missing:
         raise ExposureValidationError(
-            f"Casualty bordereau must have LIMIT and CEDENT_SHARE columns. "
-            f"Missing: {', '.join(missing_columns)}. "
+            f"{lob.title()} bordereau must have: {', '.join(missing)}. "
             f"Found columns: {', '.join(df_columns)}"
         )
 
+    # at least one of
+    atleast = rules.get("at_least_one_of")
+    if atleast:
+        groups = [set(g.split("|")) for g in atleast.split(";")] if ";" in atleast else [set(atleast.split("|"))]
+        for g in groups:
+            if not any(x in cols for x in g):
+                raise ExposureValidationError(
+                    f"{lob.title()} bordereau must have at least one of: {', '.join(sorted(g))}. "
+                    f"Found columns: {', '.join(df_columns)}"
+                )
 
-def _validate_test_exposure_columns(df_columns: list) -> None:
-    if "exposure" not in df_columns:
-        raise ExposureValidationError(
-            f"Test bordereau must have exposure column. "
-            f"Found columns: {', '.join(df_columns)}"
-        )
-
-
-def _validate_aviation_exposure_columns(df_columns: list) -> None:
-    has_hull_limit = "HULL_LIMIT" in df_columns
-    has_hull_share = "HULL_SHARE" in df_columns
-    has_liability_limit = "LIABILITY_LIMIT" in df_columns
-    has_liability_share = "LIABILITY_SHARE" in df_columns
-
-    if not has_hull_limit and not has_liability_limit:
-        raise ExposureValidationError(
-            f"Aviation bordereau must have at least one exposure type. "
-            f"Required: HULL_LIMIT or LIABILITY_LIMIT (or both). "
-            f"Found columns: {', '.join(df_columns)}"
-        )
-
-    errors = []
-    
-    if has_hull_limit and not has_hull_share:
-        errors.append("HULL_LIMIT requires HULL_SHARE")
-    
-    if has_hull_share and not has_hull_limit:
-        errors.append("HULL_SHARE requires HULL_LIMIT")
-    
-    if has_liability_limit and not has_liability_share:
-        errors.append("LIABILITY_LIMIT requires LIABILITY_SHARE")
-    
-    if has_liability_share and not has_liability_limit:
-        errors.append("LIABILITY_SHARE requires LIABILITY_LIMIT")
-
-    if errors:
-        raise ExposureValidationError(
-            f"Invalid Aviation exposure columns. "
-            f"Errors: {'; '.join(errors)}. "
-            f"Found columns: {', '.join(df_columns)}"
-        )
+    # pairs (co-dépendance)
+    pairs = rules.get("pairs")
+    if pairs:
+        errors = []
+        for pair in pairs.split(";"):
+            left, right = map(str.strip, pair.split("<->"))
+            if (left in cols) ^ (right in cols):
+                errors.append(f"{left} requires {right} (and vice versa)")
+        if errors:
+            raise ExposureValidationError(
+                f"Invalid {lob.title()} exposure columns. "
+                f"Errors: {'; '.join(errors)}. "
+                f"Found columns: {', '.join(df_columns)}"
+            )

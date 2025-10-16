@@ -12,9 +12,12 @@ def apply_program_to_bordereau(
     
     # Duck typing : détecte si c'est notre wrapper Bordereau
     if hasattr(bordereau_df, "to_dataframe"):
-        # C'est un objet Bordereau
-        df = bordereau_df.to_dataframe().copy()
-        # Optionnel : on peut (ré)valider les colonnes d'expo avec la LOB la plus fiable disponible
+        # C'est un objet Bordereau : privilégier le DF **canonique**
+        if hasattr(bordereau_df, "to_engine_dataframe"):
+            df = bordereau_df.to_engine_dataframe().copy()
+        else:
+            df = bordereau_df.to_dataframe().copy()
+        # LOB la plus fiable dispo
         lob = getattr(bordereau_df, "line_of_business", None) or program.underwriting_department
     else:
         # C'est un DataFrame classique

@@ -10,8 +10,8 @@ from src.domain.dimension_mapping import (
     validate_program_bordereau_compatibility,
     validate_aviation_currency_consistency,
     get_all_mappable_dimensions,
-    DIMENSION_COLUMN_MAPPING,
 )
+from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 
 class TestGetPolicyValue:
@@ -218,14 +218,14 @@ class TestDimensionMappingConfiguration:
     
     def test_mapping_structure(self):
         """Test that the mapping configuration has the expected structure."""
-        assert isinstance(DIMENSION_COLUMN_MAPPING, dict)
+        assert isinstance(PROGRAM_TO_BORDEREAU_DIMENSIONS, dict)
         
         # Test direct mappings
-        assert DIMENSION_COLUMN_MAPPING["BUSCL_COUNTRY_CD"] == "BUSCL_COUNTRY_CD"
-        assert DIMENSION_COLUMN_MAPPING["BUSCL_REGION"] == "BUSCL_REGION"
+        assert PROGRAM_TO_BORDEREAU_DIMENSIONS["BUSCL_COUNTRY_CD"] == "BUSCL_COUNTRY_CD"
+        assert PROGRAM_TO_BORDEREAU_DIMENSIONS["BUSCL_REGION"] == "BUSCL_REGION"
         
         # Test complex mappings
-        currency_mapping = DIMENSION_COLUMN_MAPPING["BUSCL_LIMIT_CURRENCY_CD"]
+        currency_mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS["BUSCL_LIMIT_CURRENCY_CD"]
         assert isinstance(currency_mapping, dict)
         assert currency_mapping["aviation"] == "HULL_CURRENCY"
         assert currency_mapping["casualty"] == "CURRENCY"
@@ -245,7 +245,7 @@ class TestDimensionMappingConfiguration:
         ]
         
         for dimension in expected_dimensions:
-            assert dimension in DIMENSION_COLUMN_MAPPING
+            assert dimension in PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 
 class TestIntegrationScenarios:

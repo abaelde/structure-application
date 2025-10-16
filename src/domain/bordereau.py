@@ -6,7 +6,8 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 
 import pandas as pd
 
-from src.domain.constants import FIELDS, CURRENCY_COLUMN_ALIASES
+from src.domain.constants import FIELDS
+from src.domain.schema import COLUMNS, exposure_rules_for_lob, build_alias_to_canonical
 from src.engine.exposure_validation import (
     validate_exposure_columns,
     ExposureValidationError,
@@ -54,8 +55,9 @@ class Bordereau:
         line_of_business: Optional[str] = None,
         source: Optional[str] = None,
     ):
-        self._df = df
-        self.line_of_business = line_of_business
+        self._raw_df = df.copy()
+        self._df = self._normalize_columns(self._raw_df)
+        self.line_of_business = line_of_business or self._infer_lob(self._df)
         self.source = source
         self.validation_warnings: List[str] = []
         self.validation_errors: List[str] = []
@@ -105,7 +107,7 @@ class Bordereau:
 
         # Run all validation checks
         self._validate_not_empty()
-        self._validate_all_columns_present()
+        self._validate_all_columns_present_via_schema()
         self._validate_non_null_values()
         self._validate_dates()
         self._validate_insured_name_uppercase()
@@ -114,10 +116,7 @@ class Bordereau:
 
         # En plus : validation des colonnes d'exposition selon LOB, si connue
         if check_exposure_columns and self.line_of_business:
-            try:
-                validate_exposure_columns(self._df.columns.tolist(), self.line_of_business)
-            except ExposureValidationError as e:
-                self.validation_errors.append(str(e))
+            self._validate_exposure_columns_via_schema(self.line_of_business)
 
         # Raise exception if there are errors
         if self.validation_errors:
@@ -139,61 +138,18 @@ class Bordereau:
         if self._df.empty:
             self.validation_errors.append("Bordereau is empty (no rows)")
 
-    def _validate_all_columns_present(self):
-        # Required columns
-        required_columns = [
-            FIELDS["INSURED_NAME"],
-            FIELDS["INCEPTION_DATE"],
-            FIELDS["EXPIRY_DATE"],
-        ]
-        
-        missing_required = [
-            col for col in required_columns if col not in self._df.columns
-        ]
+    def _validate_all_columns_present_via_schema(self):
+        cols = set(self._df.columns)
+        # requis globaux
+        missing_required = [spec.canonical for spec in COLUMNS.values()
+                            if spec.required and spec.canonical not in cols]
         if missing_required:
-            self.validation_errors.append(
-                f"Missing required columns: {', '.join(missing_required)}"
-            )
-
-        # Allowed columns
-        dimension_columns = [
-            FIELDS["COUNTRY"],
-            FIELDS["REGION"],
-            FIELDS["CLASS_1"],
-            FIELDS["CLASS_2"],
-            FIELDS["CLASS_3"],
-            FIELDS["CURRENCY"],
-            FIELDS["HULL_CURRENCY"],
-            FIELDS["LIABILITY_CURRENCY"],
-            FIELDS["LINE_OF_BUSINESS"],
-        ]
-
-        optional_columns = [
-            FIELDS["POLICY_NUMBER"],
-            "POLICY_ID",
-            "INDUSTRY",
-            "SIC_CODE",
-        ]
-
-        exposure_columns_all_departments = [
-            "exposure",
-            "HULL_LIMIT",
-            "LIABILITY_LIMIT",
-            "HULL_SHARE",
-            "LIABILITY_SHARE",
-            "LIMIT",
-            "CEDENT_SHARE",
-        ]
-
-        allowed_columns = required_columns + dimension_columns + optional_columns + exposure_columns_all_departments
-
-        unknown_columns = [
-            col for col in self._df.columns if col not in allowed_columns
-        ]
-        if unknown_columns:
-            self.validation_errors.append(
-                f"Unknown columns not allowed: {', '.join(unknown_columns)}"
-            )
+            self.validation_errors.append(f"Missing required columns: {', '.join(missing_required)}")
+        # colonnes inconnues -> warning (tolérance)
+        known = set(COLUMNS.keys())
+        unknown = [c for c in cols if c not in known]
+        if unknown:
+            self.validation_warnings.append(f"Ignored unknown columns: {', '.join(unknown)}")
 
     def _validate_non_null_values(self):
         required_columns = [
@@ -337,6 +293,47 @@ class Bordereau:
                 "BUSCL_LIMIT_CURRENCY_CD not allowed in casualty, use CURRENCY"
             )
 
+    def _normalize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Renomme les alias -> noms canoniques et applique les coercions déclarées dans schema."""
+        rename_map = build_alias_to_canonical()
+        df2 = df.rename(columns=rename_map).copy()
+        # coercions par colonne
+        for name, spec in COLUMNS.items():
+            if spec.coerce and name in df2.columns:
+                df2[name] = df2[name].map(spec.coerce)
+        return df2
+
+    def _infer_lob(self, df: pd.DataFrame) -> Optional[str]:
+        col = FIELDS["LINE_OF_BUSINESS"] if FIELDS["LINE_OF_BUSINESS"] in df.columns else "line_of_business"
+        if col in df.columns:
+            vals = df[col].dropna().astype(str).str.lower().unique().tolist()
+            if len(vals) == 1:
+                return vals[0]
+        return None
+
+    def _validate_exposure_columns_via_schema(self, lob: str):
+        rules = exposure_rules_for_lob(lob)
+        cols = set(self._df.columns)
+        # requis par LOB
+        missing = [name for name, spec in COLUMNS.items()
+                   if spec.required_by_lob.get(lob) and name not in cols]
+        if missing:
+            self.validation_errors.append(f"{lob.title()} bordereau missing: {', '.join(missing)}")
+        # at least one of (aviation)
+        atleast = rules.get("at_least_one_of")
+        if atleast:
+            groups = [set(g.split("|")) for g in atleast.split(";")] if ";" in atleast else [set(atleast.split("|"))]
+            for g in groups:
+                if not any(x in cols for x in g):
+                    self.validation_errors.append(f"{lob.title()} requires at least one of: {', '.join(sorted(g))}")
+        # paires (aviation)
+        pairs = rules.get("pairs")
+        if pairs:
+            for pair in pairs.split(";"):
+                left, right = map(str.strip, pair.split("<->"))
+                if (left in cols) ^ (right in cols):
+                    self.validation_errors.append(f"{lob.title()} pair mismatch: {left} requires {right} and vice versa")
+
     def compatibility_report(self, program) -> Dict[str, Any]:
         """
         Informe sur la compatibilité program ↔︎ bordereau (dimensions mappables, warnings…).
@@ -383,6 +380,10 @@ class Bordereau:
     def to_dataframe(self) -> pd.DataFrame:
         """Alias explicite (pour duck typing dans l'engine)."""
         return self._df
+
+    def to_engine_dataframe(self) -> pd.DataFrame:
+        """DF **canonique** (noms & types) prêt pour l'engine."""
+        return self._df.copy()
 
     @property
     def columns(self) -> List[str]:
