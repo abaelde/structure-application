@@ -1,8 +1,8 @@
 """
-Création du programme New Line
+Création du programme New Line - Version simplifiée avec dimensions multiples
 
 Programme casualty avec 3 layers Excess of Loss:
-- Layer 1: 2 sous-conditions (a et b) avec des lignes de business spécifiques, multi-devises
+- Layer 1: 2 sous-conditions (a et b) avec des lignes de business groupées par liste
 - Layer 2: Multi-devises
 - Layer 3: Multi-devises
 
@@ -18,13 +18,14 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from tests.builders import build_excess_of_loss, build_program
-from excel_utils import program_to_excel
+from src.loaders.excel_program_manager import save_program_to_excel
 
-print("Création du programme New Line...")
+print("Création du programme New Line (version simplifiée)...")
 
 CURRENCIES = ["GBP", "USD", "EUR", "CAD", "AUD"]
 REINSURER_SHARE = 0.10
 
+# Layer 1 - Sub-condition A (Financial Institutions, etc.)
 LAYER_1_SUB_A = {
     "GBP": (3_000_000, 1_000_000),
     "USD": (4_500_000, 1_500_000),
@@ -33,6 +34,7 @@ LAYER_1_SUB_A = {
     "AUD": (8_000_000, 2_000_000),
 }
 
+# Layer 1 - Sub-condition B (Employers' Liability, General Liability)
 LAYER_1_SUB_B = {
     "GBP": (2_500_000, 1_500_000),
     "USD": (3_750_000, 2_250_000),
@@ -57,6 +59,7 @@ LAYER_3_VALUES = {
     "AUD": (5_000_000, 25_000_000),
 }
 
+# LOB groupées par liste (nouveau système)
 LOB_SUB_A = [
     "Financial Institutions",
     "Commercial Crime",
@@ -71,28 +74,35 @@ LOB_SUB_B = [
     "General Liability",
 ]
 
-layer_1_conditions = []
+print(f"Layer 1 Sub-A: {len(LOB_SUB_A)} LOB groupées en liste")
+print(f"Layer 1 Sub-B: {len(LOB_SUB_B)} LOB groupées en liste")
+
+# Layer 1 - Sub-condition A (LOB groupées)
+layer_1_sub_a_conditions = []
 for currency in CURRENCIES:
     limit_a, attachment_a = LAYER_1_SUB_A[currency]
-    for lob in LOB_SUB_A:
-        layer_1_conditions.append({
-            "attachment": attachment_a,
-            "limit": limit_a,
-            "signed_share": REINSURER_SHARE,
-            "currency_cd": currency,
-            "class_of_business_1": lob,
-        })
+    layer_1_sub_a_conditions.append({
+        "attachment": attachment_a,
+        "limit": limit_a,
+        "signed_share": REINSURER_SHARE,
+        "currency_cd": currency,
+        "class_of_business_1": LOB_SUB_A,  # Liste complète des LOB
+    })
 
+# Layer 1 - Sub-condition B (LOB groupées)
+layer_1_sub_b_conditions = []
 for currency in CURRENCIES:
     limit_b, attachment_b = LAYER_1_SUB_B[currency]
-    for lob in LOB_SUB_B:
-        layer_1_conditions.append({
-            "attachment": attachment_b,
-            "limit": limit_b,
-            "signed_share": REINSURER_SHARE,
-            "currency_cd": currency,
-            "class_of_business_1": lob,
-        })
+    layer_1_sub_b_conditions.append({
+        "attachment": attachment_b,
+        "limit": limit_b,
+        "signed_share": REINSURER_SHARE,
+        "currency_cd": currency,
+        "class_of_business_1": LOB_SUB_B,  # Liste complète des LOB
+    })
+
+# Combiner les deux sous-conditions
+layer_1_conditions = layer_1_sub_a_conditions + layer_1_sub_b_conditions
 
 layer_1 = build_excess_of_loss(
     name="LAYER_1",
@@ -100,6 +110,7 @@ layer_1 = build_excess_of_loss(
     claim_basis="risk_attaching"
 )
 
+# Layer 2 - inchangé
 layer_2_conditions = []
 for currency in CURRENCIES:
     limit, attachment = LAYER_2_VALUES[currency]
@@ -116,6 +127,7 @@ layer_2 = build_excess_of_loss(
     claim_basis="risk_attaching"
 )
 
+# Layer 3 - inchangé
 layer_3_conditions = []
 for currency in CURRENCIES:
     limit, attachment = LAYER_3_VALUES[currency]
@@ -142,7 +154,7 @@ output_dir = "../programs"
 os.makedirs(output_dir, exist_ok=True)
 output_file = os.path.join(output_dir, "new_line_2024.xlsx")
 
-program_to_excel(program, output_file)
+save_program_to_excel(program, output_file)
 
 print(f"✓ Programme créé: {output_file}")
 
@@ -153,31 +165,32 @@ print("=" * 80)
 program.describe()
 
 print("\n" + "=" * 80)
-print("RÉSUMÉ DU PROGRAMME")
+print("RÉSUMÉ DU PROGRAMME SIMPLIFIÉ")
 print("=" * 80)
 
+total_conditions = len(layer_1_conditions) + len(layer_2_conditions) + len(layer_3_conditions)
+
 print(f"""
-Programme: New Line 2024
-Type: Casualty - Multi-currency XOL Layers
+Programme: New Line 2024 (Simplifié)
+Type: Casualty - Multi-currency XOL Layers avec dimensions multiples
 Devises: GBP, USD, EUR, CAD, AUD
 
-LAYER 1 - conditions par Line of Business et Devise:
-  Sub-condition a) - Financial Institutions, Commercial Crime, Professional Indemnity/E&O,
-                   Commercial D&O, Medical Malpractice, Transactional Liability:
+LAYER 1 - conditions groupées par liste de LOB et Devise:
+  Sub-condition a) - {len(LOB_SUB_A)} LOB groupées:
     GBP: 3,000,000 xs 1,000,000
     USD: 4,500,000 xs 1,500,000
     EUR: 4,500,000 xs 1,500,000
     CAD: 5,250,000 xs 1,750,000
     AUD: 8,000,000 xs 2,000,000
     
-  Sub-condition b) - Employers' Liability, General Liability:
+  Sub-condition b) - {len(LOB_SUB_B)} LOB groupées:
     GBP: 2,500,000 xs 1,500,000
     USD: 3,750,000 xs 2,250,000
     EUR: 3,750,000 xs 2,250,000
     CAD: 4,375,000 xs 2,625,000
     AUD: 7,000,000 xs 3,000,000
     
-  Total conditions Layer 1: {len(layer_1_conditions)} ({len(LOB_SUB_A)} LOB × 5 devises + {len(LOB_SUB_B)} LOB × 5 devises)
+  Total conditions Layer 1: {len(layer_1_conditions)} (2 groupes LOB × 5 devises)
 
 LAYER 2 - conditions par Devise uniquement:
     GBP: 6,000,000 xs 4,000,000
@@ -197,15 +210,21 @@ LAYER 3 - conditions par Devise uniquement:
     
   Total conditions Layer 3: {len(layer_3_conditions)} (5 devises)
 
-TOTAL conditions: {len(layer_1_conditions) + len(layer_2_conditions) + len(layer_3_conditions)}
+TOTAL conditions: {total_conditions}
 
 Reinsurer share: {REINSURER_SHARE:.1%} pour toutes les conditions
+
+AVANTAGES DE LA VERSION SIMPLIFIÉE:
+- Réduction de {40 - len(layer_1_conditions)} conditions dans Layer 1 (de 40 à {len(layer_1_conditions)})
+- Maintenance plus simple (changements de LOB dans une seule liste)
+- Logique plus claire (groupement conceptuel des LOB)
+- Même fonctionnalité métier avec moins de complexité
 """)
 
-print("✓ Le programme New Line 2024 est prêt !")
+print("✓ Le programme New Line 2024 simplifié est prêt !")
 print("\nNotes importantes:")
-print("- Les lignes de business sont prises telles quelles en attendant le référentiel")
-print("- Layer 1 utilise BUSCL_CLASS_OF_BUSINESS_1 pour distinguer les sous-conditions")
+print("- Les LOB sont maintenant groupées par liste dans chaque sous-condition")
+print("- Layer 1 utilise BUSCL_CLASS_OF_BUSINESS_1 avec des listes pour distinguer les sous-conditions")
 print("- Toutes les structures sont des entry points (pas d'inuring)")
-print(f"- Total: 3 structures, {len(layer_1_conditions) + len(layer_2_conditions) + len(layer_3_conditions)} conditions")
-
+print(f"- Total: 3 structures, {total_conditions} conditions (vs {total_conditions + 30} dans la version originale)")
+print("- Comportement identique : une police matche si sa LOB est dans la liste de la condition")

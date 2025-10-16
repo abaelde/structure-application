@@ -1,85 +1,58 @@
-import pandas as pd
+"""
+Création d'un programme Quota Share avec exclusions
+
+Programme: Quota Share with Exclusions Test
+- 2 conditions d'exclusion (Iran, Russia)
+- 1 condition normale: 25% cession sur tout le reste
+"""
+
 import sys
-from pathlib import Path
+import os
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-output_file = "examples/programs/quota_share_with_exclusion.xlsx"
+from tests.builders import build_quota_share, build_program
+from src.loaders.excel_program_manager import save_program_to_excel
 
-program_df = pd.DataFrame(
-    [
+print("Création du programme Quota Share with Exclusions...")
+
+# Créer un quota share avec exclusions et condition normale
+qs = build_quota_share(
+    name="QS Aviation 25%",
+    conditions_config=[
         {
-            "REPROG_TITLE": "Quota Share with Exclusions Test",
+            "exclude_cd": "exclude",
+            "country_cd": "Iran",
+            "cession_pct": None,
+        },
+        {
+            "exclude_cd": "exclude", 
+            "country_cd": "Russia",
+            "cession_pct": None,
+        },
+        {
+            "exclude_cd": None,
+            "country_cd": None,
+            "cession_pct": 0.25,
+            "signed_share": 1.0,
         }
-    ]
+    ],
+    claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2024-12-31"
 )
 
-structures_df = pd.DataFrame(
-    [
-        {
-            "BUSINESS_TITLE": "QS Aviation 25%",
-            "INSPER_ID_PRE": 1,
-            "INSPER_CONTRACT_ORDER": 1,
-            "TYPE_OF_PARTICIPATION_CD": "quota_share",
-            "INSPER_PREDECESSOR_TITLE": None,
-            "INSPER_CLAIM_BASIS_CD": "risk_attaching",
-            "INSPER_EFFECTIVE_DATE": "2024-01-01",
-            "INSPER_EXPIRY_DATE": "2024-12-31",
-        }
-    ]
+program = build_program(
+    name="Quota Share with Exclusions Test",
+    structures=[qs],
+    underwriting_department="aviation"
 )
 
-conditions_df = pd.DataFrame(
-    [
-        {
-            "INSPER_ID_PRE": 1,
-            "BUSCL_EXCLUDE_CD": "exclude",
-            "BUSCL_COUNTRY_CD": "Iran",
-            "BUSCL_REGION": None,
-            "BUSCL_CLASS_OF_BUSINESS_1": None,
-            "BUSCL_CLASS_OF_BUSINESS_2": None,
-            "BUSCL_CLASS_OF_BUSINESS_3": None,
-            "BUSCL_LIMIT_CURRENCY_CD": None,
-            "CESSION_PCT": None,
-            "LIMIT_100": None,
-            "ATTACHMENT_POINT_100": None,
-            "SIGNED_SHARE_PCT": None,
-        },
-        {
-            "INSPER_ID_PRE": 1,
-            "BUSCL_EXCLUDE_CD": "exclude",
-            "BUSCL_COUNTRY_CD": "Russia",
-            "BUSCL_REGION": None,
-            "BUSCL_CLASS_OF_BUSINESS_1": None,
-            "BUSCL_CLASS_OF_BUSINESS_2": None,
-            "BUSCL_CLASS_OF_BUSINESS_3": None,
-            "BUSCL_LIMIT_CURRENCY_CD": None,
-            "CESSION_PCT": None,
-            "LIMIT_100": None,
-            "ATTACHMENT_POINT_100": None,
-            "SIGNED_SHARE_PCT": None,
-        },
-        {
-            "INSPER_ID_PRE": 1,
-            "BUSCL_EXCLUDE_CD": None,
-            "BUSCL_COUNTRY_CD": None,
-            "BUSCL_REGION": None,
-            "BUSCL_CLASS_OF_BUSINESS_1": None,
-            "BUSCL_CLASS_OF_BUSINESS_2": None,
-            "BUSCL_CLASS_OF_BUSINESS_3": None,
-            "BUSCL_LIMIT_CURRENCY_CD": None,
-            "CESSION_PCT": 0.25,
-            "LIMIT_100": None,
-            "ATTACHMENT_POINT_100": None,
-            "SIGNED_SHARE_PCT": 1.0,
-        },
-    ]
-)
+output_dir = "../programs"
+os.makedirs(output_dir, exist_ok=True)
+output_file = os.path.join(output_dir, "quota_share_with_exclusion.xlsx")
 
-with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
-    program_df.to_excel(writer, sheet_name="program", index=False)
-    structures_df.to_excel(writer, sheet_name="structures", index=False)
-    conditions_df.to_excel(writer, sheet_name="conditions", index=False)
+save_program_to_excel(program, output_file)
 
 print(f"✓ Programme créé: {output_file}")
 print("\nStructure du programme:")
