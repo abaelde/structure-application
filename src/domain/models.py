@@ -275,7 +275,7 @@ class Structure:
         return 1.0
 
     def describe(self, dimension_columns: list, structure_number: int) -> str:
-        """Generate a text description of this structure"""
+        """Generate a compact text description of this structure, grouping similar conditions"""
         lines = []
 
         lines.append(f"\nStructure {structure_number}: {self.structure_name}")
@@ -296,27 +296,132 @@ class Structure:
         if self.expiry_date and pd.notna(self.expiry_date):
             lines.append(f"   Expiry date: {self.expiry_date}")
 
-        if len(self.conditions) == 1:
-            condition = self.conditions[0]
-            lines.append("   Single condition:")
-            lines.append(
-                condition.describe(
-                    dimension_columns,
-                    self.type_of_participation,
-                    indent="      ",
-                )
-            )
+        # Group conditions by their core parameters (excluding dimension values)
+        condition_groups = self._group_similar_conditions()
+        
+        if len(condition_groups) == 1:
+            group = condition_groups[0]
+            lines.append("   Single condition group:")
+            lines.append(self._describe_condition_group(group, dimension_columns, "      "))
         else:
-            lines.append("   conditions:")
-            for j, condition in enumerate(self.conditions, 1):
-                lines.append(f"      condition {j}:")
+            lines.append("   Condition groups:")
+            for j, group in enumerate(condition_groups, 1):
+                lines.append(f"      Group {j}:")
+                lines.append(self._describe_condition_group(group, dimension_columns, "         "))
+
+        return "\n".join(lines)
+
+    def _group_similar_conditions(self) -> List[Dict]:
+        """Group conditions that have the same core parameters but different dimension values"""
+        groups = []
+        
+        for condition in self.conditions:
+            # Create a signature for the condition (excluding dimension values)
+            signature = self._get_condition_signature(condition)
+            
+            # Find existing group with same signature
+            found_group = None
+            for group in groups:
+                if group['signature'] == signature:
+                    found_group = group
+                    break
+            
+            if found_group:
+                found_group['conditions'].append(condition)
+            else:
+                groups.append({
+                    'signature': signature,
+                    'conditions': [condition],
+                    'sample_condition': condition
+                })
+        
+        return groups
+
+    def _get_condition_signature(self, condition: "Condition") -> tuple:
+        """Get a signature for a condition excluding dimension values"""
+        signature = (
+            condition.cession_pct,
+            condition.attachment,
+            condition.limit,
+            condition.signed_share,
+            condition.includes_hull,
+            condition.includes_liability,
+            condition.get("BUSCL_EXCLUDE_CD")
+        )
+        return signature
+
+    def _describe_condition_group(self, group: Dict, dimension_columns: list, indent: str) -> str:
+        """Describe a group of similar conditions"""
+        sample_condition = group['sample_condition']
+        conditions = group['conditions']
+        
+        lines = []
+        
+        # Describe the core parameters (same for all conditions in the group)
+        if self.type_of_participation == PRODUCT.QUOTA_SHARE:
+            if pd.notna(sample_condition.get(condition_COLS.CESSION_PCT)):
+                cession_pct = sample_condition[condition_COLS.CESSION_PCT]
                 lines.append(
-                    condition.describe(
-                        dimension_columns,
-                        self.type_of_participation,
-                        indent="         ",
-                    )
+                    f"{indent}Cession rate: {cession_pct:.1%} ({cession_pct * 100:.1f}%)"
                 )
+
+            if pd.notna(sample_condition.get(condition_COLS.LIMIT)):
+                lines.append(f"{indent}Limit: {sample_condition[condition_COLS.LIMIT]:,.2f}M")
+
+        elif self.type_of_participation == PRODUCT.EXCESS_OF_LOSS:
+            if pd.notna(sample_condition.get(condition_COLS.ATTACHMENT)) and pd.notna(
+                sample_condition.get(condition_COLS.LIMIT)
+            ):
+                attachment = sample_condition[condition_COLS.ATTACHMENT]
+                limit = sample_condition[condition_COLS.LIMIT]
+                lines.append(f"{indent}Coverage: {limit:,.2f}M xs {attachment:,.2f}M")
+                lines.append(
+                    f"{indent}Range: {attachment:,.2f}M to {attachment + limit:,.2f}M"
+                )
+
+        if pd.notna(sample_condition.get(condition_COLS.SIGNED_SHARE)):
+            reinsurer_share = sample_condition[condition_COLS.SIGNED_SHARE]
+            lines.append(
+                f"{indent}Reinsurer share: {reinsurer_share:.2%} ({reinsurer_share * 100:.2f}%)"
+            )
+
+        if sample_condition.includes_hull is not None or sample_condition.includes_liability is not None:
+            coverage_parts = []
+            if sample_condition.includes_hull is True:
+                coverage_parts.append("Hull")
+            if sample_condition.includes_liability is True:
+                coverage_parts.append("Liability")
+
+            if coverage_parts:
+                coverage_str = " + ".join(coverage_parts)
+                lines.append(f"{indent}Coverage scope: {coverage_str}")
+            elif sample_condition.includes_hull is False and sample_condition.includes_liability is False:
+                lines.append(f"{indent}Coverage scope: None (invalid)")
+
+        # Describe dimension values (grouped by dimension)
+        dimension_info = []
+        for dim in dimension_columns:
+            if dim == "BUSCL_EXCLUDE_CD":
+                continue
+                
+            # Collect all unique values for this dimension across all conditions in the group
+            all_values = set()
+            for condition in conditions:
+                vals = condition.get_values(dim)
+                if vals:
+                    all_values.update(vals)
+            
+            if all_values:
+                sorted_values = sorted(all_values)
+                if len(sorted_values) == 1:
+                    dimension_info.append(f"{dim}={sorted_values[0]}")
+                else:
+                    dimension_info.append(f"{dim}=[{', '.join(sorted_values)}]")
+
+        if dimension_info:
+            lines.append(f"{indent}Matching conditions: {', '.join(dimension_info)}")
+        else:
+            lines.append(f"{indent}Matching conditions: None (applies to all policies)")
 
         return "\n".join(lines)
 
