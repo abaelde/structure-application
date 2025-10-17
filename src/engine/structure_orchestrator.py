@@ -164,20 +164,27 @@ class StructureProcessor:
     def _rescale_if_needed(
         self, matched: Condition, structure: Structure
     ) -> tuple[Condition, Optional[Dict[str, Any]]]:
-        """Rescale XL si prédécesseur QS ; renvoie (condition_à_appliquer, rescaling_info|None)."""
-        if (
-            not structure.has_predecessor()
-            or structure.predecessor_title not in self._state_by_structure
-        ):
-            return matched.copy(), None
-        pred = self._state_by_structure[structure.predecessor_title]
-        if (
-            pred.get("type_of_participation") == PRODUCT.QUOTA_SHARE
-            and structure.is_excess_of_loss()
-        ):
-            retention_factor = pred.get("retention_pct", 1.0)
-            return matched.rescale_for_predecessor(retention_factor)
+        """Rescale XL si prédécesseur QS ; renvoie (condition_à_appliquer, rescaling_info|None).
+        
+        NOTE: Le rescaling est temporairement désactivé. Pour le réactiver, décommenter le code ci-dessous.
+        """
+        # Rescaling temporairement désactivé
         return matched.copy(), None
+        
+        # Code original du rescaling (commenté pour désactivation temporaire):
+        # if (
+        #     not structure.has_predecessor()
+        #     or structure.predecessor_title not in self._state_by_structure
+        # ):
+        #     return matched.copy(), None
+        # pred = self._state_by_structure[structure.predecessor_title]
+        # if (
+        #     pred.get("type_of_participation") == PRODUCT.QUOTA_SHARE
+        #     and structure.is_excess_of_loss()
+        # ):
+        #     retention_factor = pred.get("retention_pct", 1.0)
+        #     return matched.rescale_for_predecessor(retention_factor)
+        # return matched.copy(), None
 
     # ─── Rapports "skipped" homogènes ─────────────────────────────────────
     def _report_skipped(
