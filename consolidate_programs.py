@@ -21,7 +21,7 @@ from datetime import datetime
 from src.managers import ProgramManager
 from src.engine import apply_program_to_bordereau
 from src.domain.bordereau import Bordereau
-from src.domain import FIELDS
+# FIELDS supprimé - utilisation directe des clés canoniques
 from examples.program_bordereau_mapping import (
     get_ready_pairs,
 )
@@ -69,7 +69,7 @@ def generate_consolidated_report(
         f.write(
             insured_aggregation[
                 [
-                    FIELDS["INSURED_NAME"],
+                    "INSURED_NAME",
                     "exposure",
                     "cession_to_reinsurer",
                     "retained_by_cedant",
@@ -214,7 +214,7 @@ def consolidate_all_programs():
 
     # Group by insured name to get consolidated view
     insured_aggregation = (
-        consolidated_results.groupby(FIELDS["INSURED_NAME"])
+        consolidated_results.groupby("INSURED_NAME")
         .agg(
             {
                 "exposure": "sum",  # Sum exposure across all cedants for same insured
@@ -239,7 +239,7 @@ def consolidate_all_programs():
     print(
         insured_aggregation[
             [
-                FIELDS["INSURED_NAME"],
+                "INSURED_NAME",
                 "exposure",
                 "cession_to_reinsurer",
                 "retained_by_cedant",

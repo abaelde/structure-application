@@ -6,7 +6,7 @@ import tempfile
 from src.managers import ProgramManager
 from src.domain.bordereau import Bordereau
 from src.engine import apply_program_to_bordereau
-from src.domain import FIELDS, PRODUCT
+from src.domain import PRODUCT
 
 st.set_page_config(
     page_title="Reinsurance Program Analyzer",
@@ -146,7 +146,7 @@ if program_file and bordereau_file:
         display_df = results.copy()
 
         priority_columns = [
-            FIELDS["INSURED_NAME"],
+            "INSURED_NAME",
             "exposure",
             "cession_to_layer_100pct",
             "cession_to_reinsurer",
@@ -181,8 +181,8 @@ if program_file and bordereau_file:
                 )
 
         column_config = {}
-        if FIELDS["INSURED_NAME"] in formatted_df.columns:
-            column_config[FIELDS["INSURED_NAME"]] = st.column_config.TextColumn(
+        if "INSURED_NAME" in formatted_df.columns:
+            column_config["INSURED_NAME"] = st.column_config.TextColumn(
                 "Insured", width="medium"
             )
         if "exposure" in formatted_df.columns:
@@ -209,14 +209,14 @@ if program_file and bordereau_file:
 
         st.markdown("### 🔍 Policy Details")
 
-        if FIELDS["INSURED_NAME"] in results.columns and len(results) > 0:
+        if "INSURED_NAME" in results.columns and len(results) > 0:
             selected_insured = st.selectbox(
                 "Select an insured to view details",
-                options=results[FIELDS["INSURED_NAME"]].unique(),
+                options=results["INSURED_NAME"].unique(),
             )
 
             policy_result = results[
-                results[FIELDS["INSURED_NAME"]] == selected_insured
+                results["INSURED_NAME"] == selected_insured
             ].iloc[0]
 
             st.markdown(f"#### 📋 {selected_insured}")
@@ -298,11 +298,11 @@ if program_file and bordereau_file:
                                                 "Value": f"{condition['CESSION_PCT']}",
                                             }
                                         )
-                                    if pd.notna(condition.get("LIMIT")):
+                                    if pd.notna(condition.get("LIMIT_100")):
                                         params_df_data.append(
                                             {
                                                 "Parameter": "LIMIT_100",
-                                                "Value": f"{condition['LIMIT']:,.0f}",
+                                                "Value": f"{condition['LIMIT_100']:,.0f}",
                                             }
                                         )
 
@@ -342,11 +342,11 @@ if program_file and bordereau_file:
                                                     "Value": f"{condition['ATTACHMENT_POINT_100']:,.0f}",
                                                 }
                                             )
-                                        if pd.notna(condition.get("LIMIT")):
+                                        if pd.notna(condition.get("LIMIT_100")):
                                             params_df_data.append(
                                                 {
                                                     "Parameter": "LIMIT_100",
-                                                    "Value": f"{condition['LIMIT']:,.0f}",
+                                                    "Value": f"{condition['LIMIT_100']:,.0f}",
                                                 }
                                             )
 
