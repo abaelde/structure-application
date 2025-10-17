@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Tuple
 import pandas as pd
 
+
 class CsvProgramFolderIO:
     """
     Lit/écrit un programme stocké dans un dossier contenant 3 CSV:
@@ -30,7 +31,9 @@ class CsvProgramFolderIO:
     def read(self, folder: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         p = Path(folder)
         if not p.exists() or not p.is_dir():
-            raise ValueError(f"Program source must be a folder with CSV files: {folder}")
+            raise ValueError(
+                f"Program source must be a folder with CSV files: {folder}"
+            )
 
         program_df = self._read_one(p, self.PROGRAM_FILE, "PROGRAM.csv", "programs.csv")
         structures_df = self._read_one(p, self.STRUCTURES_FILE, "STRUCTURES.csv")

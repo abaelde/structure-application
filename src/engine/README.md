@@ -340,3 +340,90 @@ condition({"INCLUDES_HULL": False, "INCLUDES_LIABILITY": False, "SIGNED_SHARE_PC
 
 Voir le fichier [`examples/program_creation/create_aviation_hull_liability_split.py`](../../examples/program_creation/create_aviation_hull_liability_split.py) pour un exemple complet de création d'un programme avec filtrage Hull/Liability.
 
+## Sélection multi-année & Claim Basis (RA/LO)
+
+### Vue d'ensemble
+
+Le module `engine` supporte maintenant la sélection temporelle des structures basée sur le **Claim Basis** (Risk Attaching vs Loss Occurring). Cela permet de créer des programmes multi-annuels où chaque structure a sa propre période d'effet.
+
+### Types de Claim Basis
+
+- **Risk Attaching (RA)** : La structure s'applique si la date d'inception de la police est dans la période d'effet de la structure
+- **Loss Occurring (LO)** : La structure s'applique si la date de calcul (`calculation_date`) est dans la période d'effet de la structure
+
+### Configuration
+
+Dans la feuille **structures** du fichier Excel de programme, les colonnes suivantes contrôlent la sélection temporelle :
+
+| Colonne | Type | Défaut | Description |
+|---------|------|--------|-------------|
+| `INSPER_CLAIM_BASIS_CD` | String | `risk_attaching` | Type de claim basis (`risk_attaching` ou `loss_occurring`) |
+| `INSPER_EFFECTIVE_DATE` | Date | `NULL` | Date de début d'effet de la structure |
+| `INSPER_EXPIRY_DATE` | Date | `NULL` | Date de fin d'effet de la structure (exclusive) |
+
+### Comportement
+
+#### Risk Attaching (RA)
+- **Référence** : `Policy.INCEPTION_DT`
+- **Logique** : La structure s'applique si `INCEPTION_DT` ∈ `[INSPER_EFFECTIVE_DATE ; INSPER_EXPIRY_DATE[`
+- **Cas d'usage** : Structures qui suivent le cycle de vie de la police
+
+#### Loss Occurring (LO)
+- **Référence** : `calculation_date` (paramètre passé à `apply_program`)
+- **Logique** : La structure s'applique si `calculation_date` ∈ `[INSPER_EFFECTIVE_DATE ; INSPER_EXPIRY_DATE[`
+- **Cas d'usage** : Structures qui s'appliquent selon la date de survenance des sinistres
+
+### Exemple
+
+#### Programme multi-annuel
+
+```
+Feuille "structures":
+| BUSINESS_TITLE | INSPER_CLAIM_BASIS_CD | INSPER_EFFECTIVE_DATE | INSPER_EXPIRY_DATE | ... |
+|----------------|----------------------|----------------------|-------------------|-----|
+| QS_2024        | risk_attaching      | 2024-01-01          | 2025-01-01        | ... |
+| QS_2025        | risk_attaching      | 2025-01-01          | 2026-01-01        | ... |
+| XOL_2024       | loss_occurring      | 2024-01-01          | 2025-01-01        | ... |
+| XOL_2025       | loss_occurring      | 2025-01-01          | 2026-01-01        | ... |
+```
+
+#### Calcul avec `calculation_date="2024-06-15"`
+
+**Police avec `INCEPTION_DT="2024-03-01"`** :
+- ✅ **QS_2024** : Applicable (RA, inception dans [2024-01-01 ; 2025-01-01[)
+- ❌ **QS_2025** : Non applicable (RA, inception hors [2025-01-01 ; 2026-01-01[)
+- ✅ **XOL_2024** : Applicable (LO, calculation_date dans [2024-01-01 ; 2025-01-01[)
+- ❌ **XOL_2025** : Non applicable (LO, calculation_date hors [2025-01-01 ; 2026-01-01[)
+
+**Police avec `INCEPTION_DT="2025-03-01"`** :
+- ❌ **QS_2024** : Non applicable (RA, inception hors [2024-01-01 ; 2025-01-01[)
+- ✅ **QS_2025** : Applicable (RA, inception dans [2025-01-01 ; 2026-01-01[)
+- ✅ **XOL_2024** : Applicable (LO, calculation_date dans [2024-01-01 ; 2025-01-01[)
+- ❌ **XOL_2025** : Non applicable (LO, calculation_date hors [2025-01-01 ; 2026-01-01[)
+
+### Reporting
+
+Les structures non applicables (hors période) sont incluses dans le rapport avec :
+- `applied=False`
+- `reason="out_of_period"`
+- `matching_details={"claim_basis": "risk_attaching"}` ou `{"claim_basis": "loss_occurring"}`
+
+### API
+
+```python
+from src.engine import apply_program
+
+# Application avec date de calcul
+result = apply_program(policy, program, calculation_date="2025-01-01")
+
+# Les structures LO seront évaluées selon calculation_date
+# Les structures RA seront évaluées selon policy.inception
+```
+
+### Implémentation
+
+La logique de sélection temporelle est implémentée dans :
+- `Structure.is_applicable()` : Méthode qui détermine si une structure est applicable
+- `StructureProcessor.process_structures()` : Filtre les structures avant traitement
+- `StructureProcessor._process_one()` : Vérification de sécurité pour les prédécesseurs
+

@@ -47,7 +47,9 @@ class ProgramSerializer:
     @staticmethod
     def _dimension_candidates(conditions_df: pd.DataFrame) -> list[str]:
         # Utiliser uniquement le schéma comme source de vérité pour les dimensions
-        program_dims = set(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()) | {"BUSCL_EXCLUDE_CD"}
+        program_dims = set(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()) | {
+            "BUSCL_EXCLUDE_CD"
+        }
         program_dims -= {"INCLUDES_HULL", "INCLUDES_LIABILITY"}  # flags booléens
         return [c for c in program_dims if c in conditions_df.columns]
 
@@ -324,29 +326,33 @@ class ProgramSerializer:
         """Export lean avec seulement les colonnes essentielles."""
         reprog_id = 1
 
-        program_df = pd.DataFrame({
-            "REPROG_ID_PRE": [reprog_id],
-            "REPROG_TITLE": [program.name],
-            "REPROG_UW_DEPARTMENT_LOB_CD": [program.underwriting_department],
-        })
+        program_df = pd.DataFrame(
+            {
+                "REPROG_ID_PRE": [reprog_id],
+                "REPROG_TITLE": [program.name],
+                "REPROG_UW_DEPARTMENT_LOB_CD": [program.underwriting_department],
+            }
+        )
 
         structures_rows = []
         conditions_rows = []
 
         insper_id = 1
         for st in program.structures:
-            structures_rows.append({
-                "INSPER_ID_PRE": insper_id,
-                "REPROG_ID_PRE": reprog_id,
-                "BUSINESS_TITLE": st.structure_name,
-                "INSPER_CONTRACT_ORDER": st.contract_order,
-                "TYPE_OF_PARTICIPATION_CD": st.type_of_participation,
-                "INSPER_PREDECESSOR_TITLE": st.predecessor_title,
-                "INSPER_CLAIM_BASIS_CD": st.claim_basis,
-                "INSPER_EFFECTIVE_DATE": st.inception_date,
-                "INSPER_EXPIRY_DATE": st.expiry_date,
-            })
-            
+            structures_rows.append(
+                {
+                    "INSPER_ID_PRE": insper_id,
+                    "REPROG_ID_PRE": reprog_id,
+                    "BUSINESS_TITLE": st.structure_name,
+                    "INSPER_CONTRACT_ORDER": st.contract_order,
+                    "TYPE_OF_PARTICIPATION_CD": st.type_of_participation,
+                    "INSPER_PREDECESSOR_TITLE": st.predecessor_title,
+                    "INSPER_CLAIM_BASIS_CD": st.claim_basis,
+                    "INSPER_EFFECTIVE_DATE": st.inception_date,
+                    "INSPER_EXPIRY_DATE": st.expiry_date,
+                }
+            )
+
             for c in st.conditions:
                 d = c.to_dict()
                 row = {

@@ -7,7 +7,7 @@ from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 def build_program(
     name: str,
     structures: List[Structure],
-        dimension_columns: Optional[List[str]] = None,
+    dimension_columns: Optional[List[str]] = None,
     underwriting_department: str = "test",
 ) -> Program:
     """

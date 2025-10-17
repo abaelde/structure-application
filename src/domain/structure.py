@@ -1,7 +1,7 @@
 from typing import Dict, Any, List, Optional, Self
 import pandas as pd
 from .condition import Condition
-from .constants import condition_COLS, PRODUCT
+from .constants import condition_COLS, PRODUCT, CLAIM_BASIS
 
 
 class Structure:
@@ -21,9 +21,19 @@ class Structure:
         self.type_of_participation = type_of_participation
         self.predecessor_title = predecessor_title
         self.claim_basis = claim_basis
-        self.inception_date = inception_date
-        self.expiry_date = expiry_date
+        self.inception_date = self._to_ts(inception_date)
+        self.expiry_date = self._to_ts(expiry_date)
         self.conditions = conditions
+
+    @staticmethod
+    def _to_ts(val) -> Optional[pd.Timestamp]:
+        if val is None:
+            return None
+        try:
+            ts = pd.to_datetime(val)
+            return None if (isinstance(ts, pd.Timestamp) and pd.isna(ts)) else ts
+        except Exception:
+            return None
 
     @classmethod
     def from_row(
@@ -85,6 +95,36 @@ class Structure:
             return 1.0 - matched_condition.cession_pct
         return 1.0
 
+    # ─── Sélection temporelle RA/LO multi-année (sans LossDate) ───────────
+    def _in_range(self, dt: Optional[pd.Timestamp]) -> bool:
+        """Intervalle [inception_date ; expiry_date[ (expiry exclusive)."""
+        if dt is None:
+            return False
+        if self.inception_date and dt < self.inception_date:
+            return False
+        if self.expiry_date and dt >= self.expiry_date:
+            return False
+        return True
+
+    def is_applicable(
+        self,
+        policy,  # Policy
+        *,
+        evaluation_date: Optional[str] = None,
+    ) -> bool:
+        """
+        - Risk attaching  → référence = INCEPTION_DT de la police
+        - Loss occurring  → référence = calculation_date (evaluation_date)
+        """
+        basis = (self.claim_basis or "").lower()
+        if basis == CLAIM_BASIS.LOSS_OCCURRING:
+            ref = (
+                pd.to_datetime(evaluation_date) if evaluation_date is not None else None
+            )
+            return self._in_range(ref)
+        # défaut / RA
+        return self._in_range(policy.inception)
+
     def describe(self, dimension_columns: list, structure_number: int) -> str:
         """Generate a compact text description of this structure, grouping similar conditions"""
         lines = []
@@ -109,43 +149,51 @@ class Structure:
 
         # Group conditions by their core parameters (excluding dimension values)
         condition_groups = self._group_similar_conditions()
-        
+
         if len(condition_groups) == 1:
             group = condition_groups[0]
             lines.append("   Single condition group:")
-            lines.append(self._describe_condition_group(group, dimension_columns, "      "))
+            lines.append(
+                self._describe_condition_group(group, dimension_columns, "      ")
+            )
         else:
             lines.append("   Condition groups:")
             for j, group in enumerate(condition_groups, 1):
                 lines.append(f"      Group {j}:")
-                lines.append(self._describe_condition_group(group, dimension_columns, "         "))
+                lines.append(
+                    self._describe_condition_group(
+                        group, dimension_columns, "         "
+                    )
+                )
 
         return "\n".join(lines)
 
     def _group_similar_conditions(self) -> List[Dict]:
         """Group conditions that have the same core parameters but different dimension values"""
         groups = []
-        
+
         for condition in self.conditions:
             # Create a signature for the condition (excluding dimension values)
             signature = self._get_condition_signature(condition)
-            
+
             # Find existing group with same signature
             found_group = None
             for group in groups:
-                if group['signature'] == signature:
+                if group["signature"] == signature:
                     found_group = group
                     break
-            
+
             if found_group:
-                found_group['conditions'].append(condition)
+                found_group["conditions"].append(condition)
             else:
-                groups.append({
-                    'signature': signature,
-                    'conditions': [condition],
-                    'sample_condition': condition
-                })
-        
+                groups.append(
+                    {
+                        "signature": signature,
+                        "conditions": [condition],
+                        "sample_condition": condition,
+                    }
+                )
+
         return groups
 
     def _get_condition_signature(self, condition: Condition) -> tuple:
@@ -157,17 +205,19 @@ class Structure:
             condition.signed_share,
             condition.includes_hull,
             condition.includes_liability,
-            condition.get("BUSCL_EXCLUDE_CD")
+            condition.get("BUSCL_EXCLUDE_CD"),
         )
         return signature
 
-    def _describe_condition_group(self, group: Dict, dimension_columns: list, indent: str) -> str:
+    def _describe_condition_group(
+        self, group: Dict, dimension_columns: list, indent: str
+    ) -> str:
         """Describe a group of similar conditions"""
-        sample_condition = group['sample_condition']
-        conditions = group['conditions']
-        
+        sample_condition = group["sample_condition"]
+        conditions = group["conditions"]
+
         lines = []
-        
+
         # Describe the core parameters (same for all conditions in the group)
         if self.type_of_participation == PRODUCT.QUOTA_SHARE:
             if pd.notna(sample_condition.get(condition_COLS.CESSION_PCT)):
@@ -176,8 +226,12 @@ class Structure:
                     f"{indent}Cession rate: {cession_pct:.1%} ({cession_pct * 100:.1f}%)"
                 )
 
-            if pd.notna(sample_condition.get(condition_COLS.LIMIT)): # AURE : pk du pandas a ce niveau ?
-                lines.append(f"{indent}Limit: {sample_condition[condition_COLS.LIMIT]:,.2f}M")
+            if pd.notna(
+                sample_condition.get(condition_COLS.LIMIT)
+            ):  # AURE : pk du pandas a ce niveau ?
+                lines.append(
+                    f"{indent}Limit: {sample_condition[condition_COLS.LIMIT]:,.2f}M"
+                )
 
         elif self.type_of_participation == PRODUCT.EXCESS_OF_LOSS:
             if pd.notna(sample_condition.get(condition_COLS.ATTACHMENT)) and pd.notna(
@@ -196,7 +250,10 @@ class Structure:
                 f"{indent}Reinsurer share: {reinsurer_share:.2%} ({reinsurer_share * 100:.2f}%)"
             )
 
-        if sample_condition.includes_hull is not None or sample_condition.includes_liability is not None:
+        if (
+            sample_condition.includes_hull is not None
+            or sample_condition.includes_liability is not None
+        ):
             coverage_parts = []
             if sample_condition.includes_hull is True:
                 coverage_parts.append("Hull")
@@ -206,7 +263,10 @@ class Structure:
             if coverage_parts:
                 coverage_str = " + ".join(coverage_parts)
                 lines.append(f"{indent}Coverage scope: {coverage_str}")
-            elif sample_condition.includes_hull is False and sample_condition.includes_liability is False:
+            elif (
+                sample_condition.includes_hull is False
+                and sample_condition.includes_liability is False
+            ):
                 lines.append(f"{indent}Coverage scope: None (invalid)")
 
         # Describe dimension values (grouped by dimension)
@@ -214,14 +274,14 @@ class Structure:
         for dim in dimension_columns:
             if dim == "BUSCL_EXCLUDE_CD":
                 continue
-                
+
             # Collect all unique values for this dimension across all conditions in the group
             all_values = set()
             for condition in conditions:
                 vals = condition.get_values(dim)
                 if vals:
                     all_values.update(vals)
-            
+
             if all_values:
                 sorted_values = sorted(all_values)
                 if len(sorted_values) == 1:

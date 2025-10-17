@@ -95,7 +95,7 @@ if program_files and bordereau_file:
             # Reconstruire le dossier CSV temporaire
             with tempfile.TemporaryDirectory() as tmp_dir:
                 tmp_dir_path = Path(tmp_dir)
-                
+
                 # Sauvegarder tous les fichiers CSV du programme à la racine
                 uploaded_filenames = []
                 for uploaded_file in program_files:
@@ -104,13 +104,17 @@ if program_files and bordereau_file:
                     dest_path = tmp_dir_path / filename
                     dest_path.write_bytes(uploaded_file.getbuffer())
                     uploaded_filenames.append(filename)
-                
+
                 # Vérifier que les fichiers requis sont présents
                 required_files = ["program.csv", "structures.csv", "conditions.csv"]
-                missing_files = [f for f in required_files if f not in uploaded_filenames]
+                missing_files = [
+                    f for f in required_files if f not in uploaded_filenames
+                ]
                 if missing_files:
-                    raise ValueError(f"Missing required files: {', '.join(missing_files)}")
-                
+                    raise ValueError(
+                        f"Missing required files: {', '.join(missing_files)}"
+                    )
+
                 # Sauvegarder le bordereau
                 with tempfile.NamedTemporaryFile(
                     delete=False, suffix=".csv", mode="w", encoding="utf-8"
@@ -231,9 +235,7 @@ if program_files and bordereau_file:
                 options=results["INSURED_NAME"].unique(),
             )
 
-            policy_result = results[
-                results["INSURED_NAME"] == selected_insured
-            ].iloc[0]
+            policy_result = results[results["INSURED_NAME"] == selected_insured].iloc[0]
 
             st.markdown(f"#### 📋 {selected_insured}")
 

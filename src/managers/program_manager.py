@@ -48,9 +48,9 @@ class ProgramManager:
     @staticmethod
     def detect_backend(source: str) -> Backend:
         """Heuristique simple:
-           - 'snowflake://...' -> snowflake
-           - dossier existant -> csv_folder
-           - fichier .xlsx/.xls -> excel
+        - 'snowflake://...' -> snowflake
+        - dossier existant -> csv_folder
+        - fichier .xlsx/.xls -> excel
         """
         if source.lower().startswith("snowflake://"):
             return "snowflake"

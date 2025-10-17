@@ -21,6 +21,7 @@ from datetime import datetime
 from src.managers import ProgramManager
 from src.engine import apply_program_to_bordereau
 from src.domain.bordereau import Bordereau
+
 # FIELDS supprimé - utilisation directe des clés canoniques
 from examples.program_bordereau_mapping import (
     get_ready_pairs,

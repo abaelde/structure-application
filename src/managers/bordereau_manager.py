@@ -8,7 +8,8 @@ from src.domain.program import Program
 from src.io.bordereau_csv_adapter import CsvBordereauIO
 from src.io.bordereau_snowflake_adapter import SnowflakeBordereauIO
 
-Backend = Literal["csv", "snowflake"] # AURE : maerge enle rogrm et le bordereau
+Backend = Literal["csv", "snowflake"]  # AURE : maerge enle rogrm et le bordereau
+
 
 class BordereauManager:
     """
@@ -73,7 +74,9 @@ class BordereauManager:
     def reload(self) -> Bordereau:
         if not self._source:
             raise ValueError("No bordereau currently loaded. Call load() first.")
-        return self.load(self._source, program=self._loaded.program if self._loaded else None)
+        return self.load(
+            self._source, program=self._loaded.program if self._loaded else None
+        )
 
     def get_current_bordereau(self) -> Bordereau:
         if not self._loaded:

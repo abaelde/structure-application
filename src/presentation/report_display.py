@@ -103,12 +103,12 @@ def write_detailed_results(
                         ", ".join(conditions) if conditions else "All (no conditions)"
                     )
                     file.write(f"   Matching conditions: {conditions_str}\n")
-                    
+
                     # Afficher les détails de matching si disponibles
                     matching_details = struct.get("matching_details")
                     if matching_details:
                         file.write(f"   Matching details:\n")
-                        
+
                         # Afficher les valeurs de la police
                         policy_values = matching_details.get("policy_values", {})
                         if policy_values:
@@ -118,9 +118,11 @@ def write_detailed_results(
                                 if value is not None:
                                     policy_parts.append(f"{dim}={value}")
                             file.write(f"{', '.join(policy_parts)}\n")
-                        
+
                         # Afficher les détails de matching par dimension
-                        dimension_matches = matching_details.get("dimension_matches", {})
+                        dimension_matches = matching_details.get(
+                            "dimension_matches", {}
+                        )
                         if dimension_matches:
                             file.write(f"      Dimension matching:\n")
                             for dim, match_info in dimension_matches.items():
@@ -129,31 +131,43 @@ def write_detailed_results(
                                     policy_val = match_info["policy_value"]
                                     matches = match_info["matches"]
                                     status = "✓" if matches else "✗"
-                                    file.write(f"         {status} {dim}: policy='{policy_val}' vs condition={cond_vals}\n")
+                                    file.write(
+                                        f"         {status} {dim}: policy='{policy_val}' vs condition={cond_vals}\n"
+                                    )
                                 else:
-                                    file.write(f"         - {dim}: no constraint (applies to all)\n")
-                        
+                                    file.write(
+                                        f"         - {dim}: no constraint (applies to all)\n"
+                                    )
+
                         # Afficher le score de matching
                         matching_score = matching_details.get("matching_score", 0.0)
                         if matching_score > 0:
                             file.write(f"      Matching score: {matching_score:.3f}\n")
-                        
+
                         # Afficher les conditions qui ont échoué
-                        failed_conditions = matching_details.get("failed_conditions", [])
+                        failed_conditions = matching_details.get(
+                            "failed_conditions", []
+                        )
                         if failed_conditions:
-                            file.write(f"      Failed conditions: {len(failed_conditions)} other conditions did not match\n")
-                            for i, failed in enumerate(failed_conditions[:3]):  # Limiter à 3 pour éviter le spam
+                            file.write(
+                                f"      Failed conditions: {len(failed_conditions)} other conditions did not match\n"
+                            )
+                            for i, failed in enumerate(
+                                failed_conditions[:3]
+                            ):  # Limiter à 3 pour éviter le spam
                                 failed_dims = failed.get("failed_dimensions", [])
                                 if failed_dims:
-                                    file.write(f"         - Failed on: {', '.join(failed_dims)}\n")
+                                    file.write(
+                                        f"         - Failed on: {', '.join(failed_dims)}\n"
+                                    )
             else:
                 file.write(f"   Reason: No matching condition found\n")
-                
+
                 # Afficher les détails de pourquoi aucune condition n'a matché
                 matching_details = struct.get("matching_details")
                 if matching_details:
                     file.write(f"   Why no condition matched:\n")
-                    
+
                     # Afficher les valeurs de la police
                     policy_values = matching_details.get("policy_values", {})
                     if policy_values:
@@ -163,17 +177,25 @@ def write_detailed_results(
                             if value is not None:
                                 policy_parts.append(f"{dim}={value}")
                         file.write(f"{', '.join(policy_parts)}\n")
-                    
+
                     # Afficher les conditions qui ont échoué
                     failed_conditions = matching_details.get("failed_conditions", [])
                     if failed_conditions:
-                        file.write(f"      All {len(failed_conditions)} conditions failed to match:\n")
-                        for i, failed in enumerate(failed_conditions[:5]):  # Limiter à 5
+                        file.write(
+                            f"      All {len(failed_conditions)} conditions failed to match:\n"
+                        )
+                        for i, failed in enumerate(
+                            failed_conditions[:5]
+                        ):  # Limiter à 5
                             failed_dims = failed.get("failed_dimensions", [])
                             if failed_dims:
-                                file.write(f"         - Condition {i+1}: failed on {', '.join(failed_dims)}\n")
+                                file.write(
+                                    f"         - Condition {i+1}: failed on {', '.join(failed_dims)}\n"
+                                )
                     else:
-                        file.write(f"      No conditions were defined for this structure\n")
+                        file.write(
+                            f"      No conditions were defined for this structure\n"
+                        )
 
 
 def generate_detailed_report(

@@ -5,6 +5,7 @@ import pandas as pd
 from src.domain.bordereau import Bordereau
 from src.domain.program import Program
 
+
 class BordereauSerializer:
     """
     Parité avec ProgramSerializer, mais fin et volontairement simple.

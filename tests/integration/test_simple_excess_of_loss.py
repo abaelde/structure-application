@@ -133,7 +133,7 @@ def test_single_line_excess_of_loss_by_country():
     us_result = results_df.iloc[0]
     us_exposure = 30_000_000
     us_attachment = 5_000_000  # Condition US
-    us_limit = 20_000_000      # Condition US
+    us_limit = 20_000_000  # Condition US
     us_expected_cession = min(us_exposure - us_attachment, us_limit)
     us_expected_retained = us_exposure - us_expected_cession
     tolerance = 1
@@ -149,7 +149,7 @@ def test_single_line_excess_of_loss_by_country():
     fr_result = results_df.iloc[1]
     fr_exposure = 25_000_000
     fr_attachment = 10_000_000  # Condition FR
-    fr_limit = 15_000_000       # Condition FR
+    fr_limit = 15_000_000  # Condition FR
     fr_expected_cession = min(fr_exposure - fr_attachment, fr_limit)
     fr_expected_retained = fr_exposure - fr_expected_cession
 

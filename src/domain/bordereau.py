@@ -145,7 +145,7 @@ class Bordereau:
         return df2
 
     def _infer_uw_dept(self, df: pd.DataFrame) -> Optional[str]:
-        col = "line_of_business" # AURE
+        col = "line_of_business"  # AURE
         if col in df.columns:
             vals = df[col].dropna().astype(str).str.lower().unique().tolist()
             if len(vals) == 1:

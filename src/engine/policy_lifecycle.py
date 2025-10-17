@@ -1,4 +1,5 @@
 from typing import Dict
+
 # FIELDS supprimé - utilisation directe des clés canoniques
 from src.domain.program import Program
 from src.domain.policy import Policy

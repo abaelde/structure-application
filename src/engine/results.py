@@ -77,7 +77,7 @@ class ProgramRunResult:
             condition_dict = None
             if r.outcome.condition_applied:
                 condition_dict = r.outcome.condition_applied.to_dict()
-            
+
             # Convertir les informations de rescaling en dict si elles existent
             rescaling_dict = None
             if r.outcome.rescaling:
@@ -88,7 +88,7 @@ class ProgramRunResult:
                     "original_limit": r.outcome.rescaling.original_limit,
                     "rescaled_limit": r.outcome.rescaling.rescaled_limit,
                 }
-            
+
             out.append(
                 {
                     "structure_name": r.input.structure_name,

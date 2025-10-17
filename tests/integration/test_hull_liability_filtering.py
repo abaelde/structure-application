@@ -139,12 +139,12 @@ def test_hull_liability_filtering_aviation():
     assert (
         abs(xol_hull_detail["input_exposure"] - hull_component_of_retained) < tolerance
     )
-    qs_retention_factor = 0.75
-    rescaled_attachment_hull = 5_000_000 * qs_retention_factor
-    rescaled_limit_hull = 10_000_000 * qs_retention_factor
+    # SANS rescaling: attachment et limit restent inchangés
+    attachment_hull = 5_000_000  # NON rescalé
+    limit_hull = 10_000_000     # NON rescalé
     expected_hull_cession = max(
         0,
-        min(rescaled_limit_hull, hull_component_of_retained - rescaled_attachment_hull),
+        min(limit_hull, hull_component_of_retained - attachment_hull),
     )
     assert (
         abs(xol_hull_detail["cession_to_layer_100pct"] - expected_hull_cession)
@@ -161,13 +161,14 @@ def test_hull_liability_filtering_aviation():
         abs(xol_liability_detail["input_exposure"] - liability_component_of_retained)
         < tolerance
     )
-    rescaled_attachment_liability = 10_000_000 * qs_retention_factor
-    rescaled_limit_liability = 40_000_000 * qs_retention_factor
+    # SANS rescaling: attachment et limit restent inchangés
+    attachment_liability = 10_000_000  # NON rescalé
+    limit_liability = 40_000_000      # NON rescalé
     expected_liability_cession = max(
         0,
         min(
-            rescaled_limit_liability,
-            liability_component_of_retained - rescaled_attachment_liability,
+            limit_liability,
+            liability_component_of_retained - attachment_liability,
         ),
     )
     assert (

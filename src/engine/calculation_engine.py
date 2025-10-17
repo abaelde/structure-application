@@ -1,5 +1,6 @@
 from typing import Dict
 from src.domain import Program
+
 # FIELDS supprimé - utilisation directe des clés canoniques
 from src.domain.policy import Policy
 from .condition_matcher import check_exclusion
@@ -28,7 +29,9 @@ def apply_program(
     ):
         return create_excluded_result(policy, program)
 
-    run = StructureProcessor(policy, program).process_structures()
+    run = StructureProcessor(
+        policy, program, calculation_date=calculation_date
+    ).process_structures()
 
     exposure = policy.exposure_bundle(program.underwriting_department).total
 

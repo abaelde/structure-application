@@ -7,6 +7,7 @@ import pandas as pd
 #   pip install snowflake-connector-python
 #   pip install snowflake-connector-python[pandas]
 
+
 class SnowflakeBordereauIO:
     """
     Lecture/écriture d'un bordereau en table Snowflake.
@@ -18,7 +19,7 @@ class SnowflakeBordereauIO:
     def _parse_table_identifier(self, source: str) -> Tuple[str, str, str]:
         if not source.lower().startswith("snowflake://"):
             raise ValueError(f"Invalid Snowflake DSN: {source}")
-        ident = source[len("snowflake://"):]
+        ident = source[len("snowflake://") :]
         parts = ident.split(".")
         if len(parts) != 3:
             raise ValueError("Snowflake identifier must be snowflake://DB.SCHEMA.TABLE")
@@ -73,7 +74,14 @@ class SnowflakeBordereauIO:
                     cur.execute(f'DROP TABLE IF EXISTS "{table}"')
                     # création automatique par write_pandas si absent
                 # upload
-                write_pandas(cnx, df, table_name=table, auto_create_table=True, quote_identifiers=True, chunk_size=chunk_size)
+                write_pandas(
+                    cnx,
+                    df,
+                    table_name=table,
+                    auto_create_table=True,
+                    quote_identifiers=True,
+                    chunk_size=chunk_size,
+                )
             finally:
                 cur.close()
         finally:

@@ -17,11 +17,18 @@ from src.engine.results import (
 class StructureProcessor:
     """Traitement des structures avec sorties fortement typées."""
 
-    def __init__(self, policy: Policy, program: Program):
+    def __init__(
+        self,
+        policy: Policy,
+        program: Program,
+        *,
+        calculation_date: Optional[str] = None,
+    ):
         self.policy = policy
         self.program = program
         self.structures = program.structures
         self.dimension_columns = program.dimension_columns
+        self.calculation_date = calculation_date
 
         if not program.underwriting_department:
             raise ValueError("Program must have an underwriting_department")
@@ -37,6 +44,21 @@ class StructureProcessor:
         run = ProgramRunResult()
 
         for structure in self.structures:
+            # Filtre multi-année (RA/LO) piloté par calculation_date
+            if not structure.is_applicable(
+                self.policy,
+                evaluation_date=self.calculation_date,
+            ):
+                run.structures.append(
+                    self._report_skipped(
+                        structure,
+                        reason="out_of_period",
+                        input_exposure=self.base_bundle.total,
+                        scope_components=set(),
+                        matching_details={"claim_basis": structure.claim_basis},
+                    )
+                )
+                continue
             report = self._process_one(structure)
             run.structures.append(report)
             if report.outcome.applied:
@@ -53,6 +75,19 @@ class StructureProcessor:
         # 1) Sécurité idempotence
         if structure.structure_name in self._processed:
             return self._report_skipped(structure, reason="already_processed")
+
+        # 1bis) Garde au cas où un prédécesseur serait invoqué directement
+        if not structure.is_applicable(
+            self.policy,
+            evaluation_date=self.calculation_date,
+        ):
+            return self._report_skipped(
+                structure,
+                reason="out_of_period",
+                input_exposure=self.base_bundle.total,
+                scope_components=set(),
+                matching_details={"claim_basis": structure.claim_basis},
+            )
 
         # 2) Garantit le prédécesseur (inuring) si nécessaire
         self._process_predecessor_if_needed(structure)
@@ -148,11 +183,11 @@ class StructureProcessor:
         # Hors aviation : pas de composants
         if self.uw_dept.lower() != "aviation":
             return set()
-        
+
         # Si aucune condition ne matche, on applique sur le total (hull+liab)
         if matched is None:
             return {"hull", "liability"}
-        
+
         # Ici, on exige des bool explicites (serializer les garantit)
         include = set()
         if matched.includes_hull:
@@ -165,12 +200,12 @@ class StructureProcessor:
         self, matched: Condition, structure: Structure
     ) -> tuple[Condition, Optional[Dict[str, Any]]]:
         """Rescale XL si prédécesseur QS ; renvoie (condition_à_appliquer, rescaling_info|None).
-        
+
         NOTE: Le rescaling est temporairement désactivé. Pour le réactiver, décommenter le code ci-dessous.
         """
         # Rescaling temporairement désactivé
         return matched.copy(), None
-        
+
         # Code original du rescaling (commenté pour désactivation temporaire):
         # if (
         #     not structure.has_predecessor()

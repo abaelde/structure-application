@@ -32,9 +32,11 @@ class Condition:
             )
 
         # Si un des deux flags est fourni, exiger qu'au moins un soit True
-        if (self.includes_hull is not None or self.includes_liability is not None):
+        if self.includes_hull is not None or self.includes_liability is not None:
             if not bool(self.includes_hull) and not bool(self.includes_liability):
-                raise ValueError("At least one of INCLUDES_HULL / INCLUDES_LIABILITY must be True")
+                raise ValueError(
+                    "At least one of INCLUDES_HULL / INCLUDES_LIABILITY must be True"
+                )
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Self:

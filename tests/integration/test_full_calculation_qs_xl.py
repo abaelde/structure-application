@@ -4,9 +4,9 @@ from src.domain.bordereau import Bordereau
 from tests.builders import build_quota_share, build_excess_of_loss, build_program
 
 
-def test_quota_share_then_excess_of_loss_with_rescaling():
+def test_quota_share_then_excess_of_loss_without_rescaling():
     """
-    Test complet grandeur réelle : QS → XL avec rescaling
+    Test complet grandeur réelle : QS → XL SANS rescaling
 
     STRUCTURE DU PROGRAMME:
     1. QS_30% : Quota Share 30% (reinsurer share 100%)
@@ -17,31 +17,31 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     - Policy B: 100M → Partiellement dans la layer XL après QS
     - Policy C: 150M → Complètement dans et au-dessus de la layer XL après QS
 
-    CALCULS ATTENDUS:
+    CALCULS ATTENDUS (SANS RESCALING):
 
     Policy A (50M):
     ---------------
     QS_30%: 50M * 30% = 15M cédé, 35M retenu
-    XOL_50xs20 sur 35M: attachment=20M*(1-30%)=14M, limit=50M*(1-30%)=35M
-        → 35M < 14M? Non, 35M > 14M, donc cession = min(35M - 14M, 35M) = 21M
-    Total cession: 15M (QS) + 21M (XL) = 36M
-    Retained: 50M - 36M = 14M
+    XOL_50xs20 sur 35M: attachment=20M (NON rescalé), limit=50M (NON rescalé)
+        → 35M < 20M? Non, 35M > 20M, donc cession = min(35M - 20M, 50M) = 15M
+    Total cession: 15M (QS) + 15M (XL) = 30M
+    Retained: 50M - 30M = 20M
 
     Policy B (100M):
     ----------------
     QS_30%: 100M * 30% = 30M cédé, 70M retenu
-    XOL_50xs20 sur 70M: attachment=14M, limit=35M
-        → 70M > 14M, cession = min(70M - 14M, 35M) = min(56M, 35M) = 35M
-    Total cession: 30M (QS) + 35M (XL) = 65M
-    Retained: 100M - 65M = 35M
+    XOL_50xs20 sur 70M: attachment=20M (NON rescalé), limit=50M (NON rescalé)
+        → 70M > 20M, cession = min(70M - 20M, 50M) = min(50M, 50M) = 50M
+    Total cession: 30M (QS) + 50M (XL) = 80M
+    Retained: 100M - 80M = 20M
 
     Policy C (150M):
     ----------------
     QS_30%: 150M * 30% = 45M cédé, 105M retenu
-    XOL_50xs20 sur 105M: attachment=14M, limit=35M
-        → 105M > 14M, cession = min(105M - 14M, 35M) = 35M
-    Total cession: 45M (QS) + 35M (XL) = 80M
-    Retained: 150M - 80M = 70M
+    XOL_50xs20 sur 105M: attachment=20M (NON rescalé), limit=50M (NON rescalé)
+        → 105M > 20M, cession = min(105M - 20M, 50M) = min(85M, 50M) = 50M
+    Total cession: 45M (QS) + 50M (XL) = 95M
+    Retained: 150M - 95M = 55M
     """
 
     qs = build_quota_share(
@@ -93,11 +93,11 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     result_a = results_df.iloc[0]
 
     # QS: 50M * 30% = 15M, retenu = 35M
-    # XL sur 35M: attachment rescalé = 20M * 70% = 14M, limit = 35M
-    # Cession XL = min(35M - 14M, 35M) = 21M
-    # Total cession = 15M + 21M = 36M
+    # XL sur 35M: attachment NON rescalé = 20M, limit NON rescalé = 50M
+    # Cession XL = min(35M - 20M, 50M) = 15M
+    # Total cession = 15M + 15M = 30M
 
-    expected_cession_a = 36_000_000
+    expected_cession_a = 30_000_000
     tolerance = 100
 
     assert abs(result_a["cession_to_layer_100pct"] - expected_cession_a) < tolerance
@@ -106,10 +106,11 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     result_b = results_df.iloc[1]
 
     # QS: 100M * 30% = 30M, retenu = 70M
-    # XL sur 70M: cession = min(70M - 14M, 35M) = 35M
-    # Total cession = 30M + 35M = 65M
+    # XL sur 70M: attachment NON rescalé = 20M, limit NON rescalé = 50M
+    # Cession XL = min(70M - 20M, 50M) = 50M
+    # Total cession = 30M + 50M = 80M
 
-    expected_cession_b = 65_000_000
+    expected_cession_b = 80_000_000
 
     assert abs(result_b["cession_to_layer_100pct"] - expected_cession_b) < tolerance
 
@@ -117,10 +118,11 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
     result_c = results_df.iloc[2]
 
     # QS: 150M * 30% = 45M, retenu = 105M
-    # XL sur 105M: cession = min(105M - 14M, 35M) = 35M
-    # Total cession = 45M + 35M = 80M
+    # XL sur 105M: attachment NON rescalé = 20M, limit NON rescalé = 50M
+    # Cession XL = min(105M - 20M, 50M) = 50M
+    # Total cession = 45M + 50M = 95M
 
-    expected_cession_c = 80_000_000
+    expected_cession_c = 95_000_000
 
     assert abs(result_c["cession_to_layer_100pct"] - expected_cession_c) < tolerance
 
@@ -140,4 +142,4 @@ def test_quota_share_then_excess_of_loss_with_rescaling():
 
 
 if __name__ == "__main__":
-    test_quota_share_then_excess_of_loss_with_rescaling()
+    test_quota_share_then_excess_of_loss_without_rescaling()
