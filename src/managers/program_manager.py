@@ -1,8 +1,8 @@
 # src/managers/program_manager.py
 import pandas as pd
 from typing import Literal, Optional
-from src.io.excel_adapter import ExcelProgramIO
-from src.io.snowflake_adapter import SnowflakeProgramIO
+from src.io.program_excel_adapter import ExcelProgramIO
+from src.io.program_snowflake_adapter import SnowflakeProgramIO
 from src.serialization.program_serializer import ProgramSerializer
 from src.domain.program import Program
 
