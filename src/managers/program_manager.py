@@ -28,16 +28,16 @@ class ProgramManager:
     - State management (track loaded program and source)
     - Auto-detection of backend from source path
 
-    Examples:
+        Examples:
+        # CSV folder (default)
+        manager = ProgramManager()  # ou backend="csv_folder"
+        program = manager.load("path/to/my_program_folder")  # contient 3 CSV
+        manager.save(program, "path/to/another_folder")
+
         # Excel
         manager = ProgramManager(backend="excel")
         program = manager.load("program.xlsx")
         manager.save(program, "output.xlsx")
-
-        # CSV folder
-        manager = ProgramManager(backend="csv_folder")
-        program = manager.load("path/to/my_program_folder")  # contient 3 CSV
-        manager.save(program, "path/to/another_folder")
 
         # Snowflake
         manager = ProgramManager(backend="snowflake")
@@ -62,7 +62,7 @@ class ProgramManager:
         # défaut: si le chemin n'existe pas encore mais ressemble à un dossier (sans suffixe) -> csv_folder
         return "csv_folder" if p.suffix == "" else "excel"
 
-    def __init__(self, backend: Backend = "excel"):
+    def __init__(self, backend: Backend = "csv_folder"):
         """
         Initialize the program manager.
 

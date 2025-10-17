@@ -159,7 +159,7 @@ def combine_all_programs(programs_dir: str, output_file: str):
 
     # Auto-adjust column widths using ProgramManager
     print(f"Auto-adjusting column widths...")
-    manager = ProgramManager(backend="excel")
+    manager = ProgramManager(backend="csv_folder")
     # Note: _auto_adjust_column_widths might not be available in ProgramManager
     # manager._auto_adjust_column_widths(output_file)
 

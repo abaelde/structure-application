@@ -119,7 +119,7 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
     print(f"📋 Bordereau: {bordereau_path.name}")
 
     # Load program
-    manager = ProgramManager(backend="excel")
+    manager = ProgramManager(backend="csv_folder")
     program = manager.load(str(program_path))
     print(
         f"   Loaded program '{program.name}' with {len(program.structures)} structures"

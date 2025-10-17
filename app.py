@@ -105,7 +105,7 @@ if program_file and bordereau_file:
                 tmp_bordereau_path = tmp_bordereau.name
 
             bordereau_df = Bordereau.from_csv(tmp_bordereau_path)
-            manager = ProgramManager(backend="excel")
+            manager = ProgramManager(backend="csv_folder")
             program = manager.load(tmp_program_path)
 
             Path(tmp_program_path).unlink()
