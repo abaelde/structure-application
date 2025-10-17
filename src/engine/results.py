@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional, List, Set, Dict
+from typing import Optional, List, Set, Dict, Any
 from src.domain.condition import Condition
 
 
@@ -40,6 +40,7 @@ class StructureOutcome:
     rescaling: Optional[RescalingInfo]
     cession: CessionBreakdown
     retained_after: float
+    matching_details: Optional[Dict[str, Any]] = None
 
 
 @dataclass(frozen=True)
@@ -72,6 +73,22 @@ class ProgramRunResult:
         """Vue plate et facile à exporter / logger."""
         out = []
         for r in self.structures:
+            # Convertir la condition appliquée en dict si elle existe
+            condition_dict = None
+            if r.outcome.condition_applied:
+                condition_dict = r.outcome.condition_applied.to_dict()
+            
+            # Convertir les informations de rescaling en dict si elles existent
+            rescaling_dict = None
+            if r.outcome.rescaling:
+                rescaling_dict = {
+                    "retention_factor": r.outcome.rescaling.retention_factor,
+                    "original_attachment": r.outcome.rescaling.original_attachment,
+                    "rescaled_attachment": r.outcome.rescaling.rescaled_attachment,
+                    "original_limit": r.outcome.rescaling.original_limit,
+                    "rescaled_limit": r.outcome.rescaling.rescaled_limit,
+                }
+            
             out.append(
                 {
                     "structure_name": r.input.structure_name,
@@ -89,6 +106,9 @@ class ProgramRunResult:
                     "cession_to_reinsurer": r.outcome.cession.to_reinsurer,
                     "reinsurer_share": r.outcome.cession.reinsurer_share,
                     "retained_after": r.outcome.retained_after,
+                    "condition": condition_dict,
+                    "rescaling_info": rescaling_dict,
+                    "matching_details": r.outcome.matching_details,
                 }
             )
         return out

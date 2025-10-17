@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from src.domain import Condition
 from src.domain.policy import Policy
 
@@ -76,3 +76,81 @@ def match_condition(
         return None
     matched.sort(key=lambda x: x[1], reverse=True)
     return matched[0][0]
+
+
+def match_condition_with_details(
+    policy: Policy,
+    conditions: List[Condition],
+    dimension_columns: List[str],
+) -> tuple[Optional[Condition], Dict[str, Any]]:
+    """
+    Match condition with detailed information about why it matched or didn't match.
+    Returns (matched_condition, matching_details)
+    """
+    matching_details = {
+        "matched_condition": None,
+        "matching_score": 0.0,
+        "dimension_matches": {},
+        "failed_conditions": [],
+        "policy_values": {}
+    }
+    
+    # Store policy values for reference
+    for dimension in dimension_columns:
+        matching_details["policy_values"][dimension] = policy.get_dimension_value(dimension)
+    
+    matched = []
+    for condition in conditions:
+        if condition.is_exclusion():
+            continue
+            
+        condition_details = {
+            "condition": condition,
+            "score": 0.0,
+            "dimension_matches": {},
+            "failed_dimensions": []
+        }
+        
+        ok = True
+        for dimension in dimension_columns:
+            cond_vals = condition.get_values(dimension)
+            policy_val = policy.get_dimension_value(dimension)
+            
+            if cond_vals is not None and len(cond_vals) > 0:
+                matches = _values_match(cond_vals, policy_val)
+                condition_details["dimension_matches"][dimension] = {
+                    "condition_values": cond_vals,
+                    "policy_value": policy_val,
+                    "matches": matches
+                }
+                
+                if matches:
+                    condition_details["score"] += _specificity_increment(cond_vals)
+                else:
+                    ok = False
+                    condition_details["failed_dimensions"].append(dimension)
+            else:
+                # No constraint on this dimension
+                condition_details["dimension_matches"][dimension] = {
+                    "condition_values": None,
+                    "policy_value": policy_val,
+                    "matches": True
+                }
+        
+        if ok:
+            matched.append((condition, condition_details))
+        else:
+            matching_details["failed_conditions"].append(condition_details)
+    
+    if not matched:
+        return None, matching_details
+    
+    # Sort by score and take the best match
+    matched.sort(key=lambda x: x[1]["score"], reverse=True)
+    best_match = matched[0]
+    
+    matching_details["matched_condition"] = best_match[0]
+    matching_details["matching_score"] = best_match[1]["score"]
+    matching_details["dimension_matches"] = best_match[1]["dimension_matches"]
+    
+    return best_match[0], matching_details

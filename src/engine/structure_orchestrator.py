@@ -1,7 +1,7 @@
 from typing import Dict, Any, Set, Optional
 from src.domain import PRODUCT, Structure, Condition, Program
 from src.domain.policy import Policy
-from .condition_matcher import match_condition
+from .condition_matcher import match_condition, match_condition_with_details
 from .cession_calculator import apply_condition
 from src.engine.results import (
     ProgramRunResult,
@@ -57,8 +57,8 @@ class StructureProcessor:
         # 2) Garantit le prédécesseur (inuring) si nécessaire
         self._process_predecessor_if_needed(structure)
 
-        # 3) Matching condition le plus spécifique
-        matched = match_condition(
+        # 3) Matching condition le plus spécifique avec détails
+        matched, matching_details = match_condition_with_details(
             self.policy, structure.conditions, self.dimension_columns
         )
 
@@ -75,6 +75,7 @@ class StructureProcessor:
                 reason="no_matching_condition",
                 input_exposure=filtered_exposure,
                 scope_components=components,
+                matching_details=matching_details,
             )
 
         # 5) Rescaling éventuel (XL après QS)
@@ -115,6 +116,7 @@ class StructureProcessor:
                     reinsurer_share=ceded["reinsurer_share"],
                 ),
                 retained_after=retained,
+                matching_details=matching_details,
             ),
         )
         return report
@@ -185,6 +187,7 @@ class StructureProcessor:
         reason: str,
         input_exposure: Optional[float] = None,
         scope_components: Optional[Set[str]] = None,
+        matching_details: Optional[Dict[str, Any]] = None,
     ) -> StructureReport:
         base_input = self._input_exposure(structure)
         if input_exposure is None:
@@ -206,5 +209,6 @@ class StructureProcessor:
                 rescaling=None,
                 cession=CessionBreakdown(0.0, 0.0, 0.0),
                 retained_after=input_exposure,
+                matching_details=matching_details,
             ),
         )
