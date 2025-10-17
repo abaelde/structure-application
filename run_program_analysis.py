@@ -3,8 +3,7 @@ import argparse
 import sys
 from pathlib import Path
 from datetime import datetime
-from src.domain.bordereau import Bordereau
-from src.managers import ProgramManager
+from src.managers import ProgramManager, BordereauManager
 from src.engine import apply_program_to_bordereau
 from src.presentation import generate_detailed_report
 
@@ -46,23 +45,27 @@ def main():
     print(f"📁 Output directory: {analysis_subdir}")
     print()
 
-    print("1. Loading and validating bordereau...")
-    bordereau = Bordereau.from_csv(args.bordereau)
-    print(f"   ✓ Bordereau loaded successfully: {len(bordereau)} policies")
-    print()
-
-    print("2. Loading program configuration...")
-    manager = ProgramManager(backend="excel")
-    program = manager.load(args.program)
+    # 1. Charger d'abord le programme (on en a besoin pour valider le bordereau)
+    print("1. Loading program configuration...")
+    p_manager = ProgramManager(backend="excel")  # ou autodetect plus tard
+    program = p_manager.load(args.program)
     print(f"   ✓ Program loaded: {program.name}")
-    print(f"   ✓ Number of structures: {len(program.structures)}")
-    print()
+    print(f"   ✓ Number of structures: {len(program.structures)}\n")
 
+    # 2. Charger + valider le bordereau via le manager (backend auto)
+    print("2. Loading and validating bordereau...")
+    b_backend = BordereauManager.detect_backend(args.bordereau)
+    b_manager = BordereauManager(backend=b_backend)
+    bordereau = b_manager.load(args.bordereau, program=program, validate=True)
+    print(f"   ✓ Bordereau loaded successfully: {len(bordereau)} policies\n")
+
+    # 3. Program configuration
     print("3. Program configuration:")
     print("-" * 80)
     program.describe()
     print()
 
+    # 4. Application inchangée
     print("4. Applying program to bordereau...")
     calculation_date = "2024-06-01"  # Date de calcul par défaut
     bordereau_with_net, results = apply_program_to_bordereau(
@@ -71,6 +74,7 @@ def main():
     print(f"   ✓ Program applied to {len(results)} policies")
     print()
 
+    # 5. Sauvegarde identique
     print("5. Saving results...")
 
     output_bordereau_file = analysis_subdir / "bordereau_with_cession.csv"

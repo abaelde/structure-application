@@ -67,6 +67,8 @@ class Bordereau:
         validate: bool = True,
         read_csv_kwargs: Optional[Dict[str, object]] = None,
     ) -> "Bordereau":
+        # DEPRECATED: Use BordereauManager instead for better backend support
+        # This method is kept for convenience but will be removed in future versions # AURE to remove !
         read_csv_kwargs = read_csv_kwargs or {}
         df = pd.read_csv(path, **read_csv_kwargs)
         obj = cls(df, uw_dept=uw_dept, source=str(path))
