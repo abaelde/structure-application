@@ -47,7 +47,8 @@ def main():
 
     # 1. Charger d'abord le programme (on en a besoin pour valider le bordereau)
     print("1. Loading program configuration...")
-    p_manager = ProgramManager(backend="excel")  # ou autodetect plus tard
+    p_backend = ProgramManager.detect_backend(args.program)
+    p_manager = ProgramManager(backend=p_backend)
     program = p_manager.load(args.program)
     print(f"   ✓ Program loaded: {program.name}")
     print(f"   ✓ Number of structures: {len(program.structures)}\n")

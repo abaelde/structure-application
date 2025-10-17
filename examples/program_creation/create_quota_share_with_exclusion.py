@@ -50,12 +50,12 @@ program = build_program(
 
 output_dir = "../programs"
 os.makedirs(output_dir, exist_ok=True)
-output_file = os.path.join(output_dir, "quota_share_with_exclusion.xlsx")
+output_file = os.path.join(output_dir, "quota_share_with_exclusion")
 
-manager = ProgramManager(backend="excel")
+manager = ProgramManager(backend="csv_folder")
 manager.save(program, output_file)
 
-print(f"✓ Programme créé: {output_file}")
+print(f"✓ Programme créé: {output_file}/")
 print("\nStructure du programme:")
 print("  - 1 structure: QS Aviation 25%")
 print("  - 3 conditions d'exclusion:")

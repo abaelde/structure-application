@@ -115,12 +115,12 @@ program = build_program(
 
 output_dir = "../programs"
 os.makedirs(output_dir, exist_ok=True)
-output_file = os.path.join(output_dir, "aviation_axa_xl_2024.xlsx")
+output_file = os.path.join(output_dir, "aviation_axa_xl_2024")
 
-manager = ProgramManager(backend="excel")
+manager = ProgramManager(backend="csv_folder")
 manager.save(program, output_file)
 
-print(f"✓ Programme créé: {output_file}")
+print(f"✓ Programme créé: {output_file}/")
 
 print("\n" + "=" * 80)
 print("PROGRAMME AVIATION AXA XL 2024")

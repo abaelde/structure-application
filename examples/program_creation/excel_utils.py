@@ -4,7 +4,7 @@ Excel utilities for program creation
 Provides helper functions for Excel file manipulation, including auto-sizing columns.
 """
 
-import sys
+import sys # AURE : encore utile ?
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))

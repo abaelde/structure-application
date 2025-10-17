@@ -1,13 +1,16 @@
 # src/managers/program_manager.py
+import os
+from pathlib import Path
 import pandas as pd
 from typing import Literal, Optional
 from src.io.program_excel_adapter import ExcelProgramIO
 from src.io.program_snowflake_adapter import SnowflakeProgramIO
+from src.io.program_csv_folder_adapter import CsvProgramFolderIO
 from src.serialization.program_serializer import ProgramSerializer
 from src.domain.program import Program
 
 # Backends supportés par ProgramManager
-Backend = Literal["excel", "snowflake"]
+Backend = Literal["excel", "snowflake", "csv_folder"]
 
 
 class ProgramManager:
@@ -15,37 +18,56 @@ class ProgramManager:
     Unified Program Manager that handles import/export for multiple backends.
 
     This is the main entry point for all program operations (load, save) across
-    different backends (Excel, Snowflake, etc.).
+    different backends (Excel, Snowflake, CSV folder, etc.).
 
     Features:
-    - Load programs from Excel or Snowflake
-    - Save programs to Excel or Snowflake
+    - Load programs from Excel, Snowflake, or CSV folder
+    - Save programs to Excel, Snowflake, or CSV folder
     - Switch backends dynamically
     - Consistent API across all backends
     - State management (track loaded program and source)
+    - Auto-detection of backend from source path
 
     Examples:
-        # Excel operations
+        # Excel
         manager = ProgramManager(backend="excel")
         program = manager.load("program.xlsx")
         manager.save(program, "output.xlsx")
 
-        # Snowflake operations (when implemented)
+        # CSV folder
+        manager = ProgramManager(backend="csv_folder")
+        program = manager.load("path/to/my_program_folder")  # contient 3 CSV
+        manager.save(program, "path/to/another_folder")
+
+        # Snowflake
         manager = ProgramManager(backend="snowflake")
         program = manager.load("snowflake://database.schema.table")
         manager.save(program, "snowflake://database.schema.output_table")
-
-        # Switch backends
-        manager.switch_backend("excel")
-        manager.save(program, "backup.xlsx")
     """
+
+    @staticmethod
+    def detect_backend(source: str) -> Backend:
+        """Heuristique simple:
+           - 'snowflake://...' -> snowflake
+           - dossier existant -> csv_folder
+           - fichier .xlsx/.xls -> excel
+        """
+        if source.lower().startswith("snowflake://"):
+            return "snowflake"
+        p = Path(source)
+        if p.exists() and p.is_dir():
+            return "csv_folder"
+        if p.suffix.lower() in {".xlsx", ".xls"}:
+            return "excel"
+        # défaut: si le chemin n'existe pas encore mais ressemble à un dossier (sans suffixe) -> csv_folder
+        return "csv_folder" if p.suffix == "" else "excel"
 
     def __init__(self, backend: Backend = "excel"):
         """
         Initialize the program manager.
 
         Args:
-            backend: Default backend to use ("excel" or "snowflake")
+            backend: Default backend to use ("excel", "snowflake", or "csv_folder")
         """
         self.backend = backend
         self.serializer = ProgramSerializer()
@@ -59,6 +81,8 @@ class ProgramManager:
             return ExcelProgramIO()
         elif backend == "snowflake":
             return SnowflakeProgramIO()
+        elif backend == "csv_folder":
+            return CsvProgramFolderIO()
         else:
             raise ValueError(f"Unknown backend: {backend}")
 

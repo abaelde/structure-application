@@ -79,12 +79,12 @@ program = build_program(
     underwriting_department="aviation",
 )
 
-output_file = "../programs/aviation_old_republic_2024.xlsx"
+output_file = "../programs/aviation_old_republic_2024"
 
-manager = ProgramManager(backend="excel")
+manager = ProgramManager(backend="csv_folder")
 manager.save(program, output_file)
 
-print(f"✓ Programme créé: {output_file}")
+print(f"✓ Programme créé: {output_file}/")
 
 print("\n" + "=" * 80)
 print("PROGRAMME AVIATION OLD REPUBLIC 2024")

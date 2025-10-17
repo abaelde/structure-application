@@ -30,12 +30,12 @@ program = build_program(
 
 output_dir = "../programs"
 os.makedirs(output_dir, exist_ok=True)
-output_file = "../programs/single_quota_share.xlsx"
+output_file = "../programs/single_quota_share"
 
-manager = ProgramManager(backend="excel")
+manager = ProgramManager(backend="csv_folder")
 manager.save(program, output_file)
 
-print("✓ Programme Single Quota share créé: examples/programs/single_quota_share.xlsx")
+print("✓ Programme Single Quota share créé: examples/programs/single_quota_share/")
 
 print("\n" + "=" * 80)
 print("PROGRAMME SINGLE QUOTA SHARE")
