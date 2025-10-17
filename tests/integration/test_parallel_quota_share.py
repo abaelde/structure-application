@@ -68,7 +68,7 @@ def test_double_quota_share_parallel():
         bordereau, program, calculation_date=calculation_date
     )
 
-    result = results_df.iloc[0]
+    result = results_df.iloc[0] # AURE : toujours bizarre cette sortie
     structures_detail = result["structures_detail"]
 
     exposure = 1_000_000

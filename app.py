@@ -74,10 +74,11 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### 📋 Reinsurance Program")
-    program_file = st.file_uploader(
-        "Upload your program Excel file",
-        type=["xlsx"],
-        help="The Excel file containing the reinsurance program configuration",
+    program_files = st.file_uploader(
+        "Upload your program folder (CSV format)",
+        accept_multiple_files="directory",
+        type=["csv"],
+        help="Select the folder containing program.csv, structures.csv, and conditions.csv",
     )
 
 with col2:
@@ -88,28 +89,43 @@ with col2:
         help="The CSV file containing the policy data to analyze",
     )
 
-if program_file and bordereau_file:
+if program_files and bordereau_file:
     try:
         with st.spinner("🔄 Loading files..."):
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=".xlsx"
-            ) as tmp_program:
-                tmp_program.write(program_file.read())
-                tmp_program_path = tmp_program.name
+            # Reconstruire le dossier CSV temporaire
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                tmp_dir_path = Path(tmp_dir)
+                
+                # Sauvegarder tous les fichiers CSV du programme à la racine
+                uploaded_filenames = []
+                for uploaded_file in program_files:
+                    # Extraire le nom du fichier (sans le chemin du dossier)
+                    filename = Path(uploaded_file.name).name
+                    dest_path = tmp_dir_path / filename
+                    dest_path.write_bytes(uploaded_file.getbuffer())
+                    uploaded_filenames.append(filename)
+                
+                # Vérifier que les fichiers requis sont présents
+                required_files = ["program.csv", "structures.csv", "conditions.csv"]
+                missing_files = [f for f in required_files if f not in uploaded_filenames]
+                if missing_files:
+                    raise ValueError(f"Missing required files: {', '.join(missing_files)}")
+                
+                # Sauvegarder le bordereau
+                with tempfile.NamedTemporaryFile(
+                    delete=False, suffix=".csv", mode="w", encoding="utf-8"
+                ) as tmp_bordereau:
+                    bordereau_file.seek(0)
+                    tmp_bordereau.write(bordereau_file.read().decode("utf-8"))
+                    tmp_bordereau_path = tmp_bordereau.name
 
-            with tempfile.NamedTemporaryFile(
-                delete=False, suffix=".csv", mode="w", encoding="utf-8"
-            ) as tmp_bordereau:
-                bordereau_file.seek(0)
-                tmp_bordereau.write(bordereau_file.read().decode("utf-8"))
-                tmp_bordereau_path = tmp_bordereau.name
+                # Charger le bordereau et le programme
+                bordereau_df = Bordereau.from_csv(tmp_bordereau_path)
+                manager = ProgramManager(backend="csv_folder")
+                program = manager.load(str(tmp_dir_path))
 
-            bordereau_df = Bordereau.from_csv(tmp_bordereau_path)
-            manager = ProgramManager(backend="csv_folder")
-            program = manager.load(tmp_program_path)
-
-            Path(tmp_program_path).unlink()
-            Path(tmp_bordereau_path).unlink()
+                # Nettoyer le fichier bordereau temporaire
+                Path(tmp_bordereau_path).unlink()
 
         st.success(f"✅ Files loaded successfully!")
 
@@ -409,5 +425,5 @@ if program_file and bordereau_file:
 
 else:
     st.info(
-        "👆 Please upload a program file (Excel) and a bordereau (CSV) to start the analysis"
+        "👆 Please upload a program folder (CSV format) and a bordereau (CSV) to start the analysis"
     )
