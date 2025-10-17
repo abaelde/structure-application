@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Self
 import pandas as pd
 from .condition import Condition
 from .constants import condition_COLS, PRODUCT
@@ -31,7 +31,7 @@ class Structure:
         structure_row: Dict[str, Any],
         conditions_data: List[Dict[str, Any]],
         structure_cols,
-    ) -> "Structure":
+    ) -> Self:
         """
         Factory method: create Structure from dictionary data.
         The Structure knows how to find and link its own conditions.
@@ -148,7 +148,7 @@ class Structure:
         
         return groups
 
-    def _get_condition_signature(self, condition: "Condition") -> tuple:
+    def _get_condition_signature(self, condition: Condition) -> tuple:
         """Get a signature for a condition excluding dimension values"""
         signature = (
             condition.cession_pct,

@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Self
 import pandas as pd
 from .constants import condition_COLS
 
@@ -37,7 +37,7 @@ class Condition:
                 raise ValueError("At least one of INCLUDES_HULL / INCLUDES_LIABILITY must be True")
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Condition":
+    def from_dict(cls, data: Dict[str, Any]) -> Self:
         """Factory method: create condition from dictionary"""
         return cls(data)
 
@@ -65,7 +65,7 @@ class Condition:
     def __contains__(self, key: str) -> bool:
         return key in self._data
 
-    def copy(self) -> "Condition":
+    def copy(self) -> Self:
         return Condition(self._data.copy())
 
     def to_dict(self) -> Dict[str, Any]:
@@ -167,7 +167,7 @@ class Condition:
 
     def rescale_for_predecessor(
         self, retention_factor: float
-    ) -> tuple["Condition", Dict[str, Any]]:
+    ) -> tuple[Self, Dict[str, Any]]:
         rescaled_condition = self.copy()
         rescaling_info = {
             "retention_factor": retention_factor,
