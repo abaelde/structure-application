@@ -3,7 +3,7 @@ from typing import Dict
 from .calculation_engine import apply_program
 from ..domain.bordereau import Bordereau
 from ..domain.policy import Policy
-from ..domain.models import Program
+from ..domain.program import Program
 
 
 def apply_program_to_row(

@@ -1,6 +1,6 @@
 import pandas as pd
 from .base import Product
-from src.domain.models import Condition
+from src.domain.condition import Condition
 
 
 def quota_share(exposure: float, cession_PCT: float, limit: float = None) -> float:

@@ -1,6 +1,6 @@
 import pandas as pd
 from .base import Product
-from src.domain.models import Condition
+from src.domain.condition import Condition
 
 
 def excess_of_loss(

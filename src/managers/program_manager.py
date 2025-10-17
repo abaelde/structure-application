@@ -4,7 +4,7 @@ from typing import Literal, Optional
 from src.io.excel_adapter import ExcelProgramIO
 from src.io.snowflake_adapter import SnowflakeProgramIO
 from src.serialization.program_serializer import ProgramSerializer
-from src.domain.models import Program
+from src.domain.program import Program
 
 # Backends supportés par ProgramManager
 Backend = Literal["excel", "snowflake"]

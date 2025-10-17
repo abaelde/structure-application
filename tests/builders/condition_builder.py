@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from src.domain.models import Condition
+from src.domain.condition import Condition
 
 
 def _as_list(x):

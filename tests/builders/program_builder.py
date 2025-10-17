@@ -1,5 +1,6 @@
 from typing import List, Optional
-from src.domain.models import Program, Structure
+from src.domain.program import Program
+from src.domain.structure import Structure
 from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 

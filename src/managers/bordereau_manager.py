@@ -4,7 +4,7 @@ from typing import Literal, Optional, Dict, Any
 import pandas as pd
 from src.serialization.bordereau_serializer import BordereauSerializer
 from src.domain.bordereau import Bordereau
-from src.domain.models import Program
+from src.domain.program import Program
 from src.io.bordereau_csv_adapter import CsvBordereauIO
 from src.io.bordereau_snowflake_adapter import SnowflakeBordereauIO
 

@@ -1,6 +1,6 @@
 from typing import Dict
 from src.domain.products import PRODUCT_REGISTRY
-from src.domain.models import Condition
+from src.domain.condition import Condition
 
 
 def apply_condition(

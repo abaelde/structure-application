@@ -10,7 +10,9 @@ from .constants import (
     STRUCTURE_COLS,
     condition_COLS,
 )
-from .models import Program, Structure, Condition
+from .program import Program
+from .structure import Structure
+from .condition import Condition
 
 __all__ = [
     "UNDERWRITING_DEPARTMENT",
