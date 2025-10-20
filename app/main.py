@@ -158,8 +158,21 @@ if program_files and bordereau_file:
         st.markdown("---")
         st.markdown("## ⚙️ Program Application")
 
+        col_cd1, col_cd2 = st.columns([2, 1])
+        with col_cd1:
+            calc_dt_input = st.date_input(
+                "Calculation date",
+                value=pd.Timestamp.today().date(),
+                help="Date used for Loss Occurring structures; Risk Attaching uses policy inception",
+            )
+        with col_cd2:
+            st.write("")
+            st.write("")
+            st.info("You can change the calculation date before running the analysis")
+
+        calculation_date = pd.to_datetime(calc_dt_input).date().isoformat()
+
         with st.spinner("🔄 Calculating..."):
-            calculation_date = "2024-06-01"
             bordereau_with_net, results = apply_program_to_bordereau(
                 bordereau_df, program, calculation_date
             )
