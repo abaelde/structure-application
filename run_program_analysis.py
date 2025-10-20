@@ -3,7 +3,8 @@ import argparse
 import sys
 from pathlib import Path
 from datetime import datetime
-from src.managers import ProgramManager, BordereauManager
+from src.managers import ProgramManager, BordereauManager, RunManager
+from src.serialization.run_serializer import RunMeta
 from src.engine import apply_program_to_bordereau
 from src.presentation import generate_detailed_report
 
@@ -47,6 +48,7 @@ def main():
 
     # 1. Charger d'abord le programme (on en a besoin pour valider le bordereau)
     print("1. Loading program configuration...")
+    started_at = datetime.now().isoformat()
     p_backend = ProgramManager.detect_backend(args.program)
     p_manager = ProgramManager(backend=p_backend)
     program = p_manager.load(args.program)
@@ -77,13 +79,45 @@ def main():
 
     # 5. Sauvegarde identique
     print("5. Saving results...")
-
     output_bordereau_file = analysis_subdir / "bordereau_with_cession.csv"
     bordereau_with_net.to_csv(output_bordereau_file, index=False)
     print(f"   ✓ Bordereau with cessions: {output_bordereau_file}")
 
     detailed_report_file = analysis_subdir / "detailed_report.txt"
     generate_detailed_report(results, program, str(detailed_report_file))
+    print(f"   ✓ Detailed report: {detailed_report_file}")
+
+    # 6. Persistance du Run en CSV (3 tables)
+    print("6. Persisting run (CSV)...")
+    ended_at = datetime.now().isoformat()
+
+    run_id = f"{program_name}_{bordereau_name}_{timestamp}"  # lisible & unique (ou utilise uuid)
+    run_meta = RunMeta(
+        run_id=run_id,
+        program_name=program.name,
+        uw_dept=program.underwriting_department,
+        calculation_date=calculation_date,
+        source_program=args.program,
+        source_bordereau=args.bordereau,
+        program_fingerprint=None,  # tu peux injecter un hash du programme si tu veux
+        started_at=started_at,
+        ended_at=ended_at,
+        notes=None,
+    )
+
+    r_backend = RunManager.detect_backend(str(analysis_subdir))  # "csv"
+    r_manager = RunManager(backend=r_backend)
+    # on passe aussi le DF du bordereau pour extraire un éventuel policy_id
+    dfs = r_manager.save(
+        run_meta,
+        results_df=results,
+        dest=str(analysis_subdir),
+        source_policy_df=bordereau.to_engine_dataframe(),
+    )
+
+    print(f"   ✓ Runs CSV: {analysis_subdir / 'runs.csv'}")
+    print(f"   ✓ Policies CSV: {analysis_subdir / 'run_policies.csv'}")
+    print(f"   ✓ Structures CSV: {analysis_subdir / 'run_policy_structures.csv'}")
     print()
 
     print("=" * 80)
