@@ -1,15 +1,22 @@
 import pytest
 from src.domain.exposure import (
-    get_exposure_calculator,
     AviationExposureCalculator,
-    CasualtyExposureCalculator,
-    TestExposureCalculator,
     ExposureCalculationError,
 )
 
 
 class TestAviationExposureCalculator:
     def test_calculate_valid_exposure(self):
+        """
+        Test de calcul d'exposition aviation avec Hull et Liability complets
+        
+        DONNÉES:
+        - Hull: 50M × 15% = 7.5M
+        - Liability: 300M × 10% = 30M
+        
+        ATTENDU:
+        - Total: 37.5M
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 50_000_000,
@@ -25,6 +32,16 @@ class TestAviationExposureCalculator:
         assert result == 37_500_000
 
     def test_calculate_with_string_values(self):
+        """
+        Test de calcul avec des valeurs string (conversion automatique)
+        
+        DONNÉES:
+        - Hull: "50000000" × "0.15" = 7.5M
+        - Liability: "300000000" × "0.10" = 30M
+        
+        ATTENDU:
+        - Total: 37.5M
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": "50000000",
@@ -38,6 +55,16 @@ class TestAviationExposureCalculator:
         assert result == 37_500_000
 
     def test_calculate_missing_hull_limit(self):
+        """
+        Test de calcul avec Hull manquant (seulement Liability)
+        
+        DONNÉES:
+        - Hull: None
+        - Liability: 300M × 10% = 30M
+        
+        ATTENDU:
+        - Total: 30M
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
             "LIABILITY_LIMIT": 300_000_000,
@@ -50,6 +77,16 @@ class TestAviationExposureCalculator:
         assert result == 30_000_000
 
     def test_calculate_missing_liability_limit(self):
+        """
+        Test de calcul avec Liability manquant (seulement Hull)
+        
+        DONNÉES:
+        - Hull: 50M × 15% = 7.5M
+        - Liability: None
+        
+        ATTENDU:
+        - Total: 7.5M
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 50_000_000,
@@ -62,6 +99,16 @@ class TestAviationExposureCalculator:
         assert result == 7_500_000
 
     def test_calculate_missing_hull_share(self):
+        """
+        Test d'erreur quand HULL_SHARE est manquant
+        
+        DONNÉES:
+        - Hull: 50M (sans HULL_SHARE)
+        - Liability: 300M × 10% = 30M
+        
+        ATTENDU:
+        - Exception ExposureCalculationError
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 50_000_000,
@@ -76,6 +123,16 @@ class TestAviationExposureCalculator:
         assert "HULL_SHARE" in str(exc_info.value)
 
     def test_calculate_missing_liability_share(self):
+        """
+        Test d'erreur quand LIABILITY_SHARE est manquant
+        
+        DONNÉES:
+        - Hull: 50M × 15% = 7.5M
+        - Liability: 300M (sans LIABILITY_SHARE)
+        
+        ATTENDU:
+        - Exception ExposureCalculationError
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 50_000_000,
@@ -90,6 +147,16 @@ class TestAviationExposureCalculator:
         assert "LIABILITY_SHARE" in str(exc_info.value)
 
     def test_calculate_invalid_numeric_value(self):
+        """
+        Test d'erreur avec valeur numérique invalide
+        
+        DONNÉES:
+        - Hull: "not_a_number" (invalide)
+        - Liability: 300M × 10% = 30M
+        
+        ATTENDU:
+        - Exception ExposureCalculationError
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": "not_a_number",
@@ -104,6 +171,16 @@ class TestAviationExposureCalculator:
         assert "Invalid numeric values" in str(exc_info.value)
 
     def test_realistic_aviation_exposure(self):
+        """
+        Test avec des valeurs réalistes d'aviation
+        
+        DONNÉES:
+        - Hull: 250M × 15% = 37.5M
+        - Liability: 1B × 10% = 100M
+        
+        ATTENDU:
+        - Total: 137.5M
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 250_000_000,
@@ -121,11 +198,18 @@ class TestAviationExposureCalculator:
 
     def test_calculate_missing_both_exposures(self):
         """
-        Test que le calculateur retourne 0.0 quand aucune exposition n'est presente.
-
-        Note: La validation de la presence des colonnes d'exposition au niveau DataFrame
+        Test que le calculateur retourne 0.0 quand aucune exposition n'est présente.
+        
+        Note: La validation de la présence des colonnes d'exposition au niveau DataFrame
         est faite par validate(). Le calculateur traite ligne par ligne
-        et retourne 0.0 si aucune valeur d'exposition n'est presente sur cette ligne.
+        et retourne 0.0 si aucune valeur d'exposition n'est présente sur cette ligne.
+        
+        DONNÉES:
+        - Hull: None
+        - Liability: None
+        
+        ATTENDU:
+        - Total: 0.0
         """
         calculator = AviationExposureCalculator()
         policy_data = {
@@ -139,6 +223,16 @@ class TestAviationExposureCalculator:
         assert result == 0.0
 
     def test_calculate_hull_share_without_hull_limit(self):
+        """
+        Test avec HULL_SHARE mais sans HULL_LIMIT (seulement Liability)
+        
+        DONNÉES:
+        - Hull: HULL_SHARE présent mais HULL_LIMIT manquant
+        - Liability: 300M × 10% = 30M
+        
+        ATTENDU:
+        - Total: 30M
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
             "LIABILITY_LIMIT": 300_000_000,
@@ -152,6 +246,16 @@ class TestAviationExposureCalculator:
         assert result == 30_000_000
 
     def test_calculate_liability_share_without_liability_limit(self):
+        """
+        Test avec LIABILITY_SHARE mais sans LIABILITY_LIMIT (seulement Hull)
+        
+        DONNÉES:
+        - Hull: 50M × 15% = 7.5M
+        - Liability: LIABILITY_SHARE présent mais LIABILITY_LIMIT manquant
+        
+        ATTENDU:
+        - Total: 7.5M
+        """
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 50_000_000,
@@ -167,11 +271,11 @@ class TestAviationExposureCalculator:
     def test_calculate_components_with_both(self):
         """
         Test calculate_components avec Hull et Liability
-
+        
         DONNÉES:
         - Hull: 100M × 15% = 15M
         - Liability: 500M × 10% = 50M
-
+        
         ATTENDU:
         - Hull exposure: 15M
         - Liability exposure: 50M
@@ -194,11 +298,11 @@ class TestAviationExposureCalculator:
     def test_calculate_components_hull_only(self):
         """
         Test calculate_components avec seulement Hull
-
+        
         DONNÉES:
         - Hull: 100M × 15% = 15M
         - Liability: None
-
+        
         ATTENDU:
         - Hull exposure: 15M
         - Liability exposure: 0
@@ -219,11 +323,11 @@ class TestAviationExposureCalculator:
     def test_calculate_components_liability_only(self):
         """
         Test calculate_components avec seulement Liability
-
+        
         DONNÉES:
         - Hull: None
         - Liability: 500M × 10% = 50M
-
+        
         ATTENDU:
         - Hull exposure: 0
         - Liability exposure: 50M
@@ -244,11 +348,11 @@ class TestAviationExposureCalculator:
     def test_calculate_components_none(self):
         """
         Test calculate_components sans aucune exposition
-
+        
         DONNÉES:
         - Hull: None
         - Liability: None
-
+        
         ATTENDU:
         - Hull exposure: 0
         - Liability exposure: 0
@@ -262,143 +366,3 @@ class TestAviationExposureCalculator:
         assert bundle.components["hull"] == 0.0
         assert bundle.components["liability"] == 0.0
         assert bundle.total == 0.0
-
-
-class TestCasualtyExposureCalculator:
-    def test_calculate_valid_exposure(self):
-        calculator = CasualtyExposureCalculator()
-        policy_data = {
-            "LIMIT": 1_000_000,
-            "CEDENT_SHARE": 0.75,
-        }
-
-        result = calculator.calculate(policy_data)
-
-        assert result == 750_000
-
-    def test_calculate_with_string_value(self):
-        calculator = CasualtyExposureCalculator()
-        policy_data = {
-            "LIMIT": "1000000",
-            "CEDENT_SHARE": "0.75",
-        }
-
-        result = calculator.calculate(policy_data)
-
-        assert result == 750_000
-
-    def test_calculate_missing_limit(self):
-        calculator = CasualtyExposureCalculator()
-        policy_data = {
-            "CEDENT_SHARE": 0.75,
-        }
-
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            calculator.calculate(policy_data)
-
-        assert "Missing exposure value" in str(exc_info.value)
-        assert "LIMIT" in str(exc_info.value)
-
-    def test_calculate_missing_cedent_share(self):
-        calculator = CasualtyExposureCalculator()
-        policy_data = {
-            "LIMIT": 1_000_000,
-        }
-
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            calculator.calculate(policy_data)
-
-        assert "Missing exposure value" in str(exc_info.value)
-        assert "CEDENT_SHARE" in str(exc_info.value)
-
-    def test_calculate_invalid_numeric_value(self):
-        calculator = CasualtyExposureCalculator()
-        policy_data = {
-            "LIMIT": "invalid",
-            "CEDENT_SHARE": 0.75,
-        }
-
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            calculator.calculate(policy_data)
-
-        assert "Invalid numeric value" in str(exc_info.value)
-
-
-class TestTestExposureCalculator:
-    def test_calculate_valid_exposure(self):
-        calculator = TestExposureCalculator()
-        policy_data = {
-            "exposure": 500_000,
-        }
-
-        result = calculator.calculate(policy_data)
-
-        assert result == 500_000
-
-    def test_calculate_with_string_value(self):
-        calculator = TestExposureCalculator()
-        policy_data = {
-            "exposure": "500000",
-        }
-
-        result = calculator.calculate(policy_data)
-
-        assert result == 500_000
-
-    def test_calculate_missing_exposure(self):
-        calculator = TestExposureCalculator()
-        policy_data = {}
-
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            calculator.calculate(policy_data)
-
-        assert "Missing exposure value" in str(exc_info.value)
-        assert "exposure" in str(exc_info.value)
-
-    def test_calculate_invalid_numeric_value(self):
-        calculator = TestExposureCalculator()
-        policy_data = {
-            "exposure": "invalid",
-        }
-
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            calculator.calculate(policy_data)
-
-        assert "Invalid numeric value" in str(exc_info.value)
-
-
-class TestGetExposureCalculator:
-    def test_get_aviation_calculator(self):
-        calculator = get_exposure_calculator("aviation")
-        assert isinstance(calculator, AviationExposureCalculator)
-
-    def test_get_casualty_calculator(self):
-        calculator = get_exposure_calculator("casualty")
-        assert isinstance(calculator, CasualtyExposureCalculator)
-
-    def test_get_test_calculator(self):
-        calculator = get_exposure_calculator("test")
-        assert isinstance(calculator, TestExposureCalculator)
-
-    def test_get_aviation_calculator_uppercase(self):
-        calculator = get_exposure_calculator("AVIATION")
-        assert isinstance(calculator, AviationExposureCalculator)
-
-    def test_get_unknown_department(self):
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            get_exposure_calculator("unknown")
-
-        assert "Unknown underwriting department" in str(exc_info.value)
-        assert "unknown" in str(exc_info.value)
-
-    def test_get_calculator_none_department(self):
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            get_exposure_calculator(None)
-
-        assert "Unknown underwriting department" in str(exc_info.value)
-
-    def test_get_calculator_empty_department(self):
-        with pytest.raises(ExposureCalculationError) as exc_info:
-            get_exposure_calculator("")
-
-        assert "Unknown underwriting department" in str(exc_info.value)
