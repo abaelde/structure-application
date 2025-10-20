@@ -17,7 +17,7 @@ structure-application/
 │   │   ├── constants.py                # Constantes métier (PRODUCT, CLAIM_BASIS, etc.)
 │   │   └── __init__.py
 │   ├── loaders/                        # Chargement et validation de données
-│   │   ├── program_loader.py          # Chargement de programmes depuis Excel
+│   │   ├── program_loader.py          # Chargement de programmes depuis CSV
 │   │   ├── bordereau_loader.py        # Chargement et validation de bordereaux CSV
 │   │   ├── exposure_mapping.py        # Mapping de colonnes d'exposure par LoB
 │   │   └── __init__.py
@@ -174,7 +174,7 @@ uv run streamlit run app/main.py
 ```
 
 L'application propose :
-- 📤 Upload facile de programme (Excel) et bordereau (CSV)
+- 📤 Upload facile de programme (CSV folder) et bordereau (CSV)
 - 📊 Visualisation interactive des résultats par police
 - 🔍 Exploration détaillée de l'application des structures
 - 💾 Export des résultats au format CSV
@@ -330,7 +330,7 @@ Le fichier `PROGRAM_SPECIFICATION_GUIDE.md` contient la spécification complète
 1. Ouvrez le fichier `PROGRAM_SPECIFICATION_GUIDE.md`
 2. Décrivez votre besoin en langage naturel à Cursor
 3. Cursor utilisera automatiquement le guide pour générer le code Python correct
-4. Exécutez le script généré pour créer votre fichier Excel
+4. Exécutez le script généré pour créer votre dossier CSV
 
 **Exemples de demandes :**
 - "Crée un programme avec 25% de cession par défaut, 30% pour la France et 35% pour EMEA"

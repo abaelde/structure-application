@@ -14,7 +14,7 @@ def main():
         description="Apply reinsurance program to bordereau and generate analysis reports"
     )
     parser.add_argument(
-        "--program", "-p", required=True, help="Path to the program Excel file"
+        "--program", "-p", required=True, help="Path to the program CSV folder"
     )
     parser.add_argument(
         "--bordereau", "-b", required=True, help="Path to the bordereau CSV file"

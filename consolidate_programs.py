@@ -105,7 +105,7 @@ def apply_single_program_to_bordereau(program_path: Path, bordereau_path: Path):
     Apply a single program to its bordereau
 
     Args:
-        program_path: Path to the program Excel file
+        program_path: Path to the program CSV folder
         bordereau_path: Path to the bordereau CSV file
 
     Returns:

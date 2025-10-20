@@ -124,7 +124,7 @@ Ce programme illustre le nouveau mécanisme de filtrage Hull/Liability :
 
 UTILISATION:
 
-Dans Excel, ajoutez simplement deux colonnes optionnelles dans la feuille "conditions":
+Dans le fichier CSV, ajoutez simplement deux colonnes optionnelles dans le fichier "conditions.csv":
 - INCLUDES_HULL (TRUE/FALSE, défaut: TRUE)
 - INCLUDES_LIABILITY (TRUE/FALSE, défaut: TRUE)
 

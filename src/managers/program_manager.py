@@ -17,7 +17,7 @@ class ProgramManager:
     Unified Program Manager that handles import/export for multiple backends.
 
     This is the main entry point for all program operations (load, save) across
-    different backends (Excel, Snowflake, CSV folder, etc.).
+    different backends (Snowflake, CSV folder, etc.).
 
     Features:
     - Load programs from Snowflake or CSV folder

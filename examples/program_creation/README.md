@@ -2,11 +2,11 @@
 
 Ce document définit les contraintes du modèle de données pour la création de programmes de réassurance.
 
-## Structure des Fichiers Excel
+## Structure des Fichiers CSV
 
-Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
+Chaque programme doit être un dossier CSV avec **3 fichiers obligatoires** :
 
-### 1. Feuille "program" (1 ligne)
+### 1. Fichier "program.csv" (1 ligne)
 **Contraintes :**
 - **REPROG_ID_PRE** : INTEGER, clé primaire auto-incrémentée (commence à 1)
 - **REPROG_TITLE** : VARCHAR(255), nom du programme (obligatoire)
@@ -23,7 +23,7 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 - **REPROG_MAIN_CURRENCY_CD** : VARCHAR(255), code devise principale (peut être NULL)
 - **REPROG_MANAGEMENT_REPORTING_LOB_CD** : VARCHAR(255), code LOB reporting (peut être NULL)
 
-### 2. Feuille "structures" (n lignes)
+### 2. Fichier "structures.csv" (n lignes)
 **Contraintes :**
 - **INSPER_ID_PRE** : INTEGER PRIMARY KEY, clé primaire auto-incrémentée (commence à 1)
 - **BUSINESS_ID_PRE** : VARCHAR(255), Tnumber (peut être NULL)
@@ -47,7 +47,7 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 - **INSPER_LOD_TO_RA_DATE_SLAV** : DATE, date LOD to RA (peut être NULL)
 - **INSPER_COMMENT** : VARCHAR, commentaires (peut être NULL)
 
-### 3. Feuille "conditions" (n lignes)
+### 3. Fichier "conditions.csv" (n lignes)
 **Contraintes :**
 
 #### Clés et Références
@@ -106,10 +106,10 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 ## Contraintes de Cohérence
 
 ### Contraintes Structurelles
-1. **BUSINESS_TITLE** : Doit être unique dans la feuille structures
-2. **INSPER_ID_PRE** dans conditions : Doit référencer un INSPER_ID_PRE existant dans structures
-3. **REPROG_ID_PRE** dans structures : Doit référencer le REPROG_ID_PRE du programme parent
-4. **REPROG_ID_PRE** dans conditions : Doit référencer le REPROG_ID_PRE du programme parent
+1. **BUSINESS_TITLE** : Doit être unique dans le fichier structures.csv
+2. **INSPER_ID_PRE** dans conditions : Doit référencer un INSPER_ID_PRE existant dans structures.csv
+3. **REPROG_ID_PRE** dans structures.csv : Doit référencer le REPROG_ID_PRE du programme parent
+4. **REPROG_ID_PRE** dans conditions.csv : Doit référencer le REPROG_ID_PRE du programme parent
 5. **BUSCL_ID_PRE** : Doit être unique et auto-incrémenté
 6. **INSPER_PREDECESSOR_TITLE** : Si non NULL, doit référencer un BUSINESS_TITLE existant dans le même programme
 
@@ -159,7 +159,7 @@ Quand un **Excess of Loss** s'applique après un **Quota Share** :
 
 ### Nouveau système d'exclusions
 
-Depuis la migration, les exclusions sont gérées au niveau programme via une table dédiée `exclusions.csv` (ou feuille `exclusions` en Excel).
+Depuis la migration, les exclusions sont gérées au niveau programme via une table dédiée `exclusions.csv`.
 
 ### Structure de la table exclusions
 
@@ -227,7 +227,7 @@ Tous les scripts de création utilisent maintenant les **Builders** pour créer 
 **Avantages :**
 - ✅ **90% moins de code** : Focus sur la logique métier
 - ✅ **Plus lisible** : API fluide et intuitive
-- ✅ **Plus maintenable** : Un seul endroit pour gérer la conversion Excel
+- ✅ **Plus maintenable** : Un seul endroit pour gérer la conversion CSV
 - ✅ **Moins d'erreurs** : IDs et champs gérés automatiquement
 - ✅ **Réutilisable** : Les Builders sont aussi utilisés dans les tests
 
@@ -407,7 +407,7 @@ manager.save(program, "../programs/qs_exclusions")
 
 ### Sauvegarde en CSV Folder
 
-Les programmes sont maintenant sauvegardés au format CSV folder, qui est plus simple et plus portable que Excel. Chaque programme est sauvegardé dans un dossier contenant 4 fichiers CSV :
+Les programmes sont maintenant sauvegardés au format CSV folder, qui est plus simple et plus portable. Chaque programme est sauvegardé dans un dossier contenant 4 fichiers CSV :
 
 - `program.csv` - Informations générales du programme
 - `structures.csv` - Toutes les structures du programme  

@@ -27,10 +27,7 @@ When the user asks to create or modify a reinsurance program configuration, refe
 - Most specific condition wins (most conditions matched)
 
 ### Output Format
-Create Python script using pandas to generate Excel file with three sheets:
-1. `program`: Program configuration
-2. `structures`: Structure definitions  
-3. `conditions`: Parameter sets with conditions
+
 
 Always use `np.nan` for empty values in Python, not `None`.
 

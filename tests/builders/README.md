@@ -194,7 +194,7 @@ program = build_program(
 )
 ```
 
-## 📂 Quand utiliser Excel vs Builders
+## 📂 Quand utili
 
 ### Utiliser les **builders** pour :
 - ✅ Tests d'intégration de la logique métier

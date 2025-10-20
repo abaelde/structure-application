@@ -12,7 +12,6 @@ class CsvProgramFolderIO:
       - structures.csv
       - conditions.csv
 
-    Convention simple, isofonctionnelle avec Excel (mêmes colonnes).
     """
 
     PROGRAM_FILE = "program.csv"

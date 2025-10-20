@@ -1,7 +1,7 @@
 """
 Builders for creating Program, Structure, and condition objects directly in memory.
 
-These builders allow creating test programs without the overhead of Excel I/O,
+These builders allow creating test programs,
 making tests faster and more focused on business logic.
 """
 

@@ -17,7 +17,7 @@ L'application s'ouvrira automatiquement dans votre navigateur à l'adresse `http
 - Guide rapide d'utilisation
 
 ### 📊 Analyse
-- **Upload de fichiers**: Programme Excel + Bordereau CSV
+- **Upload de fichiers**: Programme CSV folder + Bordereau CSV
 - **Métriques globales**: Exposition totale, nombre de polices, structures
 - **Configuration du programme**: Visualisation détaillée de la configuration
 - **Résultats par police**: Tableau interactif avec toutes les polices
