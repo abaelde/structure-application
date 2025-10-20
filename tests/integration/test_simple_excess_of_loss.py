@@ -25,6 +25,9 @@ def test_single_line_excess_of_loss_basic():
         name="XL_15Mxs10M",
         attachment=10_000_000,
         limit=15_000_000,
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     program = build_program(
@@ -106,6 +109,9 @@ def test_single_line_excess_of_loss_by_country():
                 "limit": 15_000_000,
             },
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     program = build_program(

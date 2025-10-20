@@ -28,6 +28,9 @@ def test_single_line_quota_share_basic():
                 "includes_liability": True,
             }
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     program = build_program(
@@ -109,6 +112,9 @@ def test_single_line_quota_share_with_currency_matching():
                 "includes_liability": True,
             },
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     program = build_program(

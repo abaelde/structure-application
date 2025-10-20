@@ -36,6 +36,9 @@ def test_double_quota_share_parallel():
                 "includes_liability": True,
             }
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
     qs_15 = build_quota_share(
         name="QS_15",
@@ -46,6 +49,9 @@ def test_double_quota_share_parallel():
                 "includes_liability": True,
             }
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     program = build_program(

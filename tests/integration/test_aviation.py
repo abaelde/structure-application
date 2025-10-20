@@ -52,6 +52,9 @@ def test_hull_liability_filtering_aviation():
                 "includes_liability": True,
             }
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     xol_hull = build_excess_of_loss(
@@ -66,6 +69,9 @@ def test_hull_liability_filtering_aviation():
             }
         ],
         predecessor_title="QS_ALL",
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     xol_liability = build_excess_of_loss(
@@ -80,6 +86,9 @@ def test_hull_liability_filtering_aviation():
             }
         ],
         predecessor_title="QS_ALL",
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     program = build_program(
@@ -206,6 +215,9 @@ def test_hull_only_structure():
                 "includes_liability": False,
             }
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     program = build_program(
@@ -283,6 +295,9 @@ def test_liability_only_structure():
                 "includes_liability": True,
             }
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     program = build_program(
@@ -356,6 +371,9 @@ def test_casualty_unaffected_by_hull_liability_flags():
                 "includes_liability": True,
             }
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     program = build_program(

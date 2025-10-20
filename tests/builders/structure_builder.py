@@ -1,6 +1,6 @@
 from typing import Optional, List, Dict, Any
 from src.domain.structure import Structure
-from src.domain.constants import PRODUCT
+from src.domain.constants import PRODUCT, CLAIM_BASIS
 from .condition_builder import build_condition
 
 

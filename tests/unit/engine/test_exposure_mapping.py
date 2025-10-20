@@ -32,6 +32,9 @@ def test_exposure_mapping_success_aviation():
                 "includes_liability": True,
             }
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
     program = build_program(
         name="TEST_AVIATION", structures=[qs], underwriting_department="aviation"
@@ -87,6 +90,9 @@ def test_exposure_mapping_failure_wrong_column():
                 "includes_liability": True,
             }
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
     program = build_program(
         name="TEST_AVIATION", structures=[qs], underwriting_department="aviation"

@@ -1,7 +1,7 @@
 from typing import Dict, Any, List, Optional, Self
 import pandas as pd
 from .condition import Condition
-from .constants import condition_COLS, PRODUCT, CLAIM_BASIS
+from .constants import condition_COLS, PRODUCT, CLAIM_BASIS, CLAIM_BASIS_VALUES
 
 
 class Structure:
@@ -12,28 +12,44 @@ class Structure:
         type_of_participation: str,
         conditions: List[Condition],
         predecessor_title: Optional[str] = None,
-        claim_basis: Optional[str] = None,
-        inception_date: Optional[str] = None,
-        expiry_date: Optional[str] = None,
+        claim_basis: str = None,
+        inception_date: str = None,
+        expiry_date: str = None,
     ):
         self.structure_name = structure_name
         self.contract_order = contract_order
         self.type_of_participation = type_of_participation
         self.predecessor_title = predecessor_title
-        self.claim_basis = claim_basis
-        self.inception_date = self._to_ts(inception_date)
-        self.expiry_date = self._to_ts(expiry_date)
+        
+        # --- validation claim basis obligatoire
+        basis = (claim_basis or "").strip().lower()
+        if basis not in CLAIM_BASIS_VALUES:
+            raise ValueError(
+                f"INSPER_CLAIM_BASIS_CD is required and must be one of "
+                f"{sorted(CLAIM_BASIS_VALUES)}; got '{claim_basis}'"
+            )
+        self.claim_basis = basis
+
+        # --- dates obligatoires
+        self.inception_date = self._require_ts(inception_date, "INSPER_EFFECTIVE_DATE")
+        self.expiry_date = self._require_ts(expiry_date, "INSPER_EXPIRY_DATE")
+        # borne: [inception; expiry[
+        if self.expiry_date <= self.inception_date:
+            raise ValueError(
+                f"INSPER_EXPIRY_DATE must be strictly after INSPER_EFFECTIVE_DATE "
+                f"({self.inception_date} .. {self.expiry_date})"
+            )
         self.conditions = conditions
 
     @staticmethod
-    def _to_ts(val) -> Optional[pd.Timestamp]:
-        if val is None:
-            return None
+    def _require_ts(val, field_name: str) -> pd.Timestamp:
         try:
             ts = pd.to_datetime(val)
-            return None if (isinstance(ts, pd.Timestamp) and pd.isna(ts)) else ts
         except Exception:
-            return None
+            ts = None
+        if ts is None or (isinstance(ts, pd.Timestamp) and pd.isna(ts)):
+            raise ValueError(f"{field_name} is required and must be a valid date, got: {val}")
+        return ts
 
     @classmethod
     def from_row(
@@ -116,13 +132,14 @@ class Structure:
         - Risk attaching  → référence = INCEPTION_DT de la police
         - Loss occurring  → référence = calculation_date (evaluation_date)
         """
-        basis = (self.claim_basis or "").lower()
-        if basis == CLAIM_BASIS.LOSS_OCCURRING:
+        # - RA → référence = INCEPTION_DT
+        # - LO → référence = calculation_date
+        if self.claim_basis == CLAIM_BASIS.LOSS_OCCURRING:
             ref = (
                 pd.to_datetime(evaluation_date) if evaluation_date is not None else None
             )
             return self._in_range(ref)
-        # défaut / RA
+        # RA
         return self._in_range(policy.inception)
 
     def describe(self, dimension_columns: list, structure_number: int) -> str:

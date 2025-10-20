@@ -53,6 +53,9 @@ def test_quota_share_then_excess_of_loss_without_rescaling():
                 "includes_liability": True,
             }
         ],
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
     xl = build_excess_of_loss(
         name="XOL_50xs20",
@@ -65,6 +68,9 @@ def test_quota_share_then_excess_of_loss_without_rescaling():
             }
         ],
         predecessor_title="QS_30%",
+        claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
     program = build_program(

@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Any, List
 from src.domain import Program, Structure
-from src.domain.constants import PROGRAM_COLS, STRUCTURE_COLS, condition_COLS
+from src.domain.constants import PROGRAM_COLS, STRUCTURE_COLS, condition_COLS, CLAIM_BASIS_VALUES
 from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 MULTI_VALUE_SEPARATOR = ";"
@@ -99,6 +99,33 @@ class ProgramSerializer:
                 for r in recs
             ]
 
+        # --- validation forte des champs obligatoires dans structures_df
+        required_s_cols = [
+            STRUCTURE_COLS.INSPER_ID,
+            STRUCTURE_COLS.CLAIM_BASIS,
+            STRUCTURE_COLS.INCEPTION,
+            STRUCTURE_COLS.EXPIRY,
+            STRUCTURE_COLS.NAME,
+            STRUCTURE_COLS.ORDER,
+            STRUCTURE_COLS.TYPE,
+        ]
+        for col in required_s_cols:
+            if col not in structures_df.columns:
+                raise ValueError(f"Missing required column in 'structures': {col}")
+        # valeurs non nulles + formats
+        bad_rows = []
+        for idx, row in structures_df.iterrows():
+            cb = str(row[STRUCTURE_COLS.CLAIM_BASIS]).strip().lower() if pd.notna(row[STRUCTURE_COLS.CLAIM_BASIS]) else ""
+            eff = row[STRUCTURE_COLS.INCEPTION]
+            exp = row[STRUCTURE_COLS.EXPIRY]
+            if not cb or cb not in CLAIM_BASIS_VALUES or pd.isna(eff) or pd.isna(exp):
+                bad_rows.append(idx)
+        if bad_rows:
+            raise ValueError(
+                f"'structures' has {len(bad_rows)} row(s) with missing/invalid "
+                f"claim_basis/effective/expiry (rows: {bad_rows[:10]}{'...' if len(bad_rows)>10 else ''})"
+            )
+
         structures_data = df_to_dicts(structures_df)
         conditions_data = df_to_dicts(conditions_df)
 
@@ -115,6 +142,7 @@ class ProgramSerializer:
             if key is None:
                 raise ValueError("INSPER_ID_PRE is mandatory for all structures.")
             conds = by_struct.get(key, [])
+            # Structure.from_row fera encore des validations (domain rules)
             structures.append(Structure.from_row(s, conds, STRUCTURE_COLS))
 
         return Program(
@@ -227,6 +255,11 @@ class ProgramSerializer:
         insper_id = 1
         buscl_id = 1
         for st in program.structures:
+            # fail-fast côté export si un objet invalide a été construit par du code tiers
+            if not st.claim_basis or st.inception_date is None or st.expiry_date is None:
+                raise ValueError(
+                    f"Program contains a Structure with missing claim_basis/effective/expiry: {st.structure_name}"
+                )
             structures_data["INSPER_ID_PRE"].append(insper_id)
             structures_data["BUSINESS_ID_PRE"].append(None)
             structures_data["TYPE_OF_PARTICIPATION_CD"].append(st.type_of_participation)
