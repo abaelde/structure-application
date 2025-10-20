@@ -16,35 +16,27 @@ def _scope_str(scope_set):
     return " + ".join(sorted(scope_set))
 
 
-def _cond_param_lines(struct, cond, rescaling_info=None):
-    if not cond:
-        return []
+def _cond_param_lines(struct):
+    """Build parameter lines from flattened typed terms in struct rows.
+
+    Uses keys produced by src/engine/results_terms.terms_as_dict:
+    - QS: cession_pct, limit, signed_share
+    - XOL: attachment, limit, signed_share
+    """
     lines = []
     typ = struct.get("type_of_participation")
     if typ == "quota_share":
-        if cond.get("CESSION_PCT") is not None:
-            lines.append(f"CESSION_PCT: {_fmt_pct(cond.get('CESSION_PCT'))}")
-        if cond.get("LIMIT_100") is not None:
-            lines.append(f"LIMIT_100: {cond.get('LIMIT_100'):,.0f}")
+        if struct.get("cession_pct") is not None:
+            lines.append(f"CESSION_PCT: {_fmt_pct(struct.get('cession_pct'))}")
+        if struct.get("limit") is not None:
+            lines.append(f"LIMIT: {struct.get('limit'):,.0f}")
     elif typ == "excess_of_loss":
-        if rescaling_info:
-            oa, ra = rescaling_info.get("original_attachment"), rescaling_info.get(
-                "rescaled_attachment"
-            )
-            ol, rl = rescaling_info.get("original_limit"), rescaling_info.get(
-                "rescaled_limit"
-            )
-            if oa is not None:
-                lines.append(f"ATTACHMENT: {oa:,.0f} → {ra:,.0f}")
-            if ol is not None:
-                lines.append(f"LIMIT: {ol:,.0f} → {rl:,.0f}")
-        else:
-            if cond.get("ATTACHMENT_POINT_100") is not None:
-                lines.append(f"ATTACHMENT: {cond.get('ATTACHMENT_POINT_100'):,.0f}")
-            if cond.get("LIMIT_100") is not None:
-                lines.append(f"LIMIT: {cond.get('LIMIT_100'):,.0f}")
-    if cond.get("SIGNED_SHARE_PCT") is not None:
-        lines.append(f"SIGNED_SHARE: {_fmt_pct(cond.get('SIGNED_SHARE_PCT'))}")
+        if struct.get("attachment") is not None:
+            lines.append(f"ATTACHMENT: {struct.get('attachment'):,.0f}")
+        if struct.get("limit") is not None:
+            lines.append(f"LIMIT: {struct.get('limit'):,.0f}")
+    if struct.get("signed_share") is not None:
+        lines.append(f"SIGNED_SHARE: {_fmt_pct(struct.get('signed_share'))}")
     return lines
 
 
@@ -127,17 +119,16 @@ def build_program_graph_figure(policy_result_row, calculation_date):
         cbasis = cbasis or "—"
 
         input_exp = s.get("input_exposure", 0.0) or 0.0
-        c_layer = s.get("cession_to_layer_100pct", 0.0) or 0.0
-        c_reins = s.get("cession_to_reinsurer", 0.0) or 0.0
-        reins_share = s.get("reinsurer_share", 0.0) or 0.0
+        c_layer = s.get("ceded_to_layer_100pct", 0.0) or 0.0
+        c_reins = s.get("ceded_to_reinsurer", 0.0) or 0.0
+        reins_share = s.get("signed_share", 0.0) or 0.0
         scope = _scope_str(
             set(s.get("scope", "").split(";"))
             if isinstance(s.get("scope"), str)
             else s.get("scope", set())
         )
 
-        cond = s.get("condition") or {}
-        params = _cond_param_lines(s, cond, s.get("rescaling_info"))
+        params = _cond_param_lines(s)
 
         status_text = "APPLIED ✅" if applied else f"NOT APPLIED ❌ ({reason or 'n/a'})"
         tooltip_lines = [
@@ -207,5 +198,4 @@ def build_program_graph_figure(policy_result_row, calculation_date):
         yaxis=dict(visible=False),
     )
     return fig
-
 

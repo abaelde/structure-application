@@ -10,11 +10,10 @@ def apply_condition(
     if product is None:
         raise ValueError(f"Unknown product type: {type_of_participation}")
 
-    cession_to_layer_100pct = product.apply(exposure, condition)
-    cession_to_reinsurer = cession_to_layer_100pct * condition.signed_share
+    ceded_to_layer_100pct = product.apply(exposure, condition)
+    ceded_to_reinsurer = ceded_to_layer_100pct * condition.signed_share
 
     return {
-        "cession_to_layer_100pct": cession_to_layer_100pct,
-        "cession_to_reinsurer": cession_to_reinsurer,
-        "reinsurer_share": condition.signed_share,
+        "ceded_to_layer_100pct": ceded_to_layer_100pct,
+        "ceded_to_reinsurer": ceded_to_reinsurer,
     }

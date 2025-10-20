@@ -6,12 +6,10 @@ from .cession_calculator import apply_condition
 from src.engine.results import (
     ProgramRunResult,
     RunTotals,
-    StructureReport,
-    StructureInput,
-    StructureOutcome,
-    CessionBreakdown,
+    StructureRun,
     RescalingInfo,
 )
+from src.engine.results_terms import create_terms_from_condition, create_empty_terms
 
 
 class StructureProcessor:
@@ -59,19 +57,15 @@ class StructureProcessor:
                     )
                 )
                 continue
-            report = self._process_one(structure)
-            run.structures.append(report)
-            if report.outcome.applied:
-                run.totals = RunTotals(
-                    cession_to_layer_100pct=run.totals.cession_to_layer_100pct
-                    + report.outcome.cession.to_layer_100pct,
-                    cession_to_reinsurer=run.totals.cession_to_reinsurer
-                    + report.outcome.cession.to_reinsurer,
-                )
+            run_obj = self._process_one(structure)
+            run.structures.append(run_obj)
+            if run_obj.applied:
+                run.totals.ceded_to_layer_100pct += run_obj.ceded_to_layer_100pct
+                run.totals.ceded_to_reinsurer += run_obj.ceded_to_reinsurer
         return run
 
     # ─── Détails par structure ────────────────────────────────────────────
-    def _process_one(self, structure: Structure) -> StructureReport:
+    def _process_one(self, structure: Structure) -> StructureRun:
         # 1) Sécurité idempotence
         if structure.structure_name in self._processed:
             return self._report_skipped(structure, reason="already_processed")
@@ -120,7 +114,7 @@ class StructureProcessor:
         ceded = apply_condition(
             filtered_exposure, condition_to_apply, structure.type_of_participation
         )
-        retained = filtered_exposure - ceded["cession_to_layer_100pct"]
+        retained = filtered_exposure - ceded["ceded_to_layer_100pct"]
 
         # 7) Mémorise l'état pour les suivants
         self._state_by_structure[structure.structure_name] = {
@@ -130,31 +124,38 @@ class StructureProcessor:
         }
         self._processed.add(structure.structure_name)
 
-        # 8) Bâtit le rapport typé
-        report = StructureReport(
-            input=StructureInput(
-                structure_name=structure.structure_name,
-                predecessor_title=structure.predecessor_title,
-                type_of_participation=structure.type_of_participation,
-                input_exposure=filtered_exposure,
-                scope_components=components,
-            ),
-            outcome=StructureOutcome(
-                applied=True,
-                reason=None,
-                matched_condition=matched,
-                condition_applied=condition_to_apply,
-                rescaling=RescalingInfo(**rescaling_info) if rescaling_info else None,
-                cession=CessionBreakdown(
-                    to_layer_100pct=ceded["cession_to_layer_100pct"],
-                    to_reinsurer=ceded["cession_to_reinsurer"],
-                    reinsurer_share=ceded["reinsurer_share"],
-                ),
-                retained_after=retained,
-                matching_details=matching_details,
-            ),
+        # optionnel: renseigner metrics pour plus de granularité (exposition par composante)
+        metrics = {}
+        if self.uw_dept.lower() == "aviation":
+            # injecter les inputs Hull / Liability si disponible
+            bundle_scaled = self.base_bundle.fraction_to(self._input_exposure(structure))
+            metrics = {
+                "hull_input": bundle_scaled.components.get("hull", 0.0) if bundle_scaled.components else 0.0,
+                "liability_input": bundle_scaled.components.get("liability", 0.0) if bundle_scaled.components else 0.0,
+            }
+
+        # 8) Bâtit le StructureRun
+        run_obj = StructureRun(
+            structure_name=structure.structure_name,
+            type_of_participation=structure.type_of_participation,
+            predecessor_title=structure.predecessor_title,
+            claim_basis=structure.claim_basis,
+            period_start=str(structure.inception_date),
+            period_end=str(structure.expiry_date),
+            applied=True,
+            reason=None,
+            scope_components=components,
+            input_exposure=filtered_exposure,
+            matched_condition=matched,
+            terms=create_terms_from_condition(matched, structure.type_of_participation),
+            rescaling=RescalingInfo(**rescaling_info) if rescaling_info else None,
+            ceded_to_layer_100pct=ceded["ceded_to_layer_100pct"],
+            ceded_to_reinsurer=ceded["ceded_to_reinsurer"],
+            retained_after=retained,
+            matching_details=matching_details,
+            metrics=metrics,
         )
-        return report
+        return run_obj
 
     # ─── Sous-étapes explicites ───────────────────────────────────────────
     def _process_predecessor_if_needed(self, structure: Structure) -> None:
@@ -230,27 +231,29 @@ class StructureProcessor:
         input_exposure: Optional[float] = None,
         scope_components: Optional[Set[str]] = None,
         matching_details: Optional[Dict[str, Any]] = None,
-    ) -> StructureReport:
+    ) -> StructureRun:
         base_input = self._input_exposure(structure)
         if input_exposure is None:
             # Sans condition, on prend le total (ou la somme des composants en aviation)
             input_exposure = self.base_bundle.fraction_to(base_input).select(None)
-        return StructureReport(
-            input=StructureInput(
-                structure_name=structure.structure_name,
-                predecessor_title=structure.predecessor_title,
-                type_of_participation=structure.type_of_participation,
-                input_exposure=input_exposure,
-                scope_components=scope_components or set(),
-            ),
-            outcome=StructureOutcome(
-                applied=False,
-                reason=reason,
-                matched_condition=None,
-                condition_applied=None,
-                rescaling=None,
-                cession=CessionBreakdown(0.0, 0.0, 0.0),
-                retained_after=input_exposure,
-                matching_details=matching_details,
-            ),
+
+        return StructureRun(
+            structure_name=structure.structure_name,
+            type_of_participation=structure.type_of_participation,
+            predecessor_title=structure.predecessor_title,
+            claim_basis=structure.claim_basis,
+            period_start=str(structure.inception_date),
+            period_end=str(structure.expiry_date),
+            applied=False,
+            reason=reason,
+            scope_components=scope_components or set(),
+            input_exposure=input_exposure,
+            matched_condition=None,
+            terms=create_empty_terms(structure.type_of_participation),
+            rescaling=None,
+            ceded_to_layer_100pct=0.0,
+            ceded_to_reinsurer=0.0,
+            retained_after=input_exposure,
+            matching_details=matching_details,
+            metrics={},
         )

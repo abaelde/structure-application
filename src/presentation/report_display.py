@@ -43,13 +43,13 @@ def write_detailed_results(
 
             if struct.get("applied", False):
                 file.write(
-                    f"   Cession at layer (100%): {struct['cession_to_layer_100pct']:,.2f}\n"
+                    f"   Cession at layer (100%): {struct['ceded_to_layer_100pct']:,.2f}\n"
                 )
                 file.write(
-                    f"   Reinsurer Share: {struct['reinsurer_share']:.4f} ({struct['reinsurer_share']*100:.2f}%)\n"
+                    f"   Reinsurer Share: {struct['signed_share']:.4f} ({struct['signed_share']*100:.2f}%)\n"
                 )
                 file.write(
-                    f"   Cession to reinsurer: {struct['cession_to_reinsurer']:,.2f}\n"
+                    f"   Cession to reinsurer: {struct['ceded_to_reinsurer']:,.2f}\n"
                 )
 
                 if struct.get("condition"):

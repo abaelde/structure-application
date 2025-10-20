@@ -10,7 +10,7 @@ def test_valid_bordereau():
 
     try:
         bordereau = Bordereau.from_csv(
-            "examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv"
+            "examples/bordereaux/bordereau_aviation_axa_xl.csv"
         )
         print(f"✓ Success: Loaded {len(bordereau)} policies")
         print(bordereau.df.head())

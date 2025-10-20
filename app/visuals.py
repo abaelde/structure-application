@@ -102,8 +102,8 @@ def build_sankey_figure(policy_result_row, gross_exposure: float):
         add_node(name)
         idx_struct = node_index[name]
 
-        c_layer = s.get("cession_to_layer_100pct", 0.0) or 0.0
-        c_reins = s.get("cession_to_reinsurer", 0.0) or 0.0
+        c_layer = s.get("ceded_to_layer_100pct", 0.0) or 0.0
+        c_reins = s.get("ceded_to_reinsurer", 0.0) or 0.0
         retained_after = s.get("retained_after", None)
         if retained_after is None:
             retained_after = max(retained_prev - c_layer, 0.0)

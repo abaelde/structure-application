@@ -81,20 +81,20 @@ def test_risk_attaching_based_on_policy_inception():
     result_a = apply_program(policy_a, program, calculation_date=calculation_date)
     assert len(result_a.structures) == 1
     structure_result_a = result_a.structures[0]
-    assert structure_result_a.input.structure_name == "QS_RA_2024"
-    assert structure_result_a.outcome.applied is True
-    assert structure_result_a.outcome.reason is None
-    assert abs(structure_result_a.outcome.cession.to_reinsurer - 16_250_000) < 1
+    assert structure_result_a.structure_name == "QS_RA_2024"
+    assert structure_result_a.applied is True
+    assert structure_result_a.reason is None
+    assert abs(structure_result_a.ceded_to_reinsurer - 16_250_000) < 1
 
     # Police B : ne doit pas s'appliquer (inception hors période RA)
     result_b = apply_program(policy_b, program, calculation_date=calculation_date)
     assert len(result_b.structures) == 1
     structure_result_b = result_b.structures[0]
-    assert structure_result_b.input.structure_name == "QS_RA_2024"
-    assert structure_result_b.outcome.applied is False
-    assert structure_result_b.outcome.reason == "out_of_period"
+    assert structure_result_b.structure_name == "QS_RA_2024"
+    assert structure_result_b.applied is False
+    assert structure_result_b.reason == "out_of_period"
     assert (
-        structure_result_b.outcome.matching_details["claim_basis"] == "risk_attaching"
+        structure_result_b.matching_details["claim_basis"] == "risk_attaching"
     )
 
 
@@ -162,10 +162,10 @@ def test_loss_occurring_based_on_calculation_date():
 
     assert len(result_in_period.structures) == 1
     structure_result_in = result_in_period.structures[0]
-    assert structure_result_in.input.structure_name == "QS_LO_2024"
-    assert structure_result_in.outcome.applied is True
-    assert structure_result_in.outcome.reason is None
-    assert abs(structure_result_in.outcome.cession.to_reinsurer - 19_500_000) < 1
+    assert structure_result_in.structure_name == "QS_LO_2024"
+    assert structure_result_in.applied is True
+    assert structure_result_in.reason is None
+    assert abs(structure_result_in.ceded_to_reinsurer - 19_500_000) < 1
 
     # Test 2 : calculation_date hors période LO
     calculation_date_out_period = "2023-06-15"
@@ -175,9 +175,9 @@ def test_loss_occurring_based_on_calculation_date():
 
     assert len(result_out_period.structures) == 1
     structure_result_out = result_out_period.structures[0]
-    assert structure_result_out.input.structure_name == "QS_LO_2024"
-    assert structure_result_out.outcome.applied is False
-    assert structure_result_out.outcome.reason == "out_of_period"
+    assert structure_result_out.structure_name == "QS_LO_2024"
+    assert structure_result_out.applied is False
+    assert structure_result_out.reason == "out_of_period"
     assert (
-        structure_result_out.outcome.matching_details["claim_basis"] == "loss_occurring"
+        structure_result_out.matching_details["claim_basis"] == "loss_occurring"
     )

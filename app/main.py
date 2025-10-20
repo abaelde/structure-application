@@ -336,105 +336,73 @@ if program_files and bordereau_file:
 
                         if struct.get("applied", False):
                             st.write(
-                                f"**Layer Cession (100%):** {struct['cession_to_layer_100pct']:,.2f}"
+                                f"**Layer Cession (100%):** {struct.get('ceded_to_layer_100pct', 0.0):,.2f}"
                             )
+                            if struct.get("signed_share") is not None:
+                                st.write(
+                                    f"**Reinsurer Share:** {struct['signed_share']:.4f} ({struct['signed_share']*100:.2f}%)"
+                                )
                             st.write(
-                                f"**Reinsurer Share:** {struct['reinsurer_share']:.4f} ({struct['reinsurer_share']*100:.2f}%)"
-                            )
-                            st.write(
-                                f"**Cession to Reinsurer:** {struct['cession_to_reinsurer']:,.2f}"
+                                f"**Cession to Reinsurer:** {struct.get('ceded_to_reinsurer', 0.0):,.2f}"
                             )
 
-                            if struct.get("condition"):
-                                condition = struct["condition"]
-                                st.markdown("**Applied condition Parameters:**")
-
-                                params_df_data = []
-                                if (
-                                    struct["type_of_participation"]
-                                    == PRODUCT.QUOTA_SHARE
-                                ):
-                                    if pd.notna(condition.get("CESSION_PCT")):
-                                        params_df_data.append(
-                                            {
-                                                "Parameter": "CESSION_PCT",
-                                                "Value": f"{condition['CESSION_PCT']}",
-                                            }
-                                        )
-                                    if pd.notna(condition.get("LIMIT_100")):
-                                        params_df_data.append(
-                                            {
-                                                "Parameter": "LIMIT_100",
-                                                "Value": f"{condition['LIMIT_100']:,.0f}",
-                                            }
-                                        )
-
-                                elif (
-                                    struct["type_of_participation"]
-                                    == PRODUCT.EXCESS_OF_LOSS
-                                ):
-                                    rescaling_info = struct.get("rescaling_info")
-                                    if rescaling_info:
-                                        st.warning(
-                                            f"⚠️ RESCALED (Retention factor: {rescaling_info['retention_factor']:.2%})"
-                                        )
-                                        if (
-                                            rescaling_info["original_attachment"]
-                                            is not None
-                                        ):
-                                            params_df_data.append(
-                                                {
-                                                    "Parameter": "ATTACHMENT_POINT_100",
-                                                    "Value": f"{rescaling_info['original_attachment']:,.0f} → {rescaling_info['rescaled_attachment']:,.0f}",
-                                                }
-                                            )
-                                        if rescaling_info["original_limit"] is not None:
-                                            params_df_data.append(
-                                                {
-                                                    "Parameter": "LIMIT_100",
-                                                    "Value": f"{rescaling_info['original_limit']:,.0f} → {rescaling_info['rescaled_limit']:,.0f}",
-                                                }
-                                            )
-                                    else:
-                                        if pd.notna(
-                                            condition.get("ATTACHMENT_POINT_100")
-                                        ):
-                                            params_df_data.append(
-                                                {
-                                                    "Parameter": "ATTACHMENT_POINT_100",
-                                                    "Value": f"{condition['ATTACHMENT_POINT_100']:,.0f}",
-                                                }
-                                            )
-                                        if pd.notna(condition.get("LIMIT_100")):
-                                            params_df_data.append(
-                                                {
-                                                    "Parameter": "LIMIT_100",
-                                                    "Value": f"{condition['LIMIT_100']:,.0f}",
-                                                }
-                                            )
-
-                                if pd.notna(condition.get("SIGNED_SHARE_PCT")):
+                            # Display applied terms from flattened typed fields
+                            st.markdown("**Applied Terms:**")
+                            params_df_data = []
+                            if struct["type_of_participation"] == PRODUCT.QUOTA_SHARE:
+                                if pd.notna(pd.Series([struct.get("cession_pct")]).iloc[0]):
                                     params_df_data.append(
                                         {
-                                            "Parameter": "SIGNED_SHARE_PCT",
-                                            "Value": f"{condition['SIGNED_SHARE_PCT']}",
+                                            "Parameter": "CESSION_PCT",
+                                            "Value": f"{struct['cession_pct']}",
                                         }
                                     )
-
-                                if params_df_data:
-                                    st.table(pd.DataFrame(params_df_data))
-
-                                conditions = []
-                                for dim in program.dimension_columns:
-                                    value = condition.get(dim)
-                                    if pd.notna(value):
-                                        conditions.append(f"{dim}={value}")
-                                conditions_str = (
-                                    ", ".join(conditions)
-                                    if conditions
-                                    else "All (no conditions)"
+                                if pd.notna(pd.Series([struct.get("limit")]).iloc[0]):
+                                    params_df_data.append(
+                                        {
+                                            "Parameter": "LIMIT",
+                                            "Value": f"{struct['limit']:,.0f}",
+                                        }
+                                    )
+                            elif struct["type_of_participation"] == PRODUCT.EXCESS_OF_LOSS:
+                                if pd.notna(pd.Series([struct.get("attachment")]).iloc[0]):
+                                    params_df_data.append(
+                                        {
+                                            "Parameter": "ATTACHMENT",
+                                            "Value": f"{struct['attachment']:,.0f}",
+                                        }
+                                    )
+                                if pd.notna(pd.Series([struct.get("limit")]).iloc[0]):
+                                    params_df_data.append(
+                                        {
+                                            "Parameter": "LIMIT",
+                                            "Value": f"{struct['limit']:,.0f}",
+                                        }
+                                    )
+                            if pd.notna(pd.Series([struct.get("signed_share")]).iloc[0]):
+                                params_df_data.append(
+                                    {
+                                        "Parameter": "SIGNED_SHARE",
+                                        "Value": f"{struct['signed_share']}",
+                                    }
                                 )
-                                st.write(f"**Matching Conditions:** {conditions_str}")
+
+                            if params_df_data:
+                                st.table(pd.DataFrame(params_df_data))
+
+                            # Matching condition summary from matching_details
+                            md = struct.get("matching_details") or {}
+                            dim_matches = md.get("dimension_matches") or {}
+                            conditions = []
+                            for dim in program.dimension_columns:
+                                d = dim_matches.get(dim) or {}
+                                cond_vals = d.get("condition_values")
+                                if cond_vals is not None and len(cond_vals) > 0:
+                                    conditions.append(f"{dim}={','.join(map(str, cond_vals))}")
+                            conditions_str = (
+                                ", ".join(conditions) if conditions else "All (no conditions)"
+                            )
+                            st.write(f"**Matching Conditions:** {conditions_str}")
                         else:
                             st.warning("**Reason:** No matching condition found")
 

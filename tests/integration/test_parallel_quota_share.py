@@ -106,10 +106,10 @@ def test_double_quota_share_parallel():
     assert qs_15_detail is not None
 
     assert (
-        abs(qs_10_detail.get("cession_to_layer_100pct", 0) - expected_cession_qs_10)
+        abs(qs_10_detail.get("ceded_to_layer_100pct", 0) - expected_cession_qs_10)
         < tolerance
     )
     assert (
-        abs(qs_15_detail.get("cession_to_layer_100pct", 0) - expected_cession_qs_15)
+        abs(qs_15_detail.get("ceded_to_layer_100pct", 0) - expected_cession_qs_15)
         < tolerance
     )
