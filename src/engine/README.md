@@ -218,7 +218,7 @@ Certaines structures de réassurance peuvent ne couvrir que :
 
 ### Configuration
 
-Dans la feuille **conditions** du fichier Excel de programme, deux colonnes optionnelles permettent de contrôler ce filtrage :
+Dans le fichier **conditions.csv** du programme, deux colonnes optionnelles permettent de contrôler ce filtrage :
 
 | Colonne | Type | Défaut | Description |
 |---------|------|--------|-------------|
@@ -353,7 +353,7 @@ Le module `engine` supporte maintenant la sélection temporelle des structures b
 
 ### Configuration
 
-Dans la feuille **structures** du fichier Excel de programme, les colonnes suivantes contrôlent la sélection temporelle :
+Dans le fichier **structures.csv** du programme, les colonnes suivantes contrôlent la sélection temporelle :
 
 | Colonne | Type | Défaut | Description |
 |---------|------|--------|-------------|

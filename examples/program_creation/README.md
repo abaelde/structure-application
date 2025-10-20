@@ -238,8 +238,8 @@ Tous les scripts de création utilisent maintenant les **Builders** pour créer 
 - `create_aviation_AXA_XL.py` - Complexe multi-devises (156 lignes au lieu de 473)
 
 **Utilitaires :**
-- `excel_utils.py` - Fonction `program_to_excel()` pour convertir Program → Excel
-- `regenerate_all_programs.py` - Régénération en lot
+- `ProgramManager` - Gestionnaire unifié pour charger/sauvegarder des programmes
+- `regenerate_all_programs.py` - Régénération en lot de tous les programmes
 - `combine_all_programs.py` - Combinaison de tous les programmes en une base de données simulée
 
 ### 📝 Comment créer un nouveau programme avec les Builders
@@ -248,7 +248,7 @@ Tous les scripts de création utilisent maintenant les **Builders** pour créer 
 
 ```python
 from tests.builders import build_quota_share, build_program
-from excel_utils import program_to_excel
+from src.managers import ProgramManager
 
 # Créer une structure Quota Share 30%
 qs = build_quota_share(name="QS_30", cession_pct=0.30, claim_basis="risk_attaching", inception_date="2024-01-01", expiry_date="2025-01-01")
@@ -260,8 +260,9 @@ program = build_program(
     underwriting_department="aviation"
 )
 
-# Sauvegarder en Excel
-program_to_excel(program, "../programs/my_program.xlsx")
+# Sauvegarder en CSV folder
+manager = ProgramManager()
+manager.save(program, "../programs/my_program")
 ```
 
 #### Exemple 2 : Quota Share avec plusieurs conditions (multi-devises)
@@ -289,7 +290,10 @@ qs = build_quota_share(
 )
 
 program = build_program(name="QS_MULTI_2024", structures=[qs], underwriting_department="aviation")
-program_to_excel(program, "../programs/qs_multi_currency.xlsx")
+# Sauvegarder en CSV folder
+from src.managers import ProgramManager
+manager = ProgramManager()
+manager.save(program, "../programs/qs_multi_currency")
 ```
 
 #### Exemple 3 : Excess of Loss avec inuring
@@ -316,7 +320,10 @@ program = build_program(
     structures=[qs, xol],
     underwriting_department="aviation"
 )
-program_to_excel(program, "../programs/qs_then_xol.xlsx")
+# Sauvegarder en CSV folder
+from src.managers import ProgramManager
+manager = ProgramManager()
+manager.save(program, "../programs/qs_then_xol")
 ```
 
 #### Exemple 4 : Plusieurs XOL parallèles avec conditions par pays
@@ -358,7 +365,10 @@ program = build_program(
     structures=[xol_1, xol_2],
     underwriting_department="aviation"
 )
-program_to_excel(program, "../programs/multi_xol.xlsx")
+# Sauvegarder en CSV folder
+from src.managers import ProgramManager
+manager = ProgramManager()
+manager.save(program, "../programs/multi_xol")
 ```
 
 #### Exemple 5 : programme avec exclusions globales
@@ -389,55 +399,46 @@ exclusions = [
 ]
 program.exclusions = exclusions
 
-program_to_excel(program, "../programs/qs_exclusions.xlsx")
+# Sauvegarder en CSV folder
+from src.managers import ProgramManager
+manager = ProgramManager()
+manager.save(program, "../programs/qs_exclusions")
 ```
 
-### Auto-ajustement des colonnes Excel
+### Sauvegarde en CSV Folder
 
-La fonction `program_to_excel()` appelle automatiquement `auto_adjust_column_widths()` pour ajuster la largeur des colonnes en fonction de leur contenu, améliorant ainsi la lisibilité des fichiers générés.
+Les programmes sont maintenant sauvegardés au format CSV folder, qui est plus simple et plus portable que Excel. Chaque programme est sauvegardé dans un dossier contenant 4 fichiers CSV :
 
-**Paramètres optionnels de `program_to_excel()` :**
-- `min_width` : Largeur minimale des colonnes (défaut : 10)
-- `max_width` : Largeur maximale des colonnes (défaut : 50)
+- `program.csv` - Informations générales du programme
+- `structures.csv` - Toutes les structures du programme  
+- `conditions.csv` - Toutes les conditions du programme
+- `exclusions.csv` - Toutes les exclusions du programme (si présentes)
 
-```python
-program_to_excel(program, "output.xlsx", min_width=12, max_width=60)
-```
+**Avantages du format CSV :**
+- Plus simple à lire et modifier
+- Compatible avec tous les outils de données
+- Versioning Git-friendly
+- Pas de dépendances externes
 
-### Base de Données Simulée : all_programs.xlsx
+### Scripts utilitaires
 
-Le script `combine_all_programs.py` crée un fichier `all_programs.xlsx` qui simule une base de données avec plusieurs programmes :
-
+#### Régénération en lot
 ```bash
+# Régénérer tous les programmes à partir des scripts Python
+uv run python examples/program_creation/regenerate_all_programs.py
+```
+
+#### Combinaison de programmes
+```bash
+# Combiner tous les programmes en une base de données simulée
 uv run python examples/program_creation/combine_all_programs.py
 ```
 
-**Fonctionnement :**
-1. Lit tous les fichiers `.xlsx` du dossier `examples/programs/`
-2. Renumérote les IDs de manière séquentielle (simule l'auto-increment d'une base de données) :
-   - `REPROG_ID_PRE` : 1, 2, 3, ... (un par programme)
-   - `INSPER_ID_PRE` : continue séquentiellement à travers tous les programmes
-   - `BUSCL_ID_PRE` : continue séquentiellement à travers toutes les conditions
-3. Maintient les relations entre tables (foreign keys)
-4. Concatène toutes les données en un seul fichier
-
-**Exemple de renumération :**
-```
-Programme 1 (aviation_axa_xl_2024.xlsx) :
-  - REPROG_ID_PRE : 1
-  - INSPER_ID_PRE : 1-7
-  - BUSCL_ID_PRE : 1-35
-
-Programme 2 (aviation_old_republic_2024.xlsx) :
-  - REPROG_ID_PRE : 2
-  - INSPER_ID_PRE : 8-10 (continue après 7)
-  - BUSCL_ID_PRE : 36-41 (continue après 35)
-```
-
-**Usage :**
-Le fichier `all_programs.xlsx` est une **base de données simulée** qui représente ce que vous auriez dans une vraie base de données avec plusieurs programmes. 
-
-⚠️ **Note** : Ce fichier n'est pas destiné à être utilisé directement avec le `ProgramLoader` actuel, qui est conçu pour charger un seul programme à la fois. Il sert de référence pour visualiser comment plusieurs programmes coexisteraient dans une base de données réelle.
+Le script `combine_all_programs.py` crée un dossier `all_programs/` qui simule une base de données avec plusieurs programmes :
+- Lit tous les dossiers CSV du dossier `examples/programs/`
+- Renumérote les IDs de manière séquentielle (simule l'auto-increment d'une base de données)
+- Concatène toutes les données en un seul dossier CSV
+- Crée les fichiers : `program.csv`, `structures.csv`, `conditions.csv`, `exclusions.csv` (si présentes)
 
 ## Validation
 

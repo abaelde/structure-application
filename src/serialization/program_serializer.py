@@ -280,7 +280,7 @@ class ProgramSerializer:
             "INCLUDES_LIABILITY": [],
         }
 
-        def list_to_excel(v):
+        def list_to_string(v):
             if isinstance(v, list):
                 return MULTI_VALUE_SEPARATOR.join(map(str, v))
             return v
@@ -344,7 +344,7 @@ class ProgramSerializer:
                     "BUSCL_CLASS_OF_BUSINESS_3",
                     "BUSCL_LIMIT_CURRENCY_CD",
                 ]:
-                    conditions_data[col].append(list_to_excel(g(col)))
+                    conditions_data[col].append(list_to_string(g(col)))
 
                 for col in [
                     "AAD_100",

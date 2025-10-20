@@ -1,5 +1,5 @@
 """
-Script maître pour régénérer tous les programmes Excel à partir des scripts Python
+Script maître pour régénérer tous les programmes à partir des scripts Python
 """
 
 import sys
@@ -12,7 +12,7 @@ import glob
 
 
 def regenerate_all_programs():
-    print("🔄 Régénération de tous les programmes Excel...")
+    print("🔄 Régénération de tous les programmes ...")
     print("=" * 60)
 
     # Trouver tous les scripts de création
@@ -63,7 +63,7 @@ def regenerate_all_programs():
 
     # Combiner tous les programmes en une base de données simulée
     print("\n" + "=" * 60)
-    print("🔗 Combinaison de tous les programmes en all_programs.xlsx...")
+    print("🔗 Combinaison de tous les programmes en all_programs...")
     print("=" * 60)
 
     combine_script = os.path.join(script_dir, "combine_all_programs.py")
@@ -77,7 +77,7 @@ def regenerate_all_programs():
             )
 
             if result.returncode == 0:
-                print("   ✅ all_programs.xlsx créé avec succès")
+                print("   ✅ all_programs créé avec succès")
             else:
                 print(f"   ❌ Erreur lors de la combinaison:")
                 print(f"   {result.stderr}")
@@ -89,16 +89,15 @@ def regenerate_all_programs():
 
     print(f"\n📋 Programmes disponibles dans examples/programs/:")
 
-    # Lister les fichiers Excel créés
     programs_dir = os.path.join(os.path.dirname(__file__), "..", "programs")
     if os.path.exists(programs_dir):
-        excel_files = sorted(glob.glob(os.path.join(programs_dir, "*.xlsx")))
-        for excel_file in excel_files:
-            filename = os.path.basename(excel_file)
-            if filename == "all_programs.xlsx":
-                print(f"   🗄️  {filename} (base de données simulée)")
+        csv_folders = sorted([d for d in os.listdir(programs_dir) 
+                             if os.path.isdir(os.path.join(programs_dir, d))])
+        for csv_folder in csv_folders:
+            if csv_folder == "all_programs":
+                print(f"   🗄️  {csv_folder}/ (base de données simulée)")
             else:
-                print(f"   📊 {filename}")
+                print(f"   📊 {csv_folder}/")
 
 
 if __name__ == "__main__":

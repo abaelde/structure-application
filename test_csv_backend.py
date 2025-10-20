@@ -17,11 +17,14 @@ def test_csv_folder_backend():
     # 1. Test de détection automatique
     print("\n1. Test de détection automatique du backend:")
 
-    # Test avec un fichier Excel
-    excel_backend = ProgramManager.detect_backend(
-        "examples/programs/single_quota_share.xlsx"
-    )
-    print(f"   Excel file -> {excel_backend}")
+    # Test avec un fichier Excel (doit lever une erreur)
+    try:
+        excel_backend = ProgramManager.detect_backend(
+            "examples/programs/single_quota_share.xlsx"
+        )
+        print(f"   Excel file -> {excel_backend}")
+    except ValueError as e:
+        print(f"   Excel file -> Erreur attendue: {e}")
 
     # Test avec un dossier (même s'il n'existe pas encore)
     csv_backend = ProgramManager.detect_backend("test_csv_program")
@@ -40,16 +43,15 @@ def test_csv_folder_backend():
         print(f"   ❌ Erreur: {e}")
         return
 
-    # 3. Test de lecture d'un programme Excel existant et conversion vers CSV
-    print("\n3. Test de conversion Excel -> CSV folder:")
+    # 3. Test de lecture d'un programme CSV existant
+    print("\n3. Test de lecture d'un programme CSV existant:")
     try:
-        # Charger un programme Excel existant
-        excel_manager = ProgramManager(backend="excel")
-        program = excel_manager.load("examples/programs/single_quota_share.xlsx")
-        print(f"   ✓ Programme Excel chargé: {program.name}")
+        # Charger un programme CSV existant
+        csv_manager = ProgramManager(backend="csv_folder")
+        program = csv_manager.load("examples/programs/single_quota_share")
+        print(f"   ✓ Programme CSV chargé: {program.name}")
 
         # Sauvegarder en CSV folder
-        csv_manager = ProgramManager(backend="csv_folder")
         csv_manager.save(program, "test_csv_program")
         print("   ✓ Programme sauvegardé en CSV folder")
 
@@ -63,7 +65,7 @@ def test_csv_folder_backend():
                 print(f"   ❌ {file} manquant")
 
     except Exception as e:
-        print(f"   ❌ Erreur lors de la conversion: {e}")
+        print(f"   ❌ Erreur lors de la lecture/sauvegarde: {e}")
         return
 
     # 4. Test de relecture du programme depuis le CSV folder

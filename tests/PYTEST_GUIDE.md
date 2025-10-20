@@ -303,7 +303,7 @@ def test_example(sample_valid_bordereau_data):
 
 ### Builders disponibles
 
-Pour créer des programmes de test, utiliser les **builders** au lieu de fichiers Excel :
+Pour créer des programmes de test, utiliser les **builders** au lieu de fichiers externes :
 
 ```python
 from tests.builders import build_quota_share, build_program

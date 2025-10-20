@@ -41,7 +41,7 @@ L'application s'ouvrira automatiquement dans votre navigateur à l'adresse `http
 
 Vous pouvez tester l'application avec les fichiers d'exemple du projet :
 
-- **Programme**: `examples/programs/aviation_axa_xl_2024.xlsx`
+- **Programme**: `examples/programs/aviation_axa_xl_2024`
 - **Bordereau**: `examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv`
 
 ## 🔧 Configuration

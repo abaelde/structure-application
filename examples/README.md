@@ -11,19 +11,11 @@ Contient les exemples de bordereaux (fichiers CSV) avec différentes configurati
 - **`bordereau_multi_year_test.csv`** : Bordereau de test pour démontrer la logique claim_basis avec des polices de différentes années
 
 ### 🏗️ `programs/`
-Contient les exemples de programmes de réassurance (fichiers Excel) :
-
-- **`program_simple_sequential.xlsx`** : Programme séquentiel mis à jour avec les nouveaux champs
-- **`program_simple_parallel.xlsx`** : Programme parallèle mis à jour avec les nouveaux champs
-- **`program_simple_sequential_updated.xlsx`** : Version mise à jour du programme séquentiel
-- **`program_simple_parallel_updated.xlsx`** : Version mise à jour du programme parallèle
+Contient les exemples de programmes de réassurance (dossiers CSV) :
 
 ### 📋 `treaties/`
 Contient les traités multi-années pour démontrer la logique claim_basis :
 
-- **`treaty_2023.xlsx`** : Traité 2023 (QS 25% + XOL 800K xs 400K)
-- **`treaty_2024.xlsx`** : Traité 2024 (QS 30% + XOL 1M xs 500K)
-- **`treaty_2025.xlsx`** : Traité 2025 (QS 35% + XOL 1.2M xs 600K)
 
 ### 🔧 `scripts/`
 Contient les scripts de démonstration et d'exemple :
@@ -84,27 +76,6 @@ uv run python examples/scripts/create_simple_programs.py
 # Depuis la racine du projet
 uv run python examples/scripts/create_program_config.py
 ```
-
-## Structure des fichiers Excel
-
-### Feuille "program"
-- `program_name` : Nom du programme
-- `mode` : "sequential" ou "parallel"
-
-### Feuille "structures"
-- `structure_name` : Nom de la structure
-- `contract_order` : Ordre d'application
-- `type_of_participation` : "quota_share" ou "excess_of_loss"
-- `claim_basis` : "risk_attaching" ou "loss_occurring"
-- `inception_date` : Date de début de la structure
-- `expiry_date` : Date de fin de la structure
-
-### Feuille "conditions"
-- `structure_name` : Référence vers la structure
-- `cession_PCT` : Taux de cession (pour quota_share)
-- `attachment_point_100` : Priorité (pour excess_of_loss)
-- `limit_occurrence_100` : Limite (pour excess_of_loss)
-- Colonnes de dimensions pour le matching
 
 ## Structure des bordereaux CSV
 

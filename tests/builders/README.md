@@ -1,12 +1,12 @@
 # Builders - Créer des programmes de test en mémoire
 
-Ce module permet de créer des objets `Program`, `Structure` et `condition` directement en Python, sans passer par Excel.
+Ce module permet de créer des objets `Program`, `Structure` et `condition` directement en Python, sans passer par des fichiers externes.
 
 ## 🎯 Objectif
 
 **Séparer les préoccupations** :
 - Tests de **logique métier** → utilisent les builders (rapides, en mémoire)
-- Tests de **chargement Excel** → utilisent `ProgramLoader` (testent l'I/O)
+- Tests de **chargement de fichiers** → utilisent `ProgramManager` (testent l'I/O)
 
 ## 📦 Modules disponibles
 
@@ -104,25 +104,25 @@ program = build_program(
 
 ## 📝 Exemple complet de test
 
-### Avant (avec Excel)
+### Avant (avec fichiers externes)
 
 ```python
 def test_quota_share():
-    program_path = Path("fixtures/programs/single_quota_share.xlsx")
+    program_path = Path("fixtures/programs/single_quota_share")
     if not program_path.exists():
         pytest.skip(f"Programme non trouvé: {program_path}")
     
-    loader = ProgramLoader(program_path)
-    program = loader.get_program()
+    manager = ProgramManager()
+    program = manager.load(str(program_path))
     
     # ... reste du test
 ```
 
 **Problèmes** :
-- ❌ Nécessite un fichier Excel
+- ❌ Nécessite des fichiers externes
 - ❌ I/O lent
 - ❌ Complexe à maintenir
-- ❌ Teste Excel ET logique en même temps
+- ❌ Teste I/O ET logique en même temps
 
 ### Après (avec builders)
 
@@ -202,9 +202,9 @@ program = build_program(
 - ✅ Tests de calculs de cession
 - ✅ Tests rapides et itératifs
 
-### Utiliser **Excel** pour :
-- ✅ Tests du `ProgramLoader`
-- ✅ Tests de validation du format Excel
+### Utiliser **fichiers externes** pour :
+- ✅ Tests du `ProgramManager`
+- ✅ Tests de validation du format CSV
 - ✅ Tests de colonnes et mappings
 - ✅ Programmes de démo/exemples réels
 
@@ -212,23 +212,23 @@ program = build_program(
 
 Pour migrer un test existant :
 
-1. **Identifier** la structure du programme dans le fichier Excel
+1. **Identifier** la structure du programme dans les fichiers externes
 2. **Recréer** avec les builders
-3. **Supprimer** les lignes de chargement Excel
+3. **Supprimer** les lignes de chargement de fichiers
 4. **Vérifier** que le test passe
 
 Exemple de migration :
 
 ```diff
-- from src.loaders import ProgramLoader
+- from src.managers import ProgramManager
 + from tests.builders import build_quota_share, build_program
 
   def test_simple_qs():
--     program_path = Path("fixtures/programs/single_quota_share.xlsx")
+-     program_path = Path("fixtures/programs/single_quota_share")
 -     if not program_path.exists():
 -         pytest.skip(f"Programme non trouvé: {program_path}")
--     loader = ProgramLoader(program_path)
--     program = loader.get_program()
+-     manager = ProgramManager()
+-     program = manager.load(str(program_path))
 +     qs = build_quota_share(name="QS_30", cession_pct=0.30)
 +     program = build_program(name="TEST_QS", structures=[qs])
       
@@ -238,7 +238,7 @@ Exemple de migration :
 ## 📊 Performance
 
 **Benchmark indicatif** (sur un MacBook Pro M1) :
-- Création programme via Excel : ~50-100ms
+- Création programme via fichiers : ~50-100ms
 - Création programme via builders : ~0.5-1ms
 
 **→ 100x plus rapide !**

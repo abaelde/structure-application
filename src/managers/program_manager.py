@@ -3,14 +3,13 @@ import os
 from pathlib import Path
 import pandas as pd
 from typing import Literal, Optional
-from src.io.program_excel_adapter import ExcelProgramIO
 from src.io.program_snowflake_adapter import SnowflakeProgramIO
 from src.io.program_csv_folder_adapter import CsvProgramFolderIO
 from src.serialization.program_serializer import ProgramSerializer
 from src.domain.program import Program
 
 # Backends supportés par ProgramManager
-Backend = Literal["excel", "snowflake", "csv_folder"]
+Backend = Literal["snowflake", "csv_folder"]
 
 
 class ProgramManager:
@@ -21,8 +20,8 @@ class ProgramManager:
     different backends (Excel, Snowflake, CSV folder, etc.).
 
     Features:
-    - Load programs from Excel, Snowflake, or CSV folder
-    - Save programs to Excel, Snowflake, or CSV folder
+    - Load programs from Snowflake or CSV folder
+    - Save programs to Snowflake or CSV folder
     - Switch backends dynamically
     - Consistent API across all backends
     - State management (track loaded program and source)
@@ -33,11 +32,6 @@ class ProgramManager:
         manager = ProgramManager()  # ou backend="csv_folder"
         program = manager.load("path/to/my_program_folder")  # contient 3 CSV
         manager.save(program, "path/to/another_folder")
-
-        # Excel
-        manager = ProgramManager(backend="excel")
-        program = manager.load("program.xlsx")
-        manager.save(program, "output.xlsx")
 
         # Snowflake
         manager = ProgramManager(backend="snowflake")
@@ -50,7 +44,7 @@ class ProgramManager:
         """Heuristique simple:
         - 'snowflake://...' -> snowflake
         - dossier existant -> csv_folder
-        - fichier .xlsx/.xls -> excel
+        - fichier .xlsx/.xls -> erreur (Excel non supporté)
         """
         if source.lower().startswith("snowflake://"):
             return "snowflake"
@@ -58,16 +52,16 @@ class ProgramManager:
         if p.exists() and p.is_dir():
             return "csv_folder"
         if p.suffix.lower() in {".xlsx", ".xls"}:
-            return "excel"
+            raise ValueError(f"Excel files (.xlsx/.xls) are no longer supported. Please use CSV folder format instead. File: {source}")
         # défaut: si le chemin n'existe pas encore mais ressemble à un dossier (sans suffixe) -> csv_folder
-        return "csv_folder" if p.suffix == "" else "excel"
+        return "csv_folder"
 
     def __init__(self, backend: Backend = "csv_folder"):
         """
         Initialize the program manager.
 
         Args:
-            backend: Default backend to use ("excel", "snowflake", or "csv_folder")
+            backend: Default backend to use ("snowflake" or "csv_folder")
         """
         self.backend = backend
         self.serializer = ProgramSerializer()
@@ -77,9 +71,7 @@ class ProgramManager:
 
     def _make_io(self, backend: Backend):
         """Create the appropriate I/O adapter for the backend."""
-        if backend == "excel":
-            return ExcelProgramIO()
-        elif backend == "snowflake":
+        if backend == "snowflake":
             return SnowflakeProgramIO()
         elif backend == "csv_folder":
             return CsvProgramFolderIO()

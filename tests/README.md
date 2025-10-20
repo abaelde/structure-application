@@ -99,7 +99,7 @@ uv run python tests/integration/test_policy_lifecycle.py
 TEST: Mécanisme de vérification d'expiration des polices
 ================================================================================
 
-1. Chargement du programme: examples/programs/single_quota_share.xlsx
+1. Chargement du programme: examples/programs/single_quota_share
    ✓ Programme chargé: Single Quota Share Example
 
 2. Bordereau de test créé:
@@ -153,7 +153,7 @@ uv run python tests/integration/test_exclusion_mechanism.py
 TEST DU MÉCANISME D'EXCLUSION
 ================================================================================
 
-Chargement du programme: examples/programs/quota_share_with_exclusion.xlsx
+Chargement du programme: examples/programs/quota_share_with_exclusion
 
 [... affichage du programme ...]
 

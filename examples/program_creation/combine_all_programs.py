@@ -1,11 +1,11 @@
 """
-Combine all individual program files into a single all_programs.xlsx file
+Combine all individual program files into a single all_programs CSV folder
 
 This script simulates what would happen in a real database with multiple programs:
-- Reads all .xlsx files from examples/programs/
+- Reads all CSV folders from examples/programs/
 - Renumbers IDs sequentially (like auto-increment in a database)
 - Concatenates all programs, structures, and conditions
-- Outputs a single all_programs.xlsx file with 3 sheets
+- Outputs a single all_programs folder with 3 CSV files
 """
 
 import sys
@@ -18,31 +18,30 @@ import numpy as np
 from pathlib import Path
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
-from src.domain import SHEETS
 from src.managers import ProgramManager
 
 
-def combine_all_programs(programs_dir: str, output_file: str):
+def combine_all_programs(programs_dir: str, output_dir: str):
     """
-    Combine all program files into a single file with renumbered IDs
+    Combine all program files into a single CSV folder with renumbered IDs
 
     Args:
-        programs_dir: Directory containing individual program .xlsx files
-        output_file: Output path for the combined all_programs.xlsx file
+        programs_dir: Directory containing individual program CSV folders
+        output_dir: Output path for the combined all_programs folder
     """
     programs_path = Path(programs_dir)
 
-    # Find all .xlsx files (excluding all_programs.xlsx itself if it exists)
-    program_files = sorted(
-        [f for f in programs_path.glob("*.xlsx") if f.name != "all_programs.xlsx"]
+    # Find all CSV folders (excluding all_programs itself if it exists)
+    program_folders = sorted(
+        [f for f in programs_path.iterdir() if f.is_dir() and f.name != "all_programs"]
     )
 
-    if not program_files:
-        print(f"No program files found in {programs_dir}")
+    if not program_folders:
+        print(f"No program folders found in {programs_dir}")
         return
 
-    print(f"Found {len(program_files)} program files:")
-    for f in program_files:
+    print(f"Found {len(program_folders)} program folders:")
+    for f in program_folders:
         print(f"  - {f.name}")
     print()
 
@@ -56,15 +55,23 @@ def combine_all_programs(programs_dir: str, output_file: str):
     next_insper_id = 1
     next_buscl_id = 1
 
-    # Process each program file
-    for program_file in program_files:
-        print(f"Processing {program_file.name}...")
+    # Process each program folder
+    for program_folder in program_folders:
+        print(f"Processing {program_folder.name}...")
 
         try:
-            # Read the three sheets
-            program_df = pd.read_excel(program_file, sheet_name=SHEETS.PROGRAM)
-            structures_df = pd.read_excel(program_file, sheet_name=SHEETS.STRUCTURES)
-            conditions_df = pd.read_excel(program_file, sheet_name=SHEETS.conditions)
+            # Read the three CSV files
+            program_csv = program_folder / "program.csv"
+            structures_csv = program_folder / "structures.csv"
+            conditions_csv = program_folder / "conditions.csv"
+            
+            if not all([program_csv.exists(), structures_csv.exists(), conditions_csv.exists()]):
+                print(f"  WARNING: Missing CSV files in {program_folder.name}, skipping")
+                continue
+                
+            program_df = pd.read_csv(program_csv)
+            structures_df = pd.read_csv(structures_csv)
+            conditions_df = pd.read_csv(conditions_csv)
 
             # Get original IDs
             old_reprog_id = program_df["REPROG_ID_PRE"].iloc[0]
@@ -135,7 +142,7 @@ def combine_all_programs(programs_dir: str, output_file: str):
             next_reprog_id += 1
 
         except Exception as e:
-            print(f"  ERROR processing {program_file.name}: {e}")
+            print(f"  ERROR processing {program_folder.name}: {e}")
             print()
             continue
 
@@ -150,20 +157,39 @@ def combine_all_programs(programs_dir: str, output_file: str):
     print(f"Total conditions: {len(combined_conditions)}")
     print()
 
-    # Write to Excel file
-    print(f"Writing to {output_file}...")
-    with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
-        combined_programs.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
-        combined_structures.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
-        combined_conditions.to_excel(writer, sheet_name=SHEETS.conditions, index=False)
+    # Create output directory
+    output_path = Path(output_dir)
+    output_path.mkdir(exist_ok=True)
+    
+    # Write to CSV files
+    print(f"Writing to {output_dir}...")
+    combined_programs.to_csv(output_path / "program.csv", index=False)
+    combined_structures.to_csv(output_path / "structures.csv", index=False)
+    combined_conditions.to_csv(output_path / "conditions.csv", index=False)
+    
+    # Check if exclusions exist and combine them too
+    all_exclusions = []
+    for program_folder in program_folders:
+        exclusions_csv = program_folder / "exclusions.csv"
+        if exclusions_csv.exists():
+            exclusions_df = pd.read_csv(exclusions_csv)
+            # Renumber exclusion IDs if they exist
+            if "EXCLUSION_ID" in exclusions_df.columns:
+                # Map exclusion IDs to new sequential IDs
+                old_exclusion_ids = exclusions_df["EXCLUSION_ID"].values
+                exclusion_id_map = {}
+                for old_id in old_exclusion_ids:
+                    if old_id not in exclusion_id_map:
+                        exclusion_id_map[old_id] = len(exclusion_id_map) + 1
+                exclusions_df["EXCLUSION_ID"] = exclusions_df["EXCLUSION_ID"].map(exclusion_id_map)
+            all_exclusions.append(exclusions_df)
+    
+    if all_exclusions:
+        combined_exclusions = pd.concat(all_exclusions, ignore_index=True)
+        combined_exclusions.to_csv(output_path / "exclusions.csv", index=False)
+        print(f"Total exclusions: {len(combined_exclusions)}")
 
-    # Auto-adjust column widths using ProgramManager
-    print(f"Auto-adjusting column widths...")
-    manager = ProgramManager(backend="csv_folder")
-    # Note: _auto_adjust_column_widths might not be available in ProgramManager
-    # manager._auto_adjust_column_widths(output_file)
-
-    print(f"✅ Successfully created {output_file}")
+    print(f"✅ Successfully created {output_dir}")
     print()
 
     # Display summary
@@ -191,14 +217,14 @@ if __name__ == "__main__":
     # Directories
     script_dir = os.path.dirname(os.path.abspath(__file__))
     programs_dir = os.path.join(script_dir, "..", "programs")
-    output_file = os.path.join(programs_dir, "all_programs.xlsx")
+    output_dir = os.path.join(programs_dir, "all_programs")
 
     print("=" * 80)
-    print("COMBINING ALL PROGRAMS INTO SINGLE FILE")
+    print("COMBINING ALL PROGRAMS INTO SINGLE CSV FOLDER")
     print("=" * 80)
     print()
 
-    combine_all_programs(programs_dir, output_file)
+    combine_all_programs(programs_dir, output_dir)
 
     print("\n" + "=" * 80)
     print("DONE")

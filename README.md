@@ -39,14 +39,14 @@ structure-application/
 │   │   │   └── bordereau_multi_year_test.csv
 │   │   └── README.md                  # Conventions des bordereaux
 │   ├── programs/                      # Exemples de programmes
-│   │   ├── program_simple_sequential.xlsx
-│   │   ├── program_simple_parallel.xlsx
-│   │   └── program_simple_*_updated.xlsx
+│   │   ├── program_simple_sequential/
+│   │   ├── program_simple_parallel/
+│   │   └── program_simple_*_updated/
 │   └── scripts/                       # Scripts d'exemple
 │       ├── create_simple_programs.py
 │       ├── create_program_config.py
 │       └── example_claim_basis_usage.py
-├── program_config.xlsx                # Configuration du programme (Excel)
+├── program_config/                    # Configuration du programme (CSV folder)
 ├── PROGRAM_SPECIFICATION_GUIDE.md     # Guide de spécification des programmes
 ├── CLAIM_BASIS_GUIDE.md               # Guide de la logique claim_basis
 ├── EXCLUSION_MECHANISM.md             # Guide du mécanisme d'exclusion
@@ -125,18 +125,18 @@ Pour chaque police et chaque structure :
 
 Pour une police à Paris, la condition 2 sera choisie car elle est plus spécifique.
 
-## Configuration Excel
+## Configuration CSV
 
-Le fichier `program_config.xlsx` contient 3 feuilles :
+Le dossier `program_config/` contient 3 fichiers CSV :
 
-### Feuille "program"
+### Fichier "program.csv"
 Définit le programme principal (une seule ligne).
 
 | program_name | mode       |
 |--------------|------------|
 | PROGRAM_2024 | sequential |
 
-### Feuille "structures"
+### Fichier "structures.csv"
 Définit les structures du programme (nom, ordre, type de produit).
 
 | structure_name | contract_order | type_of_participation    |
@@ -144,7 +144,7 @@ Définit les structures du programme (nom, ordre, type de produit).
 | QS_GENERAL     | 1     | quota_share     |
 | XOL_LARGE      | 2     | excess_of_loss  |
 
-### Feuille "conditions"
+### Fichier "conditions.csv"
 Définit les conditions de chaque structure avec paramètres et conditions.
 
 | structure_name | cession_PCT | attachment_point_100 | limit_occurrence_100   | localisation | industrie |
@@ -191,7 +191,7 @@ Pour une utilisation scriptée ou automatisée :
 uv sync
 
 # Appliquer un programme à un bordereau
-uv run python run_program_analysis.py --program examples/programs/aviation_axa_xl_2024.xlsx --bordereau examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv
+uv run python run_program_analysis.py --program examples/programs/aviation_axa_xl_2024 --bordereau examples/bordereaux/aviation/bordereau_aviation_axa_xl.csv
 ```
 
 ### Cas d'usage avancé : Consolidation multi-cédantes
@@ -275,8 +275,8 @@ suivi d'un XoL de 1M xs 500K uniquement pour Paris"
 Le script `create_program_config.py` montre comment créer un fichier de configuration programmatiquement. 
 Vous pouvez le modifier pour créer vos propres programmes.
 
-**Option 3 : Excel direct**
-Éditez directement le fichier Excel `program_config.xlsx`.
+**Option 3 : CSV direct**
+Éditez directement les fichiers CSV dans le dossier `program_config/`.
 
 ## Exemple de résultat
 
