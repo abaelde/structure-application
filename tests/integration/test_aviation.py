@@ -26,7 +26,7 @@ def test_hull_liability_filtering_aviation():
        - Cession: 16.25M (65M × 25%)
        - Rétention: 48.75M
 
-    2. XOL_HULL (10M xs 5M sur Hull uniquement):
+    2. XOL_HULL (10M xs 5M sur Hull uniquement): # AURE pas certain car si on fait un QS, prend t on la rétention du hull ou toute la rétention ?
        - Retained total après QS: 48.75M
        - Composant Hull de ce retained: 48.75M × (15M / 65M) = 11.25M
        - Input XOL_HULL: 11.25M (filtré sur Hull)
