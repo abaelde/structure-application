@@ -5,7 +5,7 @@
 Pour démarrer l'application Streamlit, utilisez la commande suivante :
 
 ```bash
-uv run streamlit run app.py
+uv run streamlit run app/main.py
 ```
 
 L'application s'ouvrira automatiquement dans votre navigateur à l'adresse `http://localhost:8501`

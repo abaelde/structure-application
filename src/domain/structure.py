@@ -20,7 +20,7 @@ class Structure:
         self.contract_order = contract_order
         self.type_of_participation = type_of_participation
         self.predecessor_title = predecessor_title
-        
+
         # --- validation claim basis obligatoire
         basis = (claim_basis or "").strip().lower()
         if basis not in CLAIM_BASIS_VALUES:
@@ -48,7 +48,9 @@ class Structure:
         except Exception:
             ts = None
         if ts is None or (isinstance(ts, pd.Timestamp) and pd.isna(ts)):
-            raise ValueError(f"{field_name} is required and must be a valid date, got: {val}")
+            raise ValueError(
+                f"{field_name} is required and must be a valid date, got: {val}"
+            )
         return ts
 
     @classmethod

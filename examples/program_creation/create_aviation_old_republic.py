@@ -39,6 +39,8 @@ xol_1 = build_excess_of_loss(
         for country in COUNTRIES
     ],
     claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2025-01-01",
 )
 
 xol_2 = build_excess_of_loss(
@@ -55,6 +57,8 @@ xol_2 = build_excess_of_loss(
         for country in COUNTRIES
     ],
     claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2025-01-01",
 )
 
 xol_3 = build_excess_of_loss(
@@ -71,6 +75,8 @@ xol_3 = build_excess_of_loss(
         for country in COUNTRIES
     ],
     claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2025-01-01",
 )
 
 program = build_program(

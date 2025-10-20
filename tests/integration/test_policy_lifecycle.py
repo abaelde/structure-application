@@ -20,18 +20,18 @@ def test_policy_expiry_mechanism():
     - Cession = 0 pour les polices expirées
     """
     qs = build_quota_share(
-            name="QS_30",
-            conditions_config=[
-                {
-                    "cession_pct": 0.30,
-                    "includes_hull": True,
-                    "includes_liability": True,
-                }
-            ],
-            claim_basis="risk_attaching",
-            inception_date="2023-01-01",
-            expiry_date="2027-01-01",
-        )
+        name="QS_30",
+        conditions_config=[
+            {
+                "cession_pct": 0.30,
+                "includes_hull": True,
+                "includes_liability": True,
+            }
+        ],
+        claim_basis="risk_attaching",
+        inception_date="2023-01-01",
+        expiry_date="2027-01-01",
+    )
     program = build_program(
         name="TEST_LIFECYCLE", structures=[qs], underwriting_department="test"
     )

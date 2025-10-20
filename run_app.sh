@@ -7,5 +7,5 @@ echo "L'application s'ouvrira automatiquement dans votre navigateur."
 echo "Pour arrêter l'application, utilisez Ctrl+C"
 echo ""
 
-uv run streamlit run app.py
+uv run streamlit run app/main.py
 

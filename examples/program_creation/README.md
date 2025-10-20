@@ -199,7 +199,7 @@ from tests.builders import build_quota_share, build_program
 from excel_utils import program_to_excel
 
 # Créer une structure Quota Share 30%
-qs = build_quota_share(name="QS_30", cession_pct=0.30)
+qs = build_quota_share(name="QS_30", cession_pct=0.30, claim_basis="risk_attaching", inception_date="2024-01-01", expiry_date="2025-01-01")
 
 # Créer le programme
 program = build_program(
@@ -231,7 +231,9 @@ qs = build_quota_share(
             "currency_cd": "EUR",
         },
     ],
-    claim_basis="risk_attaching"
+    claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2025-01-01"
 )
 
 program = build_program(name="QS_MULTI_2024", structures=[qs], underwriting_department="aviation")
@@ -244,7 +246,7 @@ program_to_excel(program, "../programs/qs_multi_currency.xlsx")
 from tests.builders import build_quota_share, build_excess_of_loss, build_program
 
 # QS en premier (entry point)
-qs = build_quota_share(name="QS_25", cession_pct=0.25)
+qs = build_quota_share(name="QS_25", cession_pct=0.25, claim_basis="risk_attaching", inception_date="2024-01-01", expiry_date="2025-01-01")
 
 # XOL qui s'applique sur la rétention du QS (inuring)
 xol = build_excess_of_loss(
@@ -252,7 +254,9 @@ xol = build_excess_of_loss(
     attachment=20_000_000,
     limit=50_000_000,
     predecessor_title="QS_25",  # Inuring: s'applique après QS_25
-    claim_basis="risk_attaching"
+    claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2025-01-01"
 )
 
 program = build_program(

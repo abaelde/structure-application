@@ -167,7 +167,7 @@ Pour une interface graphique moderne et interactive :
 
 ```bash
 # Lancer l'application Streamlit
-uv run streamlit run app.py
+uv run streamlit run app/main.py
 
 # Ou utiliser le script de lancement
 ./run_app.sh

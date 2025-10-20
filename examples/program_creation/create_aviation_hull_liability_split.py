@@ -33,6 +33,8 @@ qs_all = build_quota_share(
         }
     ],
     claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2025-01-01",
 )
 
 xol_hull = build_excess_of_loss(
@@ -48,6 +50,8 @@ xol_hull = build_excess_of_loss(
     ],
     predecessor_title="QS_ALL",
     claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2025-01-01",
 )
 
 xol_liability = build_excess_of_loss(
@@ -63,6 +67,8 @@ xol_liability = build_excess_of_loss(
     ],
     predecessor_title="QS_ALL",
     claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2025-01-01",
 )
 
 program = build_program(

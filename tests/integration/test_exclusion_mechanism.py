@@ -35,10 +35,13 @@ def test_exclusion_mechanism():
         ).to_dict(),
     ]
 
-    qs = build_quota_share(name="QS_Aviation_25%", conditions_config=conditions,
+    qs = build_quota_share(
+        name="QS_Aviation_25%",
+        conditions_config=conditions,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
-        expiry_date="2025-01-01",)
+        expiry_date="2025-01-01",
+    )
 
     program = build_program(
         name="QS_WITH_EXCLUSIONS", structures=[qs], underwriting_department="test"

@@ -22,6 +22,9 @@ qs = build_quota_share(
             "cession_pct": 0.30,
         }
     ],
+    claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2025-01-01",
 )
 
 program = build_program(

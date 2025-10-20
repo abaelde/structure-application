@@ -150,7 +150,7 @@ def test_hull_liability_filtering_aviation():
     )
     # SANS rescaling: attachment et limit restent inchangés
     attachment_hull = 5_000_000  # NON rescalé
-    limit_hull = 10_000_000     # NON rescalé
+    limit_hull = 10_000_000  # NON rescalé
     expected_hull_cession = max(
         0,
         min(limit_hull, hull_component_of_retained - attachment_hull),
@@ -172,7 +172,7 @@ def test_hull_liability_filtering_aviation():
     )
     # SANS rescaling: attachment et limit restent inchangés
     attachment_liability = 10_000_000  # NON rescalé
-    limit_liability = 40_000_000      # NON rescalé
+    limit_liability = 40_000_000  # NON rescalé
     expected_liability_cession = max(
         0,
         min(

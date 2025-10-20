@@ -61,6 +61,8 @@ qs_1 = build_quota_share(
         for currency in ALL_CURRENCIES
     ],
     claim_basis="risk_attaching",
+    inception_date="2024-01-01",
+    expiry_date="2025-01-01",
 )
 
 
@@ -97,6 +99,8 @@ def create_xol_layer(layer_name: str) -> object:
         conditions_config=conditions,
         predecessor_title="QS_1",
         claim_basis="risk_attaching",
+        inception_date="2024-01-01",
+        expiry_date="2025-01-01",
     )
 
 

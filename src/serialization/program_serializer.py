@@ -3,7 +3,12 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Any, List
 from src.domain import Program, Structure
-from src.domain.constants import PROGRAM_COLS, STRUCTURE_COLS, condition_COLS, CLAIM_BASIS_VALUES
+from src.domain.constants import (
+    PROGRAM_COLS,
+    STRUCTURE_COLS,
+    condition_COLS,
+    CLAIM_BASIS_VALUES,
+)
 from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 MULTI_VALUE_SEPARATOR = ";"
@@ -115,7 +120,11 @@ class ProgramSerializer:
         # valeurs non nulles + formats
         bad_rows = []
         for idx, row in structures_df.iterrows():
-            cb = str(row[STRUCTURE_COLS.CLAIM_BASIS]).strip().lower() if pd.notna(row[STRUCTURE_COLS.CLAIM_BASIS]) else ""
+            cb = (
+                str(row[STRUCTURE_COLS.CLAIM_BASIS]).strip().lower()
+                if pd.notna(row[STRUCTURE_COLS.CLAIM_BASIS])
+                else ""
+            )
             eff = row[STRUCTURE_COLS.INCEPTION]
             exp = row[STRUCTURE_COLS.EXPIRY]
             if not cb or cb not in CLAIM_BASIS_VALUES or pd.isna(eff) or pd.isna(exp):
@@ -256,7 +265,11 @@ class ProgramSerializer:
         buscl_id = 1
         for st in program.structures:
             # fail-fast côté export si un objet invalide a été construit par du code tiers
-            if not st.claim_basis or st.inception_date is None or st.expiry_date is None:
+            if (
+                not st.claim_basis
+                or st.inception_date is None
+                or st.expiry_date is None
+            ):
                 raise ValueError(
                     f"Program contains a Structure with missing claim_basis/effective/expiry: {st.structure_name}"
                 )

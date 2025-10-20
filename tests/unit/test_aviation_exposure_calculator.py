@@ -9,11 +9,11 @@ class TestAviationExposureCalculator:
     def test_calculate_valid_exposure(self):
         """
         Test de calcul d'exposition aviation avec Hull et Liability complets
-        
+
         DONNÉES:
         - Hull: 50M × 15% = 7.5M
         - Liability: 300M × 10% = 30M
-        
+
         ATTENDU:
         - Total: 37.5M
         """
@@ -34,11 +34,11 @@ class TestAviationExposureCalculator:
     def test_calculate_with_string_values(self):
         """
         Test de calcul avec des valeurs string (conversion automatique)
-        
+
         DONNÉES:
         - Hull: "50000000" × "0.15" = 7.5M
         - Liability: "300000000" × "0.10" = 30M
-        
+
         ATTENDU:
         - Total: 37.5M
         """
@@ -57,11 +57,11 @@ class TestAviationExposureCalculator:
     def test_calculate_missing_hull_limit(self):
         """
         Test de calcul avec Hull manquant (seulement Liability)
-        
+
         DONNÉES:
         - Hull: None
         - Liability: 300M × 10% = 30M
-        
+
         ATTENDU:
         - Total: 30M
         """
@@ -79,11 +79,11 @@ class TestAviationExposureCalculator:
     def test_calculate_missing_liability_limit(self):
         """
         Test de calcul avec Liability manquant (seulement Hull)
-        
+
         DONNÉES:
         - Hull: 50M × 15% = 7.5M
         - Liability: None
-        
+
         ATTENDU:
         - Total: 7.5M
         """
@@ -101,11 +101,11 @@ class TestAviationExposureCalculator:
     def test_calculate_missing_hull_share(self):
         """
         Test d'erreur quand HULL_SHARE est manquant
-        
+
         DONNÉES:
         - Hull: 50M (sans HULL_SHARE)
         - Liability: 300M × 10% = 30M
-        
+
         ATTENDU:
         - Exception ExposureCalculationError
         """
@@ -125,11 +125,11 @@ class TestAviationExposureCalculator:
     def test_calculate_missing_liability_share(self):
         """
         Test d'erreur quand LIABILITY_SHARE est manquant
-        
+
         DONNÉES:
         - Hull: 50M × 15% = 7.5M
         - Liability: 300M (sans LIABILITY_SHARE)
-        
+
         ATTENDU:
         - Exception ExposureCalculationError
         """
@@ -149,11 +149,11 @@ class TestAviationExposureCalculator:
     def test_calculate_invalid_numeric_value(self):
         """
         Test d'erreur avec valeur numérique invalide
-        
+
         DONNÉES:
         - Hull: "not_a_number" (invalide)
         - Liability: 300M × 10% = 30M
-        
+
         ATTENDU:
         - Exception ExposureCalculationError
         """
@@ -173,11 +173,11 @@ class TestAviationExposureCalculator:
     def test_realistic_aviation_exposure(self):
         """
         Test avec des valeurs réalistes d'aviation
-        
+
         DONNÉES:
         - Hull: 250M × 15% = 37.5M
         - Liability: 1B × 10% = 100M
-        
+
         ATTENDU:
         - Total: 137.5M
         """
@@ -199,15 +199,15 @@ class TestAviationExposureCalculator:
     def test_calculate_missing_both_exposures(self):
         """
         Test que le calculateur retourne 0.0 quand aucune exposition n'est présente.
-        
+
         Note: La validation de la présence des colonnes d'exposition au niveau DataFrame
         est faite par validate(). Le calculateur traite ligne par ligne
         et retourne 0.0 si aucune valeur d'exposition n'est présente sur cette ligne.
-        
+
         DONNÉES:
         - Hull: None
         - Liability: None
-        
+
         ATTENDU:
         - Total: 0.0
         """
@@ -225,11 +225,11 @@ class TestAviationExposureCalculator:
     def test_calculate_hull_share_without_hull_limit(self):
         """
         Test avec HULL_SHARE mais sans HULL_LIMIT (seulement Liability)
-        
+
         DONNÉES:
         - Hull: HULL_SHARE présent mais HULL_LIMIT manquant
         - Liability: 300M × 10% = 30M
-        
+
         ATTENDU:
         - Total: 30M
         """
@@ -248,11 +248,11 @@ class TestAviationExposureCalculator:
     def test_calculate_liability_share_without_liability_limit(self):
         """
         Test avec LIABILITY_SHARE mais sans LIABILITY_LIMIT (seulement Hull)
-        
+
         DONNÉES:
         - Hull: 50M × 15% = 7.5M
         - Liability: LIABILITY_SHARE présent mais LIABILITY_LIMIT manquant
-        
+
         ATTENDU:
         - Total: 7.5M
         """
@@ -271,11 +271,11 @@ class TestAviationExposureCalculator:
     def test_calculate_components_with_both(self):
         """
         Test calculate_components avec Hull et Liability
-        
+
         DONNÉES:
         - Hull: 100M × 15% = 15M
         - Liability: 500M × 10% = 50M
-        
+
         ATTENDU:
         - Hull exposure: 15M
         - Liability exposure: 50M
@@ -298,11 +298,11 @@ class TestAviationExposureCalculator:
     def test_calculate_components_hull_only(self):
         """
         Test calculate_components avec seulement Hull
-        
+
         DONNÉES:
         - Hull: 100M × 15% = 15M
         - Liability: None
-        
+
         ATTENDU:
         - Hull exposure: 15M
         - Liability exposure: 0
@@ -323,11 +323,11 @@ class TestAviationExposureCalculator:
     def test_calculate_components_liability_only(self):
         """
         Test calculate_components avec seulement Liability
-        
+
         DONNÉES:
         - Hull: None
         - Liability: 500M × 10% = 50M
-        
+
         ATTENDU:
         - Hull exposure: 0
         - Liability exposure: 50M
@@ -348,11 +348,11 @@ class TestAviationExposureCalculator:
     def test_calculate_components_none(self):
         """
         Test calculate_components sans aucune exposition
-        
+
         DONNÉES:
         - Hull: None
         - Liability: None
-        
+
         ATTENDU:
         - Hull exposure: 0
         - Liability exposure: 0
