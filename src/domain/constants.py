@@ -39,6 +39,7 @@ SHEETS = (
         PROGRAM="program",
         STRUCTURES="structures",
         conditions="conditions",
+        EXCLUSIONS="exclusions",
     )
 )
 

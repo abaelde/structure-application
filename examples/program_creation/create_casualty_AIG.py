@@ -34,7 +34,6 @@ qs = build_quota_share(
             "limit": 10_000_000,
             "signed_share": REINSURER_SHARE,
             "pol_risk_name_ced": "cyber",
-            "exclude_cd": "INCLUDE",
         },
     ],
     claim_basis="risk_attaching",

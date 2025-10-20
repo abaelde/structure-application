@@ -224,7 +224,6 @@ class Structure:
             condition.signed_share,
             condition.includes_hull,
             condition.includes_liability,
-            condition.get("BUSCL_EXCLUDE_CD"),
         )
         return signature
 
@@ -291,9 +290,6 @@ class Structure:
         # Describe dimension values (grouped by dimension)
         dimension_info = []
         for dim in dimension_columns:
-            if dim == "BUSCL_EXCLUDE_CD":
-                continue
-
             # Collect all unique values for this dimension across all conditions in the group
             all_values = set()
             for condition in conditions:

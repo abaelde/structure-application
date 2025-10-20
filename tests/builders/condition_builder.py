@@ -16,7 +16,6 @@ def build_condition(
     attachment: Optional[float] = None,
     limit: Optional[float] = None,
     signed_share: Optional[float] = 1.0,
-    exclude_cd: Optional[str] = None,
     entity_name_ced: Optional[str] = None,
     pol_risk_name_ced: Optional[str] = None,
     country_cd: Optional[str | list[str]] = None,
@@ -37,7 +36,6 @@ def build_condition(
         attachment: Attachment point (for excess of loss)
         limit: Limit (for excess of loss)
         signed_share: Reinsurer share (default 1.0 = 100%)
-        exclude_cd: Exclusion code ("exclude" for exclusion conditions)
         entity_name_ced: Entity name
         pol_risk_name_ced: Policy risk name
         country_cd: Country code (string or list of strings for multi-value conditions)
@@ -58,7 +56,6 @@ def build_condition(
         "ATTACHMENT_POINT_100": attachment,
         "LIMIT_100": limit,
         "SIGNED_SHARE_PCT": signed_share,
-        "BUSCL_EXCLUDE_CD": exclude_cd,
         "BUSCL_ENTITY_NAME_CED": _as_list(entity_name_ced),
         "POL_RISK_NAME_CED": _as_list(pol_risk_name_ced),
         "BUSCL_COUNTRY_CD": _as_list(country_cd),
@@ -76,36 +73,4 @@ def build_condition(
     return Condition(condition_data)
 
 
-def build_exclusion_condition(
-    country_cd: Optional[str | list[str]] = None,
-    region: Optional[str | list[str]] = None,
-    class_of_business_1: Optional[str | list[str]] = None,
-    class_of_business_2: Optional[str | list[str]] = None,
-    class_of_business_3: Optional[str | list[str]] = None,
-    currency_cd: Optional[str | list[str]] = None,
-    entity_name_ced: Optional[str] = None,
-    pol_risk_name_ced: Optional[str] = None,
-    **kwargs,
-) -> Condition:
-    """
-    Build an exclusion condition.
-
-    Exclusion conditions don't have cession_pct, attachment, limit, or signed_share.
-    They only define what to exclude based on dimensions.
-    """
-    return build_condition(
-        exclude_cd="exclude",
-        country_cd=country_cd,
-        region=region,
-        class_of_business_1=class_of_business_1,
-        class_of_business_2=class_of_business_2,
-        class_of_business_3=class_of_business_3,
-        currency_cd=currency_cd,
-        entity_name_ced=entity_name_ced,
-        pol_risk_name_ced=pol_risk_name_ced,
-        cession_pct=None,
-        attachment=None,
-        limit=None,
-        signed_share=None,
-        **kwargs,
-    )
+# build_exclusion_condition removed - exclusions are now handled at program level

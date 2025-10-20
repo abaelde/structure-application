@@ -1,0 +1,137 @@
+================================================================================
+DETAILED STRUCTURES APPLICATION REPORT
+================================================================================
+
+================================================================================
+PROGRAM CONFIGURATION
+================================================================================
+Program name: Quota Share with Exclusions Test
+Underwriting department: aviation
+Number of structures: 1
+Matching dimensions: 8
+   Dimensions: BUSCL_LIMIT_CURRENCY_CD, BUSCL_CLASS_OF_BUSINESS_3, BUSCL_COUNTRY_CD, BUSCL_ENTITY_NAME_CED, POL_RISK_NAME_CED, BUSCL_CLASS_OF_BUSINESS_2, BUSCL_REGION, BUSCL_CLASS_OF_BUSINESS_1
+
+--------------------------------------------------------------------------------
+STRUCTURE DETAILS
+--------------------------------------------------------------------------------
+
+Structure 1: QS Aviation 25%
+   Type: quota_share
+   Predecessor: None (Entry point)
+   Number of conditions: 1
+   Claim basis: risk_attaching
+   Inception date: 2024-01-01 00:00:00
+   Expiry date: 2024-12-31 00:00:00
+   Single condition group:
+      Cession rate: 25.0% (25.0%)
+      Reinsurer share: 100.00% (100.00%)
+      Coverage scope: Hull + Liability
+      Matching conditions: None (applies to all policies)
+
+================================================================================
+PROGRAM EXCLUSIONS
+================================================================================
+- Excl 1: BUSCL_COUNTRY_CD=[Iran]  reason=Sanctions Iran
+- Excl 2: BUSCL_COUNTRY_CD=[Russia]  reason=Sanctions Russia
+================================================================================
+
+
+================================================================================
+DETAILED BREAKDOWN BY POLICY
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: AIR FRANCE-KLM
+Cedant gross exposure: 137,500,000.00
+Cession at layer (100%): 34,375,000.00
+Reinsurer net exposure: 34,375,000.00
+Retained by cedant: 103,125,000.00
+
+Structures applied:
+
+1. QS Aviation 25% (quota_share) - ✓ APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 137,500,000.00
+   Cession at layer (100%): 34,375,000.00
+   Reinsurer Share: 1.0000 (100.00%)
+   Cession to reinsurer: 34,375,000.00
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: LUFTHANSA GROUP
+Cedant gross exposure: 43,600,000.00
+Cession at layer (100%): 10,900,000.00
+Reinsurer net exposure: 10,900,000.00
+Retained by cedant: 32,700,000.00
+
+Structures applied:
+
+1. QS Aviation 25% (quota_share) - ✓ APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 43,600,000.00
+   Cession at layer (100%): 10,900,000.00
+   Reinsurer Share: 1.0000 (100.00%)
+   Cession to reinsurer: 10,900,000.00
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: EMIRATES AIRLINES
+Cedant gross exposure: 98,100,000.00
+Cession at layer (100%): 24,525,000.00
+Reinsurer net exposure: 24,525,000.00
+Retained by cedant: 73,575,000.00
+
+Structures applied:
+
+1. QS Aviation 25% (quota_share) - ✓ APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 98,100,000.00
+   Cession at layer (100%): 24,525,000.00
+   Reinsurer Share: 1.0000 (100.00%)
+   Cession to reinsurer: 24,525,000.00
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: SINGAPORE AIRLINES
+Cedant gross exposure: 70,700,000.00
+Cession at layer (100%): 17,675,000.00
+Reinsurer net exposure: 17,675,000.00
+Retained by cedant: 53,025,000.00
+
+Structures applied:
+
+1. QS Aviation 25% (quota_share) - ✓ APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 70,700,000.00
+   Cession at layer (100%): 17,675,000.00
+   Reinsurer Share: 1.0000 (100.00%)
+   Cession to reinsurer: 17,675,000.00
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: DELTA AIR LINES
+Cedant gross exposure: 137,900,000.00
+Cession at layer (100%): 34,475,000.00
+Reinsurer net exposure: 34,475,000.00
+Retained by cedant: 103,425,000.00
+
+Structures applied:
+
+1. QS Aviation 25% (quota_share) - ✓ APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 137,900,000.00
+   Cession at layer (100%): 34,475,000.00
+   Reinsurer Share: 1.0000 (100.00%)
+   Cession to reinsurer: 34,475,000.00
+
+────────────────────────────────────────────────────────────────────────────────
+INSURED: BRITISH AIRWAYS
+Cedant gross exposure: 83,560,000.00
+Cession at layer (100%): 20,890,000.00
+Reinsurer net exposure: 20,890,000.00
+Retained by cedant: 62,670,000.00
+
+Structures applied:
+
+1. QS Aviation 25% (quota_share) - ✓ APPLIED
+   Predecessor: None (Entry point)
+   Input exposure: 83,560,000.00
+   Cession at layer (100%): 20,890,000.00
+   Reinsurer Share: 1.0000 (100.00%)
+   Cession to reinsurer: 20,890,000.00

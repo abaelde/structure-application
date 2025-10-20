@@ -13,6 +13,7 @@ from .constants import (
 from .program import Program
 from .structure import Structure
 from .condition import Condition
+from .exclusion import ExclusionRule
 
 __all__ = [
     "UNDERWRITING_DEPARTMENT",
@@ -28,4 +29,5 @@ __all__ = [
     "Program",
     "Structure",
     "Condition",
+    "ExclusionRule",
 ]

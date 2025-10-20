@@ -10,7 +10,11 @@ class ExcelProgramIO:
         program_df = pd.read_excel(source, sheet_name=SHEETS.PROGRAM)
         structures_df = pd.read_excel(source, sheet_name=SHEETS.STRUCTURES)
         conditions_df = pd.read_excel(source, sheet_name=SHEETS.conditions)
-        return program_df, structures_df, conditions_df
+        try:
+            exclusions_df = pd.read_excel(source, sheet_name=SHEETS.EXCLUSIONS)
+        except Exception:
+            exclusions_df = pd.DataFrame()
+        return program_df, structures_df, conditions_df, exclusions_df
 
     def write(
         self,
@@ -18,6 +22,7 @@ class ExcelProgramIO:
         program_df,
         structures_df,
         conditions_df,
+        exclusions_df,
         *,
         min_width=10,
         max_width=50,
@@ -26,6 +31,13 @@ class ExcelProgramIO:
             program_df.to_excel(writer, sheet_name=SHEETS.PROGRAM, index=False)
             structures_df.to_excel(writer, sheet_name=SHEETS.STRUCTURES, index=False)
             conditions_df.to_excel(writer, sheet_name=SHEETS.conditions, index=False)
+            # exclusions sheet may be missing in older programs
+            if "exclusions" in locals() or "exclusions_df" in locals():
+                try:
+                    exclusions_df.to_excel(writer, sheet_name=SHEETS.EXCLUSIONS, index=False)
+                except Exception:
+                    # if caller didn't pass it, create empty sheet
+                    pd.DataFrame().to_excel(writer, sheet_name=SHEETS.EXCLUSIONS, index=False)
         self._auto_adjust_column_widths(dest, min_width, max_width)
 
     def _auto_adjust_column_widths(

@@ -30,29 +30,6 @@ def _specificity_increment(condition_values: list[str] | None) -> float:
     return 1.0 / n  # 1 si 1 valeur, 0.5 si 2, etc.
 
 
-def check_exclusion(
-    policy: Policy,
-    conditions: List[Condition],
-    dimension_columns: List[str],
-) -> bool:
-    for condition in conditions:
-        if not condition.is_exclusion():
-            continue
-        matches = True
-        for dimension in dimension_columns:
-            if dimension == "BUSCL_EXCLUDE_CD":
-                continue
-            cond_vals = condition.get_values(dimension)
-            if cond_vals is not None and len(cond_vals) > 0:
-                policy_val = policy.get_dimension_value(dimension)
-                if not _values_match(cond_vals, policy_val):
-                    matches = False
-                    break
-        if matches:
-            return True
-    return False
-
-
 def match_condition(
     policy: Policy,
     conditions: List[Condition],
@@ -60,8 +37,6 @@ def match_condition(
 ) -> Optional[Condition]:
     matched = []
     for condition in conditions:
-        if condition.is_exclusion():
-            continue
         ok = True
         score = 0.0
         for dimension in dimension_columns:
@@ -105,9 +80,6 @@ def match_condition_with_details(
 
     matched = []
     for condition in conditions:
-        if condition.is_exclusion():
-            continue
-
         condition_details = {
             "condition": condition,
             "score": 0.0,

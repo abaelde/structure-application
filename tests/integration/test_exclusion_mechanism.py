@@ -1,9 +1,9 @@
 import pandas as pd
 from src.engine import apply_program_to_bordereau
 from src.domain.bordereau import Bordereau
+from src.domain.exclusion import ExclusionRule
 from tests.builders import (
     build_quota_share,
-    build_exclusion_condition,
     build_condition,
     build_program,
 )
@@ -14,7 +14,7 @@ def test_exclusion_mechanism():
     Test du mécanisme d'exclusion dans un programme Quota Share
 
     STRUCTURE DU PROGRAMME:
-    - Quota Share 25% avec critères d'exclusion par pays (Iran, Russia)
+    - Quota Share 25% avec exclusions globales par pays (Iran, Russia)
     - condition catch-all avec 25% de cession
 
     BORDEREAU:
@@ -26,10 +26,8 @@ def test_exclusion_mechanism():
     - Les polices incluses ont une cession de 25% de leur exposure
     - Le statut d'exclusion est correctement reporté
     """
-    # Créer le programme avec exclusions
+    # Créer le programme avec exclusions au niveau programme
     conditions = [
-        build_exclusion_condition(country_cd="Iran").to_dict(),
-        build_exclusion_condition(country_cd="Russia").to_dict(),
         build_condition(
             cession_pct=0.25, includes_hull=True, includes_liability=True
         ).to_dict(),
@@ -43,9 +41,24 @@ def test_exclusion_mechanism():
         expiry_date="2025-01-01",
     )
 
+    # Créer les exclusions au niveau programme
+    exclusions = [
+        ExclusionRule(
+            values_by_dimension={'BUSCL_COUNTRY_CD': ['Iran']},
+            reason='Sanctions Iran'
+        ),
+        ExclusionRule(
+            values_by_dimension={'BUSCL_COUNTRY_CD': ['Russia']},
+            reason='Sanctions Russia'
+        ),
+    ]
+
     program = build_program(
         name="QS_WITH_EXCLUSIONS", structures=[qs], underwriting_department="test"
     )
+    
+    # Ajouter les exclusions au programme
+    program.exclusions = exclusions
 
     # Créer le bordereau de test
     test_data = {

@@ -3,7 +3,7 @@ from src.domain import Program
 
 # FIELDS supprimé - utilisation directe des clés canoniques
 from src.domain.policy import Policy
-from .condition_matcher import check_exclusion
+from .exclusion_matcher import check_program_exclusions
 from .policy_lifecycle import (
     create_inactive_result,
     create_excluded_result,
@@ -22,12 +22,11 @@ def apply_program(
     if not is_policy_active:
         return create_inactive_result(policy, program, inactive_reason)
 
-    if check_exclusion(
-        policy,
-        program.all_conditions,
-        program.dimension_columns,
-    ):
-        return create_excluded_result(policy, program)
+    is_excl, reason = check_program_exclusions(policy, program, calculation_date=calculation_date)
+    if is_excl:
+        res = create_excluded_result(policy, program)
+        res.exclusion_reason = reason
+        return res
 
     run = StructureProcessor(
         policy, program, calculation_date=calculation_date

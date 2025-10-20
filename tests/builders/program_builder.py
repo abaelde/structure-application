@@ -33,9 +33,7 @@ def build_program(
     """
     if dimension_columns is None:
         # Utilise uniquement le schéma comme source de vérité pour les dimensions
-        dimension_columns = sorted(
-            set(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()) | {"BUSCL_EXCLUDE_CD"}
-        )
+        dimension_columns = sorted(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
 
     return Program(
         name=name,

@@ -15,15 +15,9 @@ class Condition:
         self._validate()
 
     def _validate(self):
-
-        # Les conditions d'exclusion n'ont pas besoin de SIGNED_SHARE_PCT ni de INCLUDES_HULL/LIABILITY
-        is_exclusion = self._data.get("BUSCL_EXCLUDE_CD") == "exclude"
-        if is_exclusion:
-            return
-
         if self.signed_share is None:
             raise ValueError(
-                f"SIGNED_SHARE_PCT is required for all non-exclusion conditions. "
+                f"SIGNED_SHARE_PCT is required for all conditions. "
                 f"condition data: {self._data}"
             )
         if not 0 <= self.signed_share <= 1:
@@ -102,8 +96,7 @@ class Condition:
         vals = self.get_values(key)
         return vals is not None and len(vals) > 0
 
-    def is_exclusion(self) -> bool:
-        return self.get("BUSCL_EXCLUDE_CD") == "exclude"
+    # No longer supports condition-level exclusion
 
     def describe(
         self,

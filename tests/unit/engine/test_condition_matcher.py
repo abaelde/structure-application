@@ -2,7 +2,6 @@ import pytest
 import pandas as pd
 from src.engine.condition_matcher import (
     match_condition,
-    check_exclusion,
 )
 from src.domain import Condition
 from src.domain.policy import Policy
@@ -233,75 +232,5 @@ class TestMatchConditionWithCurrencyMapping:
         assert result.get("CESSION_PCT") == 0.25
 
 
-class TestCheckExclusionWithCurrencyMapping:
-    """Tests for check_exclusion with currency mapping"""
-
-    def test_exclusion_with_currency_matching(self):
-        """Test that exclusions work with currency mapping"""
-        # Create an exclusion condition
-        exclusion_data = {
-            "BUSCL_EXCLUDE_CD": "exclude",
-            "BUSCL_LIMIT_CURRENCY_CD": ["USD"],
-        }
-        exclusion_condition = Condition(exclusion_data)
-
-        # Policy that matches the exclusion (should be excluded)
-        policy_data = {
-            "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "EUR",
-        }
-
-        dimension_columns = ["BUSCL_EXCLUDE_CD", "BUSCL_LIMIT_CURRENCY_CD"]
-        uw_departement = "aviation"
-
-        policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = check_exclusion(policy, [exclusion_condition], dimension_columns)
-
-        assert result is True
-
-    def test_exclusion_with_currency_no_match(self):
-        """Test that exclusions don't trigger when currencies don't match"""
-        # Create an exclusion condition
-        exclusion_data = {
-            "BUSCL_EXCLUDE_CD": "exclude",
-            "BUSCL_LIMIT_CURRENCY_CD": ["USD"],
-        }
-        exclusion_condition = Condition(exclusion_data)
-
-        # Policy that doesn't match the exclusion (should not be excluded)
-        policy_data = {
-            "HULL_CURRENCY": "EUR",
-            "LIABILITY_CURRENCY": "EUR",
-        }
-
-        dimension_columns = ["BUSCL_EXCLUDE_CD", "BUSCL_LIMIT_CURRENCY_CD"]
-        uw_departement = "aviation"
-
-        policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = check_exclusion(policy, [exclusion_condition], dimension_columns)
-
-        assert result is False
-
-    def test_non_exclusion_condition_ignored(self):
-        """Test that non-exclusion conditions are ignored in check_exclusion"""
-        # Create a non-exclusion condition
-        normal_condition = Condition(
-            {
-                "BUSCL_LIMIT_CURRENCY_CD": ["USD"],
-                "CESSION_PCT": 0.25,
-                "SIGNED_SHARE_PCT": 0.5,
-            }
-        )
-
-        policy_data = {
-            "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "EUR",
-        }
-
-        dimension_columns = ["BUSCL_LIMIT_CURRENCY_CD"]
-        uw_departement = "aviation"
-
-        policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = check_exclusion(policy, [normal_condition], dimension_columns)
-
-        assert result is False
+# Note: Exclusion tests have been moved to integration tests since exclusions
+# are now handled at the program level, not at the condition level.

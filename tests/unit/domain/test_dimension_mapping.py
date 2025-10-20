@@ -140,7 +140,6 @@ class TestDimensionMappingConfiguration:
             "BUSCL_CLASS_OF_BUSINESS_3",
             "BUSCL_ENTITY_NAME_CED",
             "POL_RISK_NAME_CED",
-            "BUSCL_EXCLUDE_CD",
             "BUSCL_LIMIT_CURRENCY_CD",
         ]
 

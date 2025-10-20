@@ -57,10 +57,11 @@ Chaque programme doit être un fichier Excel avec **3 feuilles obligatoires** :
 - **BUSINESS_ID_PRE** : INTEGER, référence au business (peut être NULL)
 - **INSPER_ID_PRE** : INTEGER, référence vers structures.INSPER_ID_PRE (obligatoire)
 
-#### Exclusions et Noms
-- **BUSCL_EXCLUDE_CD** : VARCHAR(255), ENUM: 'INCLUDE' ou 'EXCLUDE' (peut être NULL)
+#### Noms d'entités
 - **BUSCL_ENTITY_NAME_CED** : VARCHAR(255), nom d'entité cédante (peut être NULL)
 - **POL_RISK_NAME_CED** : VARCHAR(255), nom du risque de police (peut être NULL)
+
+> **Note** : Les exclusions sont maintenant gérées au niveau programme via la table `exclusions.csv` (voir section "Exclusions globales de programme").
 
 #### Dimensions Géographiques et Produits
 - **BUSCL_COUNTRY_CD** : VARCHAR(255), code pays (peut être NULL = pas de condition)
@@ -153,6 +154,57 @@ Quand un **Excess of Loss** s'applique après un **Quota Share** :
 1. **Montants** : Tous les montants sont exprimés en valeur absolue (unités réelles)
 2. **Pourcentages** : Tous les pourcentages sont exprimés en décimal (0.25 = 25%)
 3. **Dates** : Format ISO (YYYY-MM-DD) ou NULL
+
+## Exclusions Globales de Programme
+
+### Nouveau système d'exclusions
+
+Depuis la migration, les exclusions sont gérées au niveau programme via une table dédiée `exclusions.csv` (ou feuille `exclusions` en Excel).
+
+### Structure de la table exclusions
+
+| Colonne | Type | Description |
+|---------|------|-------------|
+| **EXCL_REASON** | VARCHAR(255) | Raison de l'exclusion (optionnel) |
+| **EXCL_EFFECTIVE_DATE** | DATE | Date d'effet de l'exclusion (optionnel) |
+| **EXCL_EXPIRY_DATE** | DATE | Date d'expiration de l'exclusion (optionnel) |
+| **BUSCL_COUNTRY_CD** | VARCHAR(255) | Pays à exclure (valeurs multiples séparées par `;`) |
+| **BUSCL_REGION** | VARCHAR(255) | Région à exclure (valeurs multiples séparées par `;`) |
+| **BUSCL_CLASS_OF_BUSINESS_1** | VARCHAR(255) | Classe de business à exclure (valeurs multiples séparées par `;`) |
+| **BUSCL_CLASS_OF_BUSINESS_2** | VARCHAR(255) | Classe de business niveau 2 à exclure (valeurs multiples séparées par `;`) |
+| **BUSCL_CLASS_OF_BUSINESS_3** | VARCHAR(255) | Classe de business niveau 3 à exclure (valeurs multiples séparées par `;`) |
+| **BUSCL_ENTITY_NAME_CED** | VARCHAR(255) | Entité cédante à exclure (valeurs multiples séparées par `;`) |
+| **POL_RISK_NAME_CED** | VARCHAR(255) | Risque de police à exclure (valeurs multiples séparées par `;`) |
+| **BUSCL_LIMIT_CURRENCY_CD** | VARCHAR(255) | Devise à exclure (valeurs multiples séparées par `;`) |
+
+### Exemples d'exclusions
+
+#### Exclusions simples par pays
+```csv
+EXCL_REASON,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1
+"Sanctions Iran",,,Iran,,,
+"Sanctions Russia",,,Russia,,,
+```
+
+#### Exclusions avec dates
+```csv
+EXCL_REASON,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_CLASS_OF_BUSINESS_1
+"Temporary sanctions",2024-06-01,2024-12-31,Iran,,
+"Scope Aviation 2025",2025-01-01,2026-01-01,,AVIATION
+```
+
+#### Exclusions multiples
+```csv
+EXCL_REASON,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_CLASS_OF_BUSINESS_1
+"Multiple sanctions",,,Iran;Russia;Syria,,
+```
+
+### Logique d'exclusion
+
+1. **Évaluation temporelle** : Si des dates sont fournies, l'exclusion n'est active que pendant la période `[EXCL_EFFECTIVE_DATE, EXCL_EXPIRY_DATE[`
+2. **Matching des dimensions** : Une police est exclue si elle correspond à **toutes** les dimensions spécifiées dans une règle d'exclusion
+3. **Valeurs multiples** : Les valeurs multiples sont séparées par `;` (ex: `Iran;Russia`)
+4. **Priorité** : Les exclusions sont évaluées **avant** l'application des structures
 
 ## Format de Données
 
@@ -309,20 +361,15 @@ program = build_program(
 program_to_excel(program, "../programs/multi_xol.xlsx")
 ```
 
-#### Exemple 5 : condition avec exclusions
+#### Exemple 5 : programme avec exclusions globales
 
 ```python
-from tests.builders import build_condition, build_quota_share
+from tests.builders import build_condition, build_quota_share, build_program
+from src.domain.exclusion import ExclusionRule
 
 qs = build_quota_share(
     name="QS_WITH_EXCLUSIONS",
     conditions_config=[
-        {
-            "cession_pct": 0.30,
-            "signed_share": 0.10,
-            "country_cd": "Iran",
-            "exclude_cd": "exclude",  # condition d'exclusion
-        },
         {
             "cession_pct": 0.30,
             "signed_share": 0.10,
@@ -332,6 +379,16 @@ qs = build_quota_share(
 )
 
 program = build_program(name="QS_EXCL_2024", structures=[qs], underwriting_department="casualty")
+
+# Ajouter les exclusions au niveau programme
+exclusions = [
+    ExclusionRule(
+        values_by_dimension={'BUSCL_COUNTRY_CD': ['Iran']},
+        reason='Sanctions Iran'
+    ),
+]
+program.exclusions = exclusions
+
 program_to_excel(program, "../programs/qs_exclusions.xlsx")
 ```
 

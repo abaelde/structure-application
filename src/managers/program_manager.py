@@ -96,9 +96,9 @@ class ProgramManager:
         Returns:
             The loaded Program object
         """
-        program_df, structures_df, conditions_df = self.io.read(source)
+        program_df, structures_df, conditions_df, exclusions_df = self.io.read(source)
         self._loaded_program = self.serializer.dataframes_to_program(
-            program_df, structures_df, conditions_df
+            program_df, structures_df, conditions_df, exclusions_df
         )
         self._loaded_source = source
         return self._loaded_program
@@ -112,7 +112,7 @@ class ProgramManager:
             dest: Destination path/identifier
         """
         dfs = self.serializer.program_to_dataframes(program)
-        self.io.write(dest, dfs["program"], dfs["structures"], dfs["conditions"])
+        self.io.write(dest, dfs["program"], dfs["structures"], dfs["conditions"], dfs["exclusions"])
 
     def save_current(self, dest: str) -> None:
         """

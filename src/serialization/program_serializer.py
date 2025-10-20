@@ -1,8 +1,9 @@
 # src/serialization/program_serializer.py
 import pandas as pd
 import numpy as np
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from src.domain import Program, Structure
+from src.domain.exclusion import ExclusionRule
 from src.domain.constants import (
     PROGRAM_COLS,
     STRUCTURE_COLS,
@@ -52,9 +53,7 @@ class ProgramSerializer:
     @staticmethod
     def _dimension_candidates(conditions_df: pd.DataFrame) -> list[str]:
         # Utiliser uniquement le schéma comme source de vérité pour les dimensions
-        program_dims = set(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()) | {
-            "BUSCL_EXCLUDE_CD"
-        }
+        program_dims = set(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
         program_dims -= {"INCLUDES_HULL", "INCLUDES_LIABILITY"}  # flags booléens
         return [c for c in program_dims if c in conditions_df.columns]
 
@@ -64,6 +63,7 @@ class ProgramSerializer:
         program_df: pd.DataFrame,
         structures_df: pd.DataFrame,
         conditions_df: pd.DataFrame,
+        exclusions_df: Optional[pd.DataFrame] = None,
     ) -> Program:
 
         uw_dept = self._convert_pandas_to_native(
@@ -154,11 +154,36 @@ class ProgramSerializer:
             # Structure.from_row fera encore des validations (domain rules)
             structures.append(Structure.from_row(s, conds, STRUCTURE_COLS))
 
+        # --- exclusions (program level)
+        program_dimensions = list(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
+        exclusions: List[ExclusionRule] = []
+        if exclusions_df is not None and not exclusions_df.empty:
+            # normalize (split multi-values)
+            def _split(cell):
+                if pd.isna(cell):
+                    return None
+                toks = [t.strip() for t in str(cell).split(MULTI_VALUE_SEPARATOR)]
+                toks = [t for t in toks if t]
+                return toks or None
+            ex_df = exclusions_df.copy()
+            # keep only known dims + reason + dates
+            usable_cols = set(program_dimensions) | {"EXCL_REASON", "EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE"}
+            for c in list(ex_df.columns):
+                if c not in usable_cols:
+                    ex_df.drop(columns=[c], inplace=True)
+            for dim in program_dimensions:
+                if dim in ex_df.columns:
+                    ex_df[dim] = ex_df[dim].map(_split, na_action="ignore")
+            # build ExclusionRule
+            for row in ex_df.to_dict("records"):
+                exclusions.append(ExclusionRule.from_row(row, program_dimensions))
+
         return Program(
             name=name,
             structures=structures,
             dimension_columns=dimension_cols,
             underwriting_department=uw_dept,
+            exclusions=exclusions,
         )
 
     # ---------- Export (Domain -> DFs) ----------
@@ -220,7 +245,6 @@ class ProgramSerializer:
             "CED_ID_PRE": [],
             "BUSINESS_ID_PRE": [],
             "INSPER_ID_PRE": [],
-            "BUSCL_EXCLUDE_CD": [],
             "BUSCL_ENTITY_NAME_CED": [],
             "POL_RISK_NAME_CED": [],
             "BUSCL_COUNTRY_CD": [],
@@ -307,7 +331,7 @@ class ProgramSerializer:
                 conditions_data["CED_ID_PRE"].append(None)
                 conditions_data["BUSINESS_ID_PRE"].append(None)
                 conditions_data["INSPER_ID_PRE"].append(insper_id)
-                conditions_data["BUSCL_EXCLUDE_CD"].append(g("BUSCL_EXCLUDE_CD"))
+                # no exclusion flag at condition level anymore
 
                 for col in [
                     "BUSCL_ENTITY_NAME_CED",
@@ -365,6 +389,7 @@ class ProgramSerializer:
             "program": program_df,
             "structures": pd.DataFrame(structures_data),
             "conditions": pd.DataFrame(conditions_data),
+            "exclusions": self._exclusions_to_df(program),
         }
 
     # ---------- Export Lean (Domain -> DFs minimales) ----------
@@ -403,7 +428,6 @@ class ProgramSerializer:
                 d = c.to_dict()
                 row = {
                     "INSPER_ID_PRE": insper_id,
-                    "BUSCL_EXCLUDE_CD": d.get("BUSCL_EXCLUDE_CD"),
                     "CESSION_PCT": d.get("CESSION_PCT"),
                     "LIMIT_100": d.get("LIMIT_100"),
                     "ATTACHMENT_POINT_100": d.get("ATTACHMENT_POINT_100"),
@@ -421,4 +445,25 @@ class ProgramSerializer:
             "program": program_df,
             "structures": pd.DataFrame(structures_rows),
             "conditions": pd.DataFrame(conditions_rows),
+            "exclusions": self._exclusions_to_df(program),
         }
+
+    # ---------- Helpers exclusions ----------
+    def _exclusions_to_df(self, program: Program) -> pd.DataFrame:
+        if not program.exclusions:
+            return pd.DataFrame(columns=[
+                "EXCL_REASON", "EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE", *PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()
+            ])
+        rows = []
+        dims = list(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
+        for e in program.exclusions:
+            row = {
+                "EXCL_REASON": e.reason,
+                "EXCL_EFFECTIVE_DATE": e.effective_date,
+                "EXCL_EXPIRY_DATE": e.expiry_date,
+            }
+            for d in dims:
+                vals = e.values_by_dimension.get(d)
+                row[d] = MULTI_VALUE_SEPARATOR.join(vals) if vals else None
+            rows.append(row)
+        return pd.DataFrame(rows)

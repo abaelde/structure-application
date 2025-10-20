@@ -60,7 +60,6 @@ COLUMNS: Dict[str, ColumnSpec] = {
     "BUSCL_CLASS_OF_BUSINESS_3": ColumnSpec("BUSCL_CLASS_OF_BUSINESS_3", "dimension"),
     "BUSCL_ENTITY_NAME_CED": ColumnSpec("BUSCL_ENTITY_NAME_CED", "dimension"),
     "POL_RISK_NAME_CED": ColumnSpec("POL_RISK_NAME_CED", "dimension"),
-    "BUSCL_EXCLUDE_CD": ColumnSpec("BUSCL_EXCLUDE_CD", "dimension"),
     # currency (dimension logique unique ; représentation selon LOB)
     "CURRENCY": ColumnSpec("CURRENCY", "dimension"),
     "HULL_CURRENCY": ColumnSpec("HULL_CURRENCY", "dimension"),
@@ -123,7 +122,6 @@ PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, object] = {
     "BUSCL_CLASS_OF_BUSINESS_3": "BUSCL_CLASS_OF_BUSINESS_3",
     "BUSCL_ENTITY_NAME_CED": "BUSCL_ENTITY_NAME_CED",
     "POL_RISK_NAME_CED": "POL_RISK_NAME_CED",
-    "BUSCL_EXCLUDE_CD": "BUSCL_EXCLUDE_CD",
     # currency logique unique -> dépend du LOB
     "BUSCL_LIMIT_CURRENCY_CD": {
         "aviation": "HULL_CURRENCY",

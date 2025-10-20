@@ -2,6 +2,7 @@ from typing import Dict, Any, List, Optional, Literal
 import sys
 from .structure import Structure
 from .condition import Condition
+from .exclusion import ExclusionRule
 
 
 class Program:
@@ -11,11 +12,13 @@ class Program:
         structures: List[Structure],
         dimension_columns: List[str],
         underwriting_department: Literal["aviation", "casualty", "test"],
+        exclusions: Optional[List[ExclusionRule]] = None,
     ):
         self.name = name
         self.dimension_columns = dimension_columns
         self.structures = structures
         self.underwriting_department = underwriting_department
+        self.exclusions = exclusions or []
 
     def __getitem__(self, key: str):
         if not hasattr(self, key):
@@ -36,6 +39,15 @@ class Program:
             "structures": [s.to_dict() for s in self.structures],
             "dimension_columns": self.dimension_columns,
             "underwriting_department": self.underwriting_department,
+            "exclusions": [
+                {
+                    "values_by_dimension": e.values_by_dimension,
+                    "reason": e.reason,
+                    "effective_date": str(e.effective_date) if e.effective_date is not None else None,
+                    "expiry_date": str(e.expiry_date) if e.expiry_date is not None else None,
+                }
+                for e in self.exclusions
+            ],
         }
 
     def describe(self, file=None) -> str:
@@ -65,6 +77,16 @@ class Program:
             lines.append(structure.describe(self.dimension_columns, i))
 
         lines.append("\n" + "=" * 80)
+        if self.exclusions:
+            lines.append("PROGRAM EXCLUSIONS")
+            lines.append("=" * 80)
+            for i, e in enumerate(self.exclusions, 1):
+                dims = ", ".join(f"{k}=[{', '.join(v)}]" for k, v in e.values_by_dimension.items())
+                period = ""
+                if e.effective_date or e.expiry_date:
+                    period = f" (period: {e.effective_date} .. {e.expiry_date} exclusive)"
+                lines.append(f"- Excl {i}: {dims}{period}  reason={e.reason or 'N/A'}")
+            lines.append("=" * 80)
 
         description = "\n".join(lines)
         file.write(description + "\n")
