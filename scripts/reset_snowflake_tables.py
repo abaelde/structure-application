@@ -55,16 +55,22 @@ def reset_snowflake_tables():
     cur = cnx.cursor()
     
     try:
-        # 1. Supprimer toutes les tables existantes
-        print("\n🗑️  Suppression des tables existantes...")
-        tables = ["RP_GLOBAL_EXCLUSION", "CONDITIONS", "STRUCTURES", "PROGRAMS"]
+        # 1. Supprimer TOUTES les tables existantes
+        print("\n🗑️  Suppression de toutes les tables existantes...")
         
-        for table in tables:
+        # Récupérer la liste de toutes les tables
+        cur.execute(f'SHOW TABLES IN SCHEMA "{db}"."{schema}"')
+        tables = cur.fetchall()
+        
+        print(f"   📊 {len(tables)} table(s) trouvée(s)")
+        
+        for table_info in tables:
+            table_name = table_info[1]  # Le nom de la table est dans la 2ème colonne
             try:
-                cur.execute(f'DROP TABLE IF EXISTS "{db}"."{schema}"."{table}"')
-                print(f"   ✅ Table {table} supprimée")
+                cur.execute(f'DROP TABLE IF EXISTS "{db}"."{schema}"."{table_name}"')
+                print(f"   ✅ Table {table_name} supprimée")
             except Exception as e:
-                print(f"   ⚠️  Erreur suppression {table}: {e}")
+                print(f"   ⚠️  Erreur suppression {table_name}: {e}")
         
         # 2. Recréer les tables avec la nouvelle structure (auto-increment)
         print("\n🏗️  Création des nouvelles tables...")

@@ -55,11 +55,11 @@ program = build_program(
 exclusions = [
     ExclusionRule(
         values_by_dimension={'BUSCL_COUNTRY_CD': ['Iran']},
-        reason='Sanctions Iran'
+        name='Sanctions Iran'
     ),
     ExclusionRule(
         values_by_dimension={'BUSCL_COUNTRY_CD': ['Russia']},
-        reason='Sanctions Russia'
+        name='Sanctions Russia'
     ),
 ]
 program.exclusions = exclusions
@@ -69,7 +69,7 @@ program.exclusions = exclusions
 # =============================================================================
 
 # Sauvegarde avec l'utilitaire partagé
-output_path = save_program(program, BACKEND, "QUOTA_SHARE_WITH_EXCLUSION")
+output_path = save_program(program, BACKEND, "Quota Share with Exclusions Test")
 
 print(f"✓ Programme créé: {output_path}")
 print("\nStructure du programme:")

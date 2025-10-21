@@ -126,7 +126,7 @@ def list_programs() -> list:
         cur = cnx.cursor()
         
         cur.execute(f"""
-            SELECT PROGRAM_ID, TITLE, CREATED_AT, UPDATED_AT 
+            SELECT REINSURANCE_PROGRAM_ID, TITLE, CREATED_AT, UPDATED_AT 
             FROM "{config.database}"."{config.schema}"."PROGRAMS" 
             ORDER BY CREATED_AT DESC
         """)
@@ -169,7 +169,7 @@ def delete_program(program_title: str) -> bool:
         
         # Récupérer l'ID du programme
         cur.execute(f"""
-            SELECT PROGRAM_ID FROM "{config.database}"."{config.schema}"."PROGRAMS" 
+            SELECT REINSURANCE_PROGRAM_ID FROM "{config.database}"."{config.schema}"."PROGRAMS" 
             WHERE TITLE = %s
         """, (program_title,))
         
@@ -184,7 +184,7 @@ def delete_program(program_title: str) -> bool:
         cur.execute(f'DELETE FROM "{config.database}"."{config.schema}"."RP_GLOBAL_EXCLUSION" WHERE RP_ID = %s', (program_id,))
         cur.execute(f'DELETE FROM "{config.database}"."{config.schema}"."CONDITIONS" WHERE PROGRAM_ID = %s', (program_id,))
         cur.execute(f'DELETE FROM "{config.database}"."{config.schema}"."STRUCTURES" WHERE PROGRAM_ID = %s', (program_id,))
-        cur.execute(f'DELETE FROM "{config.database}"."{config.schema}"."PROGRAMS" WHERE PROGRAM_ID = %s', (program_id,))
+        cur.execute(f'DELETE FROM "{config.database}"."{config.schema}"."PROGRAMS" WHERE REINSURANCE_PROGRAM_ID = %s', (program_id,))
         
         cnx.commit()
         cur.close()
