@@ -111,7 +111,6 @@ class ProgramSerializer:
             STRUCTURE_COLS.INCEPTION,
             STRUCTURE_COLS.EXPIRY,
             STRUCTURE_COLS.NAME,
-            STRUCTURE_COLS.ORDER,
             STRUCTURE_COLS.TYPE,
         ]
         for col in required_s_cols:

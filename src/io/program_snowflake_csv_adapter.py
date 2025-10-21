@@ -4,6 +4,7 @@ from typing import Tuple, Optional, Dict, Any, List
 import pandas as pd
 import snowflake.connector
 from snowflake.connector.pandas_tools import write_pandas
+from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 
 class SnowflakeProgramCSVIO:
@@ -35,6 +36,83 @@ class SnowflakeProgramCSVIO:
     # ────────────────────────────────────────────────────────────────────
     # Utils
     # ────────────────────────────────────────────────────────────────────
+    def _get_dimension_columns(self, df: pd.DataFrame) -> List[str]:
+        dims = [d for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys() if d in df.columns]
+        # Explicit boolean flags are not dimensions and must not be compacted
+        return [d for d in dims if d not in ("INCLUDES_HULL", "INCLUDES_LIABILITY")]
+
+    def _split_multivalue_tokens(self, value: Any, sep: str = ";") -> List[str]:
+        if value is None or (isinstance(value, float) and pd.isna(value)):
+            return []
+        if isinstance(value, list):
+            tokens = [str(v).strip() for v in value if v is not None and str(v).strip()]
+            return tokens
+        s = str(value)
+        if not s:
+            return []
+        parts = [t.strip() for t in s.split(sep)]
+        return [t for t in parts if t]
+
+    def _normalize_multivalue_cells(self, df: pd.DataFrame, dims: List[str], sep: str = ";") -> pd.DataFrame:
+        if df.empty or not dims:
+            return df
+        out = df.copy()
+        for col in dims:
+            if col not in out.columns:
+                continue
+            def _norm_cell(v: Any) -> Any:
+                tokens = self._split_multivalue_tokens(v, sep=sep)
+                if not tokens:
+                    return pd.NA
+                # Deduplicate while preserving order
+                seen = set()
+                ordered = []
+                for t in tokens:
+                    if t not in seen:
+                        seen.add(t)
+                        ordered.append(t)
+                return sep.join(ordered)
+            out[col] = out[col].map(_norm_cell, na_action="ignore")
+        return out
+
+    def _compact_multivalue_conditions(self, df: pd.DataFrame, sep: str = ";") -> pd.DataFrame:
+        if df.empty:
+            return df
+        dims = self._get_dimension_columns(df)
+        if not dims:
+            return df
+        normalized = self._normalize_multivalue_cells(df, dims, sep=sep)
+        # Identify grouping columns (non-dimensions). Exclude row-level identifier if present.
+        group_cols = [c for c in normalized.columns if c not in dims and c != "BUSCL_ID_PRE"]
+        if not group_cols:
+            return normalized
+        # Group and aggregate dimension columns into semicolon-separated unique tokens
+        grouped_rows: List[Dict[str, Any]] = []
+        # Use dropna=False to treat NaNs as keys and preserve groups
+        for keys, grp in normalized.groupby(group_cols, dropna=False, sort=False):
+            if not isinstance(keys, tuple):
+                keys = (keys,)
+            base: Dict[str, Any] = {col: val for col, val in zip(group_cols, keys)}
+            # Choose a stable BUSCL_ID_PRE if exists (min over group)
+            if "BUSCL_ID_PRE" in normalized.columns:
+                try:
+                    base["BUSCL_ID_PRE"] = grp["BUSCL_ID_PRE"].dropna().min()
+                except Exception:
+                    # Fallback: take first value
+                    base["BUSCL_ID_PRE"] = grp["BUSCL_ID_PRE"].iloc[0] if not grp["BUSCL_ID_PRE"].empty else None
+            # Aggregate dimensions
+            for dim in dims:
+                series = grp[dim] if dim in grp.columns else pd.Series([], dtype=object)
+                tokens: List[str] = []
+                seen: set[str] = set()
+                for v in series.tolist():
+                    for t in self._split_multivalue_tokens(v, sep=sep):
+                        if t not in seen:
+                            seen.add(t)
+                            tokens.append(t)
+                base[dim] = (sep.join(tokens)) if tokens else pd.NA
+            grouped_rows.append(base)
+        return pd.DataFrame(grouped_rows, columns=list(group_cols) + (["BUSCL_ID_PRE"] if "BUSCL_ID_PRE" in normalized.columns else []) + dims)
     def _parse_dsn(self, source: str) -> Tuple[str, str, Dict[str, str]]:
         if not source.lower().startswith("snowflake://"):
             raise ValueError(f"Invalid Snowflake DSN: {source}")
@@ -342,8 +420,10 @@ class SnowflakeProgramCSVIO:
 
             # CONDITIONS - toutes les colonnes CSV + PROGRAM_ID
             if not conditions_df.empty:
+                # Respect multi-value semantics: compact multiple rows differing only by dimension columns
+                compacted_conditions = self._compact_multivalue_conditions(conditions_df)
                 c_rows: List[Dict[str, Any]] = []
-                for _, r in conditions_df.iterrows():
+                for _, r in compacted_conditions.iterrows():
                     row_dict = r.to_dict()
 
                     # Mapping des colonnes CSV vers Snowflake

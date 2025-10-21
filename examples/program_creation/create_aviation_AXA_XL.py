@@ -119,6 +119,7 @@ for i, (layer_name, (limit_common, priority_common)) in enumerate(
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
         predecessor_title="QS_1",
+        signed_share=0.05,  # 5% signed share pour les excess of loss
     )
     xol_layers.append(xol)
 
