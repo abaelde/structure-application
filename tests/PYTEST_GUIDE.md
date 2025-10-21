@@ -306,7 +306,7 @@ def test_example(sample_valid_bordereau_data):
 Pour créer des programmes de test, utiliser les **builders** au lieu de fichiers externes :
 
 ```python
-from tests.builders import build_quota_share, build_program
+from src.builders import build_quota_share, build_program
 
 qs = build_quota_share(name="QS_30", cession_pct=0.30)
 program = build_program(name="TEST", structures=[qs])
@@ -378,7 +378,7 @@ def test_quota_share_negative_limit():
 
 import pandas as pd
 from src.engine import apply_program_to_bordereau
-from tests.builders import build_quota_share, build_program
+from src.builders import build_quota_share, build_program
 
 
 def test_full_workflow():

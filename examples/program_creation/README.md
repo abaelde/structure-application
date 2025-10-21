@@ -245,7 +245,7 @@ Tous les scripts de création utilisent maintenant les **Builders** pour créer 
 #### Exemple 1 : Quota Share simple
 
 ```python
-from tests.builders import build_quota_share, build_program
+from src.builders import build_quota_share, build_program
 from src.managers import ProgramManager
 
 # Créer une structure Quota Share 30%
@@ -297,7 +297,7 @@ manager.save(program, "../programs/qs_multi_currency")
 #### Exemple 3 : Excess of Loss avec inuring
 
 ```python
-from tests.builders import build_quota_share, build_excess_of_loss, build_program
+from src.builders import build_quota_share, build_excess_of_loss, build_program
 
 # QS en premier (entry point)
 qs = build_quota_share(name="QS_25", cession_pct=0.25, claim_basis="risk_attaching", inception_date="2024-01-01", expiry_date="2025-01-01")
@@ -372,7 +372,7 @@ manager.save(program, "../programs/multi_xol")
 #### Exemple 5 : programme avec exclusions globales
 
 ```python
-from tests.builders import build_condition, build_quota_share, build_program
+from src.builders import build_condition, build_quota_share, build_program
 from src.domain.exclusion import ExclusionRule
 
 qs = build_quota_share(

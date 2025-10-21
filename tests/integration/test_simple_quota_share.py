@@ -1,7 +1,7 @@
 import pandas as pd
 from src.engine import apply_program_to_bordereau
 from src.domain.bordereau import Bordereau
-from tests.builders import build_quota_share, build_program, build_excess_of_loss
+from src.builders import build_quota_share, build_program, build_excess_of_loss
 
 
 def test_single_line_quota_share_basic():

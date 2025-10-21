@@ -1,8 +1,8 @@
 """
 Builders for creating Program, Structure, and condition objects directly in memory.
 
-These builders allow creating test programs,
-making tests faster and more focused on business logic.
+These builders allow creating programs programmatically,
+making development and testing faster and more focused on business logic.
 """
 
 from .condition_builder import build_condition

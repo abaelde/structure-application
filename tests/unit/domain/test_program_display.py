@@ -3,8 +3,8 @@ Tests for Program.describe() method
 """
 
 import io
-from tests.builders.program_builder import build_program
-from tests.builders.structure_builder import build_quota_share
+from src.builders.program_builder import build_program
+from src.builders.structure_builder import build_quota_share
 
 
 def test_program_describe_generates_text():

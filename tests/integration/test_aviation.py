@@ -1,5 +1,5 @@
 import pandas as pd
-from tests.builders import build_quota_share, build_excess_of_loss, build_program
+from src.builders import build_quota_share, build_excess_of_loss, build_program
 from src.engine import apply_program_to_bordereau
 from src.domain.bordereau import Bordereau
 

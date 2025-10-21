@@ -24,7 +24,7 @@ from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from tests.builders import build_quota_share, build_program
+from src.builders import build_quota_share, build_program
 from snowflake_utils import save_program
 
 print("Création du programme Single Quota share...")

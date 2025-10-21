@@ -2,7 +2,7 @@ import pandas as pd
 from src.engine import apply_program_to_bordereau
 from src.domain.bordereau import Bordereau
 from src.domain.exclusion import ExclusionRule
-from tests.builders import (
+from src.builders import (
     build_quota_share,
     build_condition,
     build_program,

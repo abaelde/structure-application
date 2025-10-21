@@ -1,7 +1,7 @@
 import pandas as pd
 from src.engine import apply_program_to_bordereau
 from src.domain.bordereau import Bordereau
-from tests.builders import build_quota_share, build_program
+from src.builders import build_quota_share, build_program
 
 
 def test_policy_expiry_mechanism():

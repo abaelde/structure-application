@@ -135,9 +135,9 @@ class TestDimensionMappingConfiguration:
         expected_dimensions = [
             "BUSCL_COUNTRY_CD",
             "BUSCL_REGION",
-            "BUSCL_CLASS_OF_BUSINESS_1",
-            "BUSCL_CLASS_OF_BUSINESS_2",
-            "BUSCL_CLASS_OF_BUSINESS_3",
+            "PRODUCT_TYPE_LEVEL_1",
+            "PRODUCT_TYPE_LEVEL_2",
+            "PRODUCT_TYPE_LEVEL_3",
             "BUSCL_ENTITY_NAME_CED",
             "POL_RISK_NAME_CED",
             "BUSCL_LIMIT_CURRENCY_CD",

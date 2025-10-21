@@ -18,7 +18,7 @@ from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from tests.builders import build_quota_share, build_program
+from src.builders import build_quota_share, build_program
 from src.domain.exclusion import ExclusionRule
 from snowflake_utils import save_program
 

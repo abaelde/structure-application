@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 from src.engine import apply_program_to_bordereau
 from src.domain.bordereau import Bordereau, BordereauValidationError
-from tests.builders import build_program, build_quota_share
+from src.builders import build_program, build_quota_share
 
 
 def test_exposure_mapping_success_aviation():

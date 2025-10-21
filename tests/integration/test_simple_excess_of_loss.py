@@ -1,7 +1,7 @@
 import pandas as pd
 from src.engine import apply_program_to_bordereau
 from src.domain.bordereau import Bordereau
-from tests.builders import build_excess_of_loss, build_program
+from src.builders import build_excess_of_loss, build_program
 
 
 def test_single_line_excess_of_loss_basic():
