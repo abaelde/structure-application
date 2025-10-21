@@ -137,12 +137,12 @@ Définit le programme principal (une seule ligne).
 | PROGRAM_2024 | sequential |
 
 ### Fichier "structures.csv"
-Définit les structures du programme (nom, ordre, type de produit).
+Définit les structures du programme (nom, type de produit).
 
-| structure_name | contract_order | type_of_participation    |
-|----------------|-------|-----------------|
-| QS_GENERAL     | 1     | quota_share     |
-| XOL_LARGE      | 2     | excess_of_loss  |
+| structure_name | type_of_participation    |
+|----------------|-----------------|
+| QS_GENERAL     | quota_share     |
+| XOL_LARGE      | excess_of_loss  |
 
 ### Fichier "conditions.csv"
 Définit les conditions de chaque structure avec paramètres et conditions.

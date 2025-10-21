@@ -63,7 +63,6 @@ REINSURER_SHARE_QS = 0.0165  # 1.65%
 # Construction du Quota Share
 qs = build_quota_share(
     name="QS_1",
-    contract_order=0,  # Premier dans l'ordre
     conditions_config=[
         {
             "cession_pct": CESSION_RATE_QS,
@@ -115,7 +114,6 @@ for i, (layer_name, (limit_common, priority_common)) in enumerate(
 
     xol = build_excess_of_loss(
         name=layer_name,
-        contract_order=i,  # Ordre séquentiel (1, 2, 3, 4, 5, 6)
         conditions_config=conditions_config,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
@@ -163,7 +161,7 @@ Structures (empilées selon l'ordre):
 """
 )
 
-print("0. QS_1 (contract_order=0):")
+print("0. QS_1:")
 print(
     f"   - Toutes devises: Quota Share {CESSION_RATE_QS:.1%} cédé avec limite de 575M, {REINSURER_SHARE_QS:.2%} reinsurer share"
 )
@@ -171,7 +169,7 @@ print(
 for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], 1):
     limit_common, priority_common = LAYER_VALUES_COMMON[layer]
     limit_gbp, priority_gbp = LAYER_VALUES_GBP[layer]
-    print(f"{i}. {layer} (contract_order={i}):")
+    print(f"{i}. {layer}:")
     print(f"   - USD/CAD/EUR/AUD: {limit_common:,.0f} xs {priority_common:,.0f}")
     print(f"   - GBP: {limit_gbp:,.0f} xs {priority_gbp:,.0f}")
 

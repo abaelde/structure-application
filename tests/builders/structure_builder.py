@@ -8,7 +8,6 @@ def build_quota_share(
     name: str,
     cession_pct: Optional[float] = None,
     conditions_config: Optional[List[Dict[str, Any]]] = None,
-    contract_order: Optional[int] = None,
     predecessor_title: Optional[str] = None,
     claim_basis: Optional[str] = None,
     inception_date: Optional[str] = None,
@@ -25,7 +24,6 @@ def build_quota_share(
             - cession_pct: Cession percentage for this condition
             - signed_share: Reinsurer share (default 1.0)
             - country_cd, region, currency_cd, etc.: Dimension filters
-        contract_order: Contract order (optional)
         predecessor_title: Name of predecessor structure (for inuring)
         claim_basis: Claim basis (e.g., "risk_attaching")
         inception_date: Effective date
@@ -63,7 +61,6 @@ def build_quota_share(
 
     return Structure(
         structure_name=name,
-        contract_order=contract_order,
         type_of_participation=PRODUCT.QUOTA_SHARE,
         conditions=conditions,
         predecessor_title=predecessor_title,
@@ -78,7 +75,6 @@ def build_excess_of_loss(
     attachment: Optional[float] = None,
     limit: Optional[float] = None,
     conditions_config: Optional[List[Dict[str, Any]]] = None,
-    contract_order: Optional[int] = None,
     predecessor_title: Optional[str] = None,
     claim_basis: Optional[str] = None,
     inception_date: Optional[str] = None,
@@ -97,7 +93,6 @@ def build_excess_of_loss(
             - limit: Limit for this condition
             - signed_share: Reinsurer share (default 1.0)
             - country_cd, region, currency_cd, etc.: Dimension filters
-        contract_order: Contract order (optional)
         predecessor_title: Name of predecessor structure (for inuring)
         claim_basis: Claim basis (e.g., "risk_attaching")
         inception_date: Effective date
@@ -141,7 +136,6 @@ def build_excess_of_loss(
 
     return Structure(
         structure_name=name,
-        contract_order=contract_order,
         type_of_participation=PRODUCT.EXCESS_OF_LOSS,
         conditions=conditions,
         predecessor_title=predecessor_title,

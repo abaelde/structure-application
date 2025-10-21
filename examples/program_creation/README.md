@@ -37,7 +37,6 @@ Chaque programme doit être un dossier CSV avec **3 fichiers obligatoires** :
 - **INSPER_LAYER_NO** : INTEGER, numéro de couche (peut être NULL)
 - **INSPER_MAIN_CURRENCY_CD** : VARCHAR(255), devise principale (peut être NULL)
 - **INSPER_UW_YEAR** : INTEGER, année UW (peut être NULL)
-- **INSPER_CONTRACT_ORDER** : INTEGER,(rempli avec NULL)
 - **INSPER_PREDECESSOR_TITLE** : VARCHAR(255), nom de la structure antécédente pour l'inuring (NULL = entry point)
 - **INSPER_CONTRACT_FORM_CD_SLAV** : VARCHAR(255), code forme de contrat (peut être NULL)
 - **INSPER_CONTRACT_LODRA_CD_SLAV** : VARCHAR(255), code LODRA contrat (peut être NULL)
@@ -216,7 +215,6 @@ EXCLUSION_NAME,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_CLASS
 ### Conventions
 - **Montants** : Tous les montants sont en **valeur absolue** (pas en millions)
 - **Inuring** : Utilisation de `INSPER_PREDECESSOR_TITLE` pour chaîner les structures
-- **Ordre** : `INSPER_CONTRACT_ORDER` est **deprecated** et doit être NULL
 
 ## Scripts de Création
 

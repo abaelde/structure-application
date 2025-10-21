@@ -8,7 +8,6 @@ class Structure:
     def __init__(
         self,
         structure_name: str,
-        contract_order: int,
         type_of_participation: str,
         conditions: List[Condition],
         predecessor_title: Optional[str] = None,
@@ -17,7 +16,6 @@ class Structure:
         expiry_date: str = None,
     ):
         self.structure_name = structure_name
-        self.contract_order = contract_order
         self.type_of_participation = type_of_participation
         self.predecessor_title = predecessor_title
 
@@ -70,7 +68,6 @@ class Structure:
         # Create and return Structure
         return cls(
             structure_name=structure_row[structure_cols.NAME],
-            contract_order=structure_row[structure_cols.ORDER],
             type_of_participation=structure_row[structure_cols.TYPE],
             conditions=conditions,
             predecessor_title=structure_row.get(structure_cols.PREDECESSOR),
@@ -90,7 +87,6 @@ class Structure:
     def to_dict(self) -> Dict[str, Any]:
         return {
             "structure_name": self.structure_name,
-            "contract_order": self.contract_order,
             "type_of_participation": self.type_of_participation,
             "predecessor_title": self.predecessor_title,
             "claim_basis": self.claim_basis,

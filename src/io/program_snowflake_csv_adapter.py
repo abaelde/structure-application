@@ -123,7 +123,7 @@ class SnowflakeProgramCSVIO:
 
             # STRUCTURES - toutes les colonnes CSV
             cur.execute(
-                f'SELECT * FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s ORDER BY INSPER_CONTRACT_ORDER NULLS LAST, INSPER_ID_PRE',
+                f'SELECT * FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s ORDER BY INSPER_ID_PRE',
                 (program_id,),
             )
             s_rows = cur.fetchall()

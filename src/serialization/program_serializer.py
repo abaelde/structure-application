@@ -233,7 +233,6 @@ class ProgramSerializer:
             "INSPER_LAYER_NO": [],
             "INSPER_MAIN_CURRENCY_CD": [],
             "INSPER_UW_YEAR": [],
-            "INSPER_CONTRACT_ORDER": [],
             "INSPER_PREDECESSOR_TITLE": [],
             "INSPER_CONTRACT_FORM_CD_SLAV": [],
             "INSPER_CONTRACT_LODRA_CD_SLAV": [],
@@ -314,7 +313,6 @@ class ProgramSerializer:
             structures_data["INSPER_LAYER_NO"].append(None)
             structures_data["INSPER_MAIN_CURRENCY_CD"].append(None)
             structures_data["INSPER_UW_YEAR"].append(None)
-            structures_data["INSPER_CONTRACT_ORDER"].append(st.contract_order)
             structures_data["INSPER_PREDECESSOR_TITLE"].append(st.predecessor_title)
             structures_data["INSPER_CONTRACT_FORM_CD_SLAV"].append(None)
             structures_data["INSPER_CONTRACT_LODRA_CD_SLAV"].append(None)
@@ -420,7 +418,6 @@ class ProgramSerializer:
                     "INSPER_ID_PRE": insper_id,
                     "REINSURANCE_PROGRAM_ID": reprog_id,
                     "BUSINESS_TITLE": st.structure_name,
-                    "INSPER_CONTRACT_ORDER": st.contract_order,
                     "TYPE_OF_PARTICIPATION_CD": st.type_of_participation,
                     "INSPER_PREDECESSOR_TITLE": st.predecessor_title,
                     "INSPER_CLAIM_BASIS_CD": st.claim_basis,

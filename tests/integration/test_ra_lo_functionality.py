@@ -34,7 +34,6 @@ def test_risk_attaching_based_on_policy_inception():
     # Créer structure RA avec période 2024
     structure_ra = Structure(
         structure_name="QS_RA_2024",
-        contract_order=1,
         type_of_participation=PRODUCT.QUOTA_SHARE,
         conditions=[condition],
         claim_basis=CLAIM_BASIS.RISK_ATTACHING,
@@ -124,7 +123,6 @@ def test_loss_occurring_based_on_calculation_date():
     # Créer structure LO avec période 2024
     structure_lo = Structure(
         structure_name="QS_LO_2024",
-        contract_order=1,
         type_of_participation=PRODUCT.QUOTA_SHARE,
         conditions=[condition],
         claim_basis=CLAIM_BASIS.LOSS_OCCURRING,

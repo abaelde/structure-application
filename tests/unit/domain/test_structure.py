@@ -14,7 +14,6 @@ class TestStructure:
 
         structure = Structure(
             structure_name="Test Structure",
-            contract_order=1,
             type_of_participation=PRODUCT.QUOTA_SHARE,
             conditions=conditions,
             claim_basis=CLAIM_BASIS.RISK_ATTACHING,
@@ -36,7 +35,6 @@ class TestStructure:
         with pytest.raises(ValueError, match="INSPER_CLAIM_BASIS_CD is required"):
             Structure(
                 structure_name="Test Structure",
-                contract_order=1,
                 type_of_participation=PRODUCT.QUOTA_SHARE,
                 conditions=conditions,
                 claim_basis=None,
@@ -53,7 +51,6 @@ class TestStructure:
         with pytest.raises(ValueError, match="INSPER_CLAIM_BASIS_CD is required"):
             Structure(
                 structure_name="Test Structure",
-                contract_order=1,
                 type_of_participation=PRODUCT.QUOTA_SHARE,
                 conditions=conditions,
                 claim_basis="invalid_basis",
@@ -70,7 +67,6 @@ class TestStructure:
         with pytest.raises(ValueError, match="INSPER_EFFECTIVE_DATE is required"):
             Structure(
                 structure_name="Test Structure",
-                contract_order=1,
                 type_of_participation=PRODUCT.QUOTA_SHARE,
                 conditions=conditions,
                 claim_basis=CLAIM_BASIS.RISK_ATTACHING,
@@ -87,7 +83,6 @@ class TestStructure:
         with pytest.raises(ValueError, match="INSPER_EXPIRY_DATE is required"):
             Structure(
                 structure_name="Test Structure",
-                contract_order=1,
                 type_of_participation=PRODUCT.QUOTA_SHARE,
                 conditions=conditions,
                 claim_basis=CLAIM_BASIS.RISK_ATTACHING,
@@ -107,7 +102,6 @@ class TestStructure:
         ):
             Structure(
                 structure_name="Test Structure",
-                contract_order=1,
                 type_of_participation=PRODUCT.QUOTA_SHARE,
                 conditions=conditions,
                 claim_basis=CLAIM_BASIS.RISK_ATTACHING,
@@ -127,7 +121,6 @@ class TestStructure:
         ):
             Structure(
                 structure_name="Test Structure",
-                contract_order=1,
                 type_of_participation=PRODUCT.QUOTA_SHARE,
                 conditions=conditions,
                 claim_basis=CLAIM_BASIS.RISK_ATTACHING,
@@ -143,7 +136,6 @@ class TestStructure:
 
         structure = Structure(
             structure_name="Test Structure",
-            contract_order=1,
             type_of_participation=PRODUCT.QUOTA_SHARE,
             conditions=conditions,
             claim_basis="RISK_ATTACHING",  # Uppercase
@@ -163,7 +155,6 @@ class TestStructure:
 
         structure = Structure(
             structure_name="Test Structure",
-            contract_order=1,
             type_of_participation=PRODUCT.QUOTA_SHARE,
             conditions=conditions,
             claim_basis=CLAIM_BASIS.RISK_ATTACHING,
@@ -193,7 +184,6 @@ class TestStructure:
 
         structure = Structure(
             structure_name="Test Structure",
-            contract_order=1,
             type_of_participation=PRODUCT.QUOTA_SHARE,
             conditions=conditions,
             claim_basis=CLAIM_BASIS.LOSS_OCCURRING,
