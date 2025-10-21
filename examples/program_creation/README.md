@@ -165,7 +165,7 @@ Depuis la migration, les exclusions sont gérées au niveau programme via une ta
 
 | Colonne | Type | Description |
 |---------|------|-------------|
-| **EXCL_REASON** | VARCHAR(255) | Raison de l'exclusion (optionnel) |
+| **EXCLUSION_NAME** | VARCHAR(255) | Nom de l'exclusion (optionnel) |
 | **EXCL_EFFECTIVE_DATE** | DATE | Date d'effet de l'exclusion (optionnel) |
 | **EXCL_EXPIRY_DATE** | DATE | Date d'expiration de l'exclusion (optionnel) |
 | **BUSCL_COUNTRY_CD** | VARCHAR(255) | Pays à exclure (valeurs multiples séparées par `;`) |
@@ -181,21 +181,21 @@ Depuis la migration, les exclusions sont gérées au niveau programme via une ta
 
 #### Exclusions simples par pays
 ```csv
-EXCL_REASON,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1
+EXCLUSION_NAME,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1
 "Sanctions Iran",,,Iran,,,
 "Sanctions Russia",,,Russia,,,
 ```
 
 #### Exclusions avec dates
 ```csv
-EXCL_REASON,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_CLASS_OF_BUSINESS_1
+EXCLUSION_NAME,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_CLASS_OF_BUSINESS_1
 "Temporary sanctions",2024-06-01,2024-12-31,Iran,,
 "Scope Aviation 2025",2025-01-01,2026-01-01,,AVIATION
 ```
 
 #### Exclusions multiples
 ```csv
-EXCL_REASON,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_CLASS_OF_BUSINESS_1
+EXCLUSION_NAME,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_CLASS_OF_BUSINESS_1
 "Multiple sanctions",,,Iran;Russia;Syria,,
 ```
 

@@ -6,7 +6,7 @@ import pandas as pd
 @dataclass(frozen=True)
 class ExclusionRule:
     values_by_dimension: Dict[str, List[str]]
-    reason: Optional[str] = None
+    name: Optional[str] = None
     effective_date: Optional[pd.Timestamp] = None  # optional
     expiry_date: Optional[pd.Timestamp] = None     # optional
 
@@ -36,7 +36,7 @@ class ExclusionRule:
 
         return cls(
             values_by_dimension=values,
-            reason=row.get("EXCL_REASON"),
+            name=row.get("EXCLUSION_NAME"),
             effective_date=cls._to_ts(row.get("EXCL_EFFECTIVE_DATE")),
             expiry_date=cls._to_ts(row.get("EXCL_EXPIRY_DATE")),
         )

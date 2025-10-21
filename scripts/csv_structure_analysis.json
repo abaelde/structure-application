@@ -244,7 +244,7 @@
   },
   "EXCLUSIONS": {
     "columns": [
-      "EXCL_REASON",
+      "EXCLUSION_NAME",
       "EXCL_EFFECTIVE_DATE",
       "EXCL_EXPIRY_DATE",
       "BUSCL_COUNTRY_CD",
@@ -258,7 +258,7 @@
     ],
     "sample_data": {},
     "dtypes": {
-      "EXCL_REASON": "object",
+      "EXCLUSION_NAME": "object",
       "EXCL_EFFECTIVE_DATE": "object",
       "EXCL_EXPIRY_DATE": "object",
       "BUSCL_COUNTRY_CD": "object",

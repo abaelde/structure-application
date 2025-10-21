@@ -45,11 +45,11 @@ def test_exclusion_mechanism():
     exclusions = [
         ExclusionRule(
             values_by_dimension={'BUSCL_COUNTRY_CD': ['Iran']},
-            reason='Sanctions Iran'
+            name='Sanctions Iran'
         ),
         ExclusionRule(
             values_by_dimension={'BUSCL_COUNTRY_CD': ['Russia']},
-            reason='Sanctions Russia'
+            name='Sanctions Russia'
         ),
     ]
 

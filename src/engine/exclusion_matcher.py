@@ -15,5 +15,5 @@ def check_program_exclusions(policy: Policy, program: Program, *, calculation_da
 
     for rule in program.exclusions:
         if rule.matches(policy, dim_map, calculation_date=calculation_date):
-            return True, rule.reason or "Matched exclusion rule"
+            return True, rule.name or "Matched exclusion rule"
     return False, None
