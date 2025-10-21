@@ -24,6 +24,7 @@ BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
 
 import sys
 import os
+from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -169,8 +170,12 @@ layer_3 = build_excess_of_loss(
     expiry_date="2025-01-01",
 )
 
+# Construction du programme avec timestamp unique
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+program_name = f"NEW_LINE_2024_{timestamp}"
+
 program = build_program(
-    name="NEW_LINE_2024",
+    name=program_name,
     structures=[layer_1, layer_2, layer_3],
     underwriting_department="casualty",
 )
@@ -180,7 +185,7 @@ program = build_program(
 # =============================================================================
 
 # Sauvegarde avec l'utilitaire partagé
-output_path = save_program(program, BACKEND, "NEW_LINE_2024")
+output_path = save_program(program, BACKEND, program_name)
 
 print(f"✓ Programme créé: {output_path}")
 

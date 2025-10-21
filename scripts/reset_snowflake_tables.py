@@ -132,9 +132,6 @@ def reset_snowflake_tables():
 
         cnx.commit()
         print("\n✅ Toutes les tables ont été recréées avec succès !")
-        print(
-            "💡 Les nouveaux programmes auront maintenant des IDs uniques automatiques."
-        )
 
     except Exception as e:
         print(f"❌ Erreur: {e}")

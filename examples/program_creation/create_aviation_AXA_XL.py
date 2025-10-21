@@ -27,6 +27,7 @@ BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
 
 import sys
 import os
+from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -123,9 +124,12 @@ for i, (layer_name, (limit_common, priority_common)) in enumerate(
     )
     xol_layers.append(xol)
 
-# Construction du programme
+# Construction du programme avec timestamp unique
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+program_name = f"AVIATION_AXA_XL_2024_{timestamp}"
+
 program = build_program(
-    name="AVIATION_AXA_XL_2024",
+    name=program_name,
     structures=[qs] + xol_layers,
     underwriting_department="aviation",
 )
@@ -136,7 +140,7 @@ program = build_program(
 
 if __name__ == "__main__":
     # Sauvegarde avec l'utilitaire partagé
-    output_path = save_program(program, BACKEND, "AVIATION_AXA_XL_2024")
+    output_path = save_program(program, BACKEND, program_name)
 
 # =============================================================================
 # AFFICHAGE

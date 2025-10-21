@@ -23,6 +23,7 @@ BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
 
 import sys
 import os
+from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -82,8 +83,12 @@ xol_liability = build_excess_of_loss(
     expiry_date="2025-01-01",
 )
 
+# Construction du programme avec timestamp unique
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+program_name = f"AVIATION_HULL_LIABILITY_SPLIT_{timestamp}"
+
 program = build_program(
-    name="AVIATION_HULL_LIABILITY_SPLIT",
+    name=program_name,
     structures=[qs_all, xol_hull, xol_liability],
     underwriting_department="aviation",
 )
@@ -93,7 +98,7 @@ program = build_program(
 # =============================================================================
 
 # Sauvegarde avec l'utilitaire partagé
-output_path = save_program(program, BACKEND, "AVIATION_HULL_LIABILITY_SPLIT")
+output_path = save_program(program, BACKEND, program_name)
 
 print(f"✓ Programme créé: {output_path}")
 

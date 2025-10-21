@@ -62,8 +62,8 @@ CREATE TABLE RP_STRUCTURES (
 
 -- Table RP_CONDITIONS avec clé étrangère vers REINSURANCE_PROGRAM
 CREATE TABLE RP_CONDITIONS (
+  RP_CONDITION_ID                NUMBER(38,0)    AUTOINCREMENT PRIMARY KEY,
   PROGRAM_ID                     NUMBER(38,0)    NOT NULL,
-  BUSCL_ID_PRE                   NUMBER(38,0)    NOT NULL,
   REINSURANCE_PROGRAM_ID                  NUMBER(38,0),
   CED_ID_PRE                     NUMBER(38,0),
   BUSINESS_ID_PRE                NUMBER(38,0),

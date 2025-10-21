@@ -20,6 +20,7 @@ BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
 
 import sys
 import os
+from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -41,8 +42,12 @@ qs = build_quota_share(
     expiry_date="2025-01-01",
 )
 
+# Construction du programme avec timestamp unique
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+program_name = f"SINGLE_QUOTA_SHARE_2024_{timestamp}"
+
 program = build_program(
-    name="SINGLE_QUOTA_SHARE_2024", structures=[qs], underwriting_department="test"
+    name=program_name, structures=[qs], underwriting_department="test"
 )
 
 # =============================================================================
@@ -50,7 +55,7 @@ program = build_program(
 # =============================================================================
 
 # Sauvegarde avec l'utilitaire partagé
-output_path = save_program(program, BACKEND, "SINGLE_QUOTA_SHARE_2024")
+output_path = save_program(program, BACKEND, program_name)
 
 # =============================================================================
 # AFFICHAGE

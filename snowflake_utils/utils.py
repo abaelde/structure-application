@@ -328,9 +328,6 @@ def reset_all_tables() -> bool:
         cnx.close()
 
         print("\n✅ Reset complet terminé avec succès !")
-        print(
-            "💡 Les nouveaux programmes auront maintenant des IDs uniques automatiques."
-        )
         return True
 
     except Exception as e:

@@ -18,6 +18,7 @@ BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
 
 import sys
 import os
+from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -51,9 +52,12 @@ exclusions = [
     ),
 ]
 
-# Créer le programme avec les exclusions
+# Créer le programme avec les exclusions et timestamp unique
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+program_name = f"Quota_Share_with_Exclusions_Test_{timestamp}"
+
 program = build_program(
-    name="Quota Share with Exclusions Test",
+    name=program_name,
     structures=[qs],
     underwriting_department="casualty",
     exclusions=exclusions,
@@ -64,7 +68,7 @@ program = build_program(
 # =============================================================================
 
 # Sauvegarde avec l'utilitaire partagé
-output_path = save_program(program, BACKEND, "Quota Share with Exclusions Test")
+output_path = save_program(program, BACKEND, program_name)
 
 print(f"✓ Programme créé: {output_path}")
 print("\nStructure du programme:")

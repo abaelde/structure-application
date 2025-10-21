@@ -14,6 +14,7 @@ BACKEND = "snowflake"
 
 import sys
 import os
+from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -68,9 +69,12 @@ exclusions = [
     ),
 ]
 
-# Construction du programme
+# Construction du programme avec timestamp unique
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+program_name = f"TEST_EXCLUSIONS_2024_{timestamp}"
+
 program = build_program(
-    name="TEST_EXCLUSIONS_2024",
+    name=program_name,
     structures=[qs],
     underwriting_department="casualty",
     exclusions=exclusions,
@@ -82,7 +86,7 @@ program = build_program(
 
 if __name__ == "__main__":
     # Sauvegarde avec l'utilitaire partagé
-    output_path = save_program(program, BACKEND, "TEST_EXCLUSIONS_2024")
+    output_path = save_program(program, BACKEND, program_name)
 
 # =============================================================================
 # AFFICHAGE
