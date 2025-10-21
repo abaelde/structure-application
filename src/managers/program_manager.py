@@ -78,47 +78,50 @@ class ProgramManager:
         else:
             raise ValueError(f"Unknown backend: {backend}")
 
-    def load(self, source: str) -> Program:
+    def load(self, source: str, io_kwargs: Optional[dict] = None) -> Program:
         """
         Load a program from the specified source.
 
         Args:
             source: Source path/identifier for the program data
+            io_kwargs: Additional parameters for the I/O adapter (e.g., connection_params for Snowflake)
 
         Returns:
             The loaded Program object
         """
-        program_df, structures_df, conditions_df, exclusions_df = self.io.read(source)
+        program_df, structures_df, conditions_df, exclusions_df = self.io.read(source, **(io_kwargs or {}))
         self._loaded_program = self.serializer.dataframes_to_program(
             program_df, structures_df, conditions_df, exclusions_df
         )
         self._loaded_source = source
         return self._loaded_program
 
-    def save(self, program: Program, dest: str) -> None:
+    def save(self, program: Program, dest: str, io_kwargs: Optional[dict] = None) -> None:
         """
         Save a program to the specified destination.
 
         Args:
             program: The Program object to save
             dest: Destination path/identifier
+            io_kwargs: Additional parameters for the I/O adapter (e.g., connection_params, if_exists for Snowflake)
         """
         dfs = self.serializer.program_to_dataframes(program)
-        self.io.write(dest, dfs["program"], dfs["structures"], dfs["conditions"], dfs["exclusions"])
+        self.io.write(dest, dfs["program"], dfs["structures"], dfs["conditions"], dfs["exclusions"], **(io_kwargs or {}))
 
-    def save_current(self, dest: str) -> None:
+    def save_current(self, dest: str, io_kwargs: Optional[dict] = None) -> None:
         """
         Save the currently loaded program to the specified destination.
 
         Args:
             dest: Destination path/identifier
+            io_kwargs: Additional parameters for the I/O adapter (e.g., connection_params, if_exists for Snowflake)
 
         Raises:
             ValueError: If no program is currently loaded
         """
         if not self._loaded_program:
             raise ValueError("No program currently loaded. Call load() first.")
-        self.save(self._loaded_program, dest)
+        self.save(self._loaded_program, dest, io_kwargs)
 
     def get_current_program(self) -> Program:
         """
@@ -161,9 +164,12 @@ class ProgramManager:
         self._loaded_program = None
         self._loaded_source = None
 
-    def reload(self) -> Program:
+    def reload(self, io_kwargs: Optional[dict] = None) -> Program:
         """
         Reload the program from the current source.
+
+        Args:
+            io_kwargs: Additional parameters for the I/O adapter (e.g., connection_params for Snowflake)
 
         Returns:
             The reloaded Program object
@@ -173,9 +179,9 @@ class ProgramManager:
         """
         if not self._loaded_source:
             raise ValueError("No program currently loaded. Call load() first.")
-        return self.load(self._loaded_source)
+        return self.load(self._loaded_source, io_kwargs)
 
-    def copy_to_backend(self, program: Program, dest: str, backend: Backend) -> None:
+    def copy_to_backend(self, program: Program, dest: str, backend: Backend, io_kwargs: Optional[dict] = None) -> None:
         """
         Copy a program to a different backend.
 
@@ -183,6 +189,7 @@ class ProgramManager:
             program: The Program object to copy
             dest: Destination path/identifier
             backend: Target backend
+            io_kwargs: Additional parameters for the I/O adapter (e.g., connection_params, if_exists for Snowflake)
         """
         # Save current backend
         current_backend = self.backend
@@ -191,7 +198,7 @@ class ProgramManager:
         self.switch_backend(backend)
 
         # Save the program
-        self.save(program, dest)
+        self.save(program, dest, io_kwargs)
 
         # Restore original backend
         self.switch_backend(current_backend)

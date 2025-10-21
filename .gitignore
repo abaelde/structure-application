@@ -222,3 +222,5 @@ consolidated_results/
 output/
 
 data/
+
+*.env
