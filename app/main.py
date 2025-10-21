@@ -350,7 +350,9 @@ if program_files and bordereau_file:
                             st.markdown("**Applied Terms:**")
                             params_df_data = []
                             if struct["type_of_participation"] == PRODUCT.QUOTA_SHARE:
-                                if pd.notna(pd.Series([struct.get("cession_pct")]).iloc[0]):
+                                if pd.notna(
+                                    pd.Series([struct.get("cession_pct")]).iloc[0]
+                                ):
                                     params_df_data.append(
                                         {
                                             "Parameter": "CESSION_PCT",
@@ -364,8 +366,13 @@ if program_files and bordereau_file:
                                             "Value": f"{struct['limit']:,.0f}",
                                         }
                                     )
-                            elif struct["type_of_participation"] == PRODUCT.EXCESS_OF_LOSS:
-                                if pd.notna(pd.Series([struct.get("attachment")]).iloc[0]):
+                            elif (
+                                struct["type_of_participation"]
+                                == PRODUCT.EXCESS_OF_LOSS
+                            ):
+                                if pd.notna(
+                                    pd.Series([struct.get("attachment")]).iloc[0]
+                                ):
                                     params_df_data.append(
                                         {
                                             "Parameter": "ATTACHMENT",
@@ -379,7 +386,9 @@ if program_files and bordereau_file:
                                             "Value": f"{struct['limit']:,.0f}",
                                         }
                                     )
-                            if pd.notna(pd.Series([struct.get("signed_share")]).iloc[0]):
+                            if pd.notna(
+                                pd.Series([struct.get("signed_share")]).iloc[0]
+                            ):
                                 params_df_data.append(
                                     {
                                         "Parameter": "SIGNED_SHARE",
@@ -398,9 +407,13 @@ if program_files and bordereau_file:
                                 d = dim_matches.get(dim) or {}
                                 cond_vals = d.get("condition_values")
                                 if cond_vals is not None and len(cond_vals) > 0:
-                                    conditions.append(f"{dim}={','.join(map(str, cond_vals))}")
+                                    conditions.append(
+                                        f"{dim}={','.join(map(str, cond_vals))}"
+                                    )
                             conditions_str = (
-                                ", ".join(conditions) if conditions else "All (no conditions)"
+                                ", ".join(conditions)
+                                if conditions
+                                else "All (no conditions)"
                             )
                             st.write(f"**Matching Conditions:** {conditions_str}")
                         else:

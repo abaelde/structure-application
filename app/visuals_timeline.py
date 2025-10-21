@@ -60,5 +60,3 @@ def build_timeline_figure(program, calculation_date):
         margin=dict(l=20, r=20, t=50, b=20),
     )
     return fig
-
-

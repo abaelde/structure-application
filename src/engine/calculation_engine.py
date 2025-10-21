@@ -22,7 +22,9 @@ def apply_program(
     if not is_policy_active:
         return create_inactive_result(policy, program, inactive_reason)
 
-    is_excl, reason = check_program_exclusions(policy, program, calculation_date=calculation_date)
+    is_excl, reason = check_program_exclusions(
+        policy, program, calculation_date=calculation_date
+    )
     if is_excl:
         res = create_excluded_result(policy, program)
         res.exclusion_reason = reason

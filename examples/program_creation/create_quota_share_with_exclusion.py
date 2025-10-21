@@ -54,12 +54,10 @@ program = build_program(
 # Ajouter les exclusions au niveau programme
 exclusions = [
     ExclusionRule(
-        values_by_dimension={'BUSCL_COUNTRY_CD': ['Iran']},
-        name='Sanctions Iran'
+        values_by_dimension={"BUSCL_COUNTRY_CD": ["Iran"]}, name="Sanctions Iran"
     ),
     ExclusionRule(
-        values_by_dimension={'BUSCL_COUNTRY_CD': ['Russia']},
-        name='Sanctions Russia'
+        values_by_dimension={"BUSCL_COUNTRY_CD": ["Russia"]}, name="Sanctions Russia"
     ),
 ]
 program.exclusions = exclusions

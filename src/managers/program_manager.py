@@ -52,7 +52,9 @@ class ProgramManager:
         if p.exists() and p.is_dir():
             return "csv_folder"
         if p.suffix.lower() in {".xlsx", ".xls"}:
-            raise ValueError(f"Excel files (.xlsx/.xls) are no longer supported. Please use CSV folder format instead. File: {source}")
+            raise ValueError(
+                f"Excel files (.xlsx/.xls) are no longer supported. Please use CSV folder format instead. File: {source}"
+            )
         # défaut: si le chemin n'existe pas encore mais ressemble à un dossier (sans suffixe) -> csv_folder
         return "csv_folder"
 
@@ -89,14 +91,18 @@ class ProgramManager:
         Returns:
             The loaded Program object
         """
-        program_df, structures_df, conditions_df, exclusions_df = self.io.read(source, **(io_kwargs or {}))
+        program_df, structures_df, conditions_df, exclusions_df = self.io.read(
+            source, **(io_kwargs or {})
+        )
         self._loaded_program = self.serializer.dataframes_to_program(
             program_df, structures_df, conditions_df, exclusions_df
         )
         self._loaded_source = source
         return self._loaded_program
 
-    def save(self, program: Program, dest: str, io_kwargs: Optional[dict] = None) -> None:
+    def save(
+        self, program: Program, dest: str, io_kwargs: Optional[dict] = None
+    ) -> None:
         """
         Save a program to the specified destination.
 
@@ -106,7 +112,14 @@ class ProgramManager:
             io_kwargs: Additional parameters for the I/O adapter (e.g., connection_params, if_exists for Snowflake)
         """
         dfs = self.serializer.program_to_dataframes(program)
-        self.io.write(dest, dfs["program"], dfs["structures"], dfs["conditions"], dfs["exclusions"], **(io_kwargs or {}))
+        self.io.write(
+            dest,
+            dfs["program"],
+            dfs["structures"],
+            dfs["conditions"],
+            dfs["exclusions"],
+            **(io_kwargs or {}),
+        )
 
     def save_current(self, dest: str, io_kwargs: Optional[dict] = None) -> None:
         """
@@ -181,7 +194,13 @@ class ProgramManager:
             raise ValueError("No program currently loaded. Call load() first.")
         return self.load(self._loaded_source, io_kwargs)
 
-    def copy_to_backend(self, program: Program, dest: str, backend: Backend, io_kwargs: Optional[dict] = None) -> None:
+    def copy_to_backend(
+        self,
+        program: Program,
+        dest: str,
+        backend: Backend,
+        io_kwargs: Optional[dict] = None,
+    ) -> None:
         """
         Copy a program to a different backend.
 

@@ -9,32 +9,32 @@ Ce module centralise toute la configuration et les utilitaires liés à Snowflak
 
 Usage:
     from snowflake_utils import SnowflakeConfig, save_program
-    
+
     # Configuration automatique
     config = SnowflakeConfig.load()
-    
+
     # Sauvegarde d'un programme
     save_program(program, "MY_PROGRAM_2024")
 """
 
 from .config import SnowflakeConfig
 from .utils import (
-    save_program, 
-    get_save_config, 
-    test_connection, 
-    list_programs, 
+    save_program,
+    get_save_config,
+    test_connection,
+    list_programs,
     delete_program,
     reset_all_tables,
-    truncate_all_tables
+    truncate_all_tables,
 )
 
 __all__ = [
     "SnowflakeConfig",
-    "save_program", 
+    "save_program",
     "get_save_config",
     "test_connection",
     "list_programs",
     "delete_program",
     "reset_all_tables",
-    "truncate_all_tables"
+    "truncate_all_tables",
 ]

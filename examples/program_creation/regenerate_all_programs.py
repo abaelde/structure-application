@@ -91,8 +91,13 @@ def regenerate_all_programs():
 
     programs_dir = os.path.join(os.path.dirname(__file__), "..", "programs")
     if os.path.exists(programs_dir):
-        csv_folders = sorted([d for d in os.listdir(programs_dir) 
-                             if os.path.isdir(os.path.join(programs_dir, d))])
+        csv_folders = sorted(
+            [
+                d
+                for d in os.listdir(programs_dir)
+                if os.path.isdir(os.path.join(programs_dir, d))
+            ]
+        )
         for csv_folder in csv_folders:
             if csv_folder == "all_programs":
                 print(f"   🗄️  {csv_folder}/ (base de données simulée)")

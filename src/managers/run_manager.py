@@ -49,8 +49,16 @@ class RunManager:
         dfs = self.serializer.build_dataframes(run_meta, results_df, source_policy_df)
 
         if self.backend == "csv":
-            self.io.write(dest, dfs["runs"], dfs["run_policies"], dfs["run_policy_structures"])
+            self.io.write(
+                dest, dfs["runs"], dfs["run_policies"], dfs["run_policy_structures"]
+            )
         else:
-            self.io.write(dest, dfs["runs"], dfs["run_policies"], dfs["run_policy_structures"], **io_kwargs)
+            self.io.write(
+                dest,
+                dfs["runs"],
+                dfs["run_policies"],
+                dfs["run_policy_structures"],
+                **io_kwargs,
+            )
 
         return dfs

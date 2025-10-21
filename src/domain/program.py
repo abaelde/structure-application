@@ -43,8 +43,12 @@ class Program:
                 {
                     "values_by_dimension": e.values_by_dimension,
                     "reason": e.reason,
-                    "effective_date": str(e.effective_date) if e.effective_date is not None else None,
-                    "expiry_date": str(e.expiry_date) if e.expiry_date is not None else None,
+                    "effective_date": (
+                        str(e.effective_date) if e.effective_date is not None else None
+                    ),
+                    "expiry_date": (
+                        str(e.expiry_date) if e.expiry_date is not None else None
+                    ),
                 }
                 for e in self.exclusions
             ],
@@ -81,10 +85,14 @@ class Program:
             lines.append("PROGRAM EXCLUSIONS")
             lines.append("=" * 80)
             for i, e in enumerate(self.exclusions, 1):
-                dims = ", ".join(f"{k}=[{', '.join(v)}]" for k, v in e.values_by_dimension.items())
+                dims = ", ".join(
+                    f"{k}=[{', '.join(v)}]" for k, v in e.values_by_dimension.items()
+                )
                 period = ""
                 if e.effective_date or e.expiry_date:
-                    period = f" (period: {e.effective_date} .. {e.expiry_date} exclusive)"
+                    period = (
+                        f" (period: {e.effective_date} .. {e.expiry_date} exclusive)"
+                    )
                 lines.append(f"- Excl {i}: {dims}{period}  reason={e.reason or 'N/A'}")
             lines.append("=" * 80)
 

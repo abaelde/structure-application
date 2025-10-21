@@ -3,12 +3,13 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Any
 import pandas as pd
 
+
 @dataclass(frozen=True)
 class ExclusionRule:
     values_by_dimension: Dict[str, List[str]]
     name: Optional[str] = None
     effective_date: Optional[pd.Timestamp] = None  # optional
-    expiry_date: Optional[pd.Timestamp] = None     # optional
+    expiry_date: Optional[pd.Timestamp] = None  # optional
 
     @staticmethod
     def _to_ts(v) -> Optional[pd.Timestamp]:
@@ -20,7 +21,9 @@ class ExclusionRule:
             return None
 
     @classmethod
-    def from_row(cls, row: Dict[str, Any], dimension_columns: List[str]) -> "ExclusionRule":
+    def from_row(
+        cls, row: Dict[str, Any], dimension_columns: List[str]
+    ) -> "ExclusionRule":
         values: Dict[str, List[str]] = {}
         for dim in dimension_columns:
             cell = row.get(dim)
@@ -41,7 +44,13 @@ class ExclusionRule:
             expiry_date=cls._to_ts(row.get("EXCL_EXPIRY_DATE")),
         )
 
-    def matches(self, policy, dimension_mapping: Dict[str, str], *, calculation_date: Optional[str] = None) -> bool:
+    def matches(
+        self,
+        policy,
+        dimension_mapping: Dict[str, str],
+        *,
+        calculation_date: Optional[str] = None,
+    ) -> bool:
         # Optional temporal filter (if dates provided)
         if self.effective_date is not None or self.expiry_date is not None:
             calc = pd.to_datetime(calculation_date) if calculation_date else None

@@ -135,9 +135,7 @@ def test_hull_liability_filtering_aviation():
     assert qs_all_detail["applied"] is True
     assert abs(qs_all_detail["input_exposure"] - 65_000_000) < tolerance
     expected_qs_cession = 65_000_000 * 0.25
-    assert (
-        abs(qs_all_detail["ceded_to_layer_100pct"] - expected_qs_cession) < tolerance
-    )
+    assert abs(qs_all_detail["ceded_to_layer_100pct"] - expected_qs_cession) < tolerance
     assert abs(qs_all_detail["ceded_to_reinsurer"] - expected_qs_cession) < tolerance
 
     xol_hull_detail = structures[1]
@@ -181,9 +179,7 @@ def test_hull_liability_filtering_aviation():
         ),
     )
     assert (
-        abs(
-            xol_liability_detail["ceded_to_layer_100pct"] - expected_liability_cession
-        )
+        abs(xol_liability_detail["ceded_to_layer_100pct"] - expected_liability_cession)
         < tolerance
     )
 

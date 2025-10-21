@@ -44,19 +44,18 @@ def test_exclusion_mechanism():
     # Créer les exclusions au niveau programme
     exclusions = [
         ExclusionRule(
-            values_by_dimension={'BUSCL_COUNTRY_CD': ['Iran']},
-            name='Sanctions Iran'
+            values_by_dimension={"BUSCL_COUNTRY_CD": ["Iran"]}, name="Sanctions Iran"
         ),
         ExclusionRule(
-            values_by_dimension={'BUSCL_COUNTRY_CD': ['Russia']},
-            name='Sanctions Russia'
+            values_by_dimension={"BUSCL_COUNTRY_CD": ["Russia"]},
+            name="Sanctions Russia",
         ),
     ]
 
     program = build_program(
         name="QS_WITH_EXCLUSIONS", structures=[qs], underwriting_department="test"
     )
-    
+
     # Ajouter les exclusions au programme
     program.exclusions = exclusions
 

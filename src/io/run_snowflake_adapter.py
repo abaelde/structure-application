@@ -3,11 +3,13 @@ from __future__ import annotations
 from typing import Optional, Dict, Any, Tuple
 import pandas as pd
 
+
 class RunSnowflakeIO:
     """
     Persistance des 3 tables de run dans Snowflake (tables globales).
     DSN attendu: snowflake://DB.SCHEMA
     """
+
     RUNS = "RUNS"
     POLICIES = "RUN_POLICIES"
     STRUCTURES = "RUN_POLICY_STRUCTURES"
@@ -15,7 +17,7 @@ class RunSnowflakeIO:
     def _parse_dsn(self, dsn: str) -> Tuple[str, str]:
         if not dsn.lower().startswith("snowflake://"):
             raise ValueError("Invalid DSN")
-        rest = dsn[len("snowflake://"):]
+        rest = dsn[len("snowflake://") :]
         parts = rest.split(".")
         if len(parts) != 2:
             raise ValueError("DSN must be snowflake://DB.SCHEMA")
@@ -23,6 +25,7 @@ class RunSnowflakeIO:
 
     def _connect(self, params: Optional[Dict[str, Any]]):
         import snowflake.connector
+
         return snowflake.connector.connect(**(params or {}))
 
     def _ensure_tables(self, cnx, db: str, schema: str) -> None:
@@ -99,11 +102,12 @@ class RunSnowflakeIO:
         **kwargs,
     ) -> None:
         from snowflake.connector.pandas_tools import write_pandas
+
         db, schema = self._parse_dsn(dest_dsn)
         cnx = self._connect(connection_params)
         try:
             self._ensure_tables(cnx, db, schema)
-            
+
             for name, df in [
                 (self.RUNS, runs_df),
                 (self.POLICIES, run_policies_df),
@@ -111,32 +115,43 @@ class RunSnowflakeIO:
             ]:
                 if not df.empty:
                     write_pandas(
-                        cnx, df, table_name=name, database=db, schema=schema,
-                        auto_create_table=False, quote_identifiers=True
+                        cnx,
+                        df,
+                        table_name=name,
+                        database=db,
+                        schema=schema,
+                        auto_create_table=False,
+                        quote_identifiers=True,
                     )
         finally:
             cnx.close()
 
     def read(
-        self, 
-        source_dsn: str, 
+        self,
+        source_dsn: str,
         *,
         connection_params: Optional[Dict[str, Any]] = None,
-        **kwargs
+        **kwargs,
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         db, schema = self._parse_dsn(source_dsn)
         cnx = self._connect(connection_params)
         try:
             self._ensure_tables(cnx, db, schema)
-            
+
             runs = pd.read_sql(f'SELECT * FROM "{db}"."{schema}"."{self.RUNS}"', cnx)
-            pols = pd.read_sql(f'SELECT * FROM "{db}"."{schema}"."{self.POLICIES}"', cnx)
-            strs = pd.read_sql(f'SELECT * FROM "{db}"."{schema}"."{self.STRUCTURES}"', cnx)
+            pols = pd.read_sql(
+                f'SELECT * FROM "{db}"."{schema}"."{self.POLICIES}"', cnx
+            )
+            strs = pd.read_sql(
+                f'SELECT * FROM "{db}"."{schema}"."{self.STRUCTURES}"', cnx
+            )
             return runs, pols, strs
         finally:
             cnx.close()
 
-    def drop_all_tables(self, dsn: str, *, connection_params: Optional[Dict[str, Any]] = None) -> None:
+    def drop_all_tables(
+        self, dsn: str, *, connection_params: Optional[Dict[str, Any]] = None
+    ) -> None:
         db, schema = self._parse_dsn(dsn)
         cnx = self._connect(connection_params)
         try:

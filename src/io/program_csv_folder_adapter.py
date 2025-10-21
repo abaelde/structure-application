@@ -28,7 +28,9 @@ class CsvProgramFolderIO:
         names = ", ".join(str(c.name) for c in candidates)
         raise FileNotFoundError(f"Missing required CSV in {folder}: one of [{names}]")
 
-    def read(self, folder: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def read(
+        self, folder: str
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         p = Path(folder)
         if not p.exists() or not p.is_dir():
             raise ValueError(

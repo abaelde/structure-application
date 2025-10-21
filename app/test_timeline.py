@@ -36,5 +36,3 @@ def test_build_timeline_figure_basic():
     assert fig is not None
     # Plotly Figure exposes data/layout attributes
     assert hasattr(fig, "data") and hasattr(fig, "layout")
-
-

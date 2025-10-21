@@ -2,7 +2,10 @@ from typing import Optional
 from src.domain.program import Program
 from src.domain.policy import Policy
 
-def check_program_exclusions(policy: Policy, program: Program, *, calculation_date: Optional[str] = None) -> tuple[bool, Optional[str]]:
+
+def check_program_exclusions(
+    policy: Policy, program: Program, *, calculation_date: Optional[str] = None
+) -> tuple[bool, Optional[str]]:
     """
     Returns (is_excluded, reason)
     """

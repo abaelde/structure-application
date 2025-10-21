@@ -6,14 +6,15 @@ Script pour créer le DDL correct avec auto-increment basé sur le DDL généré
 import json
 from pathlib import Path
 
+
 def create_correct_ddl():
     """Crée le DDL correct avec auto-increment"""
-    
+
     # Lire l'analyse des CSV
     analysis_file = Path(__file__).parent / "csv_structure_analysis.json"
-    with open(analysis_file, 'r') as f:
+    with open(analysis_file, "r") as f:
         analysis = json.load(f)
-    
+
     ddl_content = """-- DDL corrigé avec auto-increment
 -- Date: 2025-10-21
 
@@ -122,14 +123,15 @@ CREATE TABLE RP_GLOBAL_EXCLUSION (
   FOREIGN KEY (RP_ID) REFERENCES REINSURANCE_PROGRAM(REINSURANCE_PROGRAM_ID)
 );
 """
-    
+
     # Sauvegarder le DDL corrigé
     output_file = Path(__file__).parent / "correct_snowflake_ddl.sql"
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         f.write(ddl_content)
-    
+
     print(f"✅ DDL corrigé créé: {output_file}")
     return output_file
+
 
 if __name__ == "__main__":
     create_correct_ddl()

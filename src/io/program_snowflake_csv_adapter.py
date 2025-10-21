@@ -5,15 +5,16 @@ import pandas as pd
 import snowflake.connector
 from snowflake.connector.pandas_tools import write_pandas
 
+
 class SnowflakeProgramCSVIO:
     """
     Adapter Snowflake avec correspondance 1:1 aux colonnes CSV.
     Chaque colonne CSV correspond à une colonne table Snowflake.
-    
+
     Tables:
       - PROGRAMS: 14 colonnes CSV + 2 colonnes d'audit
       - STRUCTURES: 21 colonnes CSV + 1 clé de liaison
-      - CONDITIONS: 38 colonnes CSV + 1 clé de liaison  
+      - CONDITIONS: 38 colonnes CSV + 1 clé de liaison
       - RP_GLOBAL_EXCLUSION: 11 colonnes CSV + 1 clé de liaison
 
     DSN attendu pour load/save :
@@ -37,7 +38,7 @@ class SnowflakeProgramCSVIO:
     def _parse_dsn(self, source: str) -> Tuple[str, str, Dict[str, str]]:
         if not source.lower().startswith("snowflake://"):
             raise ValueError(f"Invalid Snowflake DSN: {source}")
-        rest = source[len("snowflake://"):]
+        rest = source[len("snowflake://") :]
         if "?" in rest:
             coord, qs = rest.split("?", 1)
         else:
@@ -58,18 +59,29 @@ class SnowflakeProgramCSVIO:
     def _connect(self, connection_params: Dict[str, Any]):
         return snowflake.connector.connect(**connection_params)
 
-    def _get_program_id_from_title(self, program_title: str, connection_params: Dict[str, Any], db: str, schema: str) -> int:
+    def _get_program_id_from_title(
+        self,
+        program_title: str,
+        connection_params: Dict[str, Any],
+        db: str,
+        schema: str,
+    ) -> int:
         """Récupère l'ID du programme depuis la base de données basé sur le titre"""
         cnx = self._connect(connection_params)
         cur = cnx.cursor()
-        
+
         try:
-            cur.execute(f'SELECT REINSURANCE_PROGRAM_ID FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s', (program_title,))
+            cur.execute(
+                f'SELECT REINSURANCE_PROGRAM_ID FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s',
+                (program_title,),
+            )
             result = cur.fetchone()
             if result:
                 return result[0]
             else:
-                raise ValueError(f"Programme '{program_title}' non trouvé dans la base de données")
+                raise ValueError(
+                    f"Programme '{program_title}' non trouvé dans la base de données"
+                )
         finally:
             cur.close()
             cnx.close()
@@ -77,33 +89,43 @@ class SnowflakeProgramCSVIO:
     # ────────────────────────────────────────────────────────────────────
     # READ
     # ────────────────────────────────────────────────────────────────────
-    def read(self, source: str, connection_params: Dict[str, Any]) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def read(
+        self, source: str, connection_params: Dict[str, Any]
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         db, schema, params = self._parse_dsn(source)
-        
+
         # Déterminer l'identifiant du programme
         program_title = params.get("program_title")
         if not program_title:
             raise ValueError("DSN must specify program_title parameter")
-        
+
         # Récupérer l'ID du programme depuis la base de données
-        program_id = self._get_program_id_from_title(program_title, connection_params, db, schema)
+        program_id = self._get_program_id_from_title(
+            program_title, connection_params, db, schema
+        )
 
         cnx = self._connect(connection_params)
         cur = cnx.cursor()
 
         try:
             # PROGRAMS - utiliser TITLE pour trouver le programme
-            cur.execute(f'SELECT * FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s', (program_title,))
+            cur.execute(
+                f'SELECT * FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s',
+                (program_title,),
+            )
             prog_rows = cur.fetchall()
             prog_cols = [d[0] for d in cur.description]
-            
+
             if not prog_rows:
                 raise ValueError("Program not found in PROGRAMS")
-            
+
             program_df = pd.DataFrame([dict(zip(prog_cols, prog_rows[0]))])
 
             # STRUCTURES - toutes les colonnes CSV
-            cur.execute(f'SELECT * FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s ORDER BY INSPER_CONTRACT_ORDER NULLS LAST, INSPER_ID_PRE', (program_id,))
+            cur.execute(
+                f'SELECT * FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s ORDER BY INSPER_CONTRACT_ORDER NULLS LAST, INSPER_ID_PRE',
+                (program_id,),
+            )
             s_rows = cur.fetchall()
             s_cols = [d[0] for d in cur.description]
             structures = []
@@ -113,7 +135,10 @@ class SnowflakeProgramCSVIO:
             structures_df = pd.DataFrame(structures) if structures else pd.DataFrame()
 
             # CONDITIONS - toutes les colonnes CSV
-            cur.execute(f'SELECT * FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE PROGRAM_ID=%s ORDER BY BUSCL_ID_PRE', (program_id,))
+            cur.execute(
+                f'SELECT * FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE PROGRAM_ID=%s ORDER BY BUSCL_ID_PRE',
+                (program_id,),
+            )
             c_rows = cur.fetchall()
             c_cols = [d[0] for d in cur.description]
             conditions = []
@@ -123,7 +148,10 @@ class SnowflakeProgramCSVIO:
             conditions_df = pd.DataFrame(conditions) if conditions else pd.DataFrame()
 
             # EXCLUSIONS - toutes les colonnes CSV
-            cur.execute(f'SELECT * FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE PROGRAM_ID=%s', (program_id,))
+            cur.execute(
+                f'SELECT * FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE PROGRAM_ID=%s',
+                (program_id,),
+            )
             e_rows = cur.fetchall()
             e_cols = [d[0] for d in cur.description]
             exclusions = []
@@ -152,12 +180,12 @@ class SnowflakeProgramCSVIO:
         if_exists: str = "append",
     ) -> None:
         db, schema, params = self._parse_dsn(dest)
-        
+
         # Déterminer l'identifiant du programme
         program_title = params.get("program_title")
         if not program_title:
             raise ValueError("DSN must specify program_title parameter")
-        
+
         # Pour la sauvegarde, on va d'abord insérer le programme et récupérer son ID auto-généré
         # ou récupérer l'ID existant si le programme existe déjà
 
@@ -173,14 +201,29 @@ class SnowflakeProgramCSVIO:
                 cur.execute(f'TRUNCATE TABLE "{db}"."{schema}"."{self.EXCLUSIONS}"')
             elif if_exists == "replace_program":
                 # Supprimer le programme existant et ses données liées
-                cur.execute(f'SELECT REINSURANCE_PROGRAM_ID FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s', (program_title,))
+                cur.execute(
+                    f'SELECT REINSURANCE_PROGRAM_ID FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s',
+                    (program_title,),
+                )
                 existing_program = cur.fetchone()
                 if existing_program:
                     existing_program_id = existing_program[0]
-                    cur.execute(f'DELETE FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE PROGRAM_ID=%s', (existing_program_id,))
-                    cur.execute(f'DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE PROGRAM_ID=%s', (existing_program_id,))
-                    cur.execute(f'DELETE FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s', (existing_program_id,))
-                    cur.execute(f'DELETE FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE REINSURANCE_PROGRAM_ID=%s', (existing_program_id,))
+                    cur.execute(
+                        f'DELETE FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE PROGRAM_ID=%s',
+                        (existing_program_id,),
+                    )
+                    cur.execute(
+                        f'DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE PROGRAM_ID=%s',
+                        (existing_program_id,),
+                    )
+                    cur.execute(
+                        f'DELETE FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s',
+                        (existing_program_id,),
+                    )
+                    cur.execute(
+                        f'DELETE FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE REINSURANCE_PROGRAM_ID=%s',
+                        (existing_program_id,),
+                    )
 
             # PROGRAMS - insérer et récupérer l'ID auto-généré
             program_id = None
@@ -188,160 +231,197 @@ class SnowflakeProgramCSVIO:
                 p_rows: List[Dict[str, Any]] = []
                 for _, r in program_df.iterrows():
                     row_dict = r.to_dict()
-                    
+
                     # Mapping des colonnes CSV vers Snowflake
                     mapped_row = {}
                     for csv_col, value in row_dict.items():
-                        if csv_col == 'REPROG_TITLE':
-                            mapped_row['TITLE'] = value
-                        elif csv_col == 'REINSURANCE_PROGRAM_ID':
+                        if csv_col == "REPROG_TITLE":
+                            mapped_row["TITLE"] = value
+                        elif csv_col == "REINSURANCE_PROGRAM_ID":
                             # Ne pas inclure REINSURANCE_PROGRAM_ID car c'est auto-increment
                             continue
-                        elif csv_col == 'ACTIVE_IND':
-                            mapped_row['ACTIVE_IND'] = value
-                        elif csv_col == 'UW_LOB':
-                            mapped_row['UW_LOB'] = value
-                        elif csv_col == 'MAIN_CURRENCY_CD':
-                            mapped_row['MAIN_CURRENCY_CD'] = value
-                        elif csv_col == 'ADDITIONAL_INFO':
-                            mapped_row['ADDITIONAL_INFO'] = value
-                        elif csv_col == 'UW_DEPARTMENT_CODE':
-                            mapped_row['UW_DEPARTMENT_CODE'] = value
-                        elif csv_col == 'BUSPAR_CED_REG_CLASS_CD':
-                            mapped_row['BUSPAR_CED_REG_CLASS_CD'] = value
-                        elif csv_col == 'CED_ID_PRE':
-                            mapped_row['CED_ID_PRE'] = value
-                        elif csv_col == 'CED_NAME_PRE':
-                            mapped_row['ID_PRE'] = value
+                        elif csv_col == "ACTIVE_IND":
+                            mapped_row["ACTIVE_IND"] = value
+                        elif csv_col == "UW_LOB":
+                            mapped_row["UW_LOB"] = value
+                        elif csv_col == "MAIN_CURRENCY_CD":
+                            mapped_row["MAIN_CURRENCY_CD"] = value
+                        elif csv_col == "ADDITIONAL_INFO":
+                            mapped_row["ADDITIONAL_INFO"] = value
+                        elif csv_col == "UW_DEPARTMENT_CODE":
+                            mapped_row["UW_DEPARTMENT_CODE"] = value
+                        elif csv_col == "BUSPAR_CED_REG_CLASS_CD":
+                            mapped_row["BUSPAR_CED_REG_CLASS_CD"] = value
+                        elif csv_col == "CED_ID_PRE":
+                            mapped_row["CED_ID_PRE"] = value
+                        elif csv_col == "CED_NAME_PRE":
+                            mapped_row["ID_PRE"] = value
                         # Ignorer les colonnes qui n'existent pas dans la table Snowflake
-                        elif csv_col in ['REPROG_UW_DEPARTMENT_NAME', 'REPROG_UW_DEPARTMENT_LOB_NAME', 
-                                       'BUSPAR_CED_REG_CLASS_NAME', 'REPROG_MANAGEMENT_REPORTING_LOB_CD']:
+                        elif csv_col in [
+                            "REPROG_UW_DEPARTMENT_NAME",
+                            "REPROG_UW_DEPARTMENT_LOB_NAME",
+                            "BUSPAR_CED_REG_CLASS_NAME",
+                            "REPROG_MANAGEMENT_REPORTING_LOB_CD",
+                        ]:
                             continue
                         else:
                             # Garder les autres colonnes telles quelles
                             mapped_row[csv_col] = value
-                    
+
                     # Ajouter les colonnes d'audit
-                    mapped_row['CREATED_AT'] = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
-                    mapped_row['UPDATED_AT'] = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
+                    mapped_row["CREATED_AT"] = pd.Timestamp.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+                    mapped_row["UPDATED_AT"] = pd.Timestamp.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
                     p_rows.append(mapped_row)
-                
+
                 # Insérer le programme et récupérer l'ID auto-généré
                 # Utiliser INSERT direct au lieu de write_pandas pour éviter les problèmes de paramètres
                 for row in p_rows:
                     columns = list(row.keys())
                     values = list(row.values())
-                    placeholders = ', '.join(['%s'] * len(values))
-                    columns_str = ', '.join([f'"{col}"' for col in columns])
+                    placeholders = ", ".join(["%s"] * len(values))
+                    columns_str = ", ".join([f'"{col}"' for col in columns])
                     insert_sql = f'INSERT INTO "{db}"."{schema}"."{self.PROGRAMS}" ({columns_str}) VALUES ({placeholders})'
                     cur.execute(insert_sql, values)
-                
+
                 # Récupérer l'ID du programme qui vient d'être inséré
-                cur.execute(f'SELECT REINSURANCE_PROGRAM_ID FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s', (program_title,))
+                cur.execute(
+                    f'SELECT REINSURANCE_PROGRAM_ID FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s',
+                    (program_title,),
+                )
                 result = cur.fetchone()
                 if result:
                     program_id = result[0]
                 else:
-                    raise ValueError(f"Impossible de récupérer l'ID du programme '{program_title}' après insertion")
+                    raise ValueError(
+                        f"Impossible de récupérer l'ID du programme '{program_title}' après insertion"
+                    )
 
             # STRUCTURES - toutes les colonnes CSV + PROGRAM_ID
             if not structures_df.empty:
                 s_rows: List[Dict[str, Any]] = []
                 for _, r in structures_df.iterrows():
                     row_dict = r.to_dict()
-                    
+
                     # Mapping des colonnes CSV vers Snowflake
                     mapped_row = {}
                     for csv_col, value in row_dict.items():
-                        if csv_col == 'INSPER_ID_PRE':
+                        if csv_col == "INSPER_ID_PRE":
                             # Ne pas inclure INSPER_ID_PRE car c'est auto-increment
                             continue
-                        elif csv_col == 'REINSURANCE_PROGRAM_ID':
+                        elif csv_col == "REINSURANCE_PROGRAM_ID":
                             # Remplacer par PROGRAM_ID
-                            mapped_row['PROGRAM_ID'] = program_id
-                        elif csv_col == 'BUSINESS_TITLE':
-                            mapped_row['BUSINESS_TITLE'] = value
+                            mapped_row["PROGRAM_ID"] = program_id
+                        elif csv_col == "BUSINESS_TITLE":
+                            mapped_row["BUSINESS_TITLE"] = value
                         else:
                             # Garder les autres colonnes telles quelles
                             mapped_row[csv_col] = value
-                    
+
                     # Convertir les timestamps au format standard pour Snowflake
-                    for col in ['INSPER_EFFECTIVE_DATE', 'INSPER_EXPIRY_DATE']:
+                    for col in ["INSPER_EFFECTIVE_DATE", "INSPER_EXPIRY_DATE"]:
                         if col in mapped_row and pd.notna(mapped_row[col]):
                             if isinstance(mapped_row[col], pd.Timestamp):
-                                mapped_row[col] = mapped_row[col].strftime('%Y-%m-%d %H:%M:%S')
-                    
+                                mapped_row[col] = mapped_row[col].strftime(
+                                    "%Y-%m-%d %H:%M:%S"
+                                )
+
                     s_rows.append(mapped_row)
-                write_pandas(cnx, pd.DataFrame(s_rows), table_name=self.STRUCTURES, database=db, schema=schema, auto_create_table=False, quote_identifiers=True)
+                write_pandas(
+                    cnx,
+                    pd.DataFrame(s_rows),
+                    table_name=self.STRUCTURES,
+                    database=db,
+                    schema=schema,
+                    auto_create_table=False,
+                    quote_identifiers=True,
+                )
 
             # CONDITIONS - toutes les colonnes CSV + PROGRAM_ID
             if not conditions_df.empty:
                 c_rows: List[Dict[str, Any]] = []
                 for _, r in conditions_df.iterrows():
                     row_dict = r.to_dict()
-                    
+
                     # Mapping des colonnes CSV vers Snowflake
                     mapped_row = {}
                     for csv_col, value in row_dict.items():
-                        if csv_col == 'REINSURANCE_PROGRAM_ID':
+                        if csv_col == "REINSURANCE_PROGRAM_ID":
                             # Remplacer par PROGRAM_ID
-                            mapped_row['PROGRAM_ID'] = program_id
+                            mapped_row["PROGRAM_ID"] = program_id
                         else:
                             # Garder les autres colonnes telles quelles
                             mapped_row[csv_col] = value
-                    
+
                     # Convertir les timestamps au format standard pour Snowflake
-                    for col in ['INSPER_EFFECTIVE_DATE', 'INSPER_EXPIRY_DATE']:
+                    for col in ["INSPER_EFFECTIVE_DATE", "INSPER_EXPIRY_DATE"]:
                         if col in mapped_row and pd.notna(mapped_row[col]):
                             if isinstance(mapped_row[col], pd.Timestamp):
-                                mapped_row[col] = mapped_row[col].strftime('%Y-%m-%d %H:%M:%S')
-                    
+                                mapped_row[col] = mapped_row[col].strftime(
+                                    "%Y-%m-%d %H:%M:%S"
+                                )
+
                     c_rows.append(mapped_row)
-                write_pandas(cnx, pd.DataFrame(c_rows), table_name=self.CONDITIONS, database=db, schema=schema, auto_create_table=False, quote_identifiers=True)
+                write_pandas(
+                    cnx,
+                    pd.DataFrame(c_rows),
+                    table_name=self.CONDITIONS,
+                    database=db,
+                    schema=schema,
+                    auto_create_table=False,
+                    quote_identifiers=True,
+                )
 
             # EXCLUSIONS - toutes les colonnes CSV + PROGRAM_ID
             if not exclusions_df.empty:
                 if program_id is None:
-                    raise ValueError("program_id is None when trying to insert exclusions")
+                    raise ValueError(
+                        "program_id is None when trying to insert exclusions"
+                    )
                 e_rows: List[Dict[str, Any]] = []
                 for _, r in exclusions_df.iterrows():
                     row_dict = r.to_dict()
-                    
+
                     # Mapping des colonnes CSV vers Snowflake
                     mapped_row = {}
                     # Ajouter RP_ID manuellement car il n'est pas dans le CSV
-                    mapped_row['RP_ID'] = program_id
-                    
+                    mapped_row["RP_ID"] = program_id
+
                     for csv_col, value in row_dict.items():
-                        if csv_col == 'BUSCL_CLASS_OF_BUSINESS_1':
-                            mapped_row['PRODICT_TYPE_LEVEL_1'] = value
-                        elif csv_col == 'BUSCL_CLASS_OF_BUSINESS_2':
-                            mapped_row['PRODICT_TYPE_LEVEL_2'] = value
-                        elif csv_col == 'BUSCL_CLASS_OF_BUSINESS_3':
-                            mapped_row['PRODICT_TYPE_LEVEL_3'] = value
-                        elif csv_col == 'BUSCL_ENTITY_NAME_CED':
-                            mapped_row['ENTITY_NAME_CED'] = value
-                        elif csv_col == 'POL_RISK_NAME_CED':
-                            mapped_row['RISK_NAME'] = value
+                        if csv_col == "BUSCL_CLASS_OF_BUSINESS_1":
+                            mapped_row["PRODICT_TYPE_LEVEL_1"] = value
+                        elif csv_col == "BUSCL_CLASS_OF_BUSINESS_2":
+                            mapped_row["PRODICT_TYPE_LEVEL_2"] = value
+                        elif csv_col == "BUSCL_CLASS_OF_BUSINESS_3":
+                            mapped_row["PRODICT_TYPE_LEVEL_3"] = value
+                        elif csv_col == "BUSCL_ENTITY_NAME_CED":
+                            mapped_row["ENTITY_NAME_CED"] = value
+                        elif csv_col == "POL_RISK_NAME_CED":
+                            mapped_row["RISK_NAME"] = value
                         else:
                             # Garder les autres colonnes telles quelles
                             mapped_row[csv_col] = value
-                    
+
                     # Convertir les timestamps au format standard pour Snowflake
-                    for col in ['EXCL_EFFECTIVE_DATE', 'EXCL_EXPIRY_DATE']:
+                    for col in ["EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE"]:
                         if col in mapped_row and pd.notna(mapped_row[col]):
                             if isinstance(mapped_row[col], pd.Timestamp):
-                                mapped_row[col] = mapped_row[col].strftime('%Y-%m-%d %H:%M:%S')
-                    
+                                mapped_row[col] = mapped_row[col].strftime(
+                                    "%Y-%m-%d %H:%M:%S"
+                                )
+
                     e_rows.append(mapped_row)
                 # Insertion SQL directe pour les exclusions
                 if e_rows:
                     for row in e_rows:
                         columns = list(row.keys())
                         values = list(row.values())
-                        placeholders = ', '.join(['%s'] * len(values))
-                        columns_str = ', '.join([f'"{col}"' for col in columns])
-                        
+                        placeholders = ", ".join(["%s"] * len(values))
+                        columns_str = ", ".join([f'"{col}"' for col in columns])
+
                         insert_sql = f'INSERT INTO "{db}"."{schema}"."{self.EXCLUSIONS}" ({columns_str}) VALUES ({placeholders})'
                         cur.execute(insert_sql, values)
 
@@ -352,12 +432,19 @@ class SnowflakeProgramCSVIO:
     # ────────────────────────────────────────────────────────────────────
     # UTILS
     # ────────────────────────────────────────────────────────────────────
-    def drop_all_tables(self, connection_params: Dict[str, Any], db: str, schema: str) -> None:
+    def drop_all_tables(
+        self, connection_params: Dict[str, Any], db: str, schema: str
+    ) -> None:
         """Supprime toutes les tables (utile pour les tests)"""
         cnx = self._connect(connection_params)
         cur = cnx.cursor()
         try:
-            for table in [self.EXCLUSIONS, self.CONDITIONS, self.STRUCTURES, self.PROGRAMS]:
+            for table in [
+                self.EXCLUSIONS,
+                self.CONDITIONS,
+                self.STRUCTURES,
+                self.PROGRAMS,
+            ]:
                 cur.execute(f'DROP TABLE IF EXISTS "{db}"."{schema}"."{table}"')
         finally:
             cur.close()

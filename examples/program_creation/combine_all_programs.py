@@ -64,11 +64,15 @@ def combine_all_programs(programs_dir: str, output_dir: str):
             program_csv = program_folder / "program.csv"
             structures_csv = program_folder / "structures.csv"
             conditions_csv = program_folder / "conditions.csv"
-            
-            if not all([program_csv.exists(), structures_csv.exists(), conditions_csv.exists()]):
-                print(f"  WARNING: Missing CSV files in {program_folder.name}, skipping")
+
+            if not all(
+                [program_csv.exists(), structures_csv.exists(), conditions_csv.exists()]
+            ):
+                print(
+                    f"  WARNING: Missing CSV files in {program_folder.name}, skipping"
+                )
                 continue
-                
+
             program_df = pd.read_csv(program_csv)
             structures_df = pd.read_csv(structures_csv)
             conditions_df = pd.read_csv(conditions_csv)
@@ -95,18 +99,18 @@ def combine_all_programs(programs_dir: str, output_dir: str):
 
             # Apply new IDs to program
             program_df_new = program_df.copy()
-            program_df_new["REINSURANCE_PROGRAM_ID"] = program_df_new["REINSURANCE_PROGRAM_ID"].map(
-                reprog_id_map
-            )
+            program_df_new["REINSURANCE_PROGRAM_ID"] = program_df_new[
+                "REINSURANCE_PROGRAM_ID"
+            ].map(reprog_id_map)
 
             # Apply new IDs to structures
             structures_df_new = structures_df.copy()
             structures_df_new["INSPER_ID_PRE"] = structures_df_new["INSPER_ID_PRE"].map(
                 insper_id_map
             )
-            structures_df_new["REINSURANCE_PROGRAM_ID"] = structures_df_new["REINSURANCE_PROGRAM_ID"].map(
-                reprog_id_map
-            )
+            structures_df_new["REINSURANCE_PROGRAM_ID"] = structures_df_new[
+                "REINSURANCE_PROGRAM_ID"
+            ].map(reprog_id_map)
 
             # Apply new IDs to conditions
             conditions_df_new = conditions_df.copy()
@@ -116,12 +120,14 @@ def combine_all_programs(programs_dir: str, output_dir: str):
             conditions_df_new["INSPER_ID_PRE"] = conditions_df_new["INSPER_ID_PRE"].map(
                 insper_id_map
             )
-            conditions_df_new["REINSURANCE_PROGRAM_ID"] = conditions_df_new["REINSURANCE_PROGRAM_ID"].map(
-                reprog_id_map
-            )
+            conditions_df_new["REINSURANCE_PROGRAM_ID"] = conditions_df_new[
+                "REINSURANCE_PROGRAM_ID"
+            ].map(reprog_id_map)
 
             # Log the mappings
-            print(f"  REINSURANCE_PROGRAM_ID: {old_reprog_id} -> {reprog_id_map[old_reprog_id]}")
+            print(
+                f"  REINSURANCE_PROGRAM_ID: {old_reprog_id} -> {reprog_id_map[old_reprog_id]}"
+            )
             print(
                 f"  INSPER_ID_PRE: {min(old_insper_ids)}-{max(old_insper_ids)} -> {min(insper_id_map.values())}-{max(insper_id_map.values())}"
             )
@@ -160,13 +166,13 @@ def combine_all_programs(programs_dir: str, output_dir: str):
     # Create output directory
     output_path = Path(output_dir)
     output_path.mkdir(exist_ok=True)
-    
+
     # Write to CSV files
     print(f"Writing to {output_dir}...")
     combined_programs.to_csv(output_path / "program.csv", index=False)
     combined_structures.to_csv(output_path / "structures.csv", index=False)
     combined_conditions.to_csv(output_path / "conditions.csv", index=False)
-    
+
     # Check if exclusions exist and combine them too
     all_exclusions = []
     for program_folder in program_folders:
@@ -181,9 +187,11 @@ def combine_all_programs(programs_dir: str, output_dir: str):
                 for old_id in old_exclusion_ids:
                     if old_id not in exclusion_id_map:
                         exclusion_id_map[old_id] = len(exclusion_id_map) + 1
-                exclusions_df["EXCLUSION_ID"] = exclusions_df["EXCLUSION_ID"].map(exclusion_id_map)
+                exclusions_df["EXCLUSION_ID"] = exclusions_df["EXCLUSION_ID"].map(
+                    exclusion_id_map
+                )
             all_exclusions.append(exclusions_df)
-    
+
     if all_exclusions:
         combined_exclusions = pd.concat(all_exclusions, ignore_index=True)
         combined_exclusions.to_csv(output_path / "exclusions.csv", index=False)

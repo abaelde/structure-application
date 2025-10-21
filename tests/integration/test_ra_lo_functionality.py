@@ -93,9 +93,7 @@ def test_risk_attaching_based_on_policy_inception():
     assert structure_result_b.structure_name == "QS_RA_2024"
     assert structure_result_b.applied is False
     assert structure_result_b.reason == "out_of_period"
-    assert (
-        structure_result_b.matching_details["claim_basis"] == "risk_attaching"
-    )
+    assert structure_result_b.matching_details["claim_basis"] == "risk_attaching"
 
 
 def test_loss_occurring_based_on_calculation_date():
@@ -178,6 +176,4 @@ def test_loss_occurring_based_on_calculation_date():
     assert structure_result_out.structure_name == "QS_LO_2024"
     assert structure_result_out.applied is False
     assert structure_result_out.reason == "out_of_period"
-    assert (
-        structure_result_out.matching_details["claim_basis"] == "loss_occurring"
-    )
+    assert structure_result_out.matching_details["claim_basis"] == "loss_occurring"

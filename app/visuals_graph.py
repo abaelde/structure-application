@@ -198,4 +198,3 @@ def build_program_graph_figure(policy_result_row, calculation_date):
         yaxis=dict(visible=False),
     )
     return fig
-

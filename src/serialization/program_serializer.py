@@ -165,9 +165,14 @@ class ProgramSerializer:
                 toks = [t.strip() for t in str(cell).split(MULTI_VALUE_SEPARATOR)]
                 toks = [t for t in toks if t]
                 return toks or None
+
             ex_df = exclusions_df.copy()
             # keep only known dims + reason + dates
-            usable_cols = set(program_dimensions) | {"EXCLUSION_NAME", "EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE"}
+            usable_cols = set(program_dimensions) | {
+                "EXCLUSION_NAME",
+                "EXCL_EFFECTIVE_DATE",
+                "EXCL_EXPIRY_DATE",
+            }
             for c in list(ex_df.columns):
                 if c not in usable_cols:
                     ex_df.drop(columns=[c], inplace=True)
@@ -451,9 +456,14 @@ class ProgramSerializer:
     # ---------- Helpers exclusions ----------
     def _exclusions_to_df(self, program: Program) -> pd.DataFrame:
         if not program.exclusions:
-            return pd.DataFrame(columns=[
-                "EXCLUSION_NAME", "EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE", *PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()
-            ])
+            return pd.DataFrame(
+                columns=[
+                    "EXCLUSION_NAME",
+                    "EXCL_EFFECTIVE_DATE",
+                    "EXCL_EXPIRY_DATE",
+                    *PROGRAM_TO_BORDEREAU_DIMENSIONS.keys(),
+                ]
+            )
         rows = []
         dims = list(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
         for e in program.exclusions:

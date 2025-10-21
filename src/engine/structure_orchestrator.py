@@ -128,10 +128,20 @@ class StructureProcessor:
         metrics = {}
         if self.uw_dept.lower() == "aviation":
             # injecter les inputs Hull / Liability si disponible
-            bundle_scaled = self.base_bundle.fraction_to(self._input_exposure(structure))
+            bundle_scaled = self.base_bundle.fraction_to(
+                self._input_exposure(structure)
+            )
             metrics = {
-                "hull_input": bundle_scaled.components.get("hull", 0.0) if bundle_scaled.components else 0.0,
-                "liability_input": bundle_scaled.components.get("liability", 0.0) if bundle_scaled.components else 0.0,
+                "hull_input": (
+                    bundle_scaled.components.get("hull", 0.0)
+                    if bundle_scaled.components
+                    else 0.0
+                ),
+                "liability_input": (
+                    bundle_scaled.components.get("liability", 0.0)
+                    if bundle_scaled.components
+                    else 0.0
+                ),
             }
 
         # 8) Bâtit le StructureRun

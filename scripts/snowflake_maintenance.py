@@ -14,19 +14,20 @@ from pathlib import Path
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from snowflake_utils import (
-    test_connection, 
-    list_programs, 
+    test_connection,
+    list_programs,
     delete_program,
     reset_all_tables,
-    truncate_all_tables
+    truncate_all_tables,
 )
+
 
 def main():
     """Menu principal pour les opérations de maintenance."""
-    
+
     print("🔧 Maintenance Snowflake")
     print("=" * 50)
-    
+
     while True:
         print("\n📋 Options disponibles:")
         print("1. 🔗 Tester la connexion")
@@ -35,16 +36,16 @@ def main():
         print("4. 🧹 Vider toutes les tables (TRUNCATE)")
         print("5. 🔄 Reset complet (DROP + CREATE)")
         print("6. ❌ Quitter")
-        
+
         choice = input("\n👉 Votre choix (1-6): ").strip()
-        
+
         if choice == "1":
             print("\n🔗 Test de connexion...")
             if test_connection():
                 print("✅ Connexion réussie !")
             else:
                 print("❌ Échec de la connexion")
-                
+
         elif choice == "2":
             print("\n📊 Liste des programmes...")
             programs = list_programs()
@@ -53,7 +54,7 @@ def main():
                     print(f"   - {program}")
             else:
                 print("   Aucun programme trouvé")
-                
+
         elif choice == "3":
             program_title = input("\n📝 Nom du programme à supprimer: ").strip()
             if program_title:
@@ -64,9 +65,11 @@ def main():
                     print("❌ Échec de la suppression")
             else:
                 print("❌ Nom de programme requis")
-                
+
         elif choice == "4":
-            confirm = input("\n⚠️  Vider toutes les tables ? (oui/non): ").strip().lower()
+            confirm = (
+                input("\n⚠️  Vider toutes les tables ? (oui/non): ").strip().lower()
+            )
             if confirm in ["oui", "o", "yes", "y"]:
                 print("\n🧹 Vidage de toutes les tables...")
                 if truncate_all_tables():
@@ -75,9 +78,13 @@ def main():
                     print("❌ Échec du vidage")
             else:
                 print("❌ Opération annulée")
-                
+
         elif choice == "5":
-            confirm = input("\n⚠️  Reset complet (suppression + recréation) ? (oui/non): ").strip().lower()
+            confirm = (
+                input("\n⚠️  Reset complet (suppression + recréation) ? (oui/non): ")
+                .strip()
+                .lower()
+            )
             if confirm in ["oui", "o", "yes", "y"]:
                 print("\n🔄 Reset complet des tables...")
                 if reset_all_tables():
@@ -86,13 +93,14 @@ def main():
                     print("❌ Échec du reset")
             else:
                 print("❌ Opération annulée")
-                
+
         elif choice == "6":
             print("\n👋 Au revoir !")
             break
-            
+
         else:
             print("❌ Choix invalide")
+
 
 if __name__ == "__main__":
     main()

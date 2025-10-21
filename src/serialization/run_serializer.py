@@ -14,12 +14,12 @@ def _uuid() -> str:
 def _json_or_none(obj: Any) -> Optional[str]:
     if obj is None:
         return None
-    
+
     # Recursively convert objects to serializable format
     def _convert_to_serializable(obj: Any) -> Any:
         if obj is None:
             return None
-        elif hasattr(obj, 'to_dict'):
+        elif hasattr(obj, "to_dict"):
             # Handle Condition objects specifically
             return _convert_to_serializable(obj.to_dict())
         elif isinstance(obj, dict):
@@ -28,9 +28,9 @@ def _json_or_none(obj: Any) -> Optional[str]:
             return [_convert_to_serializable(item) for item in obj]
         else:
             return obj
-    
+
     converted_obj = _convert_to_serializable(obj)
-    
+
     # obj peut déjà être un dict/list (ex: terms), ou un objet Condition (déjà to_dict côté engine)
     try:
         return json.dumps(converted_obj, ensure_ascii=False, separators=(",", ":"))
@@ -93,7 +93,10 @@ class RunSerializer:
 
         # Pour remonter un éventuel policy_id depuis le bordereau source
         policy_ids_series = (
-            source_policy_df["policy_id"] if (source_policy_df is not None and "policy_id" in source_policy_df.columns)
+            source_policy_df["policy_id"]
+            if (
+                source_policy_df is not None and "policy_id" in source_policy_df.columns
+            )
             else None
         )
 
@@ -106,7 +109,11 @@ class RunSerializer:
                 {
                     "policy_run_id": policy_run_id,
                     "run_id": run_meta.run_id,
-                    "policy_id": (None if policy_ids_series is None else policy_ids_series.iloc[idx]),
+                    "policy_id": (
+                        None
+                        if policy_ids_series is None
+                        else policy_ids_series.iloc[idx]
+                    ),
                     "INSURED_NAME": r.get("INSURED_NAME"),
                     "INCEPTION_DT": r.get("policy_inception_date"),
                     "EXPIRE_DT": r.get("policy_expiry_date"),
@@ -156,9 +163,13 @@ class RunSerializer:
                                 }
                             }
                         ),
-                        "matched_condition_json": _json_or_none(sd.get("matched_condition")),
+                        "matched_condition_json": _json_or_none(
+                            sd.get("matched_condition")
+                        ),
                         "rescaling_json": _json_or_none(sd.get("rescaling")),
-                        "matching_details_json": _json_or_none(sd.get("matching_details")),
+                        "matching_details_json": _json_or_none(
+                            sd.get("matching_details")
+                        ),
                         "metrics_json": _json_or_none(sd.get("metrics")),
                     }
                 )
