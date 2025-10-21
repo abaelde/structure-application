@@ -113,6 +113,65 @@ class SnowflakeProgramCSVIO:
                 base[dim] = (sep.join(tokens)) if tokens else pd.NA
             grouped_rows.append(base)
         return pd.DataFrame(grouped_rows, columns=list(group_cols) + (["BUSCL_ID_PRE"] if "BUSCL_ID_PRE" in normalized.columns else []) + dims)
+
+    def _compact_multivalue_exclusions(self, df: pd.DataFrame, sep: str = ";") -> pd.DataFrame:
+        """Compaction spécifique pour les exclusions utilisant RP_GLOBAL_EXCLUSION_ID"""
+        if df.empty:
+            return df
+        dims = self._get_dimension_columns(df)
+        if not dims:
+            return df
+        normalized = self._normalize_multivalue_cells(df, dims, sep=sep)
+        
+        # Pour les exclusions, utiliser EXCLUSION_NAME comme identifiant de groupe principal
+        # et les dates comme identifiants secondaires
+        group_cols = ["EXCLUSION_NAME", "EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE"]
+        
+        # S'assurer que les colonnes de groupe existent
+        available_group_cols = [col for col in group_cols if col in normalized.columns]
+        if not available_group_cols:
+            return normalized
+            
+        grouped_rows: List[Dict[str, Any]] = []
+        # Use dropna=False to treat NaNs as keys and preserve groups
+        for keys, grp in normalized.groupby(available_group_cols, dropna=False, sort=False):
+            if not isinstance(keys, tuple):
+                keys = (keys,)
+            base: Dict[str, Any] = {col: val for col, val in zip(available_group_cols, keys)}
+            
+            # Choisir un RP_GLOBAL_EXCLUSION_ID stable si existe (min du groupe)
+            if "RP_GLOBAL_EXCLUSION_ID" in normalized.columns:
+                try:
+                    base["RP_GLOBAL_EXCLUSION_ID"] = grp["RP_GLOBAL_EXCLUSION_ID"].dropna().min()
+                except Exception:
+                    # Fallback: prendre la première valeur
+                    base["RP_GLOBAL_EXCLUSION_ID"] = grp["RP_GLOBAL_EXCLUSION_ID"].iloc[0] if not grp["RP_GLOBAL_EXCLUSION_ID"].empty else None
+            
+            # Agrégation des dimensions
+            for dim in dims:
+                series = grp[dim] if dim in grp.columns else pd.Series([], dtype=object)
+                tokens: List[str] = []
+                seen: set[str] = set()
+                for v in series.tolist():
+                    for t in self._split_multivalue_tokens(v, sep=sep):
+                        if t not in seen:
+                            seen.add(t)
+                            tokens.append(t)
+                base[dim] = (sep.join(tokens)) if tokens else pd.NA
+            grouped_rows.append(base)
+        
+        result_columns = available_group_cols + (["RP_GLOBAL_EXCLUSION_ID"] if "RP_GLOBAL_EXCLUSION_ID" in normalized.columns else []) + dims
+        return pd.DataFrame(grouped_rows, columns=result_columns)
+
+    def _clean_values_for_sql(self, values: List[Any]) -> List[Any]:
+        """Nettoie les valeurs pour l'insertion SQL en remplaçant pd.NA et NaN par None"""
+        cleaned = []
+        for v in values:
+            if pd.isna(v) or (hasattr(pd, 'NA') and v is pd.NA):
+                cleaned.append(None)
+            else:
+                cleaned.append(v)
+        return cleaned
     def _parse_dsn(self, source: str) -> Tuple[str, str, Dict[str, str]]:
         if not source.lower().startswith("snowflake://"):
             raise ValueError(f"Invalid Snowflake DSN: {source}")
@@ -360,10 +419,12 @@ class SnowflakeProgramCSVIO:
                 for row in p_rows:
                     columns = list(row.keys())
                     values = list(row.values())
-                    placeholders = ", ".join(["%s"] * len(values))
+                    # Nettoyer les valeurs pour éviter les erreurs SQL avec pd.NA/NaN
+                    cleaned_values = self._clean_values_for_sql(values)
+                    placeholders = ", ".join(["%s"] * len(cleaned_values))
                     columns_str = ", ".join([f'"{col}"' for col in columns])
                     insert_sql = f'INSERT INTO "{db}"."{schema}"."{self.PROGRAMS}" ({columns_str}) VALUES ({placeholders})'
-                    cur.execute(insert_sql, values)
+                    cur.execute(insert_sql, cleaned_values)
 
                 # Récupérer l'ID du programme qui vient d'être inséré
                 cur.execute(
@@ -461,8 +522,10 @@ class SnowflakeProgramCSVIO:
                     raise ValueError(
                         "program_id is None when trying to insert exclusions"
                     )
+                # Respect multi-value semantics: compact multiple rows differing only by dimension columns
+                compacted_exclusions = self._compact_multivalue_exclusions(exclusions_df)
                 e_rows: List[Dict[str, Any]] = []
-                for _, r in exclusions_df.iterrows():
+                for _, r in compacted_exclusions.iterrows():
                     row_dict = r.to_dict()
 
                     # Mapping des colonnes CSV vers Snowflake
@@ -499,11 +562,13 @@ class SnowflakeProgramCSVIO:
                     for row in e_rows:
                         columns = list(row.keys())
                         values = list(row.values())
-                        placeholders = ", ".join(["%s"] * len(values))
+                        # Nettoyer les valeurs pour éviter les erreurs SQL avec pd.NA/NaN
+                        cleaned_values = self._clean_values_for_sql(values)
+                        placeholders = ", ".join(["%s"] * len(cleaned_values))
                         columns_str = ", ".join([f'"{col}"' for col in columns])
 
                         insert_sql = f'INSERT INTO "{db}"."{schema}"."{self.EXCLUSIONS}" ({columns_str}) VALUES ({placeholders})'
-                        cur.execute(insert_sql, values)
+                        cur.execute(insert_sql, cleaned_values)
 
         finally:
             cur.close()

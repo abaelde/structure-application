@@ -93,7 +93,7 @@ class Program:
                     period = (
                         f" (period: {e.effective_date} .. {e.expiry_date} exclusive)"
                     )
-                lines.append(f"- Excl {i}: {dims}{period}  reason={e.reason or 'N/A'}")
+                lines.append(f"- Excl {i}: {dims}{period}  name={e.name or 'N/A'}")
             lines.append("=" * 80)
 
         description = "\n".join(lines)

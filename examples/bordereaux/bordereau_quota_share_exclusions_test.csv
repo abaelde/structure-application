@@ -1,0 +1,7 @@
+POLICY_ID,INSURED_NAME,BUSCL_COUNTRY_CD,BUSCL_REGION,BUSCL_ENTITY_NAME_CED,PRODUCT_TYPE_LEVEL_1,PRODUCT_TYPE_LEVEL_2,PRODUCT_TYPE_LEVEL_3,CURRENCY,LIMIT,CEDENT_SHARE,INCEPTION_DT,EXPIRE_DT
+POL-001,ACME CORPORATION,France,Europe,ACME Corp,Casualty,General Liability,General Liability,EUR,1000000,1.0,2024-01-01,2024-12-31
+POL-002,IRANIAN COMPANY,Iran,Middle East,Iranian Corp,Casualty,General Liability,General Liability,USD,2000000,1.0,2024-02-01,2025-01-31
+POL-003,RUSSIAN ENTERPRISE,Russia,Europe,Russian Corp,Casualty,General Liability,General Liability,EUR,1500000,1.0,2024-03-01,2025-02-28
+POL-004,BRITISH COMPANY,United Kingdom,Europe,BA Corp,Casualty,General Liability,General Liability,GBP,3000000,1.0,2024-01-15,2025-01-14
+POL-005,GERMAN FIRM,Germany,Europe,Lufthansa Corp,Casualty,General Liability,General Liability,EUR,2500000,1.0,2024-04-01,2025-03-31
+POL-006,US CORPORATION,United States,North America,US Corp,Casualty,General Liability,General Liability,USD,4000000,1.0,2024-05-01,2025-04-30
