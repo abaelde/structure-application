@@ -211,7 +211,7 @@ def example_admin_operations():
         # program_io = SnowflakeProgramIO()
         # program_io.write(
         #     dsn + "?program_title=reset_test",
-        #     pd.DataFrame([{"REPROG_TITLE": "Reset Test", "REPROG_UW_DEPARTMENT_LOB_CD": "TEST"}]),
+        #     pd.DataFrame([{"TITLE": "Reset Test", "UW_LOB": "TEST"}]),
         #     pd.DataFrame(),
         #     pd.DataFrame(),
         #     pd.DataFrame(),

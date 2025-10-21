@@ -74,7 +74,7 @@ def combine_all_programs(programs_dir: str, output_dir: str):
             conditions_df = pd.read_csv(conditions_csv)
 
             # Get original IDs
-            old_reprog_id = program_df["REPROG_ID_PRE"].iloc[0]
+            old_reprog_id = program_df["REINSURANCE_PROGRAM_ID"].iloc[0]
             old_insper_ids = structures_df["INSPER_ID_PRE"].values
             old_buscl_ids = conditions_df["BUSCL_ID_PRE"].values
 
@@ -95,7 +95,7 @@ def combine_all_programs(programs_dir: str, output_dir: str):
 
             # Apply new IDs to program
             program_df_new = program_df.copy()
-            program_df_new["REPROG_ID_PRE"] = program_df_new["REPROG_ID_PRE"].map(
+            program_df_new["REINSURANCE_PROGRAM_ID"] = program_df_new["REINSURANCE_PROGRAM_ID"].map(
                 reprog_id_map
             )
 
@@ -104,7 +104,7 @@ def combine_all_programs(programs_dir: str, output_dir: str):
             structures_df_new["INSPER_ID_PRE"] = structures_df_new["INSPER_ID_PRE"].map(
                 insper_id_map
             )
-            structures_df_new["REPROG_ID_PRE"] = structures_df_new["REPROG_ID_PRE"].map(
+            structures_df_new["REINSURANCE_PROGRAM_ID"] = structures_df_new["REINSURANCE_PROGRAM_ID"].map(
                 reprog_id_map
             )
 
@@ -116,12 +116,12 @@ def combine_all_programs(programs_dir: str, output_dir: str):
             conditions_df_new["INSPER_ID_PRE"] = conditions_df_new["INSPER_ID_PRE"].map(
                 insper_id_map
             )
-            conditions_df_new["REPROG_ID_PRE"] = conditions_df_new["REPROG_ID_PRE"].map(
+            conditions_df_new["REINSURANCE_PROGRAM_ID"] = conditions_df_new["REINSURANCE_PROGRAM_ID"].map(
                 reprog_id_map
             )
 
             # Log the mappings
-            print(f"  REPROG_ID_PRE: {old_reprog_id} -> {reprog_id_map[old_reprog_id]}")
+            print(f"  REINSURANCE_PROGRAM_ID: {old_reprog_id} -> {reprog_id_map[old_reprog_id]}")
             print(
                 f"  INSPER_ID_PRE: {min(old_insper_ids)}-{max(old_insper_ids)} -> {min(insper_id_map.values())}-{max(insper_id_map.values())}"
             )
@@ -197,9 +197,9 @@ def combine_all_programs(programs_dir: str, output_dir: str):
     print("SUMMARY OF COMBINED PROGRAMS")
     print("=" * 80)
     print("\nPrograms:")
-    print(combined_programs[["REPROG_ID_PRE", "REPROG_TITLE"]].to_string(index=False))
+    print(combined_programs[["REINSURANCE_PROGRAM_ID", "TITLE"]].to_string(index=False))
     print("\nStructures by Program:")
-    structure_summary = combined_structures.groupby("REPROG_ID_PRE").agg(
+    structure_summary = combined_structures.groupby("REINSURANCE_PROGRAM_ID").agg(
         {
             "INSPER_ID_PRE": ["count", "min", "max"],
             "BUSINESS_TITLE": lambda x: ", ".join(x.astype(str)),
@@ -207,7 +207,7 @@ def combine_all_programs(programs_dir: str, output_dir: str):
     )
     print(structure_summary)
     print("\nconditions by Program:")
-    condition_summary = combined_conditions.groupby("REPROG_ID_PRE").agg(
+    condition_summary = combined_conditions.groupby("REINSURANCE_PROGRAM_ID").agg(
         {"BUSCL_ID_PRE": ["count", "min", "max"]}
     )
     print(condition_summary)

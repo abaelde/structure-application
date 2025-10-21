@@ -195,18 +195,18 @@ class SnowflakeProgramCSVIO:
                     for csv_col, value in row_dict.items():
                         if csv_col == 'REPROG_TITLE':
                             mapped_row['TITLE'] = value
-                        elif csv_col == 'REPROG_ID_PRE':
-                            # Ne pas inclure REPROG_ID_PRE car c'est auto-increment
+                        elif csv_col == 'REINSURANCE_PROGRAM_ID':
+                            # Ne pas inclure REINSURANCE_PROGRAM_ID car c'est auto-increment
                             continue
-                        elif csv_col == 'REPROG_ACTIVE_IND':
+                        elif csv_col == 'ACTIVE_IND':
                             mapped_row['ACTIVE_IND'] = value
-                        elif csv_col == 'REPROG_UW_DEPARTMENT_LOB_CD':
+                        elif csv_col == 'UW_LOB':
                             mapped_row['UW_LOB'] = value
-                        elif csv_col == 'REPROG_MAIN_CURRENCY_CD':
+                        elif csv_col == 'MAIN_CURRENCY_CD':
                             mapped_row['MAIN_CURRENCY_CD'] = value
-                        elif csv_col == 'REPROG_COMMENT':
+                        elif csv_col == 'ADDITIONAL_INFO':
                             mapped_row['ADDITIONAL_INFO'] = value
-                        elif csv_col == 'REPROG_UW_DEPARTMENT_CD':
+                        elif csv_col == 'UW_DEPARTMENT_CODE':
                             mapped_row['UW_DEPARTMENT_CODE'] = value
                         elif csv_col == 'BUSPAR_CED_REG_CLASS_CD':
                             mapped_row['BUSPAR_CED_REG_CLASS_CD'] = value
@@ -228,7 +228,14 @@ class SnowflakeProgramCSVIO:
                     p_rows.append(mapped_row)
                 
                 # Insérer le programme et récupérer l'ID auto-généré
-                write_pandas(cnx, pd.DataFrame(p_rows), table_name=self.PROGRAMS, database=db, schema=schema, auto_create_table=False, quote_identifiers=True)
+                # Utiliser INSERT direct au lieu de write_pandas pour éviter les problèmes de paramètres
+                for row in p_rows:
+                    columns = list(row.keys())
+                    values = list(row.values())
+                    placeholders = ', '.join(['%s'] * len(values))
+                    columns_str = ', '.join([f'"{col}"' for col in columns])
+                    insert_sql = f'INSERT INTO "{db}"."{schema}"."{self.PROGRAMS}" ({columns_str}) VALUES ({placeholders})'
+                    cur.execute(insert_sql, values)
                 
                 # Récupérer l'ID du programme qui vient d'être inséré
                 cur.execute(f'SELECT REINSURANCE_PROGRAM_ID FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s', (program_title,))
@@ -250,7 +257,7 @@ class SnowflakeProgramCSVIO:
                         if csv_col == 'INSPER_ID_PRE':
                             # Ne pas inclure INSPER_ID_PRE car c'est auto-increment
                             continue
-                        elif csv_col == 'REPROG_ID_PRE':
+                        elif csv_col == 'REINSURANCE_PROGRAM_ID':
                             # Remplacer par PROGRAM_ID
                             mapped_row['PROGRAM_ID'] = program_id
                         elif csv_col == 'BUSINESS_TITLE':
@@ -277,7 +284,7 @@ class SnowflakeProgramCSVIO:
                     # Mapping des colonnes CSV vers Snowflake
                     mapped_row = {}
                     for csv_col, value in row_dict.items():
-                        if csv_col == 'REPROG_ID_PRE':
+                        if csv_col == 'REINSURANCE_PROGRAM_ID':
                             # Remplacer par PROGRAM_ID
                             mapped_row['PROGRAM_ID'] = program_id
                         else:
@@ -302,7 +309,7 @@ class SnowflakeProgramCSVIO:
                     # Mapping des colonnes CSV vers Snowflake
                     mapped_row = {}
                     for csv_col, value in row_dict.items():
-                        if csv_col == 'REPROG_ID_PRE':
+                        if csv_col == 'REINSURANCE_PROGRAM_ID':
                             # Remplacer par PROGRAM_ID
                             mapped_row['PROGRAM_ID'] = program_id
                         else:

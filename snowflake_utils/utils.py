@@ -126,7 +126,7 @@ def list_programs() -> list:
         cur = cnx.cursor()
         
         cur.execute(f"""
-            SELECT PROGRAM_ID, REPROG_TITLE, CREATED_AT, UPDATED_AT 
+            SELECT PROGRAM_ID, TITLE, CREATED_AT, UPDATED_AT 
             FROM "{config.database}"."{config.schema}"."PROGRAMS" 
             ORDER BY CREATED_AT DESC
         """)
@@ -170,7 +170,7 @@ def delete_program(program_title: str) -> bool:
         # Récupérer l'ID du programme
         cur.execute(f"""
             SELECT PROGRAM_ID FROM "{config.database}"."{config.schema}"."PROGRAMS" 
-            WHERE REPROG_TITLE = %s
+            WHERE TITLE = %s
         """, (program_title,))
         
         result = cur.fetchone()
@@ -262,7 +262,7 @@ def reset_all_tables() -> bool:
         print("\n📊 Création des index...")
         
         indexes = [
-            f'CREATE INDEX IDX_PROGRAMS_TITLE ON "{db}"."{schema}"."PROGRAMS"(REPROG_TITLE)',
+            f'CREATE INDEX IDX_PROGRAMS_TITLE ON "{db}"."{schema}"."PROGRAMS"(TITLE)',
             f'CREATE INDEX IDX_STRUCTURES_PROGRAM_ID ON "{db}"."{schema}"."STRUCTURES"(PROGRAM_ID)',
             f'CREATE INDEX IDX_CONDITIONS_PROGRAM_ID ON "{db}"."{schema}"."CONDITIONS"(PROGRAM_ID)',
             f'CREATE INDEX IDX_EXCLUSIONS_PROGRAM_ID ON "{db}"."{schema}"."EXCLUSIONS"(PROGRAM_ID)'

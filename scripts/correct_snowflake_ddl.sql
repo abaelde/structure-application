@@ -27,7 +27,7 @@ CREATE TABLE STRUCTURES (
   ACTIVE_FLAG_CD                 BOOLEAN,
   INSPER_EFFECTIVE_DATE          TIMESTAMP_NTZ,
   INSPER_EXPIRY_DATE             TIMESTAMP_NTZ,
-  REPROG_ID_PRE                  NUMBER(38,0),
+  REINSURANCE_PROGRAM_ID                  NUMBER(38,0),
   BUSINESS_TITLE                 VARCHAR,
   INSPER_LAYER_NO                FLOAT,
   INSPER_MAIN_CURRENCY_CD        FLOAT,
@@ -48,7 +48,7 @@ CREATE TABLE STRUCTURES (
 CREATE TABLE CONDITIONS (
   PROGRAM_ID                     NUMBER(38,0)    NOT NULL,
   BUSCL_ID_PRE                   NUMBER(38,0)    NOT NULL,
-  REPROG_ID_PRE                  NUMBER(38,0),
+  REINSURANCE_PROGRAM_ID                  NUMBER(38,0),
   CED_ID_PRE                     FLOAT,
   BUSINESS_ID_PRE                FLOAT,
   INSPER_ID_PRE                  NUMBER(38,0),

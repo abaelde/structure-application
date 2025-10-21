@@ -8,19 +8,19 @@ Chaque programme doit être un dossier CSV avec **3 fichiers obligatoires** :
 
 ### 1. Fichier "program.csv" (1 ligne)
 **Contraintes :**
-- **REPROG_ID_PRE** : INTEGER, clé primaire auto-incrémentée (commence à 1)
-- **REPROG_TITLE** : VARCHAR(255), nom du programme (obligatoire)
+- **REINSURANCE_PROGRAM_ID** : INTEGER, clé primaire auto-incrémentée (commence à 1)
+- **TITLE** : VARCHAR(255), nom du programme (obligatoire)
 - **CED_ID_PRE** : INTEGER, ID du cédant (peut être NULL)
 - **CED_NAME_PRE** : VARCHAR(255), nom du cédant (peut être NULL)
-- **REPROG_ACTIVE_IND** : BOOLEAN, indicateur d'activation (défaut: TRUE)
-- **REPROG_COMMENT** : VARCHAR, commentaires (peut être NULL)
-- **REPROG_UW_DEPARTMENT_CD** : VARCHAR(255), code département UW (peut être NULL)
+- **ACTIVE_IND** : BOOLEAN, indicateur d'activation (défaut: TRUE)
+- **ADDITIONAL_INFO** : VARCHAR, commentaires (peut être NULL)
+- **UW_DEPARTMENT_CODE** : VARCHAR(255), code département UW (peut être NULL)
 - **REPROG_UW_DEPARTMENT_NAME** : VARCHAR(255), nom département UW (peut être NULL)
-- **REPROG_UW_DEPARTMENT_LOB_CD** : VARCHAR(255), code LOB département (peut être NULL)
+- **UW_LOB** : VARCHAR(255), code LOB département (peut être NULL)
 - **REPROG_UW_DEPARTMENT_LOB_NAME** : VARCHAR(255), nom LOB département (peut être NULL)
 - **BUSPAR_CED_REG_CLASS_CD** : VARCHAR(255), code classe réglementaire (peut être NULL)
 - **BUSPAR_CED_REG_CLASS_NAME** : VARCHAR(255), nom classe réglementaire (peut être NULL)
-- **REPROG_MAIN_CURRENCY_CD** : VARCHAR(255), code devise principale (peut être NULL)
+- **MAIN_CURRENCY_CD** : VARCHAR(255), code devise principale (peut être NULL)
 - **REPROG_MANAGEMENT_REPORTING_LOB_CD** : VARCHAR(255), code LOB reporting (peut être NULL)
 
 ### 2. Fichier "structures.csv" (n lignes)
@@ -32,7 +32,7 @@ Chaque programme doit être un dossier CSV avec **3 fichiers obligatoires** :
 - **ACTIVE_FLAG_CD** : BOOLEAN, indicateur d'activation (défaut: TRUE)
 - **INSPER_EFFECTIVE_DATE** : DATE, date effective (peut être NULL)
 - **INSPER_EXPIRY_DATE** : DATE, date d'expiration (peut être NULL)
-- **REPROG_ID_PRE** : INTEGER, référence au programme (obligatoire)
+- **REINSURANCE_PROGRAM_ID** : INTEGER, référence au programme (obligatoire)
 - **BUSINESS_TITLE** : VARCHAR(255), titre de la structure (obligatoire)
 - **INSPER_LAYER_NO** : INTEGER, numéro de couche (peut être NULL)
 - **INSPER_MAIN_CURRENCY_CD** : VARCHAR(255), devise principale (peut être NULL)
@@ -52,7 +52,7 @@ Chaque programme doit être un dossier CSV avec **3 fichiers obligatoires** :
 
 #### Clés et Références
 - **BUSCL_ID_PRE** : INTEGER PRIMARY KEY, clé primaire auto-incrémentée (commence à 1)
-- **REPROG_ID_PRE** : INTEGER, référence au programme (obligatoire)
+- **REINSURANCE_PROGRAM_ID** : INTEGER, référence au programme (obligatoire)
 - **CED_ID_PRE** : INTEGER, référence au cédant (peut être NULL)
 - **BUSINESS_ID_PRE** : INTEGER, référence au business (peut être NULL)
 - **INSPER_ID_PRE** : INTEGER, référence vers structures.INSPER_ID_PRE (obligatoire)
@@ -108,8 +108,8 @@ Chaque programme doit être un dossier CSV avec **3 fichiers obligatoires** :
 ### Contraintes Structurelles
 1. **BUSINESS_TITLE** : Doit être unique dans le fichier structures.csv
 2. **INSPER_ID_PRE** dans conditions : Doit référencer un INSPER_ID_PRE existant dans structures.csv
-3. **REPROG_ID_PRE** dans structures.csv : Doit référencer le REPROG_ID_PRE du programme parent
-4. **REPROG_ID_PRE** dans conditions.csv : Doit référencer le REPROG_ID_PRE du programme parent
+3. **REINSURANCE_PROGRAM_ID** dans structures.csv : Doit référencer le REINSURANCE_PROGRAM_ID du programme parent
+4. **REINSURANCE_PROGRAM_ID** dans conditions.csv : Doit référencer le REINSURANCE_PROGRAM_ID du programme parent
 5. **BUSCL_ID_PRE** : Doit être unique et auto-incrémenté
 6. **INSPER_PREDECESSOR_TITLE** : Si non NULL, doit référencer un BUSINESS_TITLE existant dans le même programme
 

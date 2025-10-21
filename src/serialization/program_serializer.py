@@ -67,7 +67,7 @@ class ProgramSerializer:
     ) -> Program:
 
         uw_dept = self._convert_pandas_to_native(
-            program_df.iloc[0].get(PROGRAM_COLS.UNDERWRITING_DEPARTMENT)
+            program_df.iloc[0].get(PROGRAM_COLS.UW_DEPARTMENT_CODE)
         )
         name = self._convert_pandas_to_native(program_df.iloc[0][PROGRAM_COLS.TITLE])
         if not uw_dept:
@@ -192,15 +192,15 @@ class ProgramSerializer:
 
         program_df = pd.DataFrame(
             {
-                "REPROG_ID_PRE": [reprog_id],
-                "REPROG_TITLE": [program.name],
+                "REINSURANCE_PROGRAM_ID": [reprog_id],
+                "TITLE": [program.name],
                 "CED_ID_PRE": [None],
                 "CED_NAME_PRE": [None],
-                "REPROG_ACTIVE_IND": [True],
-                "REPROG_COMMENT": [None],
-                "REPROG_UW_DEPARTMENT_CD": [None],
+                "ACTIVE_IND": [True],
+                "ADDITIONAL_INFO": [None],
+                "UW_DEPARTMENT_CODE": [None],
                 "REPROG_UW_DEPARTMENT_NAME": [None],
-                "REPROG_UW_DEPARTMENT_LOB_CD": [program.underwriting_department],
+                "UW_LOB": [program.underwriting_department],
                 "REPROG_UW_DEPARTMENT_LOB_NAME": [
                     (
                         program.underwriting_department.title()
@@ -210,7 +210,7 @@ class ProgramSerializer:
                 ],
                 "BUSPAR_CED_REG_CLASS_CD": [None],
                 "BUSPAR_CED_REG_CLASS_NAME": [None],
-                "REPROG_MAIN_CURRENCY_CD": [None],
+                "MAIN_CURRENCY_CD": [None],
                 "REPROG_MANAGEMENT_REPORTING_LOB_CD": [None],
             }
         )
@@ -223,7 +223,7 @@ class ProgramSerializer:
             "ACTIVE_FLAG_CD": [],
             "INSPER_EFFECTIVE_DATE": [],
             "INSPER_EXPIRY_DATE": [],
-            "REPROG_ID_PRE": [],
+            "REINSURANCE_PROGRAM_ID": [],
             "BUSINESS_TITLE": [],
             "INSPER_LAYER_NO": [],
             "INSPER_MAIN_CURRENCY_CD": [],
@@ -241,7 +241,7 @@ class ProgramSerializer:
 
         conditions_data = {
             "BUSCL_ID_PRE": [],
-            "REPROG_ID_PRE": [],
+            "REINSURANCE_PROGRAM_ID": [],
             "CED_ID_PRE": [],
             "BUSINESS_ID_PRE": [],
             "INSPER_ID_PRE": [],
@@ -304,7 +304,7 @@ class ProgramSerializer:
             structures_data["ACTIVE_FLAG_CD"].append(True)
             structures_data["INSPER_EFFECTIVE_DATE"].append(st.inception_date)
             structures_data["INSPER_EXPIRY_DATE"].append(st.expiry_date)
-            structures_data["REPROG_ID_PRE"].append(reprog_id)
+            structures_data["REINSURANCE_PROGRAM_ID"].append(reprog_id)
             structures_data["BUSINESS_TITLE"].append(st.structure_name)
             structures_data["INSPER_LAYER_NO"].append(None)
             structures_data["INSPER_MAIN_CURRENCY_CD"].append(None)
@@ -327,7 +327,7 @@ class ProgramSerializer:
 
                 conditions_data["BUSCL_ID_PRE"].append(buscl_id)
                 buscl_id += 1
-                conditions_data["REPROG_ID_PRE"].append(reprog_id)
+                conditions_data["REINSURANCE_PROGRAM_ID"].append(reprog_id)
                 conditions_data["CED_ID_PRE"].append(None)
                 conditions_data["BUSINESS_ID_PRE"].append(None)
                 conditions_data["INSPER_ID_PRE"].append(insper_id)
@@ -399,9 +399,9 @@ class ProgramSerializer:
 
         program_df = pd.DataFrame(
             {
-                "REPROG_ID_PRE": [reprog_id],
-                "REPROG_TITLE": [program.name],
-                "REPROG_UW_DEPARTMENT_LOB_CD": [program.underwriting_department],
+                "REINSURANCE_PROGRAM_ID": [reprog_id],
+                "TITLE": [program.name],
+                "UW_LOB": [program.underwriting_department],
             }
         )
 
@@ -413,7 +413,7 @@ class ProgramSerializer:
             structures_rows.append(
                 {
                     "INSPER_ID_PRE": insper_id,
-                    "REPROG_ID_PRE": reprog_id,
+                    "REINSURANCE_PROGRAM_ID": reprog_id,
                     "BUSINESS_TITLE": st.structure_name,
                     "INSPER_CONTRACT_ORDER": st.contract_order,
                     "TYPE_OF_PARTICIPATION_CD": st.type_of_participation,

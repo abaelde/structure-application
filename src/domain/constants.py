@@ -4,15 +4,15 @@ from types import SimpleNamespace
 # ──────────────────────────────────────────────────────────────────────────────
 # Underwriting Departments (valeurs possibles au niveau programme)
 # ──────────────────────────────────────────────────────────────────────────────
-UNDERWRITING_DEPARTMENT = SimpleNamespace(
+UW_DEPARTMENT_CODE = SimpleNamespace(
     AVIATION="aviation",
     CASUALTY="casualty",
     TEST="test",
 )
 UNDERWRITING_DEPARTMENT_VALUES = {
-    UNDERWRITING_DEPARTMENT.AVIATION,
-    UNDERWRITING_DEPARTMENT.CASUALTY,
-    UNDERWRITING_DEPARTMENT.TEST,
+    UW_DEPARTMENT_CODE.AVIATION,
+    UW_DEPARTMENT_CODE.CASUALTY,
+    UW_DEPARTMENT_CODE.TEST,
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -44,8 +44,8 @@ SHEETS = (
 )
 
 PROGRAM_COLS = SimpleNamespace(
-    TITLE="REPROG_TITLE",
-    UNDERWRITING_DEPARTMENT="REPROG_UW_DEPARTMENT_LOB_CD",
+    TITLE="TITLE",
+    UW_DEPARTMENT_CODE="UW_LOB",
 )
 
 STRUCTURE_COLS = SimpleNamespace(

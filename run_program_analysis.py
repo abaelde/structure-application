@@ -14,7 +14,7 @@ def main():
         description="Apply reinsurance program to bordereau and generate analysis reports"
     )
     parser.add_argument(
-        "--program", "-p", required=True, help="Path to the program CSV folder"
+        "--program", "-p", required=True, help="Path to the program CSV folder or Snowflake DSN (snowflake://DB.SCHEMA?program_title=NAME)"
     )
     parser.add_argument(
         "--bordereau", "-b", required=True, help="Path to the bordereau CSV file"
@@ -51,7 +51,20 @@ def main():
     started_at = datetime.now().isoformat()
     p_backend = ProgramManager.detect_backend(args.program)
     p_manager = ProgramManager(backend=p_backend)
-    program = p_manager.load(args.program)
+    
+    # Si c'est Snowflake, charger la configuration
+    io_kwargs = {}
+    if p_backend == "snowflake":
+        try:
+            from snowflake_utils import SnowflakeConfig
+            config = SnowflakeConfig.load()
+            io_kwargs = {"connection_params": config.to_dict()}
+            print(f"   ✓ Snowflake config loaded: {config.account}")
+        except Exception as e:
+            print(f"   ❌ Failed to load Snowflake config: {e}")
+            sys.exit(1)
+    
+    program = p_manager.load(args.program, io_kwargs=io_kwargs)
     print(f"   ✓ Program loaded: {program.name}")
     print(f"   ✓ Number of structures: {len(program.structures)}\n")
 

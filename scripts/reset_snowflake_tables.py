@@ -93,7 +93,7 @@ def reset_snowflake_tables():
         print("\n📊 Création des index...")
         
         indexes = [
-            f'CREATE INDEX IDX_PROGRAMS_TITLE ON "{db}"."{schema}"."PROGRAMS"(REPROG_TITLE)',
+            f'CREATE INDEX IDX_PROGRAMS_TITLE ON "{db}"."{schema}"."PROGRAMS"(TITLE)',
             f'CREATE INDEX IDX_STRUCTURES_PROGRAM_ID ON "{db}"."{schema}"."STRUCTURES"(PROGRAM_ID)',
             f'CREATE INDEX IDX_CONDITIONS_PROGRAM_ID ON "{db}"."{schema}"."CONDITIONS"(PROGRAM_ID)',
             f'CREATE INDEX IDX_EXCLUSIONS_PROGRAM_ID ON "{db}"."{schema}"."EXCLUSIONS"(PROGRAM_ID)'

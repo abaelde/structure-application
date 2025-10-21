@@ -54,7 +54,7 @@ def test_csv_aligned_integration():
         csv_adapter = CsvProgramFolderIO()
         program_df, structures_df, conditions_df, exclusions_df = csv_adapter.read('examples/programs/aviation_axa_xl_2024')
         
-        print(f'   Programme chargé: {program_df.iloc[0]["REPROG_TITLE"]}')
+        print(f'   Programme chargé: {program_df.iloc[0]["TITLE"]}')
         print(f'   Structures: {len(structures_df)} lignes')
         print(f'   Conditions: {len(conditions_df)} lignes')
         print(f'   Exclusions: {len(exclusions_df)} lignes')
@@ -83,7 +83,7 @@ def test_csv_aligned_integration():
         print('\n3. Rechargement depuis Snowflake...')
         reloaded_program_df, reloaded_structures_df, reloaded_conditions_df, reloaded_exclusions_df = snowflake_adapter.read(dsn, connection_params)
         
-        print(f'   Programme rechargé: {reloaded_program_df.iloc[0]["REPROG_TITLE"]}')
+        print(f'   Programme rechargé: {reloaded_program_df.iloc[0]["TITLE"]}')
         print(f'   Structures rechargées: {len(reloaded_structures_df)} lignes')
         print(f'   Conditions rechargées: {len(reloaded_conditions_df)} lignes')
         print(f'   Exclusions rechargées: {len(reloaded_exclusions_df)} lignes')
@@ -142,7 +142,7 @@ def test_csv_aligned_integration():
         cursor = conn.cursor()
         
         # Vérifier PROGRAMS
-        cursor.execute('SELECT REPROG_TITLE, REPROG_UW_DEPARTMENT_LOB_CD, CREATED_AT FROM PROGRAMS LIMIT 1')
+        cursor.execute('SELECT TITLE, UW_LOB, CREATED_AT FROM PROGRAMS LIMIT 1')
         result = cursor.fetchone()
         if result:
             print(f'   ✅ PROGRAMS: {result[0]} - {result[1]} - Créé: {result[2]}')

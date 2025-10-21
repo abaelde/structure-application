@@ -45,23 +45,23 @@ def create_tables_from_csv_structure():
         tables = [
             ('PROGRAMS', '''
                 CREATE TABLE PROGRAMS (
-                  REPROG_ID_PRE                  NUMBER(38,0)    NOT NULL,
-                  REPROG_TITLE                   STRING          NOT NULL,
+                  REINSURANCE_PROGRAM_ID                  NUMBER(38,0)    NOT NULL,
+                  TITLE                   STRING          NOT NULL,
                   CED_ID_PRE                     STRING,
                   CED_NAME_PRE                   STRING,
-                  REPROG_ACTIVE_IND              BOOLEAN,
-                  REPROG_COMMENT                 STRING,
-                  REPROG_UW_DEPARTMENT_CD        STRING,
+                  ACTIVE_IND              BOOLEAN,
+                  ADDITIONAL_INFO                 STRING,
+                  UW_DEPARTMENT_CODE        STRING,
                   REPROG_UW_DEPARTMENT_NAME      STRING,
-                  REPROG_UW_DEPARTMENT_LOB_CD    STRING,
+                  UW_LOB    STRING,
                   REPROG_UW_DEPARTMENT_LOB_NAME  STRING,
                   BUSPAR_CED_REG_CLASS_CD        STRING,
                   BUSPAR_CED_REG_CLASS_NAME      STRING,
-                  REPROG_MAIN_CURRENCY_CD        STRING,
+                  MAIN_CURRENCY_CD        STRING,
                   REPROG_MANAGEMENT_REPORTING_LOB_CD STRING,
                   CREATED_AT                     STRING,
                   UPDATED_AT                     STRING,
-                  PRIMARY KEY (REPROG_ID_PRE)
+                  PRIMARY KEY (REINSURANCE_PROGRAM_ID)
                 )
             '''),
             ('STRUCTURES', '''
@@ -74,7 +74,7 @@ def create_tables_from_csv_structure():
                   ACTIVE_FLAG_CD                 BOOLEAN,
                   INSPER_EFFECTIVE_DATE          TIMESTAMP_NTZ,
                   INSPER_EXPIRY_DATE             TIMESTAMP_NTZ,
-                  REPROG_ID_PRE                  NUMBER(38,0),
+                  REINSURANCE_PROGRAM_ID                  NUMBER(38,0),
                   BUSINESS_TITLE                 STRING,
                   INSPER_LAYER_NO                NUMBER(38,0),
                   INSPER_MAIN_CURRENCY_CD        STRING,
@@ -95,7 +95,7 @@ def create_tables_from_csv_structure():
                 CREATE TABLE CONDITIONS (
                   PROGRAM_ID                     STRING          NOT NULL,
                   BUSCL_ID_PRE                   NUMBER(38,0)    NOT NULL,
-                  REPROG_ID_PRE                  NUMBER(38,0),
+                  REINSURANCE_PROGRAM_ID                  NUMBER(38,0),
                   CED_ID_PRE                     STRING,
                   BUSINESS_ID_PRE                STRING,
                   INSPER_ID_PRE                  NUMBER(38,0),
@@ -220,11 +220,11 @@ def test_csv_based_tables():
         print("   Test de la table PROGRAMS (structure CSV complète)...")
         cursor.execute('''
             INSERT INTO PROGRAMS (
-                REPROG_ID_PRE, REPROG_TITLE, CED_ID_PRE, CED_NAME_PRE, 
-                REPROG_ACTIVE_IND, REPROG_COMMENT, REPROG_UW_DEPARTMENT_CD, 
-                REPROG_UW_DEPARTMENT_NAME, REPROG_UW_DEPARTMENT_LOB_CD, 
+                REINSURANCE_PROGRAM_ID, TITLE, CED_ID_PRE, CED_NAME_PRE, 
+                ACTIVE_IND, ADDITIONAL_INFO, UW_DEPARTMENT_CODE, 
+                REPROG_UW_DEPARTMENT_NAME, UW_LOB, 
                 REPROG_UW_DEPARTMENT_LOB_NAME, BUSPAR_CED_REG_CLASS_CD, 
-                BUSPAR_CED_REG_CLASS_NAME, REPROG_MAIN_CURRENCY_CD, 
+                BUSPAR_CED_REG_CLASS_NAME, MAIN_CURRENCY_CD, 
                 REPROG_MANAGEMENT_REPORTING_LOB_CD, CREATED_AT, UPDATED_AT
             ) VALUES (
                 999, 'Test Program CSV', 'CED001', 'Test Cedent', 
@@ -234,7 +234,7 @@ def test_csv_based_tables():
             )
         ''')
         
-        cursor.execute('SELECT COUNT(*) FROM PROGRAMS WHERE REPROG_ID_PRE = %s', (999,))
+        cursor.execute('SELECT COUNT(*) FROM PROGRAMS WHERE REINSURANCE_PROGRAM_ID = %s', (999,))
         count = cursor.fetchone()[0]
         if count > 0:
             print("   ✅ Table PROGRAMS (structure CSV): OK")
@@ -246,7 +246,7 @@ def test_csv_based_tables():
         cursor.execute('''
             INSERT INTO STRUCTURES (
                 PROGRAM_ID, INSPER_ID_PRE, TYPE_OF_PARTICIPATION_CD, 
-                INSPER_EFFECTIVE_DATE, INSPER_EXPIRY_DATE, REPROG_ID_PRE, 
+                INSPER_EFFECTIVE_DATE, INSPER_EXPIRY_DATE, REINSURANCE_PROGRAM_ID, 
                 BUSINESS_TITLE, INSPER_CLAIM_BASIS_CD
             ) VALUES (
                 'test-program-999', 1, 'quota_share', 
@@ -266,7 +266,7 @@ def test_csv_based_tables():
         print("   Test de la table CONDITIONS (structure CSV complète)...")
         cursor.execute('''
             INSERT INTO CONDITIONS (
-                PROGRAM_ID, BUSCL_ID_PRE, REPROG_ID_PRE, INSPER_ID_PRE, 
+                PROGRAM_ID, BUSCL_ID_PRE, REINSURANCE_PROGRAM_ID, INSPER_ID_PRE, 
                 BUSCL_LIMIT_CURRENCY_CD, LIMIT_100, SIGNED_SHARE_PCT, 
                 INCLUDES_HULL, INCLUDES_LIABILITY
             ) VALUES (
@@ -307,7 +307,7 @@ def test_csv_based_tables():
         cursor.execute('DELETE FROM EXCLUSIONS WHERE PROGRAM_ID = %s', ('test-program-999',))
         cursor.execute('DELETE FROM CONDITIONS WHERE PROGRAM_ID = %s', ('test-program-999',))
         cursor.execute('DELETE FROM STRUCTURES WHERE PROGRAM_ID = %s', ('test-program-999',))
-        cursor.execute('DELETE FROM PROGRAMS WHERE REPROG_ID_PRE = %s', (999,))
+        cursor.execute('DELETE FROM PROGRAMS WHERE REINSURANCE_PROGRAM_ID = %s', (999,))
         print("   ✅ Données de test supprimées")
         
         cursor.close()

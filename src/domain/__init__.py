@@ -1,5 +1,5 @@
 from .constants import (
-    UNDERWRITING_DEPARTMENT,
+    UW_DEPARTMENT_CODE,
     UNDERWRITING_DEPARTMENT_VALUES,
     PRODUCT,
     PRODUCT_TYPES,
@@ -16,7 +16,7 @@ from .condition import Condition
 from .exclusion import ExclusionRule
 
 __all__ = [
-    "UNDERWRITING_DEPARTMENT",
+    "UW_DEPARTMENT_CODE",
     "UNDERWRITING_DEPARTMENT_VALUES",
     "PRODUCT",
     "PRODUCT_TYPES",

@@ -129,7 +129,7 @@ def generate_ddl(structure):
         # Ajouter les contraintes de clé primaire
         ddl += "\n"
         if table_name == 'PROGRAMS':
-            ddl += "  PRIMARY KEY (REPROG_ID_PRE)"
+            ddl += "  PRIMARY KEY (REINSURANCE_PROGRAM_ID)"
         elif table_name == 'STRUCTURES':
             ddl += "  PRIMARY KEY (PROGRAM_ID, INSPER_ID_PRE)"
         elif table_name == 'CONDITIONS':

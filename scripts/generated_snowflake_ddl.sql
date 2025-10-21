@@ -3,23 +3,23 @@
 
 -- Table PROGRAMS
 CREATE TABLE PROGRAMS (
-  REPROG_ID_PRE                  NUMBER(38,0)    NOT NULL,
-  REPROG_TITLE                   STRING          NOT NULL,
+  REINSURANCE_PROGRAM_ID                  NUMBER(38,0)    NOT NULL,
+  TITLE                   STRING          NOT NULL,
   CED_ID_PRE                     FLOAT           NOT NULL,
   CED_NAME_PRE                   FLOAT           NOT NULL,
-  REPROG_ACTIVE_IND              BOOLEAN         NOT NULL,
-  REPROG_COMMENT                 FLOAT           NOT NULL,
-  REPROG_UW_DEPARTMENT_CD        FLOAT           NOT NULL,
+  ACTIVE_IND              BOOLEAN         NOT NULL,
+  ADDITIONAL_INFO                 FLOAT           NOT NULL,
+  UW_DEPARTMENT_CODE        FLOAT           NOT NULL,
   REPROG_UW_DEPARTMENT_NAME      FLOAT           NOT NULL,
-  REPROG_UW_DEPARTMENT_LOB_CD    STRING          NOT NULL,
+  UW_LOB    STRING          NOT NULL,
   REPROG_UW_DEPARTMENT_LOB_NAME  STRING          NOT NULL,
   BUSPAR_CED_REG_CLASS_CD        FLOAT           NOT NULL,
   BUSPAR_CED_REG_CLASS_NAME      FLOAT           NOT NULL,
-  REPROG_MAIN_CURRENCY_CD        FLOAT           NOT NULL,
+  MAIN_CURRENCY_CD        FLOAT           NOT NULL,
   REPROG_MANAGEMENT_REPORTING_LOB_CD FLOAT           NOT NULL
   CREATED_AT             STRING,
   UPDATED_AT             STRING
-  PRIMARY KEY (REPROG_ID_PRE)
+  PRIMARY KEY (REINSURANCE_PROGRAM_ID)
 );
 
 -- Table STRUCTURES
@@ -32,7 +32,7 @@ CREATE TABLE STRUCTURES (
   ACTIVE_FLAG_CD                 BOOLEAN         NOT NULL,
   INSPER_EFFECTIVE_DATE          TIMESTAMP_NTZ   NOT NULL,
   INSPER_EXPIRY_DATE             TIMESTAMP_NTZ   NOT NULL,
-  REPROG_ID_PRE                  NUMBER(38,0)    NOT NULL,
+  REINSURANCE_PROGRAM_ID                  NUMBER(38,0)    NOT NULL,
   BUSINESS_TITLE                 STRING          NOT NULL,
   INSPER_LAYER_NO                FLOAT           NOT NULL,
   INSPER_MAIN_CURRENCY_CD        FLOAT           NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE STRUCTURES (
 CREATE TABLE CONDITIONS (
   PROGRAM_ID             STRING       NOT NULL,
   BUSCL_ID_PRE                   NUMBER(38,0)    NOT NULL,
-  REPROG_ID_PRE                  NUMBER(38,0)    NOT NULL,
+  REINSURANCE_PROGRAM_ID                  NUMBER(38,0)    NOT NULL,
   CED_ID_PRE                     FLOAT           NOT NULL,
   BUSINESS_ID_PRE                FLOAT           NOT NULL,
   INSPER_ID_PRE                  NUMBER(38,0)    NOT NULL,
