@@ -60,9 +60,9 @@ def test_csv_aligned_integration():
         print(f'   Exclusions: {len(exclusions_df)} lignes')
         
         # Afficher les colonnes
-        print(f'   Colonnes PROGRAMS: {len(program_df.columns)} - {list(program_df.columns)[:3]}...')
-        print(f'   Colonnes STRUCTURES: {len(structures_df.columns)} - {list(structures_df.columns)[:3]}...')
-        print(f'   Colonnes CONDITIONS: {len(conditions_df.columns)} - {list(conditions_df.columns)[:3]}...')
+        print(f'   Colonnes REINSURANCE_PROGRAM: {len(program_df.columns)} - {list(program_df.columns)[:3]}...')
+        print(f'   Colonnes RP_STRUCTURES: {len(structures_df.columns)} - {list(structures_df.columns)[:3]}...')
+        print(f'   Colonnes RP_CONDITIONS: {len(conditions_df.columns)} - {list(conditions_df.columns)[:3]}...')
         print(f'   Colonnes RP_GLOBAL_EXCLUSION: {len(exclusions_df.columns)} - {list(exclusions_df.columns)[:3]}...')
         
         # Test 2: Sauvegarder dans Snowflake avec l'adapter CSV-aligned
@@ -91,38 +91,38 @@ def test_csv_aligned_integration():
         # Vérifier la correspondance des colonnes
         print('\n4. Vérification de la correspondance des colonnes...')
         
-        # PROGRAMS
+        # REINSURANCE_PROGRAM
         original_cols = set(program_df.columns)
         reloaded_cols = set(reloaded_program_df.columns)
         missing_cols = original_cols - reloaded_cols
         extra_cols = reloaded_cols - original_cols
         
         if not missing_cols and not extra_cols:
-            print('   ✅ PROGRAMS: Correspondance parfaite des colonnes')
+            print('   ✅ REINSURANCE_PROGRAM: Correspondance parfaite des colonnes')
         else:
-            print(f'   ⚠️  PROGRAMS: Colonnes manquantes: {missing_cols}, colonnes supplémentaires: {extra_cols}')
+            print(f'   ⚠️  REINSURANCE_PROGRAM: Colonnes manquantes: {missing_cols}, colonnes supplémentaires: {extra_cols}')
         
-        # STRUCTURES
+        # RP_STRUCTURES
         original_cols = set(structures_df.columns)
         reloaded_cols = set(reloaded_structures_df.columns) - {'PROGRAM_ID'}  # Exclure la clé de liaison
         missing_cols = original_cols - reloaded_cols
         extra_cols = reloaded_cols - original_cols
         
         if not missing_cols and not extra_cols:
-            print('   ✅ STRUCTURES: Correspondance parfaite des colonnes')
+            print('   ✅ RP_STRUCTURES: Correspondance parfaite des colonnes')
         else:
-            print(f'   ⚠️  STRUCTURES: Colonnes manquantes: {missing_cols}, colonnes supplémentaires: {extra_cols}')
+            print(f'   ⚠️  RP_STRUCTURES: Colonnes manquantes: {missing_cols}, colonnes supplémentaires: {extra_cols}')
         
-        # CONDITIONS
+        # RP_CONDITIONS
         original_cols = set(conditions_df.columns)
         reloaded_cols = set(reloaded_conditions_df.columns) - {'PROGRAM_ID'}  # Exclure la clé de liaison
         missing_cols = original_cols - reloaded_cols
         extra_cols = reloaded_cols - original_cols
         
         if not missing_cols and not extra_cols:
-            print('   ✅ CONDITIONS: Correspondance parfaite des colonnes')
+            print('   ✅ RP_CONDITIONS: Correspondance parfaite des colonnes')
         else:
-            print(f'   ⚠️  CONDITIONS: Colonnes manquantes: {missing_cols}, colonnes supplémentaires: {extra_cols}')
+            print(f'   ⚠️  RP_CONDITIONS: Colonnes manquantes: {missing_cols}, colonnes supplémentaires: {extra_cols}')
         
         # RP_GLOBAL_EXCLUSION
         original_cols = set(exclusions_df.columns)
@@ -141,21 +141,21 @@ def test_csv_aligned_integration():
         conn = snowflake.connector.connect(**connection_params)
         cursor = conn.cursor()
         
-        # Vérifier PROGRAMS
-        cursor.execute('SELECT TITLE, UW_LOB, CREATED_AT FROM PROGRAMS LIMIT 1')
+        # Vérifier REINSURANCE_PROGRAM
+        cursor.execute('SELECT TITLE, UW_LOB, CREATED_AT FROM REINSURANCE_PROGRAM LIMIT 1')
         result = cursor.fetchone()
         if result:
-            print(f'   ✅ PROGRAMS: {result[0]} - {result[1]} - Créé: {result[2]}')
+            print(f'   ✅ REINSURANCE_PROGRAM: {result[0]} - {result[1]} - Créé: {result[2]}')
         
-        # Vérifier STRUCTURES
-        cursor.execute('SELECT COUNT(*), COUNT(DISTINCT INSPER_ID_PRE) FROM STRUCTURES')
+        # Vérifier RP_STRUCTURES
+        cursor.execute('SELECT COUNT(*), COUNT(DISTINCT INSPER_ID_PRE) FROM RP_STRUCTURES')
         count, unique_count = cursor.fetchone()
-        print(f'   ✅ STRUCTURES: {count} lignes, {unique_count} structures uniques')
+        print(f'   ✅ RP_STRUCTURES: {count} lignes, {unique_count} structures uniques')
         
-        # Vérifier CONDITIONS
-        cursor.execute('SELECT COUNT(*), COUNT(DISTINCT BUSCL_ID_PRE) FROM CONDITIONS')
+        # Vérifier RP_CONDITIONS
+        cursor.execute('SELECT COUNT(*), COUNT(DISTINCT BUSCL_ID_PRE) FROM RP_CONDITIONS')
         count, unique_count = cursor.fetchone()
-        print(f'   ✅ CONDITIONS: {count} lignes, {unique_count} conditions uniques')
+        print(f'   ✅ RP_CONDITIONS: {count} lignes, {unique_count} conditions uniques')
         
         # Vérifier RP_GLOBAL_EXCLUSION
         cursor.execute('SELECT COUNT(*) FROM RP_GLOBAL_EXCLUSION')

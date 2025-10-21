@@ -1,7 +1,6 @@
 # src/io/program_snowflake_csv_adapter.py
 from __future__ import annotations
 from typing import Tuple, Optional, Dict, Any, List
-import json, uuid
 import pandas as pd
 import snowflake.connector
 from snowflake.connector.pandas_tools import write_pandas
@@ -27,9 +26,9 @@ class SnowflakeProgramCSVIO:
       - "truncate_all"       : TRUNCATE des 4 tables avant insert
     """
 
-    PROGRAMS = "PROGRAMS"
-    STRUCTURES = "STRUCTURES"
-    CONDITIONS = "CONDITIONS"
+    PROGRAMS = "REINSURANCE_PROGRAM"
+    STRUCTURES = "RP_STRUCTURES"
+    CONDITIONS = "RP_CONDITIONS"
     EXCLUSIONS = "RP_GLOBAL_EXCLUSION"
 
     # ────────────────────────────────────────────────────────────────────
@@ -302,28 +301,49 @@ class SnowflakeProgramCSVIO:
 
             # EXCLUSIONS - toutes les colonnes CSV + PROGRAM_ID
             if not exclusions_df.empty:
+                if program_id is None:
+                    raise ValueError("program_id is None when trying to insert exclusions")
                 e_rows: List[Dict[str, Any]] = []
                 for _, r in exclusions_df.iterrows():
                     row_dict = r.to_dict()
                     
                     # Mapping des colonnes CSV vers Snowflake
                     mapped_row = {}
+                    # Ajouter RP_ID manuellement car il n'est pas dans le CSV
+                    mapped_row['RP_ID'] = program_id
+                    
                     for csv_col, value in row_dict.items():
-                        if csv_col == 'REINSURANCE_PROGRAM_ID':
-                            # Remplacer par PROGRAM_ID
-                            mapped_row['PROGRAM_ID'] = program_id
+                        if csv_col == 'BUSCL_CLASS_OF_BUSINESS_1':
+                            mapped_row['PRODICT_TYPE_LEVEL_1'] = value
+                        elif csv_col == 'BUSCL_CLASS_OF_BUSINESS_2':
+                            mapped_row['PRODICT_TYPE_LEVEL_2'] = value
+                        elif csv_col == 'BUSCL_CLASS_OF_BUSINESS_3':
+                            mapped_row['PRODICT_TYPE_LEVEL_3'] = value
+                        elif csv_col == 'BUSCL_ENTITY_NAME_CED':
+                            mapped_row['ENTITY_NAME_CED'] = value
+                        elif csv_col == 'POL_RISK_NAME_CED':
+                            mapped_row['RISK_NAME'] = value
                         else:
                             # Garder les autres colonnes telles quelles
                             mapped_row[csv_col] = value
                     
                     # Convertir les timestamps au format standard pour Snowflake
-                    for col in ['INSPER_EFFECTIVE_DATE', 'INSPER_EXPIRY_DATE']:
+                    for col in ['EXCL_EFFECTIVE_DATE', 'EXCL_EXPIRY_DATE']:
                         if col in mapped_row and pd.notna(mapped_row[col]):
                             if isinstance(mapped_row[col], pd.Timestamp):
                                 mapped_row[col] = mapped_row[col].strftime('%Y-%m-%d %H:%M:%S')
                     
                     e_rows.append(mapped_row)
-                write_pandas(cnx, pd.DataFrame(e_rows), table_name=self.EXCLUSIONS, database=db, schema=schema, auto_create_table=False, quote_identifiers=True)
+                # Insertion SQL directe pour les exclusions
+                if e_rows:
+                    for row in e_rows:
+                        columns = list(row.keys())
+                        values = list(row.values())
+                        placeholders = ', '.join(['%s'] * len(values))
+                        columns_str = ', '.join([f'"{col}"' for col in columns])
+                        
+                        insert_sql = f'INSERT INTO "{db}"."{schema}"."{self.EXCLUSIONS}" ({columns_str}) VALUES ({placeholders})'
+                        cur.execute(insert_sql, values)
 
         finally:
             cur.close()

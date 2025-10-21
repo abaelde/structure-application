@@ -21,7 +21,7 @@ def analyze_csv_structure(csv_folder: str):
     program_file = folder / "program.csv"
     if program_file.exists():
         df = pd.read_csv(program_file)
-        structure['PROGRAMS'] = {
+        structure['REINSURANCE_PROGRAM'] = {
             'columns': list(df.columns),
             'sample_data': df.iloc[0].to_dict() if len(df) > 0 else {},
             'dtypes': df.dtypes.to_dict()
@@ -31,7 +31,7 @@ def analyze_csv_structure(csv_folder: str):
     structures_file = folder / "structures.csv"
     if structures_file.exists():
         df = pd.read_csv(structures_file)
-        structure['STRUCTURES'] = {
+        structure['RP_STRUCTURES'] = {
             'columns': list(df.columns),
             'sample_data': df.iloc[0].to_dict() if len(df) > 0 else {},
             'dtypes': df.dtypes.to_dict()
@@ -41,7 +41,7 @@ def analyze_csv_structure(csv_folder: str):
     conditions_file = folder / "conditions.csv"
     if conditions_file.exists():
         df = pd.read_csv(conditions_file)
-        structure['CONDITIONS'] = {
+        structure['RP_CONDITIONS'] = {
             'columns': list(df.columns),
             'sample_data': df.iloc[0].to_dict() if len(df) > 0 else {},
             'dtypes': df.dtypes.to_dict()
@@ -102,7 +102,7 @@ def generate_ddl(structure):
         ddl = f"CREATE TABLE {table_name} (\n"
         
         # Ajouter PROGRAM_ID comme première colonne (clé de liaison)
-        if table_name != 'PROGRAMS':
+        if table_name != 'REINSURANCE_PROGRAM':
             ddl += "  PROGRAM_ID             STRING       NOT NULL,\n"
         
         # Ajouter toutes les colonnes du CSV
@@ -117,22 +117,22 @@ def generate_ddl(structure):
             ddl += f"  {col:<30} {snowflake_type:<15} {not_null}"
             
             # Ajouter une virgule sauf pour la dernière colonne
-            if i < len(columns) - 1 or table_name != 'PROGRAMS':
+            if i < len(columns) - 1 or table_name != 'REINSURANCE_PROGRAM':
                 ddl += ","
             ddl += "\n"
         
-        # Ajouter les colonnes d'audit pour PROGRAMS
-        if table_name == 'PROGRAMS':
+        # Ajouter les colonnes d'audit pour REINSURANCE_PROGRAM
+        if table_name == 'REINSURANCE_PROGRAM':
             ddl += "  CREATED_AT             STRING,\n"
             ddl += "  UPDATED_AT             STRING"
         
         # Ajouter les contraintes de clé primaire
         ddl += "\n"
-        if table_name == 'PROGRAMS':
+        if table_name == 'REINSURANCE_PROGRAM':
             ddl += "  PRIMARY KEY (REINSURANCE_PROGRAM_ID)"
-        elif table_name == 'STRUCTURES':
+        elif table_name == 'RP_STRUCTURES':
             ddl += "  PRIMARY KEY (PROGRAM_ID, INSPER_ID_PRE)"
-        elif table_name == 'CONDITIONS':
+        elif table_name == 'RP_CONDITIONS':
             ddl += "  PRIMARY KEY (PROGRAM_ID, BUSCL_ID_PRE)"
         elif table_name == 'RP_GLOBAL_EXCLUSION':
             ddl += "  -- Pas de clé primaire définie (table de référence)"
