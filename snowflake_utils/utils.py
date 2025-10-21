@@ -254,20 +254,24 @@ def reset_all_tables() -> bool:
         cur = cnx.cursor()
 
         # 1. Supprimer toutes les tables existantes
-        print("\n🗑️  Suppression des tables existantes...")
-        tables = [
-            "RP_GLOBAL_EXCLUSION",
-            "RP_CONDITIONS",
-            "RP_STRUCTURES",
-            "REINSURANCE_PROGRAM",
-        ]
-
-        for table in tables:
-            try:
-                cur.execute(f'DROP TABLE IF EXISTS "{db}"."{schema}"."{table}"')
-                print(f"   ✅ Table {table} supprimée")
-            except Exception as e:
-                print(f"   ⚠️  Erreur suppression {table}: {e}")
+        print("\n🗑️  Suppression de toutes les tables existantes...")
+        
+        # Récupérer toutes les tables du schéma
+        cur.execute(f'SHOW TABLES IN SCHEMA "{db}"."{schema}"')
+        tables_result = cur.fetchall()
+        
+        # Extraire les noms de tables
+        tables = [row[1] for row in tables_result]  # Le nom de la table est dans la colonne 1
+        
+        if not tables:
+            print("   ℹ️  Aucune table trouvée dans le schéma")
+        else:
+            for table in tables:
+                try:
+                    cur.execute(f'DROP TABLE IF EXISTS "{db}"."{schema}"."{table}"')
+                    print(f"   ✅ Table {table} supprimée")
+                except Exception as e:
+                    print(f"   ⚠️  Erreur suppression {table}: {e}")
 
         # 2. Recréer les tables avec la nouvelle structure (auto-increment)
         print("\n🏗️  Création des nouvelles tables...")

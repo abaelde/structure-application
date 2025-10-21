@@ -27,6 +27,27 @@ def apply_program_to_row(
     return result.to_dict()
 
 
+def apply_program_to_row_simple(
+    row_data: Dict[str, any],
+    program: Program,
+    calculation_date: str,
+) -> Dict[str, any]:
+    """
+    Applique un programme à une ligne de bordereau (dict) et retourne un résultat simplifié.
+    Une ligne par police avec juste l'exposition et les totaux de cession.
+    """
+    # Créer une Policy temporaire pour cette ligne
+    uw_dept = program.underwriting_department
+    policy = Policy(raw=row_data, uw_dept=uw_dept)
+
+    # Appliquer le programme
+    result = apply_program(policy, program, calculation_date)
+
+    # Retourner la vue simplifiée (une seule ligne par police)
+    simple_rows = result.to_simple_rows()
+    return simple_rows[0] if simple_rows else {}
+
+
 def apply_program_to_bordereau(
     bordereau: Bordereau,
     program: Program,
@@ -54,3 +75,32 @@ def apply_program_to_bordereau(
     bordereau_with_net["cession_to_reinsurer"] = results_df["cession_to_reinsurer"]
 
     return bordereau_with_net, results_df
+
+
+def apply_program_to_bordereau_simple(
+    bordereau: Bordereau,
+    program: Program,
+    calculation_date: str,
+) -> pd.DataFrame:
+    """
+    Applique un programme à un bordereau et retourne un DataFrame simplifié.
+    Une ligne par police avec juste l'exposition et les totaux de cession.
+    """
+    # Associe le programme au bordereau si pas déjà fait
+    if not bordereau.program:
+        bordereau.program = program
+
+    # Validation complète du bordereau
+    bordereau.validate()
+
+    df = bordereau.to_engine_dataframe().copy()
+
+    # Calcul via apply pour compatibilité Snowpark
+    results_df = df.apply(
+        lambda row: pd.Series(
+            apply_program_to_row_simple(row.to_dict(), program, calculation_date)
+        ),
+        axis=1,
+    )
+
+    return results_df

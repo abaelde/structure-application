@@ -213,7 +213,7 @@ class SnowflakeProgramCSVIO:
 
                 # d) Garantir le jeu de colonnes attendu par les tables (ordre inclus)
                 structures_cols = [
-                    "PROGRAM_ID","BUSINESS_TITLE","TYPE_OF_PARTICIPATION_CD",
+                    "PROGRAM_ID","INSPER_ID_PRE","BUSINESS_TITLE","TYPE_OF_PARTICIPATION_CD",
                     "INSPER_PREDECESSOR_TITLE","INSPER_CLAIM_BASIS_CD",
                     "INSPER_EFFECTIVE_DATE","INSPER_EXPIRY_DATE","INSPER_LAYER_NO",
                     "INSPER_MAIN_CURRENCY_CD","INSPER_UW_YEAR","INSPER_COMMENT"

@@ -105,6 +105,35 @@ class ProgramRunResult:
             )
         return rows
 
+    # Vue simplifiée pour export CSV/DF - juste l'exposition par police
+    def to_simple_rows(self) -> List[Dict[str, Any]]:
+        """
+        Retourne une vue simplifiée avec juste l'exposition par police.
+        Une ligne par police avec les totaux de cession.
+        """
+        return [
+            {
+                "insured_name": self.insured_name,
+                "exposure": self.exposure,
+                "effective_exposure": (
+                    self.effective_exposure
+                    if self.effective_exposure is not None
+                    else self.exposure
+                ),
+                "ceded_to_layer_100pct": self.totals.ceded_to_layer_100pct,
+                "ceded_to_reinsurer": self.totals.ceded_to_reinsurer,
+                "retained_by_cedant": (
+                    self.exposure - self.totals.ceded_to_layer_100pct
+                    if self.exposure is not None and self.totals.ceded_to_layer_100pct is not None
+                    else None
+                ),
+                "policy_inception_date": self.policy_inception_date,
+                "policy_expiry_date": self.policy_expiry_date,
+                "exclusion_status": self.exclusion_status,
+                "exclusion_reason": self.exclusion_reason,
+            }
+        ]
+
     # Vue "legacy" compatible (optionnel)
     def to_dict(self) -> Dict[str, Any]:
         retained_by_cedant = 0.0
