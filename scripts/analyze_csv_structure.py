@@ -51,7 +51,7 @@ def analyze_csv_structure(csv_folder: str):
     exclusions_file = folder / "exclusions.csv"
     if exclusions_file.exists():
         df = pd.read_csv(exclusions_file)
-        structure['EXCLUSIONS'] = {
+        structure['RP_GLOBAL_EXCLUSION'] = {
             'columns': list(df.columns),
             'sample_data': df.iloc[0].to_dict() if len(df) > 0 else {},
             'dtypes': df.dtypes.to_dict()
@@ -134,7 +134,7 @@ def generate_ddl(structure):
             ddl += "  PRIMARY KEY (PROGRAM_ID, INSPER_ID_PRE)"
         elif table_name == 'CONDITIONS':
             ddl += "  PRIMARY KEY (PROGRAM_ID, BUSCL_ID_PRE)"
-        elif table_name == 'EXCLUSIONS':
+        elif table_name == 'RP_GLOBAL_EXCLUSION':
             ddl += "  -- Pas de clé primaire définie (table de référence)"
         
         ddl += "\n);"

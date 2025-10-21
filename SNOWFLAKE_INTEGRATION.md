@@ -18,7 +18,7 @@ Le système utilise **4 tables principales** pour les programmes :
 1. **PROGRAMS** - Métadonnées des programmes
 2. **STRUCTURES** - Structures de réassurance
 3. **CONDITIONS** - Conditions par structure
-4. **EXCLUSIONS** - Exclusions par programme
+4. **RP_GLOBAL_EXCLUSION** - Exclusions par programme
 
 Et **3 tables** pour les runs :
 

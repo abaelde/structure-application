@@ -181,7 +181,7 @@ def delete_program(program_title: str) -> bool:
         program_id = result[0]
         
         # Supprimer les données liées
-        cur.execute(f'DELETE FROM "{config.database}"."{config.schema}"."EXCLUSIONS" WHERE PROGRAM_ID = %s', (program_id,))
+        cur.execute(f'DELETE FROM "{config.database}"."{config.schema}"."RP_GLOBAL_EXCLUSION" WHERE RP_ID = %s', (program_id,))
         cur.execute(f'DELETE FROM "{config.database}"."{config.schema}"."CONDITIONS" WHERE PROGRAM_ID = %s', (program_id,))
         cur.execute(f'DELETE FROM "{config.database}"."{config.schema}"."STRUCTURES" WHERE PROGRAM_ID = %s', (program_id,))
         cur.execute(f'DELETE FROM "{config.database}"."{config.schema}"."PROGRAMS" WHERE PROGRAM_ID = %s', (program_id,))
@@ -226,7 +226,7 @@ def reset_all_tables() -> bool:
         
         # 1. Supprimer toutes les tables existantes
         print("\n🗑️  Suppression des tables existantes...")
-        tables = ["EXCLUSIONS", "CONDITIONS", "STRUCTURES", "PROGRAMS"]
+        tables = ["RP_GLOBAL_EXCLUSION", "CONDITIONS", "STRUCTURES", "PROGRAMS"]
         
         for table in tables:
             try:
@@ -252,7 +252,7 @@ def reset_all_tables() -> bool:
                 statement = statement.replace("CREATE TABLE PROGRAMS", f'CREATE TABLE "{db}"."{schema}"."PROGRAMS"')
                 statement = statement.replace("CREATE TABLE STRUCTURES", f'CREATE TABLE "{db}"."{schema}"."STRUCTURES"')
                 statement = statement.replace("CREATE TABLE CONDITIONS", f'CREATE TABLE "{db}"."{schema}"."CONDITIONS"')
-                statement = statement.replace("CREATE TABLE EXCLUSIONS", f'CREATE TABLE "{db}"."{schema}"."EXCLUSIONS"')
+                statement = statement.replace("CREATE TABLE RP_GLOBAL_EXCLUSION", f'CREATE TABLE "{db}"."{schema}"."RP_GLOBAL_EXCLUSION"')
                 
                 cur.execute(statement)
         
@@ -265,7 +265,7 @@ def reset_all_tables() -> bool:
             f'CREATE INDEX IDX_PROGRAMS_TITLE ON "{db}"."{schema}"."PROGRAMS"(TITLE)',
             f'CREATE INDEX IDX_STRUCTURES_PROGRAM_ID ON "{db}"."{schema}"."STRUCTURES"(PROGRAM_ID)',
             f'CREATE INDEX IDX_CONDITIONS_PROGRAM_ID ON "{db}"."{schema}"."CONDITIONS"(PROGRAM_ID)',
-            f'CREATE INDEX IDX_EXCLUSIONS_PROGRAM_ID ON "{db}"."{schema}"."EXCLUSIONS"(PROGRAM_ID)'
+            f'CREATE INDEX IDX_RP_GLOBAL_EXCLUSION_RP_ID ON "{db}"."{schema}"."RP_GLOBAL_EXCLUSION"(RP_ID)'
         ]
         
         for index_sql in indexes:
@@ -309,7 +309,7 @@ def truncate_all_tables() -> bool:
         cur = cnx.cursor()
         
         # Ordre de suppression (respecter les contraintes de clés étrangères)
-        tables = ["EXCLUSIONS", "CONDITIONS", "STRUCTURES", "PROGRAMS"]
+        tables = ["RP_GLOBAL_EXCLUSION", "CONDITIONS", "STRUCTURES", "PROGRAMS"]
         
         for table in tables:
             try:

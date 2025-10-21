@@ -63,7 +63,7 @@ def test_csv_aligned_integration():
         print(f'   Colonnes PROGRAMS: {len(program_df.columns)} - {list(program_df.columns)[:3]}...')
         print(f'   Colonnes STRUCTURES: {len(structures_df.columns)} - {list(structures_df.columns)[:3]}...')
         print(f'   Colonnes CONDITIONS: {len(conditions_df.columns)} - {list(conditions_df.columns)[:3]}...')
-        print(f'   Colonnes EXCLUSIONS: {len(exclusions_df.columns)} - {list(exclusions_df.columns)[:3]}...')
+        print(f'   Colonnes RP_GLOBAL_EXCLUSION: {len(exclusions_df.columns)} - {list(exclusions_df.columns)[:3]}...')
         
         # Test 2: Sauvegarder dans Snowflake avec l'adapter CSV-aligned
         print('\n2. Sauvegarde dans Snowflake (adapter CSV-aligned)...')
@@ -124,16 +124,16 @@ def test_csv_aligned_integration():
         else:
             print(f'   ⚠️  CONDITIONS: Colonnes manquantes: {missing_cols}, colonnes supplémentaires: {extra_cols}')
         
-        # EXCLUSIONS
+        # RP_GLOBAL_EXCLUSION
         original_cols = set(exclusions_df.columns)
         reloaded_cols = set(reloaded_exclusions_df.columns) - {'PROGRAM_ID'}  # Exclure la clé de liaison
         missing_cols = original_cols - reloaded_cols
         extra_cols = reloaded_cols - original_cols
         
         if not missing_cols and not extra_cols:
-            print('   ✅ EXCLUSIONS: Correspondance parfaite des colonnes')
+            print('   ✅ RP_GLOBAL_EXCLUSION: Correspondance parfaite des colonnes')
         else:
-            print(f'   ⚠️  EXCLUSIONS: Colonnes manquantes: {missing_cols}, colonnes supplémentaires: {extra_cols}')
+            print(f'   ⚠️  RP_GLOBAL_EXCLUSION: Colonnes manquantes: {missing_cols}, colonnes supplémentaires: {extra_cols}')
         
         # Test 5: Vérifier les données dans Snowflake
         print('\n5. Vérification des données dans Snowflake...')
@@ -157,10 +157,10 @@ def test_csv_aligned_integration():
         count, unique_count = cursor.fetchone()
         print(f'   ✅ CONDITIONS: {count} lignes, {unique_count} conditions uniques')
         
-        # Vérifier EXCLUSIONS
-        cursor.execute('SELECT COUNT(*) FROM EXCLUSIONS')
+        # Vérifier RP_GLOBAL_EXCLUSION
+        cursor.execute('SELECT COUNT(*) FROM RP_GLOBAL_EXCLUSION')
         count = cursor.fetchone()[0]
-        print(f'   ✅ EXCLUSIONS: {count} lignes')
+        print(f'   ✅ RP_GLOBAL_EXCLUSION: {count} lignes')
         
         cursor.close()
         conn.close()

@@ -15,7 +15,7 @@ class SnowflakeProgramCSVIO:
       - PROGRAMS: 14 colonnes CSV + 2 colonnes d'audit
       - STRUCTURES: 21 colonnes CSV + 1 clé de liaison
       - CONDITIONS: 38 colonnes CSV + 1 clé de liaison  
-      - EXCLUSIONS: 11 colonnes CSV + 1 clé de liaison
+      - RP_GLOBAL_EXCLUSION: 11 colonnes CSV + 1 clé de liaison
 
     DSN attendu pour load/save :
       snowflake://DB.SCHEMA?program_title=...
@@ -30,7 +30,7 @@ class SnowflakeProgramCSVIO:
     PROGRAMS = "PROGRAMS"
     STRUCTURES = "STRUCTURES"
     CONDITIONS = "CONDITIONS"
-    EXCLUSIONS = "EXCLUSIONS"
+    EXCLUSIONS = "RP_GLOBAL_EXCLUSION"
 
     # ────────────────────────────────────────────────────────────────────
     # Utils

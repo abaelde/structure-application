@@ -242,7 +242,7 @@
       "INCLUDES_LIABILITY": "bool"
     }
   },
-  "EXCLUSIONS": {
+  "RP_GLOBAL_EXCLUSION": {
     "columns": [
       "EXCLUSION_NAME",
       "EXCL_EFFECTIVE_DATE",
