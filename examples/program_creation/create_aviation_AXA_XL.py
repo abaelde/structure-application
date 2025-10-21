@@ -67,8 +67,9 @@ qs = build_quota_share(
     conditions_config=[
         {
             "cession_pct": CESSION_RATE_QS,
-            "limit_100": 575_000_000,
-            "reinsurer_share_pct": REINSURER_SHARE_QS,
+            "limit": 575_000_000,
+            "signed_share": REINSURER_SHARE_QS,
+            "currency_cd": currency,
             "includes_hull": True,
             "includes_liability": True,
         }
@@ -92,9 +93,9 @@ for i, (layer_name, (limit_common, priority_common)) in enumerate(
     for currency in CURRENCIES_COMMON:
         conditions_config.append(
             {
-                "limit_100": limit_common,
-                "attachment_point_100": priority_common,
-                "limit_currency_cd": currency,
+                "limit": limit_common,
+                "attachment": priority_common,
+                "currency_cd": currency,
                 "includes_hull": True,
                 "includes_liability": True,
             }
@@ -104,9 +105,9 @@ for i, (layer_name, (limit_common, priority_common)) in enumerate(
     for currency in CURRENCIES_GBP:
         conditions_config.append(
             {
-                "limit_100": limit_gbp,
-                "attachment_point_100": priority_gbp,
-                "limit_currency_cd": currency,
+                "limit": limit_gbp,
+                "attachment": priority_gbp,
+                "currency_cd": currency,
                 "includes_hull": True,
                 "includes_liability": True,
             }
