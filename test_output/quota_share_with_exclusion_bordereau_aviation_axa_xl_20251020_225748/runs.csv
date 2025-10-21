@@ -1,2 +1,0 @@
-run_id,program_name,uw_dept,calculation_date,source_program,source_bordereau,program_fingerprint,started_at,ended_at,row_count,notes
-quota_share_with_exclusion_bordereau_aviation_axa_xl_20251020_225748,Quota Share with Exclusions Test,aviation,2024-06-01,examples/programs/quota_share_with_exclusion,examples/bordereaux/bordereau_aviation_axa_xl.csv,,2025-10-20T22:57:48.056982,2025-10-20T22:57:48.076439,6,

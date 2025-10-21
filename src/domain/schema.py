@@ -55,9 +55,9 @@ COLUMNS: Dict[str, ColumnSpec] = {
     # Dimension mappings
     "BUSCL_COUNTRY_CD": ColumnSpec("BUSCL_COUNTRY_CD", "dimension"),
     "BUSCL_REGION": ColumnSpec("BUSCL_REGION", "dimension"),
-    "BUSCL_CLASS_OF_BUSINESS_1": ColumnSpec("BUSCL_CLASS_OF_BUSINESS_1", "dimension"),
-    "BUSCL_CLASS_OF_BUSINESS_2": ColumnSpec("BUSCL_CLASS_OF_BUSINESS_2", "dimension"),
-    "BUSCL_CLASS_OF_BUSINESS_3": ColumnSpec("BUSCL_CLASS_OF_BUSINESS_3", "dimension"),
+    "PRODUCT_TYPE_LEVEL_1": ColumnSpec("PRODUCT_TYPE_LEVEL_1", "dimension"),
+    "PRODUCT_TYPE_LEVEL_2": ColumnSpec("PRODUCT_TYPE_LEVEL_2", "dimension"),
+    "PRODUCT_TYPE_LEVEL_3": ColumnSpec("PRODUCT_TYPE_LEVEL_3", "dimension"),
     "BUSCL_ENTITY_NAME_CED": ColumnSpec("BUSCL_ENTITY_NAME_CED", "dimension"),
     "POL_RISK_NAME_CED": ColumnSpec("POL_RISK_NAME_CED", "dimension"),
     # currency (dimension logique unique ; représentation selon LOB)
@@ -117,9 +117,9 @@ PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, object] = {
     # identiques
     "BUSCL_COUNTRY_CD": "BUSCL_COUNTRY_CD",
     "BUSCL_REGION": "BUSCL_REGION",
-    "BUSCL_CLASS_OF_BUSINESS_1": "BUSCL_CLASS_OF_BUSINESS_1",
-    "BUSCL_CLASS_OF_BUSINESS_2": "BUSCL_CLASS_OF_BUSINESS_2",
-    "BUSCL_CLASS_OF_BUSINESS_3": "BUSCL_CLASS_OF_BUSINESS_3",
+    "PRODUCT_TYPE_LEVEL_1": "PRODUCT_TYPE_LEVEL_1",
+    "PRODUCT_TYPE_LEVEL_2": "PRODUCT_TYPE_LEVEL_2",
+    "PRODUCT_TYPE_LEVEL_3": "PRODUCT_TYPE_LEVEL_3",
     "BUSCL_ENTITY_NAME_CED": "BUSCL_ENTITY_NAME_CED",
     "POL_RISK_NAME_CED": "POL_RISK_NAME_CED",
     # currency logique unique -> dépend du LOB

@@ -149,7 +149,7 @@ class SnowflakeProgramCSVIO:
 
             # EXCLUSIONS - toutes les colonnes CSV
             cur.execute(
-                f'SELECT * FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE PROGRAM_ID=%s',
+                f'SELECT * FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s',
                 (program_id,),
             )
             e_rows = cur.fetchall()
@@ -209,7 +209,7 @@ class SnowflakeProgramCSVIO:
                 if existing_program:
                     existing_program_id = existing_program[0]
                     cur.execute(
-                        f'DELETE FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE PROGRAM_ID=%s',
+                        f'DELETE FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s',
                         (existing_program_id,),
                     )
                     cur.execute(
@@ -392,11 +392,11 @@ class SnowflakeProgramCSVIO:
 
                     for csv_col, value in row_dict.items():
                         if csv_col == "BUSCL_CLASS_OF_BUSINESS_1":
-                            mapped_row["PRODICT_TYPE_LEVEL_1"] = value
+                            mapped_row["PRODUCT_TYPE_LEVEL_1"] = value
                         elif csv_col == "BUSCL_CLASS_OF_BUSINESS_2":
-                            mapped_row["PRODICT_TYPE_LEVEL_2"] = value
+                            mapped_row["PRODUCT_TYPE_LEVEL_2"] = value
                         elif csv_col == "BUSCL_CLASS_OF_BUSINESS_3":
-                            mapped_row["PRODICT_TYPE_LEVEL_3"] = value
+                            mapped_row["PRODUCT_TYPE_LEVEL_3"] = value
                         elif csv_col == "BUSCL_ENTITY_NAME_CED":
                             mapped_row["ENTITY_NAME_CED"] = value
                         elif csv_col == "POL_RISK_NAME_CED":

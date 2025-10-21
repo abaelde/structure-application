@@ -1,3 +1,130 @@
+---
+alwaysApply: true
+---
+
+# Snowflake Integration
+
+## Module Snowflake Utils Centralisé
+
+Le module `snowflake_utils/` à la racine du projet centralise toute la configuration et les utilitaires Snowflake.
+
+### Structure
+
+```
+snowflake_utils/
+├── __init__.py          # Exports publics
+├── config.py            # Configuration centralisée
+└── utils.py             # Utilitaires de sauvegarde
+```
+
+### Configuration
+
+La configuration Snowflake est gérée par `SnowflakeConfig` qui charge les paramètres depuis :
+
+1. **Variables d'environnement** (priorité) : `SNOWFLAKE_ACCOUNT`, `SNOWFLAKE_USER`, etc.
+2. **Fichier `snowflake_config.env`** à la racine
+3. **Valeurs par défaut** si rien n'est trouvé
+
+```python
+from snowflake_utils import SnowflakeConfig
+
+# Chargement automatique
+config = SnowflakeConfig.load()
+
+# Validation
+if config.validate():
+    print("Configuration valide")
+```
+
+### Sauvegarde de Programmes
+
+Utilisez `save_program()` pour sauvegarder des programmes :
+
+```python
+from snowflake_utils import save_program
+
+# Sauvegarde en Snowflake (backend par défaut)
+output_path = save_program(program, "snowflake", "MY_PROGRAM_2024")
+
+# Sauvegarde en CSV
+output_path = save_program(program, "csv_folder", "MY_PROGRAM_2024")
+```
+
+### Utilitaires Disponibles
+
+- `test_connection()` : Teste la connexion Snowflake
+- `list_programs()` : Liste tous les programmes
+- `delete_program(title)` : Supprime un programme et ses données
+- `truncate_all_tables()` : Vide toutes les tables (garde la structure)
+- `reset_all_tables()` : Supprime et recrée toutes les tables (reset complet)
+
+### Tables Snowflake
+
+Les tables utilisent un système d'auto-increment pour les IDs uniques :
+
+- `REINSURANCE_PROGRAM` :
+- `RP_STRUCTURES` :
+- `RP_CONDITIONS` :
+- `RP_GLOBAL_EXCLUSIONS` :
+
+### Scripts de Maintenance
+
+- `scripts/reset_snowflake_tables.py` : Reset complet des tables (script standalone)
+- `scripts/snowflake_maintenance.py` : Interface interactive de maintenance
+- `scripts/correct_snowflake_ddl.sql` : DDL avec auto-increment
+
+### CLI Snowflake
+
+Une CLI complète est disponible pour toutes les opérations :
+
+```bash
+# Utilisation directe
+./snowflake-cli <command> [options]
+
+# Ou via le module
+python -m snowflake_utils <command> [options]
+```
+
+**Commandes disponibles :**
+- `test` - Tester la connexion
+- `status` - Statut complet du système
+- `config` - Informations de configuration
+- `list-programs` - Lister tous les programmes
+- `delete-program TITRE` - Supprimer un programme
+- `reset-tables --force` - Reset complet des tables
+- `truncate-tables` - Vider les tables
+- `sql "SELECT ..."` - Exécuter une requête SQL
+
+**Exemples :**
+```bash
+./snowflake-cli status
+./snowflake-cli list-programs
+./snowflake-cli sql "SELECT COUNT(*) FROM STRUCTURES"
+./snowflake-cli reset-tables --force
+```
+
+### Maintenance Interactive (Legacy)
+
+Le script de maintenance interactif est toujours disponible :
+
+```bash
+uv run python scripts/snowflake_maintenance.py
+```
+
+### Usage dans les Scripts de Création
+
+Remplacez l'ancien import :
+```python
+# Ancien
+from utils import save_program
+
+# Nouveau
+from snowflake_utils import save_program
+```
+
+### Configuration Requise
+
+Le fichier `snowflake_config.env` doit contenir est disponible à la racine du repo
 # Snowflake Integration
 
 ## Module Snowflake Utils Centralisé
