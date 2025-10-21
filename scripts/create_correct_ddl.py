@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""
+Script pour créer le DDL correct avec auto-increment basé sur le DDL généré.
+"""
+
+import json
+from pathlib import Path
+
+def create_correct_ddl():
+    """Crée le DDL correct avec auto-increment"""
+    
+    # Lire l'analyse des CSV
+    analysis_file = Path(__file__).parent / "csv_structure_analysis.json"
+    with open(analysis_file, 'r') as f:
+        analysis = json.load(f)
+    
+    ddl_content = """-- DDL corrigé avec auto-increment
+-- Date: 2025-10-21
+
+-- Table PROGRAMS avec auto-increment
+CREATE TABLE PROGRAMS (
+  REINSURANCE_PROGRAM_ID                     NUMBER(38,0)    AUTOINCREMENT PRIMARY KEY,
+  ID_PRE                  VARCHAR,
+  TITLE                   VARCHAR          NOT NULL,
+  CED_ID_PRE                     NUMBER(38,0),
+  ACTIVE_IND              BOOLEAN         NOT NULL,
+  ADDITIONAL_INFO                 VARCHAR,
+  UW_DEPARTMENT_CODE        VARCHAR,
+  UW_LOB   VARCHAR          NOT NULL,
+  BUSPAR_CED_REG_CLASS_CD        VARCHAR,
+  MAIN_CURRENCY_CD        VARCHAR,
+  CREATED_AT               TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP(),
+  UPDATED_AT               TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- Table STRUCTURES avec auto-increment pour INSPER_ID_PRE
+CREATE TABLE STRUCTURES (
+  INSPER_ID_PRE                  NUMBER(38,0)    AUTOINCREMENT PRIMARY KEY,
+  PROGRAM_ID                     NUMBER(38,0)    NOT NULL,
+  BUSINESS_ID_PRE                FLOAT,
+  TYPE_OF_PARTICIPATION_CD       VARCHAR          NOT NULL,
+  TYPE_OF_INSURED_PERIOD_CD      VARCHAR,
+  ACTIVE_FLAG_CD                 BOOLEAN,
+  INSPER_EFFECTIVE_DATE          TIMESTAMP_NTZ,
+  INSPER_EXPIRY_DATE             TIMESTAMP_NTZ,
+  REPROG_ID_PRE                  NUMBER(38,0),
+  BUSINESS_TITLE                 VARCHAR,
+  INSPER_LAYER_NO                FLOAT,
+  INSPER_MAIN_CURRENCY_CD        FLOAT,
+  INSPER_UW_YEAR                 FLOAT,
+  INSPER_CONTRACT_ORDER          FLOAT,
+  INSPER_PREDECESSOR_TITLE       STRING,
+  INSPER_CONTRACT_FORM_CD_SLAV   FLOAT,
+  INSPER_CONTRACT_LODRA_CD_SLAV  FLOAT,
+  INSPER_CONTRACT_COVERAGE_CD_SLAV FLOAT,
+  INSPER_CLAIM_BASIS_CD          STRING,
+  INSPER_LODRA_CD_SLAV           FLOAT,
+  INSPER_LOD_TO_RA_DATE_SLAV     FLOAT,
+  INSPER_COMMENT                 FLOAT,
+  FOREIGN KEY (PROGRAM_ID) REFERENCES PROGRAMS(REINSURANCE_PROGRAM_ID)
+);
+
+-- Table CONDITIONS avec clé étrangère vers PROGRAMS
+CREATE TABLE CONDITIONS (
+  PROGRAM_ID                     NUMBER(38,0)    NOT NULL,
+  BUSCL_ID_PRE                   NUMBER(38,0)    NOT NULL,
+  REPROG_ID_PRE                  NUMBER(38,0),
+  CED_ID_PRE                     FLOAT,
+  BUSINESS_ID_PRE                FLOAT,
+  INSPER_ID_PRE                  NUMBER(38,0),
+  BUSCL_ENTITY_NAME_CED          FLOAT,
+  POL_RISK_NAME_CED              FLOAT,
+  BUSCL_COUNTRY_CD               FLOAT,
+  BUSCL_COUNTRY                  FLOAT,
+  BUSCL_REGION                   FLOAT,
+  BUSCL_CLASS_OF_BUSINESS_1      FLOAT,
+  BUSCL_CLASS_OF_BUSINESS_2      FLOAT,
+  BUSCL_CLASS_OF_BUSINESS_3      FLOAT,
+  BUSCL_LIMIT_CURRENCY_CD        STRING,
+  AAD_100                        FLOAT,
+  LIMIT_100                      NUMBER(38,0),
+  LIMIT_FLOATER_100              FLOAT,
+  ATTACHMENT_POINT_100           FLOAT,
+  OLW_100                        FLOAT,
+  LIMIT_AGG_100                  FLOAT,
+  CESSION_PCT                    FLOAT,
+  RETENTION_PCT                  FLOAT,
+  SUPI_100                       FLOAT,
+  BUSCL_PREMIUM_CURRENCY_CD      FLOAT,
+  BUSCL_PREMIUM_GROSS_NET_CD     FLOAT,
+  PREMIUM_RATE_PCT               FLOAT,
+  PREMIUM_DEPOSIT_100            FLOAT,
+  PREMIUM_MIN_100                FLOAT,
+  BUSCL_LIABILITY_1_LINE_100     FLOAT,
+  MAX_COVER_PCT                  FLOAT,
+  MIN_EXCESS_PCT                 FLOAT,
+  SIGNED_SHARE_PCT               FLOAT,
+  AVERAGE_LINE_SLAV_CED          FLOAT,
+  PML_DEFAULT_PCT                FLOAT,
+  LIMIT_EVENT                    FLOAT,
+  NO_OF_REINSTATEMENTS           FLOAT,
+  INCLUDES_HULL                  BOOLEAN,
+  INCLUDES_LIABILITY             BOOLEAN,
+  FOREIGN KEY (PROGRAM_ID) REFERENCES PROGRAMS(REINSURANCE_PROGRAM_ID)
+);
+
+-- Table EXCLUSIONS avec clé étrangère vers PROGRAMS
+CREATE TABLE EXCLUSIONS (
+  PROGRAM_ID                     NUMBER(38,0)    NOT NULL,
+  EXCL_REASON                    STRING,
+  EXCL_EFFECTIVE_DATE            STRING,
+  EXCL_EXPIRY_DATE               STRING,
+  BUSCL_COUNTRY_CD               STRING,
+  BUSCL_REGION                   STRING,
+  BUSCL_CLASS_OF_BUSINESS_1      STRING,
+  BUSCL_CLASS_OF_BUSINESS_2      STRING,
+  BUSCL_CLASS_OF_BUSINESS_3      STRING,
+  BUSCL_ENTITY_NAME_CED          STRING,
+  POL_RISK_NAME_CED              STRING,
+  BUSCL_LIMIT_CURRENCY_CD        STRING,
+  FOREIGN KEY (PROGRAM_ID) REFERENCES PROGRAMS(REINSURANCE_PROGRAM_ID)
+);
+"""
+    
+    # Sauvegarder le DDL corrigé
+    output_file = Path(__file__).parent / "correct_snowflake_ddl.sql"
+    with open(output_file, 'w') as f:
+        f.write(ddl_content)
+    
+    print(f"✅ DDL corrigé créé: {output_file}")
+    return output_file
+
+if __name__ == "__main__":
+    create_correct_ddl()

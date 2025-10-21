@@ -12,15 +12,29 @@ Structure:
 - Priorités et limites définies par devise
 """
 
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+# Choisir le backend de sauvegarde : "snowflake" ou "csv_folder"
+BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
+
+# Configuration Snowflake (utilisée seulement si BACKEND = "snowflake")
+# Les paramètres sont chargés depuis le fichier snowflake_config.env
+
+# =============================================================================
+# SCRIPT
+# =============================================================================
+
 import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from tests.builders import build_quota_share, build_excess_of_loss, build_program
-from src.managers import ProgramManager
+from snowflake_utils import save_program
 
 print("Création du programme Aviation Complex Multi-Currency...")
+print(f"Backend de sauvegarde: {BACKEND}")
 
 LAYER_VALUES_COMMON = {
     "XOL_1": (65_000_000, 35_000_000),
@@ -40,91 +54,87 @@ LAYER_VALUES_GBP = {
     "XOL_6": (100_000_000, 276_666_666),
 }
 
-CESSION_RATE_QS = 0.25
-REINSURER_SHARE_QS = 0.0165
-REINSURER_SHARE_XOL = 0.05
+CURRENCIES_COMMON = ["USD", "CAD", "EUR", "AUD"]
+CURRENCIES_GBP = ["GBP"]
 
-COMMON_CURRENCIES = ["USD", "CAD", "EUR", "AUD"]
-ALL_CURRENCIES = COMMON_CURRENCIES + ["GBP"]
+CESSION_RATE_QS = 0.25  # 25% cédé
+REINSURER_SHARE_QS = 0.0165  # 1.65%
 
-qs_1 = build_quota_share(
+# Construction du Quota Share
+qs = build_quota_share(
     name="QS_1",
+    contract_order=0,  # Premier dans l'ordre
     conditions_config=[
         {
             "cession_pct": CESSION_RATE_QS,
-            "limit": 575_000_000,
-            "signed_share": REINSURER_SHARE_QS,
-            "currency_cd": currency,
-            "includes_hull": True,
-            "includes_liability": True,
+            "limit_100": 575_000_000,
+            "reinsurer_share_pct": REINSURER_SHARE_QS,
         }
-        for currency in ALL_CURRENCIES
+        for currency in CURRENCIES_COMMON + CURRENCIES_GBP
     ],
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
     expiry_date="2025-01-01",
 )
 
+# Construction des layers XOL
+xol_layers = []
+for i, (layer_name, (limit_common, priority_common)) in enumerate(
+    LAYER_VALUES_COMMON.items(), 1
+):
+    limit_gbp, priority_gbp = LAYER_VALUES_GBP[layer_name]
 
-def create_xol_layer(layer_name: str) -> object:
-    conditions = []
+    conditions_config = []
 
-    for currency in COMMON_CURRENCIES:
-        limit, attachment = LAYER_VALUES_COMMON[layer_name]
-        conditions.append(
+    # Conditions pour USD, CAD, EUR, AUD
+    for currency in CURRENCIES_COMMON:
+        conditions_config.append(
             {
-                "attachment": attachment,
-                "limit": limit,
-                "signed_share": REINSURER_SHARE_XOL,
-                "currency_cd": currency,
-                "includes_hull": True,
-                "includes_liability": True,
+                "limit_100": limit_common,
+                "attachment_point_100": priority_common,
+                "limit_currency_cd": currency,
             }
         )
 
-    limit_gbp, attachment_gbp = LAYER_VALUES_GBP[layer_name]
-    conditions.append(
-        {
-            "attachment": attachment_gbp,
-            "limit": limit_gbp,
-            "signed_share": REINSURER_SHARE_XOL,
-            "currency_cd": "GBP",
-            "includes_hull": True,
-            "includes_liability": True,
-        }
-    )
+    # Conditions pour GBP
+    for currency in CURRENCIES_GBP:
+        conditions_config.append(
+            {
+                "limit_100": limit_gbp,
+                "attachment_point_100": priority_gbp,
+                "limit_currency_cd": currency,
+            }
+        )
 
-    return build_excess_of_loss(
+    xol = build_excess_of_loss(
         name=layer_name,
-        conditions_config=conditions,
-        predecessor_title="QS_1",
+        contract_order=i,  # Ordre séquentiel (1, 2, 3, 4, 5, 6)
+        conditions_config=conditions_config,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
+        predecessor_title="QS_1",
     )
+    xol_layers.append(xol)
 
-
-xol_1 = create_xol_layer("XOL_1")
-xol_2 = create_xol_layer("XOL_2")
-xol_3 = create_xol_layer("XOL_3")
-xol_4 = create_xol_layer("XOL_4")
-xol_5 = create_xol_layer("XOL_5")
-xol_6 = create_xol_layer("XOL_6")
-
+# Construction du programme
 program = build_program(
     name="AVIATION_AXA_XL_2024",
-    structures=[qs_1, xol_1, xol_2, xol_3, xol_4, xol_5, xol_6],
+    structures=[qs] + xol_layers,
     underwriting_department="aviation",
 )
 
-output_dir = "../programs"
-os.makedirs(output_dir, exist_ok=True)
-output_file = os.path.join(output_dir, "aviation_axa_xl_2024")
+# =============================================================================
+# SAUVEGARDE
+# =============================================================================
 
-manager = ProgramManager(backend="csv_folder")
-manager.save(program, output_file)
+if __name__ == "__main__":
+    # Sauvegarde avec l'utilitaire partagé
+    output_path = save_program(program, BACKEND, "AVIATION_AXA_XL_2024")
 
-print(f"✓ Programme créé: {output_file}/")
+# =============================================================================
+# AFFICHAGE
+# =============================================================================
 
 print("\n" + "=" * 80)
 print("PROGRAMME AVIATION AXA XL 2024")
@@ -140,6 +150,7 @@ print(
     f"""
 Programme: Aviation AXA XL 2024
 Devises: USD, CAD, EUR, AUD, GBP
+Backend: {BACKEND}
 
 Structures (empilées selon l'ordre):
 """
@@ -157,5 +168,4 @@ for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"]
     print(f"   - USD/CAD/EUR/AUD: {limit_common:,.0f} xs {priority_common:,.0f}")
     print(f"   - GBP: {limit_gbp:,.0f} xs {priority_gbp:,.0f}")
 
-
-print("\n✓ Le programme Aviation AXA XL 2024 est prêt !")
+print(f"\n✓ Le programme Aviation AXA XL 2024 est prêt et sauvegardé en {BACKEND} !")

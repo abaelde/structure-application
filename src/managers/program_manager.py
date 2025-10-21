@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import pandas as pd
 from typing import Literal, Optional
-from src.io.program_snowflake_adapter import SnowflakeProgramIO
+from src.io.program_snowflake_csv_adapter import SnowflakeProgramCSVIO
 from src.io.program_csv_folder_adapter import CsvProgramFolderIO
 from src.serialization.program_serializer import ProgramSerializer
 from src.domain.program import Program
@@ -72,7 +72,7 @@ class ProgramManager:
     def _make_io(self, backend: Backend):
         """Create the appropriate I/O adapter for the backend."""
         if backend == "snowflake":
-            return SnowflakeProgramIO()
+            return SnowflakeProgramCSVIO()
         elif backend == "csv_folder":
             return CsvProgramFolderIO()
         else:

@@ -6,6 +6,16 @@ Programme: Quota Share with Exclusions Test
 - 1 condition normale: 25% cession sur tout le reste
 """
 
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+# Choisir le backend de sauvegarde : "snowflake" ou "csv_folder"
+BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
+
+# =============================================================================
+# SCRIPT
+# =============================================================================
+
 import sys
 import os
 
@@ -13,9 +23,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from tests.builders import build_quota_share, build_program
 from src.domain.exclusion import ExclusionRule
-from src.managers import ProgramManager
+from snowflake_utils import save_program
 
 print("Création du programme Quota Share with Exclusions...")
+print(f"Backend de sauvegarde: {BACKEND}")
 
 # Créer un quota share avec condition normale uniquement
 qs = build_quota_share(
@@ -53,14 +64,14 @@ exclusions = [
 ]
 program.exclusions = exclusions
 
-output_dir = "../programs"
-os.makedirs(output_dir, exist_ok=True)
-output_file = os.path.join(output_dir, "quota_share_with_exclusion")
+# =============================================================================
+# SAUVEGARDE
+# =============================================================================
 
-manager = ProgramManager(backend="csv_folder")
-manager.save(program, output_file)
+# Sauvegarde avec l'utilitaire partagé
+output_path = save_program(program, BACKEND, "QUOTA_SHARE_WITH_EXCLUSION")
 
-print(f"✓ Programme créé: {output_file}/")
+print(f"✓ Programme créé: {output_path}")
 print("\nStructure du programme:")
 print("  - 1 structure: QS Aviation 25%")
 print("  - 2 exclusions globales de programme:")

@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+import sys
+import os
+import shlex
+from pathlib import Path
+
+# Ajouter le chemin du projet
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
+
+# Utiliser uv run pour exécuter avec les bonnes dépendances
+if __name__ == '__main__':
+    # Échapper les arguments pour éviter les problèmes de shell
+    args = [shlex.quote(arg) for arg in sys.argv[1:]]
+    cmd = f'cd {project_root} && uv run python -m snowflake_utils {" ".join(args)}'
+    os.system(cmd)

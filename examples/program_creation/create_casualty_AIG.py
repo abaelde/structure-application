@@ -8,15 +8,26 @@ Programme casualty avec 1 structure Quota Share avec 2 conditions:
 Programme risk attaching avec réassureur share à 10% (à déterminer)
 """
 
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+# Choisir le backend de sauvegarde : "snowflake" ou "csv_folder"
+BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
+
+# =============================================================================
+# SCRIPT
+# =============================================================================
+
 import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from tests.builders import build_quota_share, build_program
-from src.managers import ProgramManager
+from snowflake_utils import save_program
 
 print("Création du programme Casualty AIG 2024...")
+print(f"Backend de sauvegarde: {BACKEND}")
 
 CESSION_RATE = 1.0
 REINSURER_SHARE = 0.10
@@ -45,14 +56,14 @@ program = build_program(
     name="CASUALTY_AIG_2024", structures=[qs], underwriting_department="casualty"
 )
 
-output_dir = "../programs"
-os.makedirs(output_dir, exist_ok=True)
-output_file = os.path.join(output_dir, "casualty_aig_2024")
+# =============================================================================
+# SAUVEGARDE
+# =============================================================================
 
-manager = ProgramManager(backend="csv_folder")
-manager.save(program, output_file)
+# Sauvegarde avec l'utilitaire partagé
+output_path = save_program(program, BACKEND, "CASUALTY_AIG_2024")
 
-print(f"✓ Programme créé: {output_file}/")
+print(f"✓ Programme créé: {output_path}")
 
 print("\n" + "=" * 80)
 print("PROGRAMME CASUALTY AIG 2024")

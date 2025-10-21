@@ -7,15 +7,26 @@ Programme risk attaching avec 3 structures excess of loss pour United States et 
 3. XOL_3: Priorité 21.75M, Limite 23.25M
 """
 
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+# Choisir le backend de sauvegarde : "snowflake" ou "csv_folder"
+BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
+
+# =============================================================================
+# SCRIPT
+# =============================================================================
+
 import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from tests.builders import build_excess_of_loss, build_program
-from src.managers import ProgramManager
+from snowflake_utils import save_program
 
 print("Création du programme Aviation Old Republic 2024...")
+print(f"Backend de sauvegarde: {BACKEND}")
 
 REINSURER_SHARE_VALUES = {
     "XOL_1": 0.1,
@@ -85,12 +96,14 @@ program = build_program(
     underwriting_department="aviation",
 )
 
-output_file = "../programs/aviation_old_republic_2024"
+# =============================================================================
+# SAUVEGARDE
+# =============================================================================
 
-manager = ProgramManager(backend="csv_folder")
-manager.save(program, output_file)
+# Sauvegarde avec l'utilitaire partagé
+output_path = save_program(program, BACKEND, "AVIATION_OLD_REPUBLIC_2024")
 
-print(f"✓ Programme créé: {output_file}/")
+print(f"✓ Programme créé: {output_path}")
 
 print("\n" + "=" * 80)
 print("PROGRAMME AVIATION OLD REPUBLIC 2024")

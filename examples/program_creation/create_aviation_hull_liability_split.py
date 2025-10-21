@@ -11,15 +11,26 @@ Programme:
 - XOL_LIABILITY: Excess of Loss sur Liability uniquement
 """
 
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+# Choisir le backend de sauvegarde : "snowflake" ou "csv_folder"
+BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
+
+# =============================================================================
+# SCRIPT
+# =============================================================================
+
 import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from tests.builders import build_quota_share, build_excess_of_loss, build_program
-from src.managers import ProgramManager
+from snowflake_utils import save_program
 
 print("Création du programme Aviation avec filtrage Hull/Liability...")
+print(f"Backend de sauvegarde: {BACKEND}")
 
 qs_all = build_quota_share(
     name="QS_ALL",
@@ -77,14 +88,14 @@ program = build_program(
     underwriting_department="aviation",
 )
 
-output_dir = "../programs"
-os.makedirs(output_dir, exist_ok=True)
-output_file = os.path.join(output_dir, "aviation_hull_liability_split")
+# =============================================================================
+# SAUVEGARDE
+# =============================================================================
 
-manager = ProgramManager(backend="csv_folder")
-manager.save(program, output_file)
+# Sauvegarde avec l'utilitaire partagé
+output_path = save_program(program, BACKEND, "AVIATION_HULL_LIABILITY_SPLIT")
 
-print(f"✓ Programme créé: {output_file}/")
+print(f"✓ Programme créé: {output_path}")
 
 print("\n" + "=" * 80)
 print("PROGRAMME AVIATION HULL/LIABILITY SPLIT")
