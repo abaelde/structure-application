@@ -348,3 +348,10 @@ Le guide contient des patterns courants, des exemples de traduction et toutes le
 - **Product** : Les building blocks (quota_share, excess_of_loss)
 - **Dimension** : Colonne du bordereau utilisée pour le matching (ex: country, region, industry)
 - **cession rate** : Le taux de cession pour une quota-share
+
+
+# Helpers
+
+./snowflake-cli reset-tables --force
+
+uv run python examples/program_creation/create_aviation_old_republic.py

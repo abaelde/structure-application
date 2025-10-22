@@ -1,4 +1,3 @@
-# src/serialization/program_serializer.py
 from __future__ import annotations
 from typing import Dict, Any, List, Optional
 import pandas as pd
@@ -100,7 +99,7 @@ class ProgramSerializer:
 
         conditions_by_structure: Dict[Any, List[Dict[str, Any]]] = {}
         for cond in df_to_dicts(conditions_df):
-            key = cond.get(STRUCTURE_COLS.INSPER_ID)
+            key = cond.get(condition_COLS.INSPER_ID)
             if key is None:
                 raise ValueError("INSPER_ID_PRE is mandatory for all conditions.")
             conditions_by_structure.setdefault(key, []).append(cond)

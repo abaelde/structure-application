@@ -35,6 +35,11 @@ def join_multi(
 ) -> Optional[str]:
     if not values:
         return None
+    
+    # Si c'est déjà une chaîne, la retourner telle quelle
+    if isinstance(values, str):
+        return values
+    
     out, seen = [], set()
     for v in values:
         s = str(v).strip()

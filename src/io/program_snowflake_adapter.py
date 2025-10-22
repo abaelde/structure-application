@@ -107,7 +107,7 @@ class SnowflakeProgramIO:
             # 2. Lire les structures
             program_id = int(program_df.iloc[0]["REINSURANCE_PROGRAM_ID"])
             cur.execute(
-                f'SELECT * FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s',
+                f'SELECT * FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s',
                 (program_id,),
             )
             structures_rows = cur.fetchall()
@@ -115,11 +115,22 @@ class SnowflakeProgramIO:
                 structures_rows, columns=[desc[0] for desc in cur.description]
             )
 
-            # 3. Lire les conditions
+            # 3. Lire les conditions (via les structures)
+            # D'abord récupérer les IDs des structures du programme
             cur.execute(
-                f'SELECT * FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE PROGRAM_ID=%s',
+                f'SELECT RP_STRUCTURE_ID FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s',
                 (program_id,),
             )
+            structure_ids = [row[0] for row in cur.fetchall()]
+            
+            if structure_ids:
+                placeholders = ','.join(['%s'] * len(structure_ids))
+                cur.execute(
+                    f'SELECT * FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE INSPER_ID_PRE IN ({placeholders})',
+                    structure_ids,
+                )
+            else:
+                cur.execute(f'SELECT * FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE 1=0')
             conditions_rows = cur.fetchall()
             conditions_df = pd.DataFrame(
                 conditions_rows, columns=[desc[0] for desc in cur.description]
@@ -175,12 +186,20 @@ class SnowflakeProgramIO:
                             f'DELETE FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s',
                             (existing,),
                         )
+                        # Supprimer les conditions via les structures
                         cur.execute(
-                            f'DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE PROGRAM_ID=%s',
+                            f'SELECT RP_STRUCTURE_ID FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s',
                             (existing,),
                         )
+                        structure_ids = [row[0] for row in cur.fetchall()]
+                        if structure_ids:
+                            placeholders = ','.join(['%s'] * len(structure_ids))
+                            cur.execute(
+                                f'DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE INSPER_ID_PRE IN ({placeholders})',
+                                structure_ids,
+                            )
                         cur.execute(
-                            f'DELETE FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s',
+                            f'DELETE FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s',
                             (existing,),
                         )
                         cur.execute(
@@ -209,7 +228,6 @@ class SnowflakeProgramIO:
                 dims = condition_dims_in(conditions_df)
 
                 condition_defining_cols = [
-                    "INSPER_ID_PRE",
                     "CESSION_PCT",
                     "LIMIT_100",
                     "ATTACHMENT_POINT_100",
@@ -222,48 +240,69 @@ class SnowflakeProgramIO:
                 for c in condition_defining_cols:
                     if c in conditions_df.columns and not conditions_df[c].isna().all():
                         group_cols.append(c)
-                conditions_compact = compact_multivalue(
-                    conditions_df, dims=dims, group_cols=group_cols
-                )
+                # Ne pas compacter les conditions pour préserver INSPER_ID_PRE
+                conditions_compact = conditions_df.copy()
 
                 frames = ProgramFrames(
                     program_df, structures_df, conditions_compact, exclusions_df
                 )
                 exclusions_encoded = frames.for_csv().exclusions
 
-                # c) Injecter PROGRAM_ID
+                # c) Injecter RP_ID et mapper les colonnes
                 structures_out = frames.structures.copy()
                 conditions_out = frames.conditions.copy()  # Garde les listes natives
                 exclusions_out = exclusions_encoded.copy()
+                
+                # Mapping des colonnes pour structures
                 if "REINSURANCE_PROGRAM_ID" in structures_out.columns:
-                    structures_out["PROGRAM_ID"] = program_id
+                    structures_out["RP_ID"] = program_id
                     structures_out.drop(
                         columns=["REINSURANCE_PROGRAM_ID"],
                         inplace=True,
                         errors="ignore",
                     )
                 else:
-                    structures_out["PROGRAM_ID"] = program_id
-                conditions_out["PROGRAM_ID"] = program_id
+                    structures_out["RP_ID"] = program_id
+                
+                # Mapping des noms de colonnes pour structures (ancien -> nouveau)
+                structure_column_mapping = {
+                    "INSPER_ID_PRE": "RP_STRUCTURE_ID",  # Mapper vers la clé primaire
+                    "BUSINESS_TITLE": "RP_STRUCTURE_NAME",
+                    "INSPER_CLAIM_BASIS_CD": "CLAIMS_BASIS", 
+                    "INSPER_EFFECTIVE_DATE": "EFFECTIVE_DATE",
+                    "INSPER_EXPIRY_DATE": "EXPIRY_DATE",
+                    "INSPER_PREDECESSOR_TITLE": "PREDECESSOR_TITLE",
+                }
+                structures_out = structures_out.rename(columns=structure_column_mapping)
+                
+                # Les conditions n'ont plus RP_ID, elles sont liées via INSPER_ID_PRE
                 exclusions_out["RP_ID"] = program_id
+                
+                # Mapping des noms de colonnes pour exclusions (ancien -> nouveau)
+                exclusion_column_mapping = {
+                    "BUSCL_ENTITY_NAME_CED": "ENTITY_NAME_CED",
+                    "POL_RISK_NAME_CED": "RISK_NAME",
+                }
+                exclusions_out = exclusions_out.rename(columns=exclusion_column_mapping)
 
                 # d) Garantir le jeu de colonnes attendu par les tables (ordre inclus)
                 structures_cols = [
-                    "PROGRAM_ID",
-                    "INSPER_ID_PRE",
-                    "BUSINESS_TITLE",
+                    "RP_ID",
+                    "RP_STRUCTURE_NAME",
                     "TYPE_OF_PARTICIPATION_CD",
-                    "INSPER_PREDECESSOR_TITLE",
-                    "INSPER_CLAIM_BASIS_CD",
-                    "INSPER_EFFECTIVE_DATE",
-                    "INSPER_EXPIRY_DATE",
-                    "INSPER_LAYER_NO",
-                    "INSPER_MAIN_CURRENCY_CD",
-                    "INSPER_UW_YEAR",
-                    "INSPER_COMMENT",
+                    "CLAIMS_BASIS",
+                    "EFFECTIVE_DATE",
+                    "EXPIRY_DATE",
+                    "PREDECESSOR_TITLE",
+                    "T_NUMBER",
+                    "LAYER_NUMBER",
+                    "INSURED_PERIOD_TYPE",
+                    "CLASS_OF_BUSINESS",
+                    "MAIN_CURRENCY",
+                    "UW_YEAR",
+                    "COMMENT",
                 ]
                 conditions_cols = [
-                    "PROGRAM_ID",
                     "INSPER_ID_PRE",
                     "SIGNED_SHARE_PCT",
                     "CESSION_PCT",
@@ -290,9 +329,10 @@ class SnowflakeProgramIO:
                     ],
                 ]
 
-                structures_out = self._ensure_columns(structures_out, structures_cols)
-                conditions_out = self._ensure_columns(conditions_out, conditions_cols)
-                exclusions_out = self._ensure_columns(exclusions_out, exclusions_cols)
+                # Ne pas réorganiser les colonnes - garder l'ordre naturel du DataFrame
+                # structures_out = self._ensure_columns(structures_out, structures_cols)
+                # conditions_out = self._ensure_columns(conditions_out, conditions_cols)
+                # exclusions_out = self._ensure_columns(exclusions_out, exclusions_cols)
 
                 # e) Ecriture (SQL direct pour éviter les problèmes write_pandas)
                 for name, df in [
