@@ -19,7 +19,7 @@ class Structure:
         cession_pct: Optional[float] = None,
         limit: Optional[float] = None,
         attachment: Optional[float] = None,
-        signed_share: Optional[float] = None,
+        signed_share: float = 1.0,
     ):
         self.structure_name = structure_name
         self.type_of_participation = type_of_participation
@@ -63,7 +63,7 @@ class Structure:
             cession_pct=self.cession_pct,
             attachment=self.attachment,
             limit=self.limit,
-            signed_share=(self.signed_share if self.signed_share is not None else 1.0),
+            signed_share=self.signed_share,
         )
 
     @staticmethod

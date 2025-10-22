@@ -15,7 +15,7 @@ def build_condition(
     cession_pct: Optional[float] = None,
     attachment: Optional[float] = None,
     limit: Optional[float] = None,
-    signed_share: Optional[float] = 1.0,
+    signed_share: float = 1.0,
     entity_name_ced: Optional[str] = None,
     pol_risk_name_ced: Optional[str] = None,
     country_cd: Optional[str | list[str]] = None,
