@@ -1,4 +1,8 @@
 # src/io/program_snowflake_adapter.py
+# IMPORTANT :
+# INSPER_ID_PRE / RP_STRUCTURE_ID sont des identifiants "locaux" au programme (1..n).
+# Toute lecture/suppression de RP_CONDITIONS DOIT être scopée par RP_ID via un JOIN avec RP_STRUCTURES.
+# Ne jamais filtrer RP_CONDITIONS uniquement par INSPER_ID_PRE avec IN (...).
 from __future__ import annotations
 from typing import Tuple, Optional, Dict, Any, List
 import pandas as pd
@@ -115,61 +119,54 @@ class SnowflakeProgramIO:
                 structures_rows, columns=[desc[0] for desc in cur.description]
             )
 
-            # 3. Lire les conditions (via les structures)
-            # D'abord récupérer les IDs des structures du programme
+            # 3. Lire les conditions (scopées par RP_ID via JOIN pour éviter les collisions inter-programmes)
             cur.execute(
-                f'SELECT RP_STRUCTURE_ID FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s',
+                f'''
+                SELECT 
+                    c.RP_CONDITION_ID,
+                    c.CED_ID_PRE,
+                    c.BUSINESS_ID_PRE,
+                    c.INSPER_ID_PRE,
+                    c.BUSCL_ENTITY_NAME_CED,
+                    c.POL_RISK_NAME_CED,
+                    c.BUSCL_COUNTRY_CD,
+                    c.BUSCL_COUNTRY,
+                    c.BUSCL_REGION,
+                    c.PRODUCT_TYPE_LEVEL_1,
+                    c.PRODUCT_TYPE_LEVEL_2,
+                    c.PRODUCT_TYPE_LEVEL_3,
+                    c.BUSCL_LIMIT_CURRENCY_CD,
+                    c.AAD_100,
+                    CAST(c.LIMIT_100 AS DOUBLE) AS LIMIT_100,
+                    CAST(c.LIMIT_FLOATER_100 AS DOUBLE) AS LIMIT_FLOATER_100,
+                    CAST(c.ATTACHMENT_POINT_100 AS DOUBLE) AS ATTACHMENT_POINT_100,
+                    c.OLW_100,
+                    c.LIMIT_AGG_100,
+                    CAST(c.CESSION_PCT AS DOUBLE) AS CESSION_PCT,
+                    CAST(c.RETENTION_PCT AS DOUBLE) AS RETENTION_PCT,
+                    c.SUPI_100,
+                    c.BUSCL_PREMIUM_CURRENCY_CD,
+                    c.BUSCL_PREMIUM_GROSS_NET_CD,
+                    CAST(c.PREMIUM_RATE_PCT AS DOUBLE) AS PREMIUM_RATE_PCT,
+                    c.PREMIUM_DEPOSIT_100,
+                    c.PREMIUM_MIN_100,
+                    c.BUSCL_LIABILITY_1_LINE_100,
+                    c.MAX_COVER_PCT,
+                    c.MIN_EXCESS_PCT,
+                    CAST(c.SIGNED_SHARE_PCT AS DOUBLE) AS SIGNED_SHARE_PCT,
+                    c.AVERAGE_LINE_SLAV_CED,
+                    c.PML_DEFAULT_PCT,
+                    c.LIMIT_EVENT,
+                    c.NO_OF_REINSTATEMENTS,
+                    c.INCLUDES_HULL,
+                    c.INCLUDES_LIABILITY
+                FROM "{db}"."{schema}"."{self.CONDITIONS}" c
+                JOIN "{db}"."{schema}"."{self.STRUCTURES}" s
+                  ON c.INSPER_ID_PRE = s.RP_STRUCTURE_ID
+                WHERE s.RP_ID = %s
+                ''',
                 (program_id,),
             )
-            structure_ids = [row[0] for row in cur.fetchall()]
-            
-            if structure_ids:
-                placeholders = ','.join(['%s'] * len(structure_ids))
-                cur.execute(
-                    f'''SELECT 
-                        RP_CONDITION_ID,
-                        CED_ID_PRE,
-                        BUSINESS_ID_PRE,
-                        INSPER_ID_PRE,
-                        BUSCL_ENTITY_NAME_CED,
-                        POL_RISK_NAME_CED,
-                        BUSCL_COUNTRY_CD,
-                        BUSCL_COUNTRY,
-                        BUSCL_REGION,
-                        PRODUCT_TYPE_LEVEL_1,
-                        PRODUCT_TYPE_LEVEL_2,
-                        PRODUCT_TYPE_LEVEL_3,
-                        BUSCL_LIMIT_CURRENCY_CD,
-                        AAD_100,
-                        CAST(LIMIT_100 AS DOUBLE) AS LIMIT_100,
-                        CAST(LIMIT_FLOATER_100 AS DOUBLE) AS LIMIT_FLOATER_100,
-                        CAST(ATTACHMENT_POINT_100 AS DOUBLE) AS ATTACHMENT_POINT_100,
-                        OLW_100,
-                        LIMIT_AGG_100,
-                        CAST(CESSION_PCT AS DOUBLE) AS CESSION_PCT,
-                        CAST(RETENTION_PCT AS DOUBLE) AS RETENTION_PCT,
-                        SUPI_100,
-                        BUSCL_PREMIUM_CURRENCY_CD,
-                        BUSCL_PREMIUM_GROSS_NET_CD,
-                        CAST(PREMIUM_RATE_PCT AS DOUBLE) AS PREMIUM_RATE_PCT,
-                        PREMIUM_DEPOSIT_100,
-                        PREMIUM_MIN_100,
-                        BUSCL_LIABILITY_1_LINE_100,
-                        MAX_COVER_PCT,
-                        MIN_EXCESS_PCT,
-                        CAST(SIGNED_SHARE_PCT AS DOUBLE) AS SIGNED_SHARE_PCT,
-                        AVERAGE_LINE_SLAV_CED,
-                        PML_DEFAULT_PCT,
-                        LIMIT_EVENT,
-                        NO_OF_REINSTATEMENTS,
-                        INCLUDES_HULL,
-                        INCLUDES_LIABILITY
-                    FROM "{db}"."{schema}"."{self.CONDITIONS}" 
-                    WHERE INSPER_ID_PRE IN ({placeholders})''',
-                    structure_ids,
-                )
-            else:
-                cur.execute(f'SELECT * FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE 1=0')
             conditions_rows = cur.fetchall()
             conditions_df = pd.DataFrame(
                 conditions_rows, columns=[desc[0] for desc in cur.description]
@@ -225,18 +222,16 @@ class SnowflakeProgramIO:
                             f'DELETE FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s',
                             (existing,),
                         )
-                        # Supprimer les conditions via les structures
+                        # Supprimer les conditions en se limitant au programme via JOIN (pas de IN (...))
                         cur.execute(
-                            f'SELECT RP_STRUCTURE_ID FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s',
+                            f'''
+                            DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" c
+                            USING "{db}"."{schema}"."{self.STRUCTURES}" s
+                            WHERE c.INSPER_ID_PRE = s.RP_STRUCTURE_ID
+                              AND s.RP_ID = %s
+                            ''',
                             (existing,),
                         )
-                        structure_ids = [row[0] for row in cur.fetchall()]
-                        if structure_ids:
-                            placeholders = ','.join(['%s'] * len(structure_ids))
-                            cur.execute(
-                                f'DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE INSPER_ID_PRE IN ({placeholders})',
-                                structure_ids,
-                            )
                         cur.execute(
                             f'DELETE FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s',
                             (existing,),
@@ -350,21 +345,91 @@ class SnowflakeProgramIO:
                 # conditions_out = self._ensure_columns(conditions_out, conditions_cols)
                 # exclusions_out = self._ensure_columns(exclusions_out, exclusions_cols)
 
-                # e) Ecriture (SQL direct pour éviter les problèmes write_pandas)
-                for name, df in [
-                    (self.STRUCTURES, structures_out),
-                    (self.CONDITIONS, conditions_out),
-                    (self.EXCLUSIONS, exclusions_out),
-                ]:
-                    if not df.empty:
-                        for _, row in df.iterrows():
+                # e) Écriture en 3 étapes : STRUCTURES -> mapping -> CONDITIONS -> EXCLUSIONS
+
+                # (1) Insérer les STRUCTURES en laissant Snowflake générer RP_STRUCTURE_ID (AUTOINCREMENT)
+                #     => on N'INSÈRE PAS la colonne "RP_STRUCTURE_ID"
+                if not structures_out.empty:
+                    # Sanity: on s'appuie sur l'unicité du nom dans un programme pour remapper ensuite
+                    if structures_out["RP_STRUCTURE_NAME"].duplicated().any():
+                        raise ValueError(
+                            "RP_STRUCTURE_NAME must be unique within a program to remap generated IDs."
+                        )
+                    # On garde un mapping local_id -> name avant drop
+                    local_to_name = dict(
+                        zip(
+                            structures_out.get("RP_STRUCTURE_ID", pd.Series(range(1, len(structures_out)+1))),
+                            structures_out["RP_STRUCTURE_NAME"],
+                        )
+                    )
+                    structures_for_insert = structures_out.drop(
+                        columns=["RP_STRUCTURE_ID"], errors="ignore"
+                    )
+                    for _, row in structures_for_insert.iterrows():
+                        columns = list(row.index)
+                        values = list(row.values)
+                        cleaned_values = self._clean_values_for_sql(values)
+                        placeholders = ", ".join(["%s"] * len(cleaned_values))
+                        columns_str = ", ".join([f'"{col}"' for col in columns])
+                        insert_sql = (
+                            f'INSERT INTO "{db}"."{schema}"."{self.STRUCTURES}" '
+                            f'({columns_str}) VALUES ({placeholders})'
+                        )
+                        cur.execute(insert_sql, cleaned_values)
+
+                    # Récupérer les IDs générés : name -> RP_STRUCTURE_ID pour ce programme
+                    cur.execute(
+                        f'SELECT RP_STRUCTURE_ID, RP_STRUCTURE_NAME '
+                        f'FROM "{db}"."{schema}"."{self.STRUCTURES}" '
+                        f'WHERE RP_ID=%s',
+                        (program_id,),
+                    )
+                    rows = cur.fetchall()
+                    name_to_dbid = {r[1]: int(r[0]) for r in rows}
+                    # Mapping local -> dbid via le nom
+                    local_to_dbid = {loc: name_to_dbid.get(nm) for loc, nm in local_to_name.items()}
+                    if any(v is None for v in local_to_dbid.values()):
+                        missing = [k for k, v in local_to_dbid.items() if v is None]
+                        raise ValueError(
+                            f"Cannot map local structure IDs to generated IDs (missing for locals: {missing})."
+                        )
+
+                    # (2) Remapper INSPER_ID_PRE des CONDITIONS vers les IDs générés
+                    if not conditions_out.empty:
+                        conditions_out = conditions_out.copy()
+                        conditions_out["INSPER_ID_PRE"] = conditions_out["INSPER_ID_PRE"].map(local_to_dbid)
+                        if conditions_out["INSPER_ID_PRE"].isna().any():
+                            raise ValueError("Some conditions could not be mapped to a generated structure ID.")
+                        # Insérer les CONDITIONS
+                        for _, row in conditions_out.iterrows():
                             columns = list(row.index)
                             values = list(row.values)
                             cleaned_values = self._clean_values_for_sql(values)
                             placeholders = ", ".join(["%s"] * len(cleaned_values))
                             columns_str = ", ".join([f'"{col}"' for col in columns])
-                            insert_sql = f'INSERT INTO "{db}"."{schema}"."{name}" ({columns_str}) VALUES ({placeholders})'
+                            insert_sql = (
+                                f'INSERT INTO "{db}"."{schema}"."{self.CONDITIONS}" '
+                                f'({columns_str}) VALUES ({placeholders})'
+                            )
                             cur.execute(insert_sql, cleaned_values)
+                else:
+                    # Pas de structure -> pas de condition
+                    if not conditions_out.empty:
+                        raise ValueError("Conditions provided but no structures to attach to.")
+
+                # (3) Insérer les EXCLUSIONS (liées au RP_ID)
+                if not exclusions_out.empty:
+                    for _, row in exclusions_out.iterrows():
+                        columns = list(row.index)
+                        values = list(row.values)
+                        cleaned_values = self._clean_values_for_sql(values)
+                        placeholders = ", ".join(["%s"] * len(cleaned_values))
+                        columns_str = ", ".join([f'"{col}"' for col in columns])
+                        insert_sql = (
+                            f'INSERT INTO "{db}"."{schema}"."{self.EXCLUSIONS}" '
+                            f'({columns_str}) VALUES ({placeholders})'
+                        )
+                        cur.execute(insert_sql, cleaned_values)
             finally:
                 cur.close()
         finally:
