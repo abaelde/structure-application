@@ -35,12 +35,6 @@ class BordereauManager:
             return SnowflakeBordereauIO()
         raise ValueError(f"Unknown backend: {backend}")
 
-    def switch_backend(self, backend: Backend) -> None:
-        self.backend = backend
-        self.io = self._make_io(backend)
-        self._loaded = None
-        self._source = None
-
     def load(
         self,
         source: str,
