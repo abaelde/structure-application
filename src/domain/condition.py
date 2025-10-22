@@ -160,6 +160,19 @@ class Condition:
 
         return "\n".join(lines)
 
+    def dimension_signature(self, dimension_columns: list[str]) -> tuple:
+        """Generate a unique signature for this condition based on dimensions and flags.
+        
+        This signature is used to deduplicate conditions that have the same
+        dimensional filters and hull/liability flags, regardless of financial terms.
+        """
+        vals = []
+        for dim in dimension_columns:
+            v = self.get_values(dim)  # -> list[str] | None
+            vals.append((dim, tuple(sorted(v)) if v else ()))
+        flags = (self.includes_hull, self.includes_liability)
+        return tuple(vals) + (("flags", flags),)
+
     def rescale_for_predecessor(
         self, retention_factor: float
     ) -> tuple[Self, Dict[str, Any]]:

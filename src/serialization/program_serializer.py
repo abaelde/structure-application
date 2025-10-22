@@ -211,10 +211,17 @@ class ProgramSerializer:
         )
 
         structures_rows, conditions_rows, field_links_rows = [], [], []
+
+        # Pool global de conditions uniques : signature -> RP_CONDITION_ID
+        pool: dict[tuple, int] = {}
+        next_condition_id = 1
+
+        # Signature -> row Snowflake (une seule fois par signature)
+        unique_condition_rows: dict[tuple, dict] = {}
+
         insper = 1
-        condition_id = 1
         for st in program.structures:
-            # Avec la nouvelle architecture, les valeurs par défaut sont dans la structure elle-même
+            # 1) Structure (défauts financiers au niveau structure)
             structures_rows.append({
                 "RP_STRUCTURE_ID": insper,
                 "RP_STRUCTURE_NAME": st.structure_name,
@@ -228,31 +235,44 @@ class ProgramSerializer:
                 "CESSION_PCT": st.cession_pct,
                 "SIGNED_SHARE_PCT": st.signed_share,
             })
+
+            phys_map = builder_to_physical_map(program.underwriting_department)
+
+            # 2) Conditions rattachées à cette structure (réutilisées via pool)
             for c in st.conditions:
-                d = c.to_dict()
-                row = {
-                    "RP_CONDITION_ID": condition_id,
-                    "INCLUDES_HULL": d.get("INCLUDES_HULL"),
-                    "INCLUDES_LIABILITY": d.get("INCLUDES_LIABILITY"),
-                }
-                # Calculer le mapping une seule fois
-                phys_map = builder_to_physical_map(program.underwriting_department)
-                for dim in program.dimension_columns:
-                    # Mapping des noms logiques vers les noms de colonnes Snowflake
-                    snowflake_col = phys_map.get(dim, dim)
-                    value = d.get(dim)
-                    # Convertir les listes en chaînes séparées par des points-virgules
-                    if isinstance(value, list):
-                        row[snowflake_col] = ';'.join(str(v) for v in value)
-                    else:
-                        row[snowflake_col] = value
-                conditions_rows.append(row)
-                
-                # Créer les liens RP_STRUCTURE_FIELD_LINK pour les overrides
-                self._create_field_links(field_links_rows, condition_id, insper, c, st)
-                
-                condition_id += 1
+                sig = c.dimension_signature(program.dimension_columns)
+                if sig not in pool:
+                    cond_id = next_condition_id
+                    pool[sig] = cond_id
+                    next_condition_id += 1
+
+                    # construire UNE LIGNE condition (dimensions + flags uniquement)
+                    row = {
+                        "RP_CONDITION_ID": cond_id,
+                        "INCLUDES_HULL": c.get("INCLUDES_HULL"),
+                        "INCLUDES_LIABILITY": c.get("INCLUDES_LIABILITY"),
+                    }
+                    for dim in program.dimension_columns:
+                        snow_col = phys_map.get(dim, dim)
+                        v = c.get_values(dim)
+                        row[snow_col] = ';'.join(v) if v else None
+                    unique_condition_rows[sig] = row
+
+                cond_id = pool[sig]
+
+                # 3) Field links = overrides financiers (différences condition vs défauts structure)
+                _overrides = st.overrides_for(c.to_dict())
+                for field_name, new_value in _overrides.items():
+                    field_links_rows.append({
+                        "RP_CONDITION_ID": cond_id,
+                        "RP_STRUCTURE_ID": insper,
+                        "FIELD_NAME": field_name,
+                        "NEW_VALUE": new_value,
+                    })
             insper += 1
+
+        # Émission finale des DataFrames
+        conditions_rows = list(unique_condition_rows.values())
 
         exclusions_df = self._exclusions_to_df(program)
         return {
@@ -263,19 +283,6 @@ class ProgramSerializer:
             "field_links": pd.DataFrame(field_links_rows),
         }
 
-    def _create_field_links(self, field_links_rows: list, condition_id: int, structure_id: int, condition, structure):
-        """Créer les liens RP_STRUCTURE_FIELD_LINK pour les overrides de valeurs financières."""
-        # Utiliser la logique du domaine pour identifier les overrides
-        overrides = structure.overrides_for(condition.to_dict())
-        
-        # Créer un lien pour chaque override
-        for field_name, new_value in overrides.items():
-            field_links_rows.append({
-                "RP_CONDITION_ID": condition_id,
-                "RP_STRUCTURE_ID": structure_id,
-                "FIELD_NAME": field_name,
-                "NEW_VALUE": new_value,
-            })
 
     def _exclusions_to_df(self, program: Program) -> pd.DataFrame:
         from .codecs import MULTI_VALUE_SEPARATOR
