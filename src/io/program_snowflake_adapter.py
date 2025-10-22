@@ -9,7 +9,6 @@ import pandas as pd
 import snowflake.connector
 from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 from src.serialization.program_frames import ProgramFrames, condition_dims_in
-from src.serialization.compact import compact_multivalue
 
 
 class SnowflakeProgramIO:
@@ -124,18 +123,13 @@ class SnowflakeProgramIO:
                 f'''
                 SELECT 
                     c.RP_CONDITION_ID,
-                    c.CED_ID_PRE,
-                    c.BUSINESS_ID_PRE,
                     c.INSPER_ID_PRE,
-                    c.BUSCL_ENTITY_NAME_CED,
-                    c.POL_RISK_NAME_CED,
-                    c.BUSCL_COUNTRY_CD,
-                    c.BUSCL_COUNTRY,
-                    c.BUSCL_REGION,
+                    c.COUNTRY_ID,
+                    c.REGION_ID,
                     c.PRODUCT_TYPE_LEVEL_1,
                     c.PRODUCT_TYPE_LEVEL_2,
                     c.PRODUCT_TYPE_LEVEL_3,
-                    c.BUSCL_LIMIT_CURRENCY_CD,
+                    c.CURRENCY_ID,
                     CAST(c.LIMIT_100 AS DOUBLE) AS LIMIT_100,
                     CAST(c.ATTACHMENT_POINT_100 AS DOUBLE) AS ATTACHMENT_POINT_100,
                     CAST(c.CESSION_PCT AS DOUBLE) AS CESSION_PCT,
@@ -284,7 +278,7 @@ class SnowflakeProgramIO:
                     "CLAIMS_BASIS",
                     "EFFECTIVE_DATE",
                     "EXPIRY_DATE",
-                    "PREDECESSOR_TITLE",
+                    "RP_STRUCTURE_ID_PREDECESSOR",
                     "T_NUMBER",
                     "LAYER_NUMBER",
                     "INSURED_PERIOD_TYPE",
@@ -318,7 +312,7 @@ class SnowflakeProgramIO:
                     *[
                         d
                         for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()
-                        if d in exclusions_out.columns and d not in ["BUSCL_ENTITY_NAME_CED", "POL_RISK_NAME_CED"]
+                        if d in exclusions_out.columns
                     ],
                 ]
 

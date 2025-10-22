@@ -146,7 +146,7 @@ class ProgramSerializer:
         program_df = pd.DataFrame(
             {
                 "TITLE": [program.name],
-                "UW_LOB": [program.underwriting_department],
+                "UW_LOB_ID": [program.underwriting_department],
                 "ACTIVE_IND": [True],  # Colonne requise par Snowflake
             }
         )
@@ -159,7 +159,7 @@ class ProgramSerializer:
                     "RP_STRUCTURE_ID": insper,
                     "RP_STRUCTURE_NAME": st.structure_name,
                     "TYPE_OF_PARTICIPATION": st.type_of_participation,
-                    "PREDECESSOR_TITLE": st.predecessor_title,
+                    "RP_STRUCTURE_ID_PREDECESSOR": st.predecessor_title,
                     "CLAIMS_BASIS": st.claim_basis,
                     "EFFECTIVE_DATE": st.inception_date,
                     "EXPIRY_DATE": st.expiry_date,
@@ -177,7 +177,14 @@ class ProgramSerializer:
                     "INCLUDES_LIABILITY": d.get("INCLUDES_LIABILITY"),
                 }
                 for dim in program.dimension_columns:
-                    row[dim] = d.get(dim)
+                    # Mapping des noms logiques vers les noms de colonnes Snowflake
+                    mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS.get(dim, dim)
+                    if isinstance(mapping, dict):
+                        # Mapping dépendant du LOB (ex: currency)
+                        snowflake_col = mapping.get(program.underwriting_department, dim)
+                    else:
+                        snowflake_col = mapping
+                    row[snowflake_col] = d.get(dim)
                 conditions_rows.append(row)
             insper += 1
 

@@ -356,6 +356,8 @@ uv run scripts/create_correct_ddl.py
 
 ./snowflake-cli reset-tables --force
 
+./snowflake-cli status
+
 uv run python examples/program_creation/create_aviation_old_republic.py
 
 uv run python examples/program_creation/create_quota_share_with_exclusion.py

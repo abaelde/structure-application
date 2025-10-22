@@ -53,7 +53,7 @@ COLUMNS: Dict[str, ColumnSpec] = {
     "EXPIRE_DT": ColumnSpec("EXPIRE_DT", "meta", required=True, coerce=_to_date),
     "line_of_business": ColumnSpec("line_of_business", "meta"),
     # Dimension mappings
-    "BUSCL_COUNTRY_CD": ColumnSpec("BUSCL_COUNTRY_CD", "dimension"),
+    "BUSCL_COUNTRY_CD": ColumnSpec("COUNTRY_ID", "dimension"),
     "BUSCL_REGION": ColumnSpec("BUSCL_REGION", "dimension"),
     "PRODUCT_TYPE_LEVEL_1": ColumnSpec("PRODUCT_TYPE_LEVEL_1", "dimension"),
     "PRODUCT_TYPE_LEVEL_2": ColumnSpec("PRODUCT_TYPE_LEVEL_2", "dimension"),
@@ -115,18 +115,16 @@ def exposure_rules_for_lob(lob: str) -> Dict[str, str]:
 # ——— Mapping Program -> Bordereau (source de vérité unique) ———
 PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, object] = {
     # identiques
-    "BUSCL_COUNTRY_CD": "BUSCL_COUNTRY_CD",
-    "BUSCL_REGION": "BUSCL_REGION",
+    "BUSCL_COUNTRY_CD": "COUNTRY_ID",
+    "BUSCL_REGION": "REGION_ID",
     "PRODUCT_TYPE_LEVEL_1": "PRODUCT_TYPE_LEVEL_1",
     "PRODUCT_TYPE_LEVEL_2": "PRODUCT_TYPE_LEVEL_2",
     "PRODUCT_TYPE_LEVEL_3": "PRODUCT_TYPE_LEVEL_3",
-    "BUSCL_ENTITY_NAME_CED": "BUSCL_ENTITY_NAME_CED",
-    "POL_RISK_NAME_CED": "POL_RISK_NAME_CED",
     # currency logique unique -> dépend du LOB
     "BUSCL_LIMIT_CURRENCY_CD": {
-        "aviation": "HULL_CURRENCY",
-        "casualty": "CURRENCY",
-        "test": "CURRENCY",
+        "aviation": "CURRENCY_ID",
+        "casualty": "CURRENCY_ID",
+        "test": "CURRENCY_ID",
     },
 }
 

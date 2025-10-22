@@ -66,7 +66,7 @@ class RunSnowflakeIO:
           POLICY_RUN_ID           STRING,
           STRUCTURE_NAME          STRING,
           TYPE_OF_PARTICIPATION   STRING,
-          PREDECESSOR_TITLE       STRING,
+          RP_STRUCTURE_ID_PREDECESSOR       STRING,
           CLAIM_BASIS             STRING,
           PERIOD_START            STRING,
           PERIOD_END              STRING,

@@ -137,7 +137,7 @@ def list_programs() -> list:
 
         cur.execute(
             f"""
-            SELECT REINSURANCE_PROGRAM_ID, TITLE, CREATED_AT, UPDATED_AT 
+            SELECT REINSURANCE_PROGRAM_ID, TITLE, CREATED_AT, MODIFIED_AT 
             FROM "{config.database}"."{config.schema}"."REINSURANCE_PROGRAM" 
             ORDER BY CREATED_AT DESC
         """

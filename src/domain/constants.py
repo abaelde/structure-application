@@ -45,12 +45,12 @@ SHEETS = (
 
 PROGRAM_COLS = SimpleNamespace(
     TITLE="TITLE",
-    UW_DEPARTMENT_CODE="UW_LOB", # AURE : pas certains si c'est le bon nom de colonne
+    UW_DEPARTMENT_CODE="UW_LOB_ID", # AURE : pas certains si c'est le bon nom de colonne
 )
 
 STRUCTURE_COLS = SimpleNamespace(
     NAME="RP_STRUCTURE_NAME",
-    PREDECESSOR="PREDECESSOR_TITLE",
+    PREDECESSOR="RP_STRUCTURE_ID_PREDECESSOR",
     TYPE="TYPE_OF_PARTICIPATION",
     CLAIM_BASIS="CLAIMS_BASIS",
     INCEPTION="EFFECTIVE_DATE",
