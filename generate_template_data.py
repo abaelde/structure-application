@@ -27,6 +27,32 @@ CEDENT_NAMES = [
     "BERKSHIRE HATHAWAY"
 ]
 
+# Mapping des cédantes avec leurs pays et monnaies principales
+CEDENT_COUNTRIES = {
+    "AXA": ["France", "Germany", "UK", "USA"],
+    "ALLIANZ": ["Germany", "Austria", "Switzerland", "USA"],
+    "MUNICH RE": ["Germany", "UK", "USA", "Singapore"],
+    "SWISS RE": ["Switzerland", "UK", "USA", "Germany"],
+    "HANNOVER RE": ["Germany", "UK", "USA", "France"],
+    "SCOR": ["France", "Germany", "UK", "USA"],
+    "GENERALI": ["Italy", "Germany", "France", "Austria"],
+    "ZURICH": ["Switzerland", "UK", "USA", "Germany"],
+    "CHUBB": ["USA", "UK", "Switzerland", "Singapore"],
+    "BERKSHIRE HATHAWAY": ["USA", "UK", "Germany", "Switzerland"]
+}
+
+# Mapping des pays avec leurs monnaies
+COUNTRY_CURRENCIES = {
+    "France": "EUR",
+    "Germany": "EUR", 
+    "Austria": "EUR",
+    "Italy": "EUR",
+    "Switzerland": "CHF",
+    "UK": "GBP",
+    "USA": "USD",
+    "Singapore": "SGD"
+}
+
 AIRLINE_NAMES = [
     "AIR FRANCE-KLM",
     "LUFTHANSA GROUP",
@@ -110,15 +136,32 @@ def generate_exclusion_data() -> tuple:
     else:
         return "excluded", random.choice(EXCLUSION_REASONS[1:])  # Exclure la chaîne vide
 
+def generate_cedent_location_data(cedent_name: str) -> tuple:
+    """Génère le pays et la monnaie pour une cédante donnée."""
+    # Choisir un pays parmi ceux disponibles pour cette cédante
+    available_countries = CEDENT_COUNTRIES[cedent_name]
+    country = random.choice(available_countries)
+    
+    # Obtenir la monnaie correspondante
+    currency = COUNTRY_CURRENCIES[country]
+    
+    return country, currency
+
 def generate_record() -> Dict[str, Any]:
     """Génère un enregistrement complet."""
     exposure_data = generate_exposure_data()
     policy_start, policy_end = generate_policy_dates()
     exclusion_status, exclusion_reason = generate_exclusion_data()
     
+    # Générer la cédante et ses données géographiques
+    cedent_name = random.choice(CEDENT_NAMES)
+    country, currency = generate_cedent_location_data(cedent_name)
+    
     return {
         "insured_name": random.choice(AIRLINE_NAMES),
-        "cedent_name": random.choice(CEDENT_NAMES),
+        "cedent_name": cedent_name,
+        "country": country,
+        "currency": currency,
         "exposure": exposure_data["exposure"],
         "total_ceded_by_cedent": exposure_data["total_ceded_by_cedent"],
         "ceded_to_reinsurer": exposure_data["ceded_to_reinsurer"],
@@ -151,8 +194,16 @@ def main():
     print(f"   - Nombre d'enregistrements : {len(df)}")
     print(f"   - Nombre de cédantes uniques : {df['cedent_name'].nunique()}")
     print(f"   - Nombre d'airlines uniques : {df['insured_name'].nunique()}")
+    print(f"   - Nombre de pays uniques : {df['country'].nunique()}")
+    print(f"   - Nombre de monnaies uniques : {df['currency'].nunique()}")
     print(f"   - Polices exclues : {len(df[df['exclusion_status'] == 'excluded'])}")
     print(f"   - Polices incluses : {len(df[df['exclusion_status'] == 'included'])}")
+    
+    # Afficher la distribution par pays et monnaie
+    print(f"\n🌍 Distribution par pays :")
+    print(df['country'].value_counts().head())
+    print(f"\n💰 Distribution par monnaie :")
+    print(df['currency'].value_counts())
     
     # Afficher un échantillon
     print(f"\n📋 Échantillon des données :")
