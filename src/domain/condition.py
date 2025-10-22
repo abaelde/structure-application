@@ -1,17 +1,17 @@
 from typing import Dict, Any, List, Optional, Self
 import pandas as pd
-from .constants import condition_COLS
+from .constants import CONDITION_COLS
 
 
 class Condition:
     def __init__(self, data: Dict[str, Any]):
         self._data = data.copy()
-        self.cession_pct = data.get(condition_COLS.CESSION_PCT)
-        self.attachment = data.get(condition_COLS.ATTACHMENT)
-        self.limit = data.get(condition_COLS.LIMIT)
-        self.signed_share = data.get(condition_COLS.SIGNED_SHARE)
-        self.includes_hull = data.get(condition_COLS.INCLUDES_HULL)
-        self.includes_liability = data.get(condition_COLS.INCLUDES_LIABILITY)
+        self.cession_pct = data.get(CONDITION_COLS.CESSION_PCT)
+        self.attachment = data.get(CONDITION_COLS.ATTACHMENT)
+        self.limit = data.get(CONDITION_COLS.LIMIT)
+        self.signed_share = data.get(CONDITION_COLS.SIGNED_SHARE)
+        self.includes_hull = data.get(CONDITION_COLS.INCLUDES_HULL)
+        self.includes_liability = data.get(CONDITION_COLS.INCLUDES_LIABILITY)
         self._validate()
 
     def _validate(self):
@@ -45,17 +45,17 @@ class Condition:
 
     def __setitem__(self, key: str, value: Any):
         self._data[key] = value
-        if key == condition_COLS.CESSION_PCT:
+        if key == CONDITION_COLS.CESSION_PCT:
             self.cession_pct = value
-        elif key == condition_COLS.ATTACHMENT:
+        elif key == CONDITION_COLS.ATTACHMENT:
             self.attachment = value
-        elif key == condition_COLS.LIMIT:
+        elif key == CONDITION_COLS.LIMIT:
             self.limit = value
-        elif key == condition_COLS.SIGNED_SHARE:
+        elif key == CONDITION_COLS.SIGNED_SHARE:
             self.signed_share = value
-        elif key == condition_COLS.INCLUDES_HULL:
+        elif key == CONDITION_COLS.INCLUDES_HULL:
             self.includes_hull = value
-        elif key == condition_COLS.INCLUDES_LIABILITY:
+        elif key == CONDITION_COLS.INCLUDES_LIABILITY:
             self.includes_liability = value
 
     def __contains__(self, key: str) -> bool:
@@ -108,28 +108,28 @@ class Condition:
         lines = []
 
         if type_of_participation == "quota_share":
-            if pd.notna(self.get(condition_COLS.CESSION_PCT)):
-                cession_pct = self[condition_COLS.CESSION_PCT]
+            if pd.notna(self.get(CONDITION_COLS.CESSION_PCT)):
+                cession_pct = self[CONDITION_COLS.CESSION_PCT]
                 lines.append(
                     f"{indent}Cession rate: {cession_pct:.1%} ({cession_pct * 100:.1f}%)"
                 )
 
-            if pd.notna(self.get(condition_COLS.LIMIT)):
-                lines.append(f"{indent}Limit: {self[condition_COLS.LIMIT]:,.2f}M")
+            if pd.notna(self.get(CONDITION_COLS.LIMIT)):
+                lines.append(f"{indent}Limit: {self[CONDITION_COLS.LIMIT]:,.2f}M")
 
         elif type_of_participation == "excess_of_loss":
-            if pd.notna(self.get(condition_COLS.ATTACHMENT)) and pd.notna(
-                self.get(condition_COLS.LIMIT)
+            if pd.notna(self.get(CONDITION_COLS.ATTACHMENT)) and pd.notna(
+                self.get(CONDITION_COLS.LIMIT)
             ):
-                attachment = self[condition_COLS.ATTACHMENT]
-                limit = self[condition_COLS.LIMIT]
+                attachment = self[CONDITION_COLS.ATTACHMENT]
+                limit = self[CONDITION_COLS.LIMIT]
                 lines.append(f"{indent}Coverage: {limit:,.2f}M xs {attachment:,.2f}M")
                 lines.append(
                     f"{indent}Range: {attachment:,.2f}M to {attachment + limit:,.2f}M"
                 )
 
-        if pd.notna(self.get(condition_COLS.SIGNED_SHARE)):
-            reinsurer_share = self[condition_COLS.SIGNED_SHARE]
+        if pd.notna(self.get(CONDITION_COLS.SIGNED_SHARE)):
+            reinsurer_share = self[CONDITION_COLS.SIGNED_SHARE]
             lines.append(
                 f"{indent}Reinsurer share: {reinsurer_share:.2%} ({reinsurer_share * 100:.2f}%)"
             )
@@ -174,14 +174,14 @@ class Condition:
 
         if self.has_attachment():
             rescaling_info["original_attachment"] = self.attachment
-            rescaled_condition[condition_COLS.ATTACHMENT] = (
+            rescaled_condition[CONDITION_COLS.ATTACHMENT] = (
                 self.attachment * retention_factor
             )
             rescaling_info["rescaled_attachment"] = rescaled_condition.attachment
 
         if self.has_limit():
             rescaling_info["original_limit"] = self.limit
-            rescaled_condition[condition_COLS.LIMIT] = self.limit * retention_factor
+            rescaled_condition[CONDITION_COLS.LIMIT] = self.limit * retention_factor
             rescaling_info["rescaled_limit"] = rescaled_condition.limit
 
         return rescaled_condition, rescaling_info

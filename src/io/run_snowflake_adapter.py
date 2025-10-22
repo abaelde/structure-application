@@ -15,13 +15,26 @@ class RunSnowflakeIO:
     STRUCTURES = "RUN_POLICY_STRUCTURES"
 
     def _parse_dsn(self, dsn: str) -> Tuple[str, str]:
-        if not dsn.lower().startswith("snowflake://"):
+        from urllib.parse import urlparse
+        
+        p = urlparse(dsn)
+        if p.scheme.lower() != "snowflake":
             raise ValueError("Invalid DSN")
-        rest = dsn[len("snowflake://") :]
-        parts = rest.split(".")
-        if len(parts) != 2:
-            raise ValueError("DSN must be snowflake://DB.SCHEMA")
-        return parts[0], parts[1]
+        
+        # Handle both formats: snowflake://DB.SCHEMA and snowflake://host/DB.SCHEMA
+        if p.path and p.path != "/":
+            # Format: snowflake://host/DB.SCHEMA
+            path_without_slash = p.path.lstrip("/")
+            if path_without_slash.count(".") != 1:
+                raise ValueError("DSN must be snowflake://DB.SCHEMA")
+            db, schema = path_without_slash.split(".")
+        else:
+            # Format: snowflake://DB.SCHEMA
+            if not p.netloc or p.netloc.count(".") != 1:
+                raise ValueError("DSN must be snowflake://DB.SCHEMA")
+            db, schema = p.netloc.split(".")
+        
+        return db, schema
 
     def _connect(self, params: Optional[Dict[str, Any]]):
         import snowflake.connector

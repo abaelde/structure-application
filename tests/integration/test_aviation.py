@@ -44,14 +44,8 @@ def test_hull_liability_filtering_aviation():
     """
     qs_all = build_quota_share(
         name="QS_ALL",
-        conditions_config=[
-            {
-                "cession_pct": 0.25,
-                "signed_share": 1.0,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        ],
+        cession_pct=0.25,
+        signed_share=1.0,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
@@ -59,15 +53,9 @@ def test_hull_liability_filtering_aviation():
 
     xol_hull = build_excess_of_loss(
         name="XOL_HULL",
-        conditions_config=[
-            {
-                "attachment": 5_000_000,
-                "limit": 10_000_000,
-                "signed_share": 1.0,
-                "includes_hull": True,
-                "includes_liability": False,
-            }
-        ],
+        attachment=5_000_000,
+        limit=10_000_000,
+        signed_share=1.0,
         predecessor_title="QS_ALL",
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
@@ -76,15 +64,9 @@ def test_hull_liability_filtering_aviation():
 
     xol_liability = build_excess_of_loss(
         name="XOL_LIABILITY",
-        conditions_config=[
-            {
-                "attachment": 10_000_000,
-                "limit": 40_000_000,
-                "signed_share": 1.0,
-                "includes_hull": False,
-                "includes_liability": True,
-            }
-        ],
+        attachment=10_000_000,
+        limit=40_000_000,
+        signed_share=1.0,
         predecessor_title="QS_ALL",
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
@@ -203,14 +185,8 @@ def test_hull_only_structure():
     """
     qs_hull = build_quota_share(
         name="QS_HULL",
-        conditions_config=[
-            {
-                "cession_pct": 0.30,
-                "signed_share": 1.0,
-                "includes_hull": True,
-                "includes_liability": False,
-            }
-        ],
+        cession_pct=0.30,
+        signed_share=1.0,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
@@ -283,14 +259,8 @@ def test_liability_only_structure():
     """
     qs_liability = build_quota_share(
         name="QS_LIABILITY",
-        conditions_config=[
-            {
-                "cession_pct": 0.20,
-                "signed_share": 1.0,
-                "includes_hull": False,
-                "includes_liability": True,
-            }
-        ],
+        cession_pct=0.20,
+        signed_share=1.0,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
@@ -359,14 +329,8 @@ def test_casualty_unaffected_by_hull_liability_flags():
     """
     qs_30 = build_quota_share(
         name="QS_30",
-        conditions_config=[
-            {
-                "cession_pct": 0.30,
-                "signed_share": 1.0,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        ],
+        cession_pct=0.30,
+        signed_share=1.0,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",

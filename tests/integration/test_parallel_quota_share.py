@@ -29,26 +29,14 @@ def test_double_quota_share_parallel():
     """
     qs_10 = build_quota_share(
         name="QS_10",
-        conditions_config=[
-            {
-                "cession_pct": 0.10,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        ],
+        cession_pct=0.10,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
     )
     qs_15 = build_quota_share(
         name="QS_15",
-        conditions_config=[
-            {
-                "cession_pct": 0.15,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        ],
+        cession_pct=0.15,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",

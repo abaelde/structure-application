@@ -1,7 +1,7 @@
 from typing import Dict, Any, List, Optional, Self
 import pandas as pd
 from .condition import Condition
-from .constants import condition_COLS, PRODUCT, CLAIM_BASIS, CLAIM_BASIS_VALUES
+from .constants import CONDITION_COLS, PRODUCT, CLAIM_BASIS, CLAIM_BASIS_VALUES
 
 
 class Structure:
@@ -273,6 +273,30 @@ class Structure:
         )
         return signature
 
+    def defaults_dict(self) -> Dict[str, Any]:
+        """Retourne un dictionnaire des valeurs par défaut de la structure."""
+        return {
+            "CESSION_PCT": self.cession_pct,
+            "LIMIT_100": self.limit,
+            "ATTACHMENT_POINT_100": self.attachment,
+            "SIGNED_SHARE_PCT": self.signed_share,
+        }
+
+    def overrides_for(self, condition_dict: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Compare les valeurs d'une condition avec les valeurs par défaut de la structure
+        et retourne un dictionnaire des overrides (valeurs qui diffèrent).
+        """
+        base = self.defaults_dict()
+        overrides = {}
+        
+        for field_name, default_value in base.items():
+            condition_value = condition_dict.get(field_name)
+            if condition_value is not None and condition_value != default_value:
+                overrides[field_name] = condition_value
+                
+        return overrides
+
     def _describe_condition_group(
         self, group: Dict, dimension_columns: list, indent: str
     ) -> str:
@@ -284,32 +308,32 @@ class Structure:
 
         # Describe the core parameters (same for all conditions in the group)
         if self.type_of_participation == PRODUCT.QUOTA_SHARE:
-            if pd.notna(sample_condition.get(condition_COLS.CESSION_PCT)):
-                cession_pct = sample_condition[condition_COLS.CESSION_PCT]
+            if pd.notna(sample_condition.get(CONDITION_COLS.CESSION_PCT)):
+                cession_pct = sample_condition[CONDITION_COLS.CESSION_PCT]
                 lines.append(
                     f"{indent}Cession rate: {cession_pct:.1%} ({cession_pct * 100:.1f}%)"
                 )
 
             if pd.notna(
-                sample_condition.get(condition_COLS.LIMIT)
+                sample_condition.get(CONDITION_COLS.LIMIT)
             ):  # AURE : pk du pandas a ce niveau ?
                 lines.append(
-                    f"{indent}Limit: {sample_condition[condition_COLS.LIMIT]:,.2f}M"
+                    f"{indent}Limit: {sample_condition[CONDITION_COLS.LIMIT]:,.2f}M"
                 )
 
         elif self.type_of_participation == PRODUCT.EXCESS_OF_LOSS:
-            if pd.notna(sample_condition.get(condition_COLS.ATTACHMENT)) and pd.notna(
-                sample_condition.get(condition_COLS.LIMIT)
+            if pd.notna(sample_condition.get(CONDITION_COLS.ATTACHMENT)) and pd.notna(
+                sample_condition.get(CONDITION_COLS.LIMIT)
             ):
-                attachment = sample_condition[condition_COLS.ATTACHMENT]
-                limit = sample_condition[condition_COLS.LIMIT]
+                attachment = sample_condition[CONDITION_COLS.ATTACHMENT]
+                limit = sample_condition[CONDITION_COLS.LIMIT]
                 lines.append(f"{indent}Coverage: {limit:,.2f}M xs {attachment:,.2f}M")
                 lines.append(
                     f"{indent}Range: {attachment:,.2f}M to {attachment + limit:,.2f}M"
                 )
 
-        if pd.notna(sample_condition.get(condition_COLS.SIGNED_SHARE)):
-            reinsurer_share = sample_condition[condition_COLS.SIGNED_SHARE]
+        if pd.notna(sample_condition.get(CONDITION_COLS.SIGNED_SHARE)):
+            reinsurer_share = sample_condition[CONDITION_COLS.SIGNED_SHARE]
             lines.append(
                 f"{indent}Reinsurer share: {reinsurer_share:.2%} ({reinsurer_share * 100:.2f}%)"
             )

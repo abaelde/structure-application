@@ -24,14 +24,8 @@ def test_exposure_mapping_success_aviation():
     """
     qs = build_quota_share(
         name="QS_30",
-        conditions_config=[
-            {
-                "cession_pct": 0.30,
-                "signed_share": 1.0,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        ],
+        cession_pct=0.30,
+        signed_share=1.0,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
@@ -82,14 +76,8 @@ def test_exposure_mapping_failure_wrong_column():
     """
     qs = build_quota_share(
         name="QS_30",
-        conditions_config=[
-            {
-                "cession_pct": 0.30,
-                "signed_share": 1.0,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        ],
+        cession_pct=0.30,
+        signed_share=1.0,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",

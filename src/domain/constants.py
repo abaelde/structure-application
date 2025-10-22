@@ -58,7 +58,7 @@ STRUCTURE_COLS = SimpleNamespace(
     INSPER_ID="RP_STRUCTURE_ID",  # Clé primaire auto-increment Snowflake
 )
 
-condition_COLS = SimpleNamespace(
+CONDITION_COLS = SimpleNamespace(
     CESSION_PCT="CESSION_PCT",
     ATTACHMENT="ATTACHMENT_POINT_100",
     LIMIT="LIMIT_100",

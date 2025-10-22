@@ -21,13 +21,7 @@ def test_single_line_quota_share_basic():
     """
     qs_structure = build_quota_share(
         name="QS_30",
-        conditions_config=[
-            {
-                "cession_pct": 0.30,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        ],
+        cession_pct=0.30,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
@@ -98,18 +92,15 @@ def test_single_line_quota_share_with_currency_matching():
     """
     qs_structure = build_quota_share(
         name="QS_BY_CURRENCY",
-        conditions_config=[
+        cession_pct=0.30,  # Valeur par défaut
+        special_conditions=[
             {
                 "currency_cd": "USD",
                 "cession_pct": 0.25,
-                "includes_hull": True,
-                "includes_liability": True,
             },
             {
                 "currency_cd": "EUR",
                 "cession_pct": 0.35,
-                "includes_hull": True,
-                "includes_liability": True,
             },
         ],
         claim_basis="risk_attaching",

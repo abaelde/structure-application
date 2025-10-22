@@ -8,7 +8,7 @@ from .constants import (
     SHEETS,
     PROGRAM_COLS,
     STRUCTURE_COLS,
-    condition_COLS,
+    CONDITION_COLS,
 )
 from .program import Program
 from .structure import Structure
@@ -25,7 +25,7 @@ __all__ = [
     "SHEETS",
     "PROGRAM_COLS",
     "STRUCTURE_COLS",
-    "condition_COLS",
+    "CONDITION_COLS",
     "Program",
     "Structure",
     "Condition",

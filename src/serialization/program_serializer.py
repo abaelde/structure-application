@@ -8,7 +8,7 @@ from src.domain.exclusion import ExclusionRule
 from src.domain.constants import (
     PROGRAM_COLS,
     STRUCTURE_COLS,
-    condition_COLS,
+    CONDITION_COLS,
     CLAIM_BASIS_VALUES,
 )
 from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
@@ -279,37 +279,17 @@ class ProgramSerializer:
 
     def _create_field_links(self, field_links_rows: list, condition_id: int, structure_id: int, condition, structure):
         """Créer les liens RP_STRUCTURE_FIELD_LINK pour les overrides de valeurs financières."""
-        condition_data = condition.to_dict()
+        # Utiliser la logique du domaine pour identifier les overrides
+        overrides = structure.overrides_for(condition.to_dict())
         
-        # Champs financiers qui peuvent être overridés
-        financial_fields = {
-            "CESSION_PCT": condition_data.get("CESSION_PCT"),
-            "LIMIT_100": condition_data.get("LIMIT_100"),
-            "ATTACHMENT_POINT_100": condition_data.get("ATTACHMENT_POINT_100"),
-            "SIGNED_SHARE_PCT": condition_data.get("SIGNED_SHARE_PCT"),
-        }
-        # Mapping explicite champ → attribut Structure
-        attr_by_field = {
-            "CESSION_PCT": "cession_pct",
-            "LIMIT_100": "limit",
-            "ATTACHMENT_POINT_100": "attachment",
-            "SIGNED_SHARE_PCT": "signed_share",
-        }
-
-        # Créer un lien pour chaque champ financier qui diffère de la valeur par défaut de la structure
-        for field_name, condition_value in financial_fields.items():
-            if condition_value is not None:
-                structure_attr = attr_by_field.get(field_name)
-                structure_value = getattr(structure, structure_attr, None) if structure_attr else None
-                
-                # Si la valeur de la condition diffère de la valeur par défaut, créer un lien
-                if condition_value != structure_value:
-                    field_links_rows.append({
-                        "RP_CONDITION_ID": condition_id,
-                        "RP_STRUCTURE_ID": structure_id,
-                        "FIELD_NAME": field_name,
-                        "NEW_VALUE": condition_value,
-                    })
+        # Créer un lien pour chaque override
+        for field_name, new_value in overrides.items():
+            field_links_rows.append({
+                "RP_CONDITION_ID": condition_id,
+                "RP_STRUCTURE_ID": structure_id,
+                "FIELD_NAME": field_name,
+                "NEW_VALUE": new_value,
+            })
 
     def _exclusions_to_df(self, program: Program) -> pd.DataFrame:
         from .codecs import MULTI_VALUE_SEPARATOR

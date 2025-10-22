@@ -46,27 +46,15 @@ def test_quota_share_then_excess_of_loss_without_rescaling():
 
     qs = build_quota_share(
         name="QS_30%",
-        conditions_config=[
-            {
-                "cession_pct": 0.30,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        ],
+        cession_pct=0.30,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
     )
     xl = build_excess_of_loss(
         name="XOL_50xs20",
-        conditions_config=[
-            {
-                "attachment": 20_000_000,
-                "limit": 50_000_000,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        ],
+        attachment=20_000_000,
+        limit=50_000_000,
         predecessor_title="QS_30%",
         claim_basis="risk_attaching",
         inception_date="2024-01-01",

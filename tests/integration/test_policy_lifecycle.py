@@ -21,13 +21,7 @@ def test_policy_expiry_mechanism():
     """
     qs = build_quota_share(
         name="QS_30",
-        conditions_config=[
-            {
-                "cession_pct": 0.30,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        ],
+        cession_pct=0.30,
         claim_basis="risk_attaching",
         inception_date="2023-01-01",
         expiry_date="2027-01-01",

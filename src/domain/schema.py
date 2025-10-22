@@ -116,15 +116,20 @@ def exposure_rules_for_lob(lob: str) -> Dict[str, str]:
 # Mapping "clés builder" -> "colonne Snowflake" (ou map par LOB)
 # Les clés builder correspondent aux champs produits par build_condition(...)
 PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, Union[str, Dict[str, str]]] = {
-    "BUSCL_COUNTRY_CD": "COUNTRY_ID",
-    "BUSCL_REGION": "REGION_ID",
+    "BUSCL_COUNTRY_CD": "BUSCL_COUNTRY_CD",
+    "BUSCL_REGION": "BUSCL_REGION",
+    "PRODUCT_TYPE_LEVEL_1": "PRODUCT_TYPE_LEVEL_1",
+    "PRODUCT_TYPE_LEVEL_2": "PRODUCT_TYPE_LEVEL_2",
+    "PRODUCT_TYPE_LEVEL_3": "PRODUCT_TYPE_LEVEL_3",
     "BUSCL_CLASS_OF_BUSINESS_1": "PRODUCT_TYPE_LEVEL_1",
     "BUSCL_CLASS_OF_BUSINESS_2": "PRODUCT_TYPE_LEVEL_2",
     "BUSCL_CLASS_OF_BUSINESS_3": "PRODUCT_TYPE_LEVEL_3",
+    "BUSCL_ENTITY_NAME_CED": "BUSCL_ENTITY_NAME_CED",
+    "POL_RISK_NAME_CED": "POL_RISK_NAME_CED",
     "BUSCL_LIMIT_CURRENCY_CD": {
-        "aviation": "CURRENCY_ID",
-        "casualty": "CURRENCY_ID",
-        "test": "CURRENCY_ID",
+        "aviation": "HULL_CURRENCY",
+        "casualty": "CURRENCY",
+        "test": "CURRENCY",
     },
 }
 

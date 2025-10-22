@@ -27,20 +27,26 @@ class SnowflakeProgramIO:
         return out[cols]
 
     def _parse_dsn(self, source: str) -> Tuple[str, str, Dict[str, str]]:
-        if not source.lower().startswith("snowflake://"):
-            raise ValueError(f"Invalid Snowflake DSN: {source}")
-        rest = source[len("snowflake://") :]
-        coord, qs = (rest.split("?", 1) + [""])[:2]
-        parts = coord.split(".")
-        if len(parts) != 2:
-            raise ValueError("DSN must be snowflake://DB.SCHEMA?...")
-        db, schema = parts
-        params = {}
-        if qs:
-            for tok in qs.split("&"):
-                if tok:
-                    k, _, v = tok.partition("=")
-                    params[k] = v
+        from urllib.parse import urlparse, parse_qsl
+        
+        p = urlparse(source)
+        if p.scheme.lower() != "snowflake":
+            raise ValueError("Invalid Snowflake DSN")
+        
+        # Handle both formats: snowflake://DB.SCHEMA and snowflake://host/DB.SCHEMA
+        if p.path and p.path != "/":
+            # Format: snowflake://host/DB.SCHEMA
+            path_without_slash = p.path.lstrip("/")
+            if path_without_slash.count(".") != 1:
+                raise ValueError("DSN must be snowflake://DB.SCHEMA?...")
+            db, schema = path_without_slash.split(".")
+        else:
+            # Format: snowflake://DB.SCHEMA
+            if not p.netloc or p.netloc.count(".") != 1:
+                raise ValueError("DSN must be snowflake://DB.SCHEMA?...")
+            db, schema = p.netloc.split(".")
+        
+        params = dict(parse_qsl(p.query))
         return db, schema, params
 
     def _connect(self, connection_params: Dict[str, Any]):

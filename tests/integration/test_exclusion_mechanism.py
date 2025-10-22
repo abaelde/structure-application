@@ -35,7 +35,7 @@ def test_exclusion_mechanism():
 
     qs = build_quota_share(
         name="QS_Aviation_25%",
-        conditions_config=conditions,
+        cession_pct=0.25,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",

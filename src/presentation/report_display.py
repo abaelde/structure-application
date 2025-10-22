@@ -1,7 +1,7 @@
 import pandas as pd
 import sys
 from typing import Dict, Any
-from src.domain import PRODUCT, condition_COLS as SC, Program
+from src.domain import PRODUCT, CONDITION_COLS as SC, Program
 
 
 def write_detailed_results(

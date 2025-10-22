@@ -97,7 +97,9 @@ def test_single_line_excess_of_loss_by_country():
     """
     xl_structure = build_excess_of_loss(
         name="XL_BY_COUNTRY",
-        conditions_config=[
+        attachment=10_000_000,  # Valeur par défaut
+        limit=15_000_000,       # Valeur par défaut
+        special_conditions=[
             {
                 "country_cd": "US",
                 "attachment": 5_000_000,

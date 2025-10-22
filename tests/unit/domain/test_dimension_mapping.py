@@ -57,7 +57,7 @@ class TestPolicyDimensionValue:
 
     def test_unknown_dimension_raises_error(self):
         """Test that unknown dimensions raise a clear error."""
-        policy_data = {"CUSTOM_DIMENSION": "custom_value"}
+        policy_data = {"POLICY_ID": "TEST-001"}
 
         policy = Policy(raw=policy_data)
         with pytest.raises(ValueError, match="Unknown dimension 'CUSTOM_DIMENSION'"):

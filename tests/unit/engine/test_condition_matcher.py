@@ -36,17 +36,17 @@ class TestCurrencyMapping:
         assert result == "USD"
 
     def test_unknown_line_of_business_fallback(self):
-        """Test fallback for unknown line of business"""
+        """Test error behavior for unknown line of business"""
         policy_data = {
             "CURRENCY": "USD",
         }
         uw_departement = "unknown"
 
         policy = Policy(raw=policy_data, uw_dept=uw_departement)
-        result = policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
-
-        # Should fallback to direct dimension name
-        assert result is None  # BUSCL_LIMIT_CURRENCY_CD not in policy_data
+        
+        # Should raise an error for unknown underwriting department
+        with pytest.raises(ValueError, match="Unknown underwriting department 'unknown' for dimension 'BUSCL_LIMIT_CURRENCY_CD'"):
+            policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
 
     def test_missing_currency_data(self):
         """Test when currency data is missing"""

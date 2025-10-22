@@ -60,9 +60,34 @@ class Policy:
 
     # --- Dimensions & valeurs ---
     def get_dimension_value(self, dimension: str) -> Any:
-        """Récupère la valeur de dimension directement depuis raw."""
-        # Chercher directement dans raw avec la clé de dimension
-        return self.raw.get(dimension)
+        """
+        Récupère la valeur de dimension avec mapping intelligent.
+        
+        Pour les dimensions de programme (comme BUSCL_LIMIT_CURRENCY_CD),
+        fait le mapping vers les colonnes de bordereau appropriées selon le LOB.
+        """
+        # Si la dimension existe directement dans raw, la retourner
+        if dimension in self.raw:
+            return self.raw.get(dimension)
+        
+        # Sinon, essayer le mapping via PROGRAM_TO_BORDEREAU_DIMENSIONS
+        if dimension in PROGRAM_TO_BORDEREAU_DIMENSIONS:
+            mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS[dimension]
+            
+            if isinstance(mapping, str):
+                # Mapping direct
+                return self.raw.get(mapping)
+            elif isinstance(mapping, dict) and self.uw_dept:
+                # Mapping par LOB
+                if self.uw_dept.lower() in mapping:
+                    bordereau_column = mapping[self.uw_dept.lower()]
+                    return self.raw.get(bordereau_column)
+                else:
+                    # LOB inconnu, lever une erreur
+                    raise ValueError(f"Unknown underwriting department '{self.uw_dept}' for dimension '{dimension}'")
+        
+        # Si la dimension n'est pas dans le mapping, lever une erreur
+        raise ValueError(f"Unknown dimension '{dimension}'")
 
     # --- Exposition (et composants) ---
     def exposure_bundle(self, uw_dept: str) -> ExposureBundle:
