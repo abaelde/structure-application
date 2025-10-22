@@ -94,10 +94,12 @@ def main():
     # 4. Application du programme
     print("4. Applying program to bordereau...")
     calculation_date = "2024-06-01"  # Date de calcul par défaut
-    
+
     if args.simple:
         print("   📊 Using simplified export (exposure per policy only)")
-        results = apply_program_to_bordereau_simple(bordereau, program, calculation_date)
+        results = apply_program_to_bordereau_simple(
+            bordereau, program, calculation_date
+        )
         print(f"   ✓ Program applied to {len(results)} policies (simplified)")
     else:
         print("   📊 Using detailed export (full structure details)")
@@ -109,7 +111,7 @@ def main():
 
     # 5. Sauvegarde des résultats
     print("5. Saving results...")
-    
+
     if args.simple:
         # Export simplifié
         simple_results_file = analysis_subdir / "simple_results.csv"

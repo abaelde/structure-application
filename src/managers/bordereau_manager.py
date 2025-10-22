@@ -70,27 +70,3 @@ class BordereauManager:
         io_kwargs = io_kwargs or {}
         df = self.serializer.bordereau_to_dataframe(bordereau)
         self.io.write(dest, df, **io_kwargs)
-
-    def reload(self) -> Bordereau:
-        if not self._source:
-            raise ValueError("No bordereau currently loaded. Call load() first.")
-        return self.load(
-            self._source, program=self._loaded.program if self._loaded else None
-        )
-
-    def get_current_bordereau(self) -> Bordereau:
-        if not self._loaded:
-            raise ValueError("No bordereau currently loaded. Call load() first.")
-        return self._loaded
-
-    def get_current_source(self) -> str:
-        if not self._source:
-            raise ValueError("No bordereau currently loaded. Call load() first.")
-        return self._source
-
-    def is_loaded(self) -> bool:
-        return self._loaded is not None
-
-    def clear(self) -> None:
-        self._loaded = None
-        self._source = None

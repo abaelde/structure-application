@@ -7,8 +7,9 @@ from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 from src.serialization.program_frames import ProgramFrames, condition_dims_in
 from src.serialization.compact import compact_multivalue
 
+
 class SnowflakeProgramIO:
-    PROGRAMS   = "REINSURANCE_PROGRAM"
+    PROGRAMS = "REINSURANCE_PROGRAM"
     STRUCTURES = "RP_STRUCTURES"
     CONDITIONS = "RP_CONDITIONS"
     EXCLUSIONS = "RP_GLOBAL_EXCLUSION"
@@ -26,7 +27,7 @@ class SnowflakeProgramIO:
         if not source.lower().startswith("snowflake://"):
             raise ValueError(f"Invalid Snowflake DSN: {source}")
         rest = source[len("snowflake://") :]
-        coord, qs = (rest.split("?",1)+[""])[:2]
+        coord, qs = (rest.split("?", 1) + [""])[:2]
         parts = coord.split(".")
         if len(parts) != 2:
             raise ValueError("DSN must be snowflake://DB.SCHEMA?...")
@@ -35,18 +36,21 @@ class SnowflakeProgramIO:
         if qs:
             for tok in qs.split("&"):
                 if tok:
-                    k, _, v = tok.partition("="); params[k] = v
+                    k, _, v = tok.partition("=")
+                    params[k] = v
         return db, schema, params
 
     def _connect(self, connection_params: Dict[str, Any]):
         return snowflake.connector.connect(**connection_params)
 
-    def _program_id_by_title(self, cnx, db: str, schema: str, title: str) -> Optional[int]:
+    def _program_id_by_title(
+        self, cnx, db: str, schema: str, title: str
+    ) -> Optional[int]:
         cur = cnx.cursor()
         try:
             cur.execute(
                 f'SELECT REINSURANCE_PROGRAM_ID FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s',
-                (title,)
+                (title,),
             )
             row = cur.fetchone()
             return None if not row else row[0]
@@ -80,7 +84,7 @@ class SnowflakeProgramIO:
         Retourne (program_df, structures_df, conditions_df, exclusions_df)
         """
         db, schema, params = self._parse_dsn(source)
-        
+
         cnx = self._connect(connection_params)
         cur = cnx.cursor()
         try:
@@ -88,44 +92,52 @@ class SnowflakeProgramIO:
             if program_title:
                 cur.execute(
                     f'SELECT * FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s',
-                    (program_title,)
+                    (program_title,),
                 )
             else:
                 cur.execute(f'SELECT * FROM "{db}"."{schema}"."{self.PROGRAMS}"')
-            
+
             program_rows = cur.fetchall()
             if not program_rows:
                 raise ValueError(f"Program '{program_title}' not found")
-            
-            program_df = pd.DataFrame(program_rows, columns=[desc[0] for desc in cur.description])
-            
+
+            program_df = pd.DataFrame(
+                program_rows, columns=[desc[0] for desc in cur.description]
+            )
+
             # 2. Lire les structures
-            program_id = int(program_df.iloc[0]['REINSURANCE_PROGRAM_ID'])
+            program_id = int(program_df.iloc[0]["REINSURANCE_PROGRAM_ID"])
             cur.execute(
                 f'SELECT * FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s',
-                (program_id,)
+                (program_id,),
             )
             structures_rows = cur.fetchall()
-            structures_df = pd.DataFrame(structures_rows, columns=[desc[0] for desc in cur.description])
-            
+            structures_df = pd.DataFrame(
+                structures_rows, columns=[desc[0] for desc in cur.description]
+            )
+
             # 3. Lire les conditions
             cur.execute(
                 f'SELECT * FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE PROGRAM_ID=%s',
-                (program_id,)
+                (program_id,),
             )
             conditions_rows = cur.fetchall()
-            conditions_df = pd.DataFrame(conditions_rows, columns=[desc[0] for desc in cur.description])
-            
+            conditions_df = pd.DataFrame(
+                conditions_rows, columns=[desc[0] for desc in cur.description]
+            )
+
             # 4. Lire les exclusions
             cur.execute(
                 f'SELECT * FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s',
-                (program_id,)
+                (program_id,),
             )
             exclusions_rows = cur.fetchall()
-            exclusions_df = pd.DataFrame(exclusions_rows, columns=[desc[0] for desc in cur.description])
-            
+            exclusions_df = pd.DataFrame(
+                exclusions_rows, columns=[desc[0] for desc in cur.description]
+            )
+
             return program_df, structures_df, conditions_df, exclusions_df
-            
+
         finally:
             cur.close()
             cnx.close()
@@ -151,15 +163,32 @@ class SnowflakeProgramIO:
             cur = cnx.cursor()
             try:
                 if if_exists == "truncate_all":
-                    for t in [self.EXCLUSIONS, self.CONDITIONS, self.STRUCTURES, self.PROGRAMS]:
+                    for t in [
+                        self.EXCLUSIONS,
+                        self.CONDITIONS,
+                        self.STRUCTURES,
+                        self.PROGRAMS,
+                    ]:
                         cur.execute(f'TRUNCATE TABLE "{db}"."{schema}"."{t}"')
                 elif if_exists == "replace_program":
                     existing = self._program_id_by_title(cnx, db, schema, program_title)
                     if existing is not None:
-                        cur.execute(f'DELETE FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s', (existing,))
-                        cur.execute(f'DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE PROGRAM_ID=%s', (existing,))
-                        cur.execute(f'DELETE FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s', (existing,))
-                        cur.execute(f'DELETE FROM "{db}"."{schema}"."{self.PROGRAMS}"   WHERE REINSURANCE_PROGRAM_ID=%s', (existing,))
+                        cur.execute(
+                            f'DELETE FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s',
+                            (existing,),
+                        )
+                        cur.execute(
+                            f'DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE PROGRAM_ID=%s',
+                            (existing,),
+                        )
+                        cur.execute(
+                            f'DELETE FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE PROGRAM_ID=%s',
+                            (existing,),
+                        )
+                        cur.execute(
+                            f'DELETE FROM "{db}"."{schema}"."{self.PROGRAMS}"   WHERE REINSURANCE_PROGRAM_ID=%s',
+                            (existing,),
+                        )
 
                 # 1) Insert/ensure PROGRAMS row (SQL direct pour éviter les problèmes write_pandas)
                 for _, row in program_df.iterrows():
@@ -174,7 +203,9 @@ class SnowflakeProgramIO:
                 # 2) Récupérer PROGRAM_ID
                 program_id = self._program_id_by_title(cnx, db, schema, program_title)
                 if program_id is None:
-                    raise ValueError(f"Program '{program_title}' not found after insert")
+                    raise ValueError(
+                        f"Program '{program_title}' not found after insert"
+                    )
 
                 # 3) Préparer CONDITIONS/STRUCTURES/EXCLUSIONS via helpers communs
 
@@ -184,19 +215,28 @@ class SnowflakeProgramIO:
                 # Colonnes qui définissent la condition + l'ID de structure
                 # Mais seulement celles qui ont des valeurs non-nulles dans le DataFrame
                 condition_defining_cols = [
-                    'INSPER_ID_PRE', 'CESSION_PCT', 'LIMIT_100', 'ATTACHMENT_POINT_100', 
-                    'SIGNED_SHARE_PCT', 'INCLUDES_HULL', 'INCLUDES_LIABILITY'
+                    "INSPER_ID_PRE",
+                    "CESSION_PCT",
+                    "LIMIT_100",
+                    "ATTACHMENT_POINT_100",
+                    "SIGNED_SHARE_PCT",
+                    "INCLUDES_HULL",
+                    "INCLUDES_LIABILITY",
                 ]
                 # Garder seulement les colonnes qui existent ET qui ont des valeurs non-nulles
                 group_cols = []
                 for c in condition_defining_cols:
                     if c in conditions_df.columns and not conditions_df[c].isna().all():
                         group_cols.append(c)
-                conditions_compact = compact_multivalue(conditions_df, dims=dims, group_cols=group_cols)
-                
+                conditions_compact = compact_multivalue(
+                    conditions_df, dims=dims, group_cols=group_cols
+                )
+
                 # b) Encoder seulement les exclusions pour stockage (list → "a;b")
                 # Les conditions gardent leurs listes natives
-                frames = ProgramFrames(program_df, structures_df, conditions_compact, exclusions_df)
+                frames = ProgramFrames(
+                    program_df, structures_df, conditions_compact, exclusions_df
+                )
                 exclusions_encoded = frames.for_csv().exclusions
 
                 # c) Injecter PROGRAM_ID
@@ -205,7 +245,11 @@ class SnowflakeProgramIO:
                 exclusions_out = exclusions_encoded.copy()
                 if "REINSURANCE_PROGRAM_ID" in structures_out.columns:
                     structures_out["PROGRAM_ID"] = program_id
-                    structures_out.drop(columns=["REINSURANCE_PROGRAM_ID"], inplace=True, errors="ignore")
+                    structures_out.drop(
+                        columns=["REINSURANCE_PROGRAM_ID"],
+                        inplace=True,
+                        errors="ignore",
+                    )
                 else:
                     structures_out["PROGRAM_ID"] = program_id
                 conditions_out["PROGRAM_ID"] = program_id
@@ -213,20 +257,45 @@ class SnowflakeProgramIO:
 
                 # d) Garantir le jeu de colonnes attendu par les tables (ordre inclus)
                 structures_cols = [
-                    "PROGRAM_ID","INSPER_ID_PRE","BUSINESS_TITLE","TYPE_OF_PARTICIPATION_CD",
-                    "INSPER_PREDECESSOR_TITLE","INSPER_CLAIM_BASIS_CD",
-                    "INSPER_EFFECTIVE_DATE","INSPER_EXPIRY_DATE","INSPER_LAYER_NO",
-                    "INSPER_MAIN_CURRENCY_CD","INSPER_UW_YEAR","INSPER_COMMENT"
+                    "PROGRAM_ID",
+                    "INSPER_ID_PRE",
+                    "BUSINESS_TITLE",
+                    "TYPE_OF_PARTICIPATION_CD",
+                    "INSPER_PREDECESSOR_TITLE",
+                    "INSPER_CLAIM_BASIS_CD",
+                    "INSPER_EFFECTIVE_DATE",
+                    "INSPER_EXPIRY_DATE",
+                    "INSPER_LAYER_NO",
+                    "INSPER_MAIN_CURRENCY_CD",
+                    "INSPER_UW_YEAR",
+                    "INSPER_COMMENT",
                 ]
                 conditions_cols = [
-                    "PROGRAM_ID","INSPER_ID_PRE","SIGNED_SHARE_PCT","CESSION_PCT",
-                    "LIMIT_100","ATTACHMENT_POINT_100","INCLUDES_HULL","INCLUDES_LIABILITY",
+                    "PROGRAM_ID",
+                    "INSPER_ID_PRE",
+                    "SIGNED_SHARE_PCT",
+                    "CESSION_PCT",
+                    "LIMIT_100",
+                    "ATTACHMENT_POINT_100",
+                    "INCLUDES_HULL",
+                    "INCLUDES_LIABILITY",
                     # ajoute ici les dimensions présentes côté table
-                    *[d for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys() if d in conditions_out.columns],
+                    *[
+                        d
+                        for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()
+                        if d in conditions_out.columns
+                    ],
                 ]
                 exclusions_cols = [
-                    "RP_ID","EXCLUSION_NAME","EXCL_EFFECTIVE_DATE","EXCL_EXPIRY_DATE",
-                    *[d for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys() if d in exclusions_out.columns],
+                    "RP_ID",
+                    "EXCLUSION_NAME",
+                    "EXCL_EFFECTIVE_DATE",
+                    "EXCL_EXPIRY_DATE",
+                    *[
+                        d
+                        for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()
+                        if d in exclusions_out.columns
+                    ],
                 ]
 
                 structures_out = self._ensure_columns(structures_out, structures_cols)

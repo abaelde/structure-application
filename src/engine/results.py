@@ -124,7 +124,8 @@ class ProgramRunResult:
                 "ceded_to_reinsurer": self.totals.ceded_to_reinsurer,
                 "retained_by_cedant": (
                     self.exposure - self.totals.ceded_to_layer_100pct
-                    if self.exposure is not None and self.totals.ceded_to_layer_100pct is not None
+                    if self.exposure is not None
+                    and self.totals.ceded_to_layer_100pct is not None
                     else None
                 ),
                 "policy_inception_date": self.policy_inception_date,

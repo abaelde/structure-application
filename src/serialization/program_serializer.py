@@ -7,17 +7,21 @@ import numpy as np
 from src.domain import Program, Structure
 from src.domain.exclusion import ExclusionRule
 from src.domain.constants import (
-    PROGRAM_COLS, STRUCTURE_COLS, condition_COLS, CLAIM_BASIS_VALUES,
+    PROGRAM_COLS,
+    STRUCTURE_COLS,
+    condition_COLS,
+    CLAIM_BASIS_VALUES,
 )
 from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 from .codecs import to_bool, split_multi, pandas_to_native, MULTI_VALUE_SEPARATOR
 from .program_frames import ProgramFrames, condition_dims_in, exclusion_dims_in
 
+
 class ProgramSerializer:
     """Ne gère plus que :
-       - DataFrames -> objets domaine
-       - objets domaine -> DataFrames canoniques (lean ou full)
-       L'encodage multi-valeurs et la compaction sont mutualisés ailleurs.
+    - DataFrames -> objets domaine
+    - objets domaine -> DataFrames canoniques (lean ou full)
+    L'encodage multi-valeurs et la compaction sont mutualisés ailleurs.
     """
 
     # ---------- Import (DFs -> Domain) ----------
@@ -30,9 +34,13 @@ class ProgramSerializer:
     ) -> Program:
 
         name = pandas_to_native(program_df.iloc[0][PROGRAM_COLS.TITLE])
-        uw_dept = pandas_to_native(program_df.iloc[0].get(PROGRAM_COLS.UW_DEPARTMENT_CODE))
+        uw_dept = pandas_to_native(
+            program_df.iloc[0].get(PROGRAM_COLS.UW_DEPARTMENT_CODE)
+        )
         if not uw_dept:
-            raise ValueError(f"Underwriting department is mandatory for program '{name}'.")
+            raise ValueError(
+                f"Underwriting department is mandatory for program '{name}'."
+            )
 
         # flags booléens (si présents)
         for col in ("INCLUDES_HULL", "INCLUDES_LIABILITY"):
@@ -45,7 +53,9 @@ class ProgramSerializer:
                 if col not in conditions_df.columns:
                     raise ValueError(f"Column {col} is required for Aviation programs.")
                 if conditions_df[col].isna().any():
-                    raise ValueError(f"Column {col} contains nulls for Aviation program.")
+                    raise ValueError(
+                        f"Column {col} contains nulls for Aviation program."
+                    )
 
         # Dimensions → listes
         dims = condition_dims_in(conditions_df)
@@ -67,11 +77,21 @@ class ProgramSerializer:
 
         bad = []
         for i, row in structures_df.iterrows():
-            cb = str(row[STRUCTURE_COLS.CLAIM_BASIS]).strip().lower() if pd.notna(row[STRUCTURE_COLS.CLAIM_BASIS]) else ""
-            if (cb not in CLAIM_BASIS_VALUES) or pd.isna(row[STRUCTURE_COLS.INCEPTION]) or pd.isna(row[STRUCTURE_COLS.EXPIRY]):
+            cb = (
+                str(row[STRUCTURE_COLS.CLAIM_BASIS]).strip().lower()
+                if pd.notna(row[STRUCTURE_COLS.CLAIM_BASIS])
+                else ""
+            )
+            if (
+                (cb not in CLAIM_BASIS_VALUES)
+                or pd.isna(row[STRUCTURE_COLS.INCEPTION])
+                or pd.isna(row[STRUCTURE_COLS.EXPIRY])
+            ):
                 bad.append(i)
         if bad:
-            raise ValueError(f"'structures' has {len(bad)} invalid row(s) for claim_basis/effective/expiry. Rows: {bad[:10]}{'...' if len(bad)>10 else ''}")
+            raise ValueError(
+                f"'structures' has {len(bad)} invalid row(s) for claim_basis/effective/expiry. Rows: {bad[:10]}{'...' if len(bad)>10 else ''}"
+            )
 
         # Build domain
         def df_to_dicts(df: pd.DataFrame) -> List[Dict[str, Any]]:
@@ -98,7 +118,11 @@ class ProgramSerializer:
         prog_dims = list(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
         if exclusions_df is not None and not exclusions_df.empty:
             ex_df = exclusions_df.copy()
-            keep = set(prog_dims) | {"EXCLUSION_NAME", "EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE"}
+            keep = set(prog_dims) | {
+                "EXCLUSION_NAME",
+                "EXCL_EFFECTIVE_DATE",
+                "EXCL_EXPIRY_DATE",
+            }
             ex_df = ex_df[[c for c in ex_df.columns if c in keep]]
             for d in prog_dims:
                 if d in ex_df.columns:
@@ -115,27 +139,33 @@ class ProgramSerializer:
         )
 
     # ---------- Export (Domain -> Frames) ----------
-    def program_to_dataframes(self, program: Program, *, lean: bool = True) -> Dict[str, pd.DataFrame]:
+    def program_to_dataframes(
+        self, program: Program, *, lean: bool = True
+    ) -> Dict[str, pd.DataFrame]:
         """Par défaut: export 'lean' (colonnes essentielles). On garde l'API actuelle."""
         # Ne pas inclure REINSURANCE_PROGRAM_ID - laisser Snowflake l'auto-incrémenter
-        program_df = pd.DataFrame({
-            "TITLE": [program.name],
-            "UW_LOB": [program.underwriting_department],
-            "ACTIVE_IND": [True],  # Colonne requise par Snowflake
-        })
+        program_df = pd.DataFrame(
+            {
+                "TITLE": [program.name],
+                "UW_LOB": [program.underwriting_department],
+                "ACTIVE_IND": [True],  # Colonne requise par Snowflake
+            }
+        )
 
         structures_rows, conditions_rows = [], []
         insper = 1
         for st in program.structures:
-            structures_rows.append({
-                "INSPER_ID_PRE": insper,
-                "BUSINESS_TITLE": st.structure_name,
-                "TYPE_OF_PARTICIPATION_CD": st.type_of_participation,
-                "INSPER_PREDECESSOR_TITLE": st.predecessor_title,
-                "INSPER_CLAIM_BASIS_CD": st.claim_basis,
-                "INSPER_EFFECTIVE_DATE": st.inception_date,
-                "INSPER_EXPIRY_DATE": st.expiry_date,
-            })
+            structures_rows.append(
+                {
+                    "INSPER_ID_PRE": insper,
+                    "BUSINESS_TITLE": st.structure_name,
+                    "TYPE_OF_PARTICIPATION_CD": st.type_of_participation,
+                    "INSPER_PREDECESSOR_TITLE": st.predecessor_title,
+                    "INSPER_CLAIM_BASIS_CD": st.claim_basis,
+                    "INSPER_EFFECTIVE_DATE": st.inception_date,
+                    "INSPER_EXPIRY_DATE": st.expiry_date,
+                }
+            )
             for c in st.conditions:
                 d = c.to_dict()
                 row = {
@@ -162,9 +192,14 @@ class ProgramSerializer:
 
     def _exclusions_to_df(self, program: Program) -> pd.DataFrame:
         if not program.exclusions:
-            return pd.DataFrame(columns=[
-                "EXCLUSION_NAME","EXCL_EFFECTIVE_DATE","EXCL_EXPIRY_DATE",*PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()
-            ])
+            return pd.DataFrame(
+                columns=[
+                    "EXCLUSION_NAME",
+                    "EXCL_EFFECTIVE_DATE",
+                    "EXCL_EXPIRY_DATE",
+                    *PROGRAM_TO_BORDEREAU_DIMENSIONS.keys(),
+                ]
+            )
         rows = []
         for e in program.exclusions:
             row = {

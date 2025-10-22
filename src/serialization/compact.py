@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Sequence
 import pandas as pd
 from .codecs import split_multi, join_multi
 
+
 def compact_multivalue(
     df: pd.DataFrame,
     *,
@@ -21,15 +22,17 @@ def compact_multivalue(
     rows: List[Dict[str, Any]] = []
     # dropna=False pour garder les groupes avec NaN
     for keys, grp in norm.groupby(list(group_cols), dropna=False, sort=False):
-        if not isinstance(keys, tuple): keys = (keys,)
+        if not isinstance(keys, tuple):
+            keys = (keys,)
         base = {c: v for c, v in zip(group_cols, keys)}
         for dim in dims:
             vals = []
             seen = set()
             for cell in grp.get(dim, []):
-                for t in (cell or []):
+                for t in cell or []:
                     if t not in seen:
-                        seen.add(t); vals.append(t)
+                        seen.add(t)
+                        vals.append(t)
             base[dim] = join_multi(vals, sep=sep)
         rows.append(base)
     # colonnes en sortie = group_cols + dims (ordre stable)

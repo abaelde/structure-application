@@ -30,7 +30,7 @@ def build_program(
         qs = build_quota_share(name="QS_30", cession_pct=0.30)
         exclusions = [
             ExclusionRule(
-                values_by_dimension={"BUSCL_COUNTRY_CD": ["Iran"]}, 
+                values_by_dimension={"BUSCL_COUNTRY_CD": ["Iran"]},
                 name="Sanctions Iran"
             )
         ]

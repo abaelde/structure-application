@@ -255,14 +255,16 @@ def reset_all_tables() -> bool:
 
         # 1. Supprimer toutes les tables existantes
         print("\n🗑️  Suppression de toutes les tables existantes...")
-        
+
         # Récupérer toutes les tables du schéma
         cur.execute(f'SHOW TABLES IN SCHEMA "{db}"."{schema}"')
         tables_result = cur.fetchall()
-        
+
         # Extraire les noms de tables
-        tables = [row[1] for row in tables_result]  # Le nom de la table est dans la colonne 1
-        
+        tables = [
+            row[1] for row in tables_result
+        ]  # Le nom de la table est dans la colonne 1
+
         if not tables:
             print("   ℹ️  Aucune table trouvée dans le schéma")
         else:

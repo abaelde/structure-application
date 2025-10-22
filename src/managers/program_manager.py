@@ -96,16 +96,17 @@ class ProgramManager:
         if source.lower().startswith("snowflake://"):
             try:
                 from src.io.program_snowflake_adapter import SnowflakeProgramIO
+
                 _, _, params = SnowflakeProgramIO()._parse_dsn(source)
                 program_title = params.get("program_title")
             except:
                 pass  # Si l'extraction échoue, on continue sans program_title
-        
+
         # Passer program_title si disponible
         if program_title and self.backend == "snowflake":
             io_kwargs = io_kwargs or {}
             io_kwargs["program_title"] = program_title
-        
+
         program_df, structures_df, conditions_df, exclusions_df = self.io.read(
             source, **(io_kwargs or {})
         )
