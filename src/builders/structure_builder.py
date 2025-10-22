@@ -4,6 +4,28 @@ from src.domain.constants import PRODUCT, CLAIM_BASIS
 from .condition_builder import build_condition
 
 
+def _build_specials(defaults: dict, specials: list[dict] | None, *, keys_for_dims: list[str]):
+    """
+    Helper privé pour construire les conditions spéciales.
+    
+    Args:
+        defaults: Dictionnaire des valeurs par défaut
+        specials: Liste des conditions spéciales (peut être None)
+        keys_for_dims: Liste des clés qui représentent des dimensions
+        
+    Returns:
+        Liste des conditions construites
+    """
+    out = []
+    if not specials:
+        return out
+    for sc in specials:
+        data = {**defaults, **sc}
+        if any(k in data and data[k] is not None for k in keys_for_dims):
+            out.append(build_condition(**data))
+    return out
+
+
 def build_quota_share(
     name: str,
     # Valeurs par défaut de la structure
@@ -53,27 +75,11 @@ def build_quota_share(
         )
     """
     # Construire les conditions spéciales en fusionnant avec les valeurs par défaut
-    conditions = []
-    if special_conditions is not None:
-        for special_condition in special_conditions:
-            # Fusionner les valeurs par défaut avec les valeurs spéciales
-            condition_data = {
-                "cession_pct": cession_pct,  # Valeur par défaut
-                "signed_share": signed_share,  # Valeur par défaut
-            }
-            
-            # Override avec les valeurs spéciales si fournies
-            condition_data.update(special_condition)
-            
-            # Ne créer une condition que si elle a des dimensions spécifiques
-            has_dimensions = any(
-                key in condition_data and condition_data[key] is not None
-                for key in ["country_cd", "region", "currency_cd", "class_of_business_1", "class_of_business_2", "class_of_business_3"]
-            )
-            
-            if has_dimensions:
-                condition = build_condition(**condition_data)
-                conditions.append(condition)
+    conditions = _build_specials(
+        {"cession_pct": cession_pct, "signed_share": signed_share},
+        special_conditions,
+        keys_for_dims=["country_cd", "region", "currency_cd", "class_of_business_1", "class_of_business_2", "class_of_business_3"],
+    )
 
     # Defaults obligatoires pour passer la validation (claim_basis + période)
     if claim_basis is None:
@@ -153,28 +159,11 @@ def build_excess_of_loss(
         )
     """
     # Construire les conditions spéciales en fusionnant avec les valeurs par défaut
-    conditions = []
-    if special_conditions is not None:
-        for special_condition in special_conditions:
-            # Fusionner les valeurs par défaut avec les valeurs spéciales
-            condition_data = {
-                "attachment": attachment,  # Valeur par défaut
-                "limit": limit,            # Valeur par défaut
-                "signed_share": signed_share,  # Valeur par défaut
-            }
-            
-            # Override avec les valeurs spéciales si fournies
-            condition_data.update(special_condition)
-            
-            # Ne créer une condition que si elle a des dimensions spécifiques
-            has_dimensions = any(
-                key in condition_data and condition_data[key] is not None
-                for key in ["country_cd", "region", "currency_cd", "class_of_business_1", "class_of_business_2", "class_of_business_3"]
-            )
-            
-            if has_dimensions:
-                condition = build_condition(**condition_data)
-                conditions.append(condition)
+    conditions = _build_specials(
+        {"attachment": attachment, "limit": limit, "signed_share": signed_share},
+        special_conditions,
+        keys_for_dims=["country_cd", "region", "currency_cd", "class_of_business_1", "class_of_business_2", "class_of_business_3"],
+    )
 
     if claim_basis is None:
         claim_basis = CLAIM_BASIS.RISK_ATTACHING

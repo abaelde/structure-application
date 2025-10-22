@@ -2,6 +2,7 @@ from typing import Dict, Any, List, Optional, Self
 import pandas as pd
 from .condition import Condition
 from .constants import CONDITION_COLS, PRODUCT, CLAIM_BASIS, CLAIM_BASIS_VALUES
+from .financial_terms import FinancialTerms, FIELD_TO_TERMS_KEY
 
 
 class Structure:
@@ -49,6 +50,21 @@ class Structure:
                 f"({self.inception_date} .. {self.expiry_date})"
             )
         self.conditions = conditions
+
+    @property
+    def default_terms(self) -> FinancialTerms:
+        """
+        Retourne les termes financiers par défaut de la structure.
+        
+        Returns:
+            Instance FinancialTerms avec les valeurs par défaut de la structure
+        """
+        return FinancialTerms(
+            cession_pct=self.cession_pct,
+            attachment=self.attachment,
+            limit=self.limit,
+            signed_share=(self.signed_share if self.signed_share is not None else 1.0),
+        )
 
     @staticmethod
     def _require_ts(val, field_name: str) -> pd.Timestamp:
@@ -127,22 +143,30 @@ class Structure:
 
     def create_default_condition(self) -> Condition:
         """Créer une condition par défaut avec les valeurs de la structure."""
-        from .condition import Condition
+        base = self.default_terms.to_condition_dict()
+        base |= {"INCLUDES_HULL": None, "INCLUDES_LIABILITY": None}
+        return Condition.from_dict(base)
+
+    def resolve_condition(self, template_condition_dict: Dict[str, Any], overrides: Dict[str, Any]) -> Condition:
+        """
+        Fusionne les defaults de la structure + overrides financiers dans une Condition 'résolue'.
         
-        # Créer un dictionnaire avec les valeurs par défaut de la structure
-        # SIGNED_SHARE_PCT est requis, donc on utilise 1.0 par défaut si None
-        signed_share = self.signed_share if self.signed_share is not None else 1.0
-        
-        default_data = {
-            "CESSION_PCT": self.cession_pct,
-            "LIMIT_100": self.limit,
-            "ATTACHMENT_POINT_100": self.attachment,
-            "SIGNED_SHARE_PCT": signed_share,
-            "INCLUDES_HULL": None,
-            "INCLUDES_LIABILITY": None,
-        }
-        
-        return Condition.from_dict(default_data)
+        Args:
+            template_condition_dict: Dictionnaire de base de la condition (dimensions, flags, etc.)
+            overrides: Dictionnaire des overrides financiers à appliquer
+            
+        Returns:
+            Condition résolue avec les termes financiers fusionnés
+        """
+        # 1) termes par défaut
+        terms = self.default_terms
+        # 2) appliquer overrides (convertir noms de champs physiques -> attributs du VO)
+        kw = {FIELD_TO_TERMS_KEY[k]: v for k, v in overrides.items() if k in FIELD_TO_TERMS_KEY}
+        terms = terms.merge(**kw)
+        # 3) produire la condition finale (dimensions/flags du template + termes effectifs)
+        data = dict(template_condition_dict)
+        data.update(terms.to_condition_dict())
+        return Condition.from_dict(data)
 
     # ─── Sélection temporelle RA/LO multi-année (sans LossDate) ───────────
     def _in_range(self, dt: Optional[pd.Timestamp]) -> bool:
@@ -284,18 +308,22 @@ class Structure:
 
     def overrides_for(self, condition_dict: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Compare les valeurs d'une condition avec les valeurs par défaut de la structure
-        et retourne un dictionnaire des overrides (valeurs qui diffèrent).
-        """
-        base = self.defaults_dict()
-        overrides = {}
+        Restitue les overrides (diff) vs defaults à partir d'une condition finale.
         
-        for field_name, default_value in base.items():
-            condition_value = condition_dict.get(field_name)
-            if condition_value is not None and condition_value != default_value:
-                overrides[field_name] = condition_value
-                
-        return overrides
+        Args:
+            condition_dict: Dictionnaire de la condition finale
+            
+        Returns:
+            Dictionnaire des overrides (valeurs qui diffèrent des defaults)
+        """
+        base = self.default_terms
+        actual = FinancialTerms(
+            cession_pct=condition_dict.get("CESSION_PCT"),
+            attachment=condition_dict.get("ATTACHMENT_POINT_100"),
+            limit=condition_dict.get("LIMIT_100"),
+            signed_share=condition_dict.get("SIGNED_SHARE_PCT"),
+        )
+        return base.diff(actual)
 
     def _describe_condition_group(
         self, group: Dict, dimension_columns: list, indent: str

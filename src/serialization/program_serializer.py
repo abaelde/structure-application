@@ -118,14 +118,7 @@ class ProgramSerializer:
         for cond in df_to_dicts(conditions_df):
             condition_id = cond.get("RP_CONDITION_ID")
             if condition_id is not None:
-                # Renommer les colonnes Snowflake vers builder pour les dimensions
-                renamed_cond = {}
-                for k, v in cond.items():
-                    if k in inv_map:
-                        renamed_cond[inv_map[k]] = v
-                    else:
-                        renamed_cond[k] = v
-                conditions_by_id[condition_id] = renamed_cond
+                conditions_by_id[condition_id] = cond
         
         # Créer un mapping des field_links par RP_STRUCTURE_ID
         field_links_by_structure = {}
