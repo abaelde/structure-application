@@ -32,7 +32,7 @@ class TestStructure:
             Condition.from_dict({"cession_pct": 0.3, "SIGNED_SHARE_PCT": 1.0})
         ]
 
-        with pytest.raises(ValueError, match="INSPER_CLAIM_BASIS_CD is required"):
+        with pytest.raises(ValueError, match="CLAIMS_BASIS is required"):
             Structure(
                 structure_name="Test Structure",
                 type_of_participation=PRODUCT.QUOTA_SHARE,
@@ -48,7 +48,7 @@ class TestStructure:
             Condition.from_dict({"cession_pct": 0.3, "SIGNED_SHARE_PCT": 1.0})
         ]
 
-        with pytest.raises(ValueError, match="INSPER_CLAIM_BASIS_CD is required"):
+        with pytest.raises(ValueError, match="CLAIMS_BASIS is required"):
             Structure(
                 structure_name="Test Structure",
                 type_of_participation=PRODUCT.QUOTA_SHARE,
@@ -64,7 +64,7 @@ class TestStructure:
             Condition.from_dict({"cession_pct": 0.3, "SIGNED_SHARE_PCT": 1.0})
         ]
 
-        with pytest.raises(ValueError, match="INSPER_EFFECTIVE_DATE is required"):
+        with pytest.raises(ValueError, match="EFFECTIVE_DATE is required"):
             Structure(
                 structure_name="Test Structure",
                 type_of_participation=PRODUCT.QUOTA_SHARE,
@@ -98,7 +98,7 @@ class TestStructure:
 
         with pytest.raises(
             ValueError,
-            match="INSPER_EXPIRY_DATE must be strictly after INSPER_EFFECTIVE_DATE",
+            match="INSPER_EXPIRY_DATE must be strictly after EFFECTIVE_DATE",
         ):
             Structure(
                 structure_name="Test Structure",
@@ -117,7 +117,7 @@ class TestStructure:
 
         with pytest.raises(
             ValueError,
-            match="INSPER_EXPIRY_DATE must be strictly after INSPER_EFFECTIVE_DATE",
+            match="INSPER_EXPIRY_DATE must be strictly after EFFECTIVE_DATE",
         ):
             Structure(
                 structure_name="Test Structure",

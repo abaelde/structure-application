@@ -45,17 +45,17 @@ SHEETS = (
 
 PROGRAM_COLS = SimpleNamespace(
     TITLE="TITLE",
-    UW_DEPARTMENT_CODE="UW_LOB",
+    UW_DEPARTMENT_CODE="UW_LOB", # AURE : pas certains si c'est le bon nom de colonne
 )
 
 STRUCTURE_COLS = SimpleNamespace(
     NAME="RP_STRUCTURE_NAME",
     PREDECESSOR="PREDECESSOR_TITLE",
-    TYPE="TYPE_OF_PARTICIPATION_CD",
+    TYPE="TYPE_OF_PARTICIPATION",
     CLAIM_BASIS="CLAIMS_BASIS",
     INCEPTION="EFFECTIVE_DATE",
     EXPIRY="EXPIRY_DATE",
-    INSPER_ID="RP_STRUCTURE_ID",  # Nouvelle clé primaire auto-increment
+    INSPER_ID="RP_STRUCTURE_ID",  # Clé primaire auto-increment Snowflake
 )
 
 condition_COLS = SimpleNamespace(
@@ -65,5 +65,5 @@ condition_COLS = SimpleNamespace(
     SIGNED_SHARE="SIGNED_SHARE_PCT",
     INCLUDES_HULL="INCLUDES_HULL",
     INCLUDES_LIABILITY="INCLUDES_LIABILITY",
-    INSPER_ID="INSPER_ID_PRE",  # ID de liaison vers les structures
+    INSPER_ID="INSPER_ID_PRE",  # ID de liaison vers les structures (gardé pour compatibilité)
 )

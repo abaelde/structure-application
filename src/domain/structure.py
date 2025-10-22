@@ -23,18 +23,18 @@ class Structure:
         basis = (claim_basis or "").strip().lower()
         if basis not in CLAIM_BASIS_VALUES:
             raise ValueError(
-                f"INSPER_CLAIM_BASIS_CD is required and must be one of "
+                f"CLAIMS_BASIS is required and must be one of "
                 f"{sorted(CLAIM_BASIS_VALUES)}; got '{claim_basis}'"
             )
         self.claim_basis = basis
 
         # --- dates obligatoires
-        self.inception_date = self._require_ts(inception_date, "INSPER_EFFECTIVE_DATE")
+        self.inception_date = self._require_ts(inception_date, "EFFECTIVE_DATE")
         self.expiry_date = self._require_ts(expiry_date, "INSPER_EXPIRY_DATE")
         # borne: [inception; expiry[
         if self.expiry_date <= self.inception_date:
             raise ValueError(
-                f"INSPER_EXPIRY_DATE must be strictly after INSPER_EFFECTIVE_DATE "
+                f"INSPER_EXPIRY_DATE must be strictly after EFFECTIVE_DATE "
                 f"({self.inception_date} .. {self.expiry_date})"
             )
         self.conditions = conditions

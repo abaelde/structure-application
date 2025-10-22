@@ -352,6 +352,12 @@ Le guide contient des patterns courants, des exemples de traduction et toutes le
 
 # Helpers
 
+uv run scripts/create_correct_ddl.py
+
 ./snowflake-cli reset-tables --force
 
 uv run python examples/program_creation/create_aviation_old_republic.py
+
+uv run python examples/program_creation/create_quota_share_with_exclusion.py
+
+uv run python run_program_analysis.py --program "snowflake://SNOWFLAKE_LEARNING_DB.MYSCHEMA?program_title=AVIATION_OLD_REPUBLIC_2024_20251022_105730" --bordereau examples/bordereaux/bordereau_aviation_old_republic.csv

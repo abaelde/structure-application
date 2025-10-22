@@ -357,20 +357,20 @@ Dans le fichier **structures.csv** du programme, les colonnes suivantes contrôl
 
 | Colonne | Type | Défaut | Description |
 |---------|------|--------|-------------|
-| `INSPER_CLAIM_BASIS_CD` | String | `risk_attaching` | Type de claim basis (`risk_attaching` ou `loss_occurring`) |
-| `INSPER_EFFECTIVE_DATE` | Date | `NULL` | Date de début d'effet de la structure |
+| `CLAIMS_BASIS` | String | `risk_attaching` | Type de claim basis (`risk_attaching` ou `loss_occurring`) |
+| `EFFECTIVE_DATE` | Date | `NULL` | Date de début d'effet de la structure |
 | `INSPER_EXPIRY_DATE` | Date | `NULL` | Date de fin d'effet de la structure (exclusive) |
 
 ### Comportement
 
 #### Risk Attaching (RA)
 - **Référence** : `Policy.INCEPTION_DT`
-- **Logique** : La structure s'applique si `INCEPTION_DT` ∈ `[INSPER_EFFECTIVE_DATE ; INSPER_EXPIRY_DATE[`
+- **Logique** : La structure s'applique si `INCEPTION_DT` ∈ `[EFFECTIVE_DATE ; INSPER_EXPIRY_DATE[`
 - **Cas d'usage** : Structures qui suivent le cycle de vie de la police
 
 #### Loss Occurring (LO)
 - **Référence** : `calculation_date` (paramètre passé à `apply_program`)
-- **Logique** : La structure s'applique si `calculation_date` ∈ `[INSPER_EFFECTIVE_DATE ; INSPER_EXPIRY_DATE[`
+- **Logique** : La structure s'applique si `calculation_date` ∈ `[EFFECTIVE_DATE ; INSPER_EXPIRY_DATE[`
 - **Cas d'usage** : Structures qui s'appliquent selon la date de survenance des sinistres
 
 ### Exemple
@@ -379,7 +379,7 @@ Dans le fichier **structures.csv** du programme, les colonnes suivantes contrôl
 
 ```
 Feuille "structures":
-| BUSINESS_TITLE | INSPER_CLAIM_BASIS_CD | INSPER_EFFECTIVE_DATE | INSPER_EXPIRY_DATE | ... |
+| BUSINESS_TITLE | CLAIMS_BASIS | EFFECTIVE_DATE | INSPER_EXPIRY_DATE | ... |
 |----------------|----------------------|----------------------|-------------------|-----|
 | QS_2024        | risk_attaching      | 2024-01-01          | 2025-01-01        | ... |
 | QS_2025        | risk_attaching      | 2025-01-01          | 2026-01-01        | ... |

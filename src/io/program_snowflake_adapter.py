@@ -126,7 +126,46 @@ class SnowflakeProgramIO:
             if structure_ids:
                 placeholders = ','.join(['%s'] * len(structure_ids))
                 cur.execute(
-                    f'SELECT * FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE INSPER_ID_PRE IN ({placeholders})',
+                    f'''SELECT 
+                        RP_CONDITION_ID,
+                        CED_ID_PRE,
+                        BUSINESS_ID_PRE,
+                        INSPER_ID_PRE,
+                        BUSCL_ENTITY_NAME_CED,
+                        POL_RISK_NAME_CED,
+                        BUSCL_COUNTRY_CD,
+                        BUSCL_COUNTRY,
+                        BUSCL_REGION,
+                        PRODUCT_TYPE_LEVEL_1,
+                        PRODUCT_TYPE_LEVEL_2,
+                        PRODUCT_TYPE_LEVEL_3,
+                        BUSCL_LIMIT_CURRENCY_CD,
+                        AAD_100,
+                        CAST(LIMIT_100 AS DOUBLE) AS LIMIT_100,
+                        CAST(LIMIT_FLOATER_100 AS DOUBLE) AS LIMIT_FLOATER_100,
+                        CAST(ATTACHMENT_POINT_100 AS DOUBLE) AS ATTACHMENT_POINT_100,
+                        OLW_100,
+                        LIMIT_AGG_100,
+                        CAST(CESSION_PCT AS DOUBLE) AS CESSION_PCT,
+                        CAST(RETENTION_PCT AS DOUBLE) AS RETENTION_PCT,
+                        SUPI_100,
+                        BUSCL_PREMIUM_CURRENCY_CD,
+                        BUSCL_PREMIUM_GROSS_NET_CD,
+                        CAST(PREMIUM_RATE_PCT AS DOUBLE) AS PREMIUM_RATE_PCT,
+                        PREMIUM_DEPOSIT_100,
+                        PREMIUM_MIN_100,
+                        BUSCL_LIABILITY_1_LINE_100,
+                        MAX_COVER_PCT,
+                        MIN_EXCESS_PCT,
+                        CAST(SIGNED_SHARE_PCT AS DOUBLE) AS SIGNED_SHARE_PCT,
+                        AVERAGE_LINE_SLAV_CED,
+                        PML_DEFAULT_PCT,
+                        LIMIT_EVENT,
+                        NO_OF_REINSTATEMENTS,
+                        INCLUDES_HULL,
+                        INCLUDES_LIABILITY
+                    FROM "{db}"."{schema}"."{self.CONDITIONS}" 
+                    WHERE INSPER_ID_PRE IN ({placeholders})''',
                     structure_ids,
                 )
             else:
@@ -253,43 +292,18 @@ class SnowflakeProgramIO:
                 conditions_out = frames.conditions.copy()  # Garde les listes natives
                 exclusions_out = exclusions_encoded.copy()
                 
-                # Mapping des colonnes pour structures
-                if "REINSURANCE_PROGRAM_ID" in structures_out.columns:
-                    structures_out["RP_ID"] = program_id
-                    structures_out.drop(
-                        columns=["REINSURANCE_PROGRAM_ID"],
-                        inplace=True,
-                        errors="ignore",
-                    )
-                else:
-                    structures_out["RP_ID"] = program_id
-                
-                # Mapping des noms de colonnes pour structures (ancien -> nouveau)
-                structure_column_mapping = {
-                    "INSPER_ID_PRE": "RP_STRUCTURE_ID",  # Mapper vers la clé primaire
-                    "BUSINESS_TITLE": "RP_STRUCTURE_NAME",
-                    "INSPER_CLAIM_BASIS_CD": "CLAIMS_BASIS", 
-                    "INSPER_EFFECTIVE_DATE": "EFFECTIVE_DATE",
-                    "INSPER_EXPIRY_DATE": "EXPIRY_DATE",
-                    "INSPER_PREDECESSOR_TITLE": "PREDECESSOR_TITLE",
-                }
-                structures_out = structures_out.rename(columns=structure_column_mapping)
+                # Ajouter RP_ID pour les structures
+                structures_out["RP_ID"] = program_id
                 
                 # Les conditions n'ont plus RP_ID, elles sont liées via INSPER_ID_PRE
                 exclusions_out["RP_ID"] = program_id
-                
-                # Mapping des noms de colonnes pour exclusions (ancien -> nouveau)
-                exclusion_column_mapping = {
-                    "BUSCL_ENTITY_NAME_CED": "ENTITY_NAME_CED",
-                    "POL_RISK_NAME_CED": "RISK_NAME",
-                }
-                exclusions_out = exclusions_out.rename(columns=exclusion_column_mapping)
 
                 # d) Garantir le jeu de colonnes attendu par les tables (ordre inclus)
                 structures_cols = [
                     "RP_ID",
+                    "RP_STRUCTURE_ID",
                     "RP_STRUCTURE_NAME",
-                    "TYPE_OF_PARTICIPATION_CD",
+                    "TYPE_OF_PARTICIPATION",
                     "CLAIMS_BASIS",
                     "EFFECTIVE_DATE",
                     "EXPIRY_DATE",
@@ -322,10 +336,12 @@ class SnowflakeProgramIO:
                     "EXCLUSION_NAME",
                     "EXCL_EFFECTIVE_DATE",
                     "EXCL_EXPIRY_DATE",
+                    "ENTITY_NAME_CED",
+                    "RISK_NAME",
                     *[
                         d
                         for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()
-                        if d in exclusions_out.columns
+                        if d in exclusions_out.columns and d not in ["BUSCL_ENTITY_NAME_CED", "POL_RISK_NAME_CED"]
                     ],
                 ]
 

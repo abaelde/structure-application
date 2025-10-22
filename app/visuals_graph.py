@@ -115,7 +115,7 @@ def build_program_graph_figure(policy_result_row, calculation_date):
         color = _color_for_status(applied, reason)
         cbasis = (s.get("matching_details") or {}).get("claim_basis") or (
             s.get("condition") or {}
-        ).get("INSPER_CLAIM_BASIS_CD")
+        ).get("CLAIMS_BASIS")
         cbasis = cbasis or "—"
 
         input_exp = s.get("input_exposure", 0.0) or 0.0

@@ -156,13 +156,13 @@ class ProgramSerializer:
         for st in program.structures:
             structures_rows.append(
                 {
-                    "INSPER_ID_PRE": insper,
-                    "BUSINESS_TITLE": st.structure_name,
-                    "TYPE_OF_PARTICIPATION_CD": st.type_of_participation,
-                    "INSPER_PREDECESSOR_TITLE": st.predecessor_title,
-                    "INSPER_CLAIM_BASIS_CD": st.claim_basis,
-                    "INSPER_EFFECTIVE_DATE": st.inception_date,
-                    "INSPER_EXPIRY_DATE": st.expiry_date,
+                    "RP_STRUCTURE_ID": insper,
+                    "RP_STRUCTURE_NAME": st.structure_name,
+                    "TYPE_OF_PARTICIPATION": st.type_of_participation,
+                    "PREDECESSOR_TITLE": st.predecessor_title,
+                    "CLAIMS_BASIS": st.claim_basis,
+                    "EFFECTIVE_DATE": st.inception_date,
+                    "EXPIRY_DATE": st.expiry_date,
                 }
             )
             for c in st.conditions:
@@ -191,14 +191,20 @@ class ProgramSerializer:
 
     def _exclusions_to_df(self, program: Program) -> pd.DataFrame:
         if not program.exclusions:
-            return pd.DataFrame(
-                columns=[
-                    "EXCLUSION_NAME",
-                    "EXCL_EFFECTIVE_DATE",
-                    "EXCL_EXPIRY_DATE",
-                    *PROGRAM_TO_BORDEREAU_DIMENSIONS.keys(),
-                ]
-            )
+            # Colonnes par défaut avec mapping Snowflake
+            default_cols = [
+                "EXCLUSION_NAME",
+                "EXCL_EFFECTIVE_DATE", 
+                "EXCL_EXPIRY_DATE",
+            ]
+            for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys():
+                if d == "BUSCL_ENTITY_NAME_CED":
+                    default_cols.append("ENTITY_NAME_CED")
+                elif d == "POL_RISK_NAME_CED":
+                    default_cols.append("RISK_NAME")
+                else:
+                    default_cols.append(d)
+            return pd.DataFrame(columns=default_cols)
         rows = []
         for e in program.exclusions:
             row = {
@@ -208,6 +214,12 @@ class ProgramSerializer:
             }
             for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys():
                 vals = e.values_by_dimension.get(d)
-                row[d] = MULTI_VALUE_SEPARATOR.join(vals) if vals else None
+                # Mapping pour les exclusions vers les noms Snowflake
+                if d == "BUSCL_ENTITY_NAME_CED":
+                    row["ENTITY_NAME_CED"] = MULTI_VALUE_SEPARATOR.join(vals) if vals else None
+                elif d == "POL_RISK_NAME_CED":
+                    row["RISK_NAME"] = MULTI_VALUE_SEPARATOR.join(vals) if vals else None
+                else:
+                    row[d] = MULTI_VALUE_SEPARATOR.join(vals) if vals else None
             rows.append(row)
         return pd.DataFrame(rows)
