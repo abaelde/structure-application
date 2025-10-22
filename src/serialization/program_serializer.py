@@ -110,64 +110,29 @@ class ProgramSerializer:
             recs = df.to_dict("records")
             return [{k: pandas_to_native(v) for k, v in r.items()} for r in recs]
 
-        # Nouvelle architecture : reconstruire les structures avec leurs conditions via field_links_df
+        # Utiliser la logique métier du domaine pour fusionner défauts + overrides
         structures: List[Structure] = []
         
         # Créer un mapping des conditions par RP_CONDITION_ID
-        conditions_by_id = {}
-        for cond in df_to_dicts(conditions_df):
-            condition_id = cond.get("RP_CONDITION_ID")
-            if condition_id is not None:
-                conditions_by_id[condition_id] = cond
+        conditions_by_id = {row["RP_CONDITION_ID"]: row for row in df_to_dicts(conditions_df)}
         
         # Créer un mapping des field_links par RP_STRUCTURE_ID
-        field_links_by_structure = {}
+        field_links_by_structure: dict[int, dict[int, dict[str, object]]] = {}
         if field_links_df is not None and not field_links_df.empty:
             for link in df_to_dicts(field_links_df):
-                structure_id = link.get("RP_STRUCTURE_ID")
-                condition_id = link.get("RP_CONDITION_ID")
-                field_name = link.get("FIELD_NAME")
-                new_value = link.get("NEW_VALUE")
-                
-                if structure_id not in field_links_by_structure:
-                    field_links_by_structure[structure_id] = {}
-                if condition_id not in field_links_by_structure[structure_id]:
-                    field_links_by_structure[structure_id][condition_id] = {}
-                
-                field_links_by_structure[structure_id][condition_id][field_name] = new_value
+                field_links_by_structure.setdefault(link["RP_STRUCTURE_ID"], {}) \
+                                     .setdefault(link["RP_CONDITION_ID"], {}) \
+                                     [link["FIELD_NAME"]] = link["NEW_VALUE"]
         
-        # Reconstruire les structures
+        # Reconstruire les structures en utilisant resolve_condition()
         for s in df_to_dicts(structures_df):
-            structure_id = s.get(STRUCTURE_COLS.INSPER_ID)
-            if structure_id is None:
-                raise ValueError("RP_STRUCTURE_ID is mandatory for all structures.")
-            
-            # Trouver les conditions liées à cette structure via field_links
-            linked_conditions = []
-            if structure_id in field_links_by_structure:
-                for condition_id, overrides in field_links_by_structure[structure_id].items():
-                    if condition_id in conditions_by_id:
-                        # Créer une condition avec les valeurs par défaut de la structure
-                        condition = conditions_by_id[condition_id].copy()
-                        
-                        # Appliquer les valeurs par défaut de la structure d'abord
-                        condition[CONDITION_COLS.CESSION_PCT] = s.get("CESSION_PCT")
-                        condition[CONDITION_COLS.ATTACHMENT] = s.get("ATTACHMENT_POINT_100")
-                        condition[CONDITION_COLS.LIMIT] = s.get("LIMIT_100")
-                        condition[CONDITION_COLS.SIGNED_SHARE] = s.get("SIGNED_SHARE_PCT")
-                        
-                        # Puis appliquer les overrides financiers
-                        for field_name, new_value in overrides.items():
-                            condition[field_name] = new_value
-                        
-                        linked_conditions.append(condition)
-            
-            # Ne pas créer automatiquement une condition par défaut
-            # Les valeurs par défaut restent dans la structure elle-même
-            # linked_conditions reste vide si aucune condition spécifique
-            
-            # Créer la structure avec ses conditions
-            structures.append(Structure.from_row(s, linked_conditions, STRUCTURE_COLS))
+            struct = Structure.from_row(s, [], STRUCTURE_COLS)  # sans conditions pour l'instant
+            linked = []
+            for cond_id, overrides in field_links_by_structure.get(s[STRUCTURE_COLS.INSPER_ID], {}).items():
+                template = conditions_by_id.get(cond_id, {})
+                linked.append(struct.resolve_condition(template, overrides).to_dict())
+            # recréer l'objet Structure avec ses conditions résolues
+            structures.append(Structure.from_row(s, linked, STRUCTURE_COLS))
 
         # Exclusions
         exclusions: List[ExclusionRule] = []
@@ -210,7 +175,7 @@ class ProgramSerializer:
             }
         )
 
-        structures_rows, conditions_rows, field_links_rows = [], [], []
+        structures_rows, field_links_rows = [], []
 
         # Pool global de conditions uniques : signature -> RP_CONDITION_ID
         pool: dict[tuple, int] = {}
@@ -218,6 +183,19 @@ class ProgramSerializer:
 
         # Signature -> row Snowflake (une seule fois par signature)
         unique_condition_rows: dict[tuple, dict] = {}
+
+        def create_condition_row(condition, signature, condition_id, phys_map):
+            """Créer une row condition unique via signature."""
+            row = {
+                "RP_CONDITION_ID": condition_id,
+                "INCLUDES_HULL": condition.get("INCLUDES_HULL"),
+                "INCLUDES_LIABILITY": condition.get("INCLUDES_LIABILITY"),
+            }
+            for dim in program.dimension_columns:
+                snow_col = phys_map.get(dim, dim)
+                v = condition.get_values(dim)
+                row[snow_col] = ';'.join(v) if v else None
+            return row
 
         insper = 1
         for st in program.structures:
@@ -245,18 +223,7 @@ class ProgramSerializer:
                     cond_id = next_condition_id
                     pool[sig] = cond_id
                     next_condition_id += 1
-
-                    # construire UNE LIGNE condition (dimensions + flags uniquement)
-                    row = {
-                        "RP_CONDITION_ID": cond_id,
-                        "INCLUDES_HULL": c.get("INCLUDES_HULL"),
-                        "INCLUDES_LIABILITY": c.get("INCLUDES_LIABILITY"),
-                    }
-                    for dim in program.dimension_columns:
-                        snow_col = phys_map.get(dim, dim)
-                        v = c.get_values(dim)
-                        row[snow_col] = ';'.join(v) if v else None
-                    unique_condition_rows[sig] = row
+                    unique_condition_rows[sig] = create_condition_row(c, sig, cond_id, phys_map)
 
                 cond_id = pool[sig]
 
@@ -271,14 +238,11 @@ class ProgramSerializer:
                     })
             insper += 1
 
-        # Émission finale des DataFrames
-        conditions_rows = list(unique_condition_rows.values())
-
         exclusions_df = self._exclusions_to_df(program)
         return {
             "program": program_df,
             "structures": pd.DataFrame(structures_rows),
-            "conditions": pd.DataFrame(conditions_rows),
+            "conditions": pd.DataFrame(list(unique_condition_rows.values())),
             "exclusions": exclusions_df,
             "field_links": pd.DataFrame(field_links_rows),
         }
