@@ -360,4 +360,4 @@ uv run python examples/program_creation/create_aviation_old_republic.py
 
 uv run python examples/program_creation/create_quota_share_with_exclusion.py
 
-uv run python run_program_analysis.py --program "snowflake://SNOWFLAKE_LEARNING_DB.MYSCHEMA?program_title=AVIATION_OLD_REPUBLIC_2024_20251022_105730" --bordereau examples/bordereaux/bordereau_aviation_old_republic.csv
+uv run python run_program_analysis.py --program "snowflake://SNOWFLAKE_LEARNING_DB.MYSCHEMA?program_title=AVIATION_OLD_REPUBLIC_2024_20251022_112648" --bordereau examples/bordereaux/bordereau_aviation_old_republic.csv
