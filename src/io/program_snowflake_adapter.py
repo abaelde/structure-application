@@ -1,4 +1,4 @@
-# src/io/program_snowflake_csv_adapter.py
+# src/io/program_snowflake_adapter.py
 from __future__ import annotations
 from typing import Tuple, Optional, Dict, Any, List
 import pandas as pd
@@ -7,7 +7,7 @@ from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 from src.serialization.program_frames import ProgramFrames, condition_dims_in
 from src.serialization.compact import compact_multivalue
 
-class SnowflakeProgramCSVIO:
+class SnowflakeProgramIO:
     PROGRAMS   = "REINSURANCE_PROGRAM"
     STRUCTURES = "RP_STRUCTURES"
     CONDITIONS = "RP_CONDITIONS"

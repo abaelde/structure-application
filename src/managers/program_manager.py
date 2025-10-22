@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import pandas as pd
 from typing import Literal, Optional
-from src.io.program_snowflake_csv_adapter import SnowflakeProgramCSVIO
+from src.io.program_snowflake_adapter import SnowflakeProgramIO
 from src.io.program_csv_folder_adapter import CsvProgramFolderIO
 from src.serialization.program_serializer import ProgramSerializer
 from src.domain.program import Program
@@ -74,7 +74,7 @@ class ProgramManager:
     def _make_io(self, backend: Backend):
         """Create the appropriate I/O adapter for the backend."""
         if backend == "snowflake":
-            return SnowflakeProgramCSVIO()
+            return SnowflakeProgramIO()
         elif backend == "csv_folder":
             return CsvProgramFolderIO()
         else:
@@ -95,8 +95,8 @@ class ProgramManager:
         program_title = None
         if source.lower().startswith("snowflake://"):
             try:
-                from src.io.program_snowflake_csv_adapter import SnowflakeProgramCSVIO
-                _, _, params = SnowflakeProgramCSVIO()._parse_dsn(source)
+                from src.io.program_snowflake_adapter import SnowflakeProgramIO
+                _, _, params = SnowflakeProgramIO()._parse_dsn(source)
                 program_title = params.get("program_title")
             except:
                 pass  # Si l'extraction échoue, on continue sans program_title
@@ -135,120 +135,3 @@ class ProgramManager:
             dfs["exclusions"],
             **(io_kwargs or {}),
         )
-
-    def save_current(self, dest: str, io_kwargs: Optional[dict] = None) -> None:
-        """
-        Save the currently loaded program to the specified destination.
-
-        Args:
-            dest: Destination path/identifier
-            io_kwargs: Additional parameters for the I/O adapter (e.g., connection_params, if_exists for Snowflake)
-
-        Raises:
-            ValueError: If no program is currently loaded
-        """
-        if not self._loaded_program:
-            raise ValueError("No program currently loaded. Call load() first.")
-        self.save(self._loaded_program, dest, io_kwargs)
-
-    def get_current_program(self) -> Program:
-        """
-        Get the currently loaded program.
-
-        Returns:
-            The currently loaded Program object
-
-        Raises:
-            ValueError: If no program is currently loaded
-        """
-        if not self._loaded_program:
-            raise ValueError("No program currently loaded. Call load() first.")
-        return self._loaded_program
-
-    def get_current_source(self) -> str:
-        """
-        Get the source of the currently loaded program.
-
-        Returns:
-            The source path/identifier of the currently loaded program
-
-        Raises:
-            ValueError: If no program is currently loaded
-        """
-        if not self._loaded_source:
-            raise ValueError("No program currently loaded. Call load() first.")
-        return self._loaded_source
-
-    def switch_backend(self, backend: Backend) -> None:
-        """
-        Switch to a different backend.
-
-        Args:
-            backend: The new backend to use
-        """
-        self.backend = backend
-        self.io = self._make_io(backend)
-        # Clear the loaded program since it was loaded with the previous backend
-        self._loaded_program = None
-        self._loaded_source = None
-
-    def reload(self, io_kwargs: Optional[dict] = None) -> Program:
-        """
-        Reload the program from the current source.
-
-        Args:
-            io_kwargs: Additional parameters for the I/O adapter (e.g., connection_params for Snowflake)
-
-        Returns:
-            The reloaded Program object
-
-        Raises:
-            ValueError: If no program is currently loaded
-        """
-        if not self._loaded_source:
-            raise ValueError("No program currently loaded. Call load() first.")
-        return self.load(self._loaded_source, io_kwargs)
-
-    def copy_to_backend(
-        self,
-        program: Program,
-        dest: str,
-        backend: Backend,
-        io_kwargs: Optional[dict] = None,
-    ) -> None:
-        """
-        Copy a program to a different backend.
-
-        Args:
-            program: The Program object to copy
-            dest: Destination path/identifier
-            backend: Target backend
-            io_kwargs: Additional parameters for the I/O adapter (e.g., connection_params, if_exists for Snowflake)
-        """
-        # Save current backend
-        current_backend = self.backend
-
-        # Switch to target backend
-        self.switch_backend(backend)
-
-        # Save the program
-        self.save(program, dest, io_kwargs)
-
-        # Restore original backend
-        self.switch_backend(current_backend)
-
-    def is_loaded(self) -> bool:
-        """
-        Check if a program is currently loaded.
-
-        Returns:
-            True if a program is loaded, False otherwise
-        """
-        return self._loaded_program is not None
-
-    def clear(self) -> None:
-        """
-        Clear the currently loaded program.
-        """
-        self._loaded_program = None
-        self._loaded_source = None
