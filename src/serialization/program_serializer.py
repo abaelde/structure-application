@@ -143,7 +143,7 @@ class ProgramSerializer:
         self, program: Program, *, lean: bool = True
     ) -> Dict[str, pd.DataFrame]:
         """Par défaut: export 'lean' (colonnes essentielles). On garde l'API actuelle."""
-        # Ne pas inclure REINSURANCE_PROGRAM_ID - laisser Snowflake l'auto-incrémenter
+
         program_df = pd.DataFrame(
             {
                 "TITLE": [program.name],

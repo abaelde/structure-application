@@ -148,18 +148,3 @@ class RunSnowflakeIO:
             return runs, pols, strs
         finally:
             cnx.close()
-
-    def drop_all_tables(
-        self, dsn: str, *, connection_params: Optional[Dict[str, Any]] = None
-    ) -> None:
-        db, schema = self._parse_dsn(dsn)
-        cnx = self._connect(connection_params)
-        try:
-            cur = cnx.cursor()
-            try:
-                for t in [self.STRUCTURES, self.POLICIES, self.RUNS]:
-                    cur.execute(f'DROP TABLE IF EXISTS "{db}"."{schema}"."{t}"')
-            finally:
-                cur.close()
-        finally:
-            cnx.close()

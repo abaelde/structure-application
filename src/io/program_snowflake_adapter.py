@@ -72,7 +72,6 @@ class SnowflakeProgramIO:
                 cleaned.append(v)
         return cleaned
 
-    # ---------------- READ inchangé (logique actuelle OK) ----------------
     def read(
         self,
         source: str,
@@ -142,7 +141,6 @@ class SnowflakeProgramIO:
             cur.close()
             cnx.close()
 
-    # ---------------- WRITE simplifié & mutualisé ----------------
     def write(
         self,
         dest: str,
@@ -208,12 +206,8 @@ class SnowflakeProgramIO:
                     )
 
                 # 3) Préparer CONDITIONS/STRUCTURES/EXCLUSIONS via helpers communs
-
-                # a) Compacter les dimensions multi-valeurs côté conditions
-                # Regrouper par les colonnes qui définissent la condition + INSPER_ID_PRE
                 dims = condition_dims_in(conditions_df)
-                # Colonnes qui définissent la condition + l'ID de structure
-                # Mais seulement celles qui ont des valeurs non-nulles dans le DataFrame
+
                 condition_defining_cols = [
                     "INSPER_ID_PRE",
                     "CESSION_PCT",
@@ -232,8 +226,6 @@ class SnowflakeProgramIO:
                     conditions_df, dims=dims, group_cols=group_cols
                 )
 
-                # b) Encoder seulement les exclusions pour stockage (list → "a;b")
-                # Les conditions gardent leurs listes natives
                 frames = ProgramFrames(
                     program_df, structures_df, conditions_compact, exclusions_df
                 )
@@ -320,25 +312,4 @@ class SnowflakeProgramIO:
             finally:
                 cur.close()
         finally:
-            cnx.close()
-
-    # ────────────────────────────────────────────────────────────────────
-    # UTILS
-    # ────────────────────────────────────────────────────────────────────
-    def drop_all_tables(
-        self, connection_params: Dict[str, Any], db: str, schema: str
-    ) -> None:
-        """Supprime toutes les tables (utile pour les tests)"""
-        cnx = self._connect(connection_params)
-        cur = cnx.cursor()
-        try:
-            for table in [
-                self.EXCLUSIONS,
-                self.CONDITIONS,
-                self.STRUCTURES,
-                self.PROGRAMS,
-            ]:
-                cur.execute(f'DROP TABLE IF EXISTS "{db}"."{schema}"."{table}"')
-        finally:
-            cur.close()
             cnx.close()
