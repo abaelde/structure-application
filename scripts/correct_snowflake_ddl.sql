@@ -36,21 +36,8 @@ CREATE TABLE RP_STRUCTURES (
   EXPIRY_DATE             TIMESTAMP_NTZ,
   UW_YEAR                 NUMBER(38,0),
   COMMENT                 VARCHAR,
-  
-  FOREIGN KEY (RP_ID) REFERENCES REINSURANCE_PROGRAM(REINSURANCE_PROGRAM_ID)
-);
 
--- Table RP_CONDITIONS avec clé étrangère vers RP_STRUCTURES
-CREATE TABLE RP_CONDITIONS (
-  RP_CONDITION_ID                NUMBER(38,0)    AUTOINCREMENT PRIMARY KEY,
-  CONDITION_NAME                 VARCHAR,
-  CONDITION_DESCRIPTION          VARCHAR,
-  COUNTRY_ID                     VARCHAR,
-  REGION_ID                      VARCHAR,
-  PRODUCT_TYPE_LEVEL_1           VARCHAR,
-  PRODUCT_TYPE_LEVEL_2           VARCHAR,
-  PRODUCT_TYPE_LEVEL_3           VARCHAR,
-  CURRENCY_ID                    VARCHAR,
+  -- Défauts financiers (valeurs utilisées si pas d'override côté condition)
   LIMIT_100                      NUMBER(38,0),
   ATTACHMENT_POINT_100           NUMBER(38,0),
   CESSION_PCT                    NUMBER(38,4),
@@ -69,14 +56,37 @@ CREATE TABLE RP_CONDITIONS (
   PML_DEFAULT_PCT                NUMBER(38,0),
   LIMIT_EVENT                    NUMBER(38,0),
   NO_OF_REINSTATEMENTS           NUMBER(38,0),
+  
+  FOREIGN KEY (RP_ID) REFERENCES REINSURANCE_PROGRAM(REINSURANCE_PROGRAM_ID)
+);
+
+-- Table RP_CONDITIONS avec clé étrangère vers RP_STRUCTURES
+CREATE TABLE RP_CONDITIONS (
+  RP_CONDITION_ID                NUMBER(38,0)    AUTOINCREMENT PRIMARY KEY,
+  CONDITION_NAME                 VARCHAR,
+  CONDITION_DESCRIPTION          VARCHAR,
+
+   -- Scopage programme (à la place de l'ancien INSPER_ID_PRE)
+  RP_ID                           NUMBER(38,0) NOT NULL,
+
+  -- Dimensions logiques (complète/ajuste selon ton mapping réel)
+  COUNTRY_ID                     VARCHAR,
+  REGION_ID                      VARCHAR,
+  PRODUCT_TYPE_LEVEL_1           VARCHAR,
+  PRODUCT_TYPE_LEVEL_2           VARCHAR,
+  PRODUCT_TYPE_LEVEL_3           VARCHAR,
+  CURRENCY_ID                    VARCHAR,
+
+  -- Flags d'exposition (logiques)
   INCLUDES_HULL                  BOOLEAN,
   INCLUDES_LIABILITY             BOOLEAN,
+
+  -- Audit
   CREATED_AT                     TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP(),
   CREATED_BY                     VARCHAR,
   MODIFIED_AT                    TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP(),
   MODIFIED_BY                    VARCHAR,
-  INSPER_ID_PRE                  NUMBER(38,0) NOT NULL, -- Should be removed later
-  FOREIGN KEY (INSPER_ID_PRE) REFERENCES RP_STRUCTURES(RP_STRUCTURE_ID)
+  FOREIGN KEY (RP_ID) REFERENCES REINSURANCE_PROGRAM(REINSURANCE_PROGRAM_ID)
 );
 
 -- Table RP_GLOBAL_EXCLUSION avec clé étrangère vers PROGRAMS
@@ -103,7 +113,7 @@ CREATE TABLE RP_STRUCTURE_FIELD_LINK (
   RP_STRUCTURE_FIELD_LINK_ID         NUMBER(38,0)    AUTOINCREMENT PRIMARY KEY,
   RP_CONDITION_ID                 NUMBER(38,0) NOT NULL,
   RP_STRUCTURE_ID                 NUMBER(38,0)    NOT NULL,
-  FIELD_NAME            VARCHAR,
+  FIELD_NAME            VARCHAR NOT NULL,
   NEW_VALUE               NUMBER(38,4),
   CREATED_AT TIMESTAMP_NTZ(9),
   CREATED_BY VARCHAR,

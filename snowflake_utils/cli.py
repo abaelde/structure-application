@@ -20,7 +20,6 @@ from snowflake_utils import (
     SnowflakeConfig,
     test_connection,
     list_programs,
-    delete_program,
     reset_all_tables,
     truncate_all_tables,
     save_program,
@@ -51,21 +50,6 @@ def cmd_list_programs(args):
     else:
         print("   Aucun programme trouvé")
     return 0
-
-
-def cmd_delete_program(args):
-    """Supprime un programme."""
-    if not args.title:
-        print("❌ Erreur: Le titre du programme est requis")
-        return 1
-
-    print(f"🗑️  Suppression du programme '{args.title}'...")
-    if delete_program(args.title):
-        print("✅ Programme supprimé avec succès")
-        return 0
-    else:
-        print("❌ Échec de la suppression")
-        return 1
 
 
 def cmd_reset_tables(args):
@@ -205,7 +189,6 @@ Exemples d'utilisation:
   snowflake-cli test                    # Tester la connexion
   snowflake-cli status                  # Statut complet du système
   snowflake-cli list-programs           # Lister tous les programmes
-  snowflake-cli delete-program "TITRE"  # Supprimer un programme
   snowflake-cli reset-tables --force    # Reset complet des tables
   snowflake-cli truncate-tables         # Vider les tables
   snowflake-cli sql "SELECT COUNT(*) FROM PROGRAMS"  # Requête SQL
@@ -225,12 +208,6 @@ Exemples d'utilisation:
 
     # Lister les programmes
     subparsers.add_parser("list-programs", help="Lister tous les programmes")
-
-    # Supprimer un programme
-    delete_parser = subparsers.add_parser(
-        "delete-program", help="Supprimer un programme"
-    )
-    delete_parser.add_argument("title", help="Titre du programme à supprimer")
 
     # Reset des tables
     reset_parser = subparsers.add_parser(
@@ -264,7 +241,6 @@ Exemples d'utilisation:
         "status": cmd_status,
         "config": cmd_config_info,
         "list-programs": cmd_list_programs,
-        "delete-program": cmd_delete_program,
         "reset-tables": cmd_reset_tables,
         "truncate-tables": cmd_truncate_tables,
         "sql": cmd_sql_query,

@@ -60,7 +60,6 @@ if __name__ == '__main__':
         print("   test                    # Tester la connexion")
         print("   status                  # Statut complet du système")
         print("   list-programs           # Lister tous les programmes")
-        print("   delete-program TITRE    # Supprimer un programme")
         print("   reset-tables --force    # Reset complet des tables")
         print("   truncate-tables         # Vider les tables")
         print('   sql "SELECT ..."        # Requête SQL')

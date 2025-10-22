@@ -90,7 +90,6 @@ python -m snowflake_utils <command> [options]
 - `status` - Statut complet du système
 - `config` - Informations de configuration
 - `list-programs` - Lister tous les programmes
-- `delete-program TITRE` - Supprimer un programme
 - `reset-tables --force` - Reset complet des tables
 - `truncate-tables` - Vider les tables
 - `sql "SELECT ..."` - Exécuter une requête SQL
@@ -213,7 +212,6 @@ python -m snowflake_utils <command> [options]
 - `status` - Statut complet du système
 - `config` - Informations de configuration
 - `list-programs` - Lister tous les programmes
-- `delete-program TITRE` - Supprimer un programme
 - `reset-tables --force` - Reset complet des tables
 - `truncate-tables` - Vider les tables
 - `sql "SELECT ..."` - Exécuter une requête SQL

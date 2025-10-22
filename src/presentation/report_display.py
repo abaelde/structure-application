@@ -52,10 +52,21 @@ def write_detailed_results(
                     f"   Cession to reinsurer: {struct['ceded_to_reinsurer']:,.2f}\n"
                 )
 
-                if struct.get("condition"):
-                    condition = struct["condition"]
+                # Récupérer la condition depuis matching_details
+                matching_details = struct.get("matching_details", {})
+                condition = matching_details.get("matched_condition")
+                
+                if condition:
                     rescaling_info = struct.get("rescaling_info")
-
+                    
+                    # Vérifier si on utilise les valeurs par défaut ou une condition spécifique
+                    using_default = matching_details.get("using_default_values", False)
+                    
+                    if using_default:
+                        file.write(f"   Applied: 🏠 DEFAULT VALUES from structure\n")
+                    else:
+                        file.write(f"   Applied: 🎯 SPECIFIC CONDITION\n")
+                    
                     file.write(f"   Applied condition parameters:\n")
 
                     if struct["type_of_participation"] == PRODUCT.QUOTA_SHARE:
@@ -94,18 +105,20 @@ def write_detailed_results(
                             f"      SIGNED_SHARE_PCT: {condition[SC.SIGNED_SHARE]}\n"
                         )
 
-                    conditions = []
-                    for dim in dimension_columns:
-                        value = condition.get(dim)
-                        if pd.notna(value):
-                            conditions.append(f"{dim}={value}")
-                    conditions_str = (
-                        ", ".join(conditions) if conditions else "All (no conditions)"
-                    )
-                    file.write(f"   Matching conditions: {conditions_str}\n")
+                    if using_default:
+                        file.write(f"   Matching conditions: 🏠 DEFAULT (applies to all policies not matching specific conditions)\n")
+                    else:
+                        conditions = []
+                        for dim in dimension_columns:
+                            value = condition.get(dim)
+                            if pd.notna(value):
+                                conditions.append(f"{dim}={value}")
+                        conditions_str = (
+                            ", ".join(conditions) if conditions else "All (no conditions)"
+                        )
+                        file.write(f"   Matching conditions: 🎯 {conditions_str}\n")
 
                     # Afficher les détails de matching si disponibles
-                    matching_details = struct.get("matching_details")
                     if matching_details:
                         file.write(f"   Matching details:\n")
 
@@ -164,7 +177,6 @@ def write_detailed_results(
                 file.write(f"   Reason: No matching condition found\n")
 
                 # Afficher les détails de pourquoi aucune condition n'a matché
-                matching_details = struct.get("matching_details")
                 if matching_details:
                     file.write(f"   Why no condition matched:\n")
 

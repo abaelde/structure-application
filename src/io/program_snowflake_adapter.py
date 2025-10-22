@@ -80,10 +80,10 @@ class SnowflakeProgramIO:
         source: str,
         connection_params: Dict[str, Any],
         program_title: Optional[str] = None,
-    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Lit un programme depuis Snowflake.
-        Retourne (program_df, structures_df, conditions_df, exclusions_df)
+        Retourne (program_df, structures_df, conditions_df, exclusions_df, field_links_df)
         """
         db, schema, params = self._parse_dsn(source)
 
@@ -110,7 +110,45 @@ class SnowflakeProgramIO:
             # 2. Lire les structures
             program_id = int(program_df.iloc[0]["REINSURANCE_PROGRAM_ID"])
             cur.execute(
-                f'SELECT * FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s',
+                f'''
+                SELECT 
+                    RP_STRUCTURE_ID,
+                    RP_ID,
+                    RP_STRUCTURE_NAME,
+                    TYPE_OF_PARTICIPATION,
+                    CLAIMS_BASIS,
+                    EFFECTIVE_DATE,
+                    EXPIRY_DATE,
+                    RP_STRUCTURE_ID_PREDECESSOR,
+                    T_NUMBER,
+                    LAYER_NUMBER,
+                    INSURED_PERIOD_TYPE,
+                    CLASS_OF_BUSINESS,
+                    MAIN_CURRENCY,
+                    UW_YEAR,
+                    COMMENT,
+                    -- Cast des valeurs numériques en FLOAT
+                    CAST(LIMIT_100 AS FLOAT) AS LIMIT_100,
+                    CAST(ATTACHMENT_POINT_100 AS FLOAT) AS ATTACHMENT_POINT_100,
+                    CAST(CESSION_PCT AS FLOAT) AS CESSION_PCT,
+                    CAST(RETENTION_PCT AS FLOAT) AS RETENTION_PCT,
+                    CAST(SUPI_100 AS FLOAT) AS SUPI_100,
+                    BUSCL_PREMIUM_CURRENCY_CD,
+                    BUSCL_PREMIUM_GROSS_NET_CD,
+                    CAST(PREMIUM_RATE_PCT AS FLOAT) AS PREMIUM_RATE_PCT,
+                    CAST(PREMIUM_DEPOSIT_100 AS FLOAT) AS PREMIUM_DEPOSIT_100,
+                    CAST(PREMIUM_MIN_100 AS FLOAT) AS PREMIUM_MIN_100,
+                    CAST(BUSCL_LIABILITY_1_LINE_100 AS FLOAT) AS BUSCL_LIABILITY_1_LINE_100,
+                    CAST(MAX_COVER_PCT AS FLOAT) AS MAX_COVER_PCT,
+                    CAST(MIN_EXCESS_PCT AS FLOAT) AS MIN_EXCESS_PCT,
+                    CAST(SIGNED_SHARE_PCT AS FLOAT) AS SIGNED_SHARE_PCT,
+                    CAST(AVERAGE_LINE_SLAV_CED AS FLOAT) AS AVERAGE_LINE_SLAV_CED,
+                    CAST(PML_DEFAULT_PCT AS FLOAT) AS PML_DEFAULT_PCT,
+                    CAST(LIMIT_EVENT AS FLOAT) AS LIMIT_EVENT,
+                    NO_OF_REINSTATEMENTS
+                FROM "{db}"."{schema}"."{self.STRUCTURES}" 
+                WHERE RP_ID=%s
+                ''',
                 (program_id,),
             )
             structures_rows = cur.fetchall()
@@ -118,28 +156,23 @@ class SnowflakeProgramIO:
                 structures_rows, columns=[desc[0] for desc in cur.description]
             )
 
-            # 3. Lire les conditions (scopées par RP_ID via JOIN pour éviter les collisions inter-programmes)
+            # 3. Lire les conditions (scopées par RP_ID)
             cur.execute(
                 f'''
                 SELECT 
                     c.RP_CONDITION_ID,
-                    c.INSPER_ID_PRE,
+                    c.RP_ID,
                     c.COUNTRY_ID,
                     c.REGION_ID,
                     c.PRODUCT_TYPE_LEVEL_1,
                     c.PRODUCT_TYPE_LEVEL_2,
                     c.PRODUCT_TYPE_LEVEL_3,
                     c.CURRENCY_ID,
-                    CAST(c.LIMIT_100 AS DOUBLE) AS LIMIT_100,
-                    CAST(c.ATTACHMENT_POINT_100 AS DOUBLE) AS ATTACHMENT_POINT_100,
-                    CAST(c.CESSION_PCT AS DOUBLE) AS CESSION_PCT,
-                    CAST(c.SIGNED_SHARE_PCT AS DOUBLE) AS SIGNED_SHARE_PCT,
                     c.INCLUDES_HULL,
                     c.INCLUDES_LIABILITY
                 FROM "{db}"."{schema}"."{self.CONDITIONS}" c
-                JOIN "{db}"."{schema}"."{self.STRUCTURES}" s
-                  ON c.INSPER_ID_PRE = s.RP_STRUCTURE_ID
-                WHERE s.RP_ID = %s
+                WHERE c.RP_ID = %s
+                ORDER BY c.RP_CONDITION_ID
                 ''',
                 (program_id,),
             )
@@ -148,7 +181,34 @@ class SnowflakeProgramIO:
                 conditions_rows, columns=[desc[0] for desc in cur.description]
             )
 
-            # 4. Lire les exclusions
+            # 4. Lire les RP_STRUCTURE_FIELD_LINK pour les overrides
+            cur.execute(
+                f'''
+                SELECT 
+                    fl.RP_STRUCTURE_FIELD_LINK_ID,
+                    fl.RP_CONDITION_ID,
+                    fl.RP_STRUCTURE_ID,
+                    fl.FIELD_NAME,
+                    -- Cast NEW_VALUE en FLOAT pour les valeurs numériques
+                    CASE 
+                        WHEN fl.FIELD_NAME IN ('CESSION_PCT', 'LIMIT_100', 'ATTACHMENT_POINT_100', 'SIGNED_SHARE_PCT') 
+                        THEN CAST(fl.NEW_VALUE AS FLOAT)
+                        ELSE fl.NEW_VALUE
+                    END AS NEW_VALUE
+                FROM "{db}"."{schema}"."RP_STRUCTURE_FIELD_LINK" fl
+                JOIN "{db}"."{schema}"."{self.CONDITIONS}" c
+                  ON fl.RP_CONDITION_ID = c.RP_CONDITION_ID
+                WHERE c.RP_ID = %s
+                ORDER BY fl.RP_STRUCTURE_FIELD_LINK_ID
+                ''',
+                (program_id,),
+            )
+            field_links_rows = cur.fetchall()
+            field_links_df = pd.DataFrame(
+                field_links_rows, columns=[desc[0] for desc in cur.description]
+            )
+
+            # 5. Lire les exclusions
             cur.execute(
                 f'SELECT * FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s',
                 (program_id,),
@@ -158,7 +218,7 @@ class SnowflakeProgramIO:
                 exclusions_rows, columns=[desc[0] for desc in cur.description]
             )
 
-            return program_df, structures_df, conditions_df, exclusions_df
+            return program_df, structures_df, conditions_df, exclusions_df, field_links_df
 
         finally:
             cur.close()
@@ -171,6 +231,7 @@ class SnowflakeProgramIO:
         structures_df: pd.DataFrame,
         conditions_df: pd.DataFrame,
         exclusions_df: pd.DataFrame,
+        field_links_df: pd.DataFrame,
         connection_params: Dict[str, Any],
         if_exists: str = "append",
     ) -> None:
@@ -194,18 +255,26 @@ class SnowflakeProgramIO:
                 elif if_exists == "replace_program":
                     existing = self._program_id_by_title(cnx, db, schema, program_title)
                     if existing is not None:
+                        # 0) Supprimer d'abord les FIELD_LINKs (FK sur structures/conditions)
+                        cur.execute(
+                            f'''
+                            DELETE FROM "{db}"."{schema}"."RP_STRUCTURE_FIELD_LINK"
+                            WHERE RP_STRUCTURE_ID IN (
+                                SELECT RP_STRUCTURE_ID FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s
+                            )
+                               OR RP_CONDITION_ID IN (
+                                SELECT RP_CONDITION_ID FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE RP_ID=%s
+                            )
+                            ''',
+                            (existing, existing),
+                        )
                         cur.execute(
                             f'DELETE FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s',
                             (existing,),
                         )
-                        # Supprimer les conditions en se limitant au programme via JOIN (pas de IN (...))
+                        # Conditions désormais scopées par RP_ID
                         cur.execute(
-                            f'''
-                            DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" c
-                            USING "{db}"."{schema}"."{self.STRUCTURES}" s
-                            WHERE c.INSPER_ID_PRE = s.RP_STRUCTURE_ID
-                              AND s.RP_ID = %s
-                            ''',
+                            f'DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE RP_ID=%s',
                             (existing,),
                         )
                         cur.execute(
@@ -272,7 +341,6 @@ class SnowflakeProgramIO:
                 # d) Garantir le jeu de colonnes attendu par les tables (ordre inclus)
                 structures_cols = [
                     "RP_ID",
-                    "RP_STRUCTURE_ID",
                     "RP_STRUCTURE_NAME",
                     "TYPE_OF_PARTICIPATION",
                     "CLAIMS_BASIS",
@@ -286,29 +354,49 @@ class SnowflakeProgramIO:
                     "MAIN_CURRENCY",
                     "UW_YEAR",
                     "COMMENT",
-                ]
-                conditions_cols = [
-                    "INSPER_ID_PRE",
-                    "SIGNED_SHARE_PCT",
-                    "CESSION_PCT",
+                    # Champs financiers par défaut
                     "LIMIT_100",
                     "ATTACHMENT_POINT_100",
+                    "CESSION_PCT",
+                    "RETENTION_PCT",
+                    "SUPI_100",
+                    "BUSCL_PREMIUM_CURRENCY_CD",
+                    "BUSCL_PREMIUM_GROSS_NET_CD",
+                    "PREMIUM_RATE_PCT",
+                    "PREMIUM_DEPOSIT_100",
+                    "PREMIUM_MIN_100",
+                    "BUSCL_LIABILITY_1_LINE_100",
+                    "MAX_COVER_PCT",
+                    "MIN_EXCESS_PCT",
+                    "SIGNED_SHARE_PCT",
+                    "AVERAGE_LINE_SLAV_CED",
+                    "PML_DEFAULT_PCT",
+                    "LIMIT_EVENT",
+                    "NO_OF_REINSTATEMENTS",
+                ]
+                conditions_cols = [
+                    "RP_CONDITION_ID",
+                    "RP_ID",
+                    "COUNTRY_ID",
+                    "REGION_ID",
+                    "PRODUCT_TYPE_LEVEL_1",
+                    "PRODUCT_TYPE_LEVEL_2",
+                    "PRODUCT_TYPE_LEVEL_3",
+                    "CURRENCY_ID",
                     "INCLUDES_HULL",
                     "INCLUDES_LIABILITY",
-                    # ajoute ici les dimensions présentes côté table
-                    *[
-                        d
-                        for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()
-                        if d in conditions_out.columns
-                    ],
+                ]
+                field_links_cols = [
+                    "RP_CONDITION_ID",
+                    "RP_STRUCTURE_ID",
+                    "FIELD_NAME",
+                    "NEW_VALUE",
                 ]
                 exclusions_cols = [
                     "RP_ID",
                     "EXCLUSION_NAME",
                     "EXCL_EFFECTIVE_DATE",
                     "EXCL_EXPIRY_DATE",
-                    "ENTITY_NAME_CED",
-                    "RISK_NAME",
                     *[
                         d
                         for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()
@@ -370,21 +458,65 @@ class SnowflakeProgramIO:
                             f"Cannot map local structure IDs to generated IDs (missing for locals: {missing})."
                         )
 
-                    # (2) Remapper INSPER_ID_PRE des CONDITIONS vers les IDs générés
+                    # (1bis) Remapper les FIELD_LINKS sur les vrais RP_STRUCTURE_ID
+                    field_links_out = field_links_df.copy() if field_links_df is not None else pd.DataFrame(columns=[])
+                    if not field_links_out.empty:
+                        if "RP_STRUCTURE_ID" not in field_links_out.columns:
+                            raise ValueError("FIELD_LINKS must contain RP_STRUCTURE_ID")
+                        field_links_out["RP_STRUCTURE_ID"] = field_links_out["RP_STRUCTURE_ID"].map(local_to_dbid)
+                        if field_links_out["RP_STRUCTURE_ID"].isna().any():
+                            raise ValueError("Some FIELD_LINKS could not be mapped to generated RP_STRUCTURE_IDs")
+
+                    # (2) Insérer les CONDITIONS (RP_ID + réassignation d'un ID global unique)
                     if not conditions_out.empty:
                         conditions_out = conditions_out.copy()
-                        conditions_out["INSPER_ID_PRE"] = conditions_out["INSPER_ID_PRE"].map(local_to_dbid)
-                        if conditions_out["INSPER_ID_PRE"].isna().any():
-                            raise ValueError("Some conditions could not be mapped to a generated structure ID.")
-                        # Insérer les CONDITIONS
-                        for _, row in conditions_out.iterrows():
+                        # Ajouter RP_ID aux conditions
+                        conditions_out["RP_ID"] = program_id
+                        # Réassigner RP_CONDITION_ID pour éviter toute collision globale
+                        cur.execute(
+                            f'SELECT COALESCE(MAX(RP_CONDITION_ID), 0) FROM "{db}"."{schema}"."{self.CONDITIONS}"'
+                        )
+                        start_id = int(cur.fetchone()[0] or 0)
+                        cond_id_map = {}
+                        rows_to_insert = []
+                        for i, row in conditions_out.iterrows():
+                            old_id = row.get("RP_CONDITION_ID", None)
+                            new_id = start_id + len(cond_id_map) + 1
+                            cond_id_map[old_id] = new_id
+                            r = row.copy()
+                            r["RP_CONDITION_ID"] = new_id
+                            rows_to_insert.append(r)
+                        # Insert
+                        for r in rows_to_insert:
+                            columns = list(r.index)
+                            values = list(r.values)
+                            cleaned_values = self._clean_values_for_sql(values)
+                            placeholders = ", ".join(["%s"] * len(cleaned_values))
+                            columns_str = ", ".join([f'"{col}"' for col in columns])
+                            insert_sql = (
+                                f'INSERT INTO "{db}"."{schema}"."{self.CONDITIONS}" '
+                                f'({columns_str}) VALUES ({placeholders})'
+                            )
+                            cur.execute(insert_sql, cleaned_values)
+
+                        # Remapper les FIELD_LINKS sur les nouveaux RP_CONDITION_ID
+                        if not field_links_out.empty:
+                            if "RP_CONDITION_ID" not in field_links_out.columns:
+                                raise ValueError("FIELD_LINKS must contain RP_CONDITION_ID")
+                            field_links_out["RP_CONDITION_ID"] = field_links_out["RP_CONDITION_ID"].map(cond_id_map)
+                            if field_links_out["RP_CONDITION_ID"].isna().any():
+                                raise ValueError("Some FIELD_LINKS could not be mapped to generated RP_CONDITION_IDs")
+
+                    # (3) Insérer les RP_STRUCTURE_FIELD_LINK pour les overrides
+                    if not (field_links_out is None or field_links_out.empty):
+                        for _, row in field_links_out.iterrows():
                             columns = list(row.index)
                             values = list(row.values)
                             cleaned_values = self._clean_values_for_sql(values)
                             placeholders = ", ".join(["%s"] * len(cleaned_values))
                             columns_str = ", ".join([f'"{col}"' for col in columns])
                             insert_sql = (
-                                f'INSERT INTO "{db}"."{schema}"."{self.CONDITIONS}" '
+                                f'INSERT INTO "{db}"."{schema}"."RP_STRUCTURE_FIELD_LINK" '
                                 f'({columns_str}) VALUES ({placeholders})'
                             )
                             cur.execute(insert_sql, cleaned_values)

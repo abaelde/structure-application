@@ -68,7 +68,7 @@ def main():
             from snowflake_utils import SnowflakeConfig
 
             config = SnowflakeConfig.load()
-            io_kwargs = {"connection_params": config.to_dict()}
+            io_kwargs = config.to_dict()
             print(f"   ✓ Snowflake config loaded: {config.account}")
         except Exception as e:
             print(f"   ❌ Failed to load Snowflake config: {e}")

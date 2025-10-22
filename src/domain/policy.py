@@ -60,19 +60,9 @@ class Policy:
 
     # --- Dimensions & valeurs ---
     def get_dimension_value(self, dimension: str) -> Any:
-        """Utilise le mapping de dimensions pour récupérer la valeur."""
-
-        mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS.get(dimension)
-        if mapping is None:
-            raise ValueError(
-                f"Unknown dimension '{dimension}'. Only configured dimensions are allowed."
-            )
-        if isinstance(mapping, str):
-            return self.raw.get(mapping)
-        if isinstance(mapping, dict):
-            if self.uw_dept in mapping:
-                return self.raw.get(mapping[self.uw_dept])
-        return None
+        """Récupère la valeur de dimension directement depuis raw."""
+        # Chercher directement dans raw avec la clé de dimension
+        return self.raw.get(dimension)
 
     # --- Exposition (et composants) ---
     def exposure_bundle(self, uw_dept: str) -> ExposureBundle:

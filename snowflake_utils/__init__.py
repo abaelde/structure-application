@@ -23,7 +23,6 @@ from .utils import (
     get_save_config,
     test_connection,
     list_programs,
-    delete_program,
     reset_all_tables,
     truncate_all_tables,
 )
@@ -34,7 +33,6 @@ __all__ = [
     "get_save_config",
     "test_connection",
     "list_programs",
-    "delete_program",
     "reset_all_tables",
     "truncate_all_tables",
 ]

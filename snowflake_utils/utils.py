@@ -163,69 +163,6 @@ def list_programs() -> list:
         return []
 
 
-def delete_program(program_title: str) -> bool:
-    """
-    Supprime un programme et toutes ses données liées.
-
-    Args:
-        program_title: Titre du programme à supprimer
-
-    Returns:
-        True si la suppression réussit, False sinon
-    """
-    try:
-        import snowflake.connector
-
-        config = SnowflakeConfig.load()
-        cnx = snowflake.connector.connect(**config.to_dict())
-        cur = cnx.cursor()
-
-        # Récupérer l'ID du programme
-        cur.execute(
-            f"""
-            SELECT REINSURANCE_PROGRAM_ID FROM "{config.database}"."{config.schema}"."REINSURANCE_PROGRAM" 
-            WHERE TITLE = %s
-        """,
-            (program_title,),
-        )
-
-        result = cur.fetchone()
-        if not result:
-            print(f"❌ Programme '{program_title}' non trouvé")
-            return False
-
-        program_id = result[0]
-
-        # Supprimer les données liées
-        cur.execute(
-            f'DELETE FROM "{config.database}"."{config.schema}"."RP_GLOBAL_EXCLUSION" WHERE RP_ID = %s',
-            (program_id,),
-        )
-        cur.execute(
-            f'DELETE FROM "{config.database}"."{config.schema}"."RP_CONDITIONS" WHERE PROGRAM_ID = %s',
-            (program_id,),
-        )
-        cur.execute(
-            f'DELETE FROM "{config.database}"."{config.schema}"."RP_STRUCTURES" WHERE PROGRAM_ID = %s',
-            (program_id,),
-        )
-        cur.execute(
-            f'DELETE FROM "{config.database}"."{config.schema}"."REINSURANCE_PROGRAM" WHERE REINSURANCE_PROGRAM_ID = %s',
-            (program_id,),
-        )
-
-        cnx.commit()
-        cur.close()
-        cnx.close()
-
-        print(f"✅ Programme '{program_title}' supprimé avec succès")
-        return True
-
-    except Exception as e:
-        print(f"❌ Erreur lors de la suppression: {e}")
-        return False
-
-
 def reset_all_tables() -> bool:
     """
     Supprime et recrée toutes les tables Snowflake.
@@ -312,22 +249,20 @@ def reset_all_tables() -> bool:
 
         print("   ✅ Toutes les tables créées avec le DDL corrigé (auto-increment)")
 
-        # 3. Créer des index pour les performances
-        print("\n📊 Création des index...")
-
-        indexes = [
-            f'CREATE INDEX IDX_REINSURANCE_PROGRAM_TITLE ON "{db}"."{schema}"."REINSURANCE_PROGRAM"(TITLE)',
-            f'CREATE INDEX IDX_RP_STRUCTURES_PROGRAM_ID ON "{db}"."{schema}"."RP_STRUCTURES"(PROGRAM_ID)',
-            f'CREATE INDEX IDX_RP_CONDITIONS_PROGRAM_ID ON "{db}"."{schema}"."RP_CONDITIONS"(PROGRAM_ID)',
-            f'CREATE INDEX IDX_RP_GLOBAL_EXCLUSION_RP_ID ON "{db}"."{schema}"."RP_GLOBAL_EXCLUSION"(RP_ID)',
+        # 3. (Optionnel) Clustering keys pour filtrage efficace
+        print("\n📊 Définition des clés de clustering (optionnel)...")
+        cluster_sql = [
+            f'ALTER TABLE "{db}"."{schema}"."RP_STRUCTURES" CLUSTER BY (RP_ID)',
+            f'ALTER TABLE "{db}"."{schema}"."RP_CONDITIONS" CLUSTER BY (RP_ID)',
+            f'ALTER TABLE "{db}"."{schema}"."RP_GLOBAL_EXCLUSION" CLUSTER BY (RP_ID)',
+            f'ALTER TABLE "{db}"."{schema}"."RP_STRUCTURE_FIELD_LINK" CLUSTER BY (RP_STRUCTURE_ID, RP_CONDITION_ID)',
         ]
-
-        for index_sql in indexes:
+        for stmt in cluster_sql:
             try:
-                cur.execute(index_sql)
-                print(f"   ✅ Index créé")
+                cur.execute(stmt)
+                print("   ✅ Clustering appliqué")
             except Exception as e:
-                print(f"   ⚠️  Erreur création index: {e}")
+                print(f"   ⚠️  Clustering non appliqué: {e}")
 
         cnx.commit()
         cur.close()
@@ -364,6 +299,7 @@ def truncate_all_tables() -> bool:
 
         # Ordre de suppression (respecter les contraintes de clés étrangères)
         tables = [
+            "RP_STRUCTURE_FIELD_LINK",
             "RP_GLOBAL_EXCLUSION",
             "RP_CONDITIONS",
             "RP_STRUCTURES",

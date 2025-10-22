@@ -16,6 +16,27 @@ from .codecs import to_bool, split_multi, pandas_to_native, MULTI_VALUE_SEPARATO
 from .program_frames import ProgramFrames, condition_dims_in, exclusion_dims_in
 
 
+# Helpers mapping dims
+def _builder_to_snowflake(dim_key: str, uw_dept: str) -> str:
+    from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
+    m = PROGRAM_TO_BORDEREAU_DIMENSIONS.get(dim_key, dim_key)
+    if isinstance(m, dict):
+        return m.get(str(uw_dept).lower(), next(iter(m.values())))
+    return m
+
+def _snowflake_to_builder_map(uw_dept: str) -> dict:
+    from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
+    inv = {}
+    lob = str(uw_dept).lower()
+    for builder_key, v in PROGRAM_TO_BORDEREAU_DIMENSIONS.items():
+        if isinstance(v, dict):
+            snow = v.get(lob, next(iter(v.values())))
+        else:
+            snow = v
+        inv[snow] = builder_key
+    return inv
+
+
 class ProgramSerializer:
     """Ne gère plus que :
     - DataFrames -> objets domaine
@@ -30,6 +51,7 @@ class ProgramSerializer:
         structures_df: pd.DataFrame,
         conditions_df: pd.DataFrame,
         exclusions_df: Optional[pd.DataFrame] = None,
+        field_links_df: Optional[pd.DataFrame] = None,
     ) -> Program:
 
         name = pandas_to_native(program_df.iloc[0][PROGRAM_COLS.TITLE])
@@ -56,10 +78,15 @@ class ProgramSerializer:
                         f"Column {col} contains nulls for Aviation program."
                     )
 
-        # Dimensions → listes
-        dims = condition_dims_in(conditions_df)
-        for col in dims:
+        # Dimensions (Snowflake) → listes
+        # 1) split sur colonnes Snowflake (COUNTRY_ID, ...)
+        snow_dims = condition_dims_in(conditions_df)
+        for col in snow_dims:
             conditions_df[col] = conditions_df[col].map(split_multi, na_action="ignore")
+
+        # 2) renommer Snowflake → builder pour construire le domaine
+        inv_map = _snowflake_to_builder_map(uw_dept)
+        conditions_df = conditions_df.rename(columns={k: v for k, v in inv_map.items() if k in conditions_df.columns})
 
         # Structures: présence & valeurs minimales
         req = [
@@ -97,42 +124,90 @@ class ProgramSerializer:
             recs = df.to_dict("records")
             return [{k: pandas_to_native(v) for k, v in r.items()} for r in recs]
 
-        conditions_by_structure: Dict[Any, List[Dict[str, Any]]] = {}
-        for cond in df_to_dicts(conditions_df):
-            key = cond.get(condition_COLS.INSPER_ID)
-            if key is None:
-                raise ValueError("INSPER_ID_PRE is mandatory for all conditions.")
-            conditions_by_structure.setdefault(key, []).append(cond)
-
+        # Nouvelle architecture : reconstruire les structures avec leurs conditions via field_links_df
         structures: List[Structure] = []
+        
+        # Créer un mapping des conditions par RP_CONDITION_ID
+        conditions_by_id = {}
+        for cond in df_to_dicts(conditions_df):
+            condition_id = cond.get("RP_CONDITION_ID")
+            if condition_id is not None:
+                # Renommer les colonnes Snowflake vers builder pour les dimensions
+                renamed_cond = {}
+                for k, v in cond.items():
+                    if k in inv_map:
+                        renamed_cond[inv_map[k]] = v
+                    else:
+                        renamed_cond[k] = v
+                conditions_by_id[condition_id] = renamed_cond
+        
+        # Créer un mapping des field_links par RP_STRUCTURE_ID
+        field_links_by_structure = {}
+        if field_links_df is not None and not field_links_df.empty:
+            for link in df_to_dicts(field_links_df):
+                structure_id = link.get("RP_STRUCTURE_ID")
+                condition_id = link.get("RP_CONDITION_ID")
+                field_name = link.get("FIELD_NAME")
+                new_value = link.get("NEW_VALUE")
+                
+                if structure_id not in field_links_by_structure:
+                    field_links_by_structure[structure_id] = {}
+                if condition_id not in field_links_by_structure[structure_id]:
+                    field_links_by_structure[structure_id][condition_id] = {}
+                
+                field_links_by_structure[structure_id][condition_id][field_name] = new_value
+        
+        # Reconstruire les structures
         for s in df_to_dicts(structures_df):
-            key = s.get(STRUCTURE_COLS.INSPER_ID)
-            if key is None:
-                raise ValueError("INSPER_ID_PRE is mandatory for all structures.")
-            conds = conditions_by_structure.get(key, [])
-            structures.append(Structure.from_row(s, conds, STRUCTURE_COLS))
+            structure_id = s.get(STRUCTURE_COLS.INSPER_ID)
+            if structure_id is None:
+                raise ValueError("RP_STRUCTURE_ID is mandatory for all structures.")
+            
+            # Trouver les conditions liées à cette structure via field_links
+            linked_conditions = []
+            if structure_id in field_links_by_structure:
+                for condition_id, overrides in field_links_by_structure[structure_id].items():
+                    if condition_id in conditions_by_id:
+                        # Créer une condition avec les overrides appliqués
+                        condition = conditions_by_id[condition_id].copy()
+                        
+                        # Appliquer les overrides financiers
+                        for field_name, new_value in overrides.items():
+                            condition[field_name] = new_value
+                        
+                        linked_conditions.append(condition)
+            
+            # Ne pas créer automatiquement une condition par défaut
+            # Les valeurs par défaut restent dans la structure elle-même
+            # linked_conditions reste vide si aucune condition spécifique
+            
+            # Créer la structure avec ses conditions
+            structures.append(Structure.from_row(s, linked_conditions, STRUCTURE_COLS))
 
         # Exclusions
         exclusions: List[ExclusionRule] = []
-        prog_dims = list(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
+        prog_dims_builder = list(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
         if exclusions_df is not None and not exclusions_df.empty:
             ex_df = exclusions_df.copy()
-            keep = set(prog_dims) | {
-                "EXCLUSION_NAME",
-                "EXCL_EFFECTIVE_DATE",
-                "EXCL_EXPIRY_DATE",
-            }
+
+            # split sur dims Snowflake
+            from .program_frames import exclusion_dims_in
+            for col in exclusion_dims_in(ex_df):
+                ex_df[col] = ex_df[col].map(split_multi, na_action="ignore")
+
+            # renommer Snowflake -> builder
+            ex_df = ex_df.rename(columns={k: v for k, v in inv_map.items() if k in ex_df.columns})
+
+            keep = set(prog_dims_builder) | {"EXCLUSION_NAME", "EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE"}
             ex_df = ex_df[[c for c in ex_df.columns if c in keep]]
-            for d in prog_dims:
-                if d in ex_df.columns:
-                    ex_df[d] = ex_df[d].map(split_multi, na_action="ignore")
+
             for row in ex_df.to_dict("records"):
-                exclusions.append(ExclusionRule.from_row(row, prog_dims))
+                exclusions.append(ExclusionRule.from_row(row, prog_dims_builder))
 
         return Program(
             name=name,
             structures=structures,
-            dimension_columns=dims,
+            dimension_columns=prog_dims_builder,
             underwriting_department=uw_dept,
             exclusions=exclusions,
         )
@@ -151,28 +226,28 @@ class ProgramSerializer:
             }
         )
 
-        structures_rows, conditions_rows = [], []
+        structures_rows, conditions_rows, field_links_rows = [], [], []
         insper = 1
+        condition_id = 1
         for st in program.structures:
-            structures_rows.append(
-                {
-                    "RP_STRUCTURE_ID": insper,
-                    "RP_STRUCTURE_NAME": st.structure_name,
-                    "TYPE_OF_PARTICIPATION": st.type_of_participation,
-                    "RP_STRUCTURE_ID_PREDECESSOR": st.predecessor_title,
-                    "CLAIMS_BASIS": st.claim_basis,
-                    "EFFECTIVE_DATE": st.inception_date,
-                    "EXPIRY_DATE": st.expiry_date,
-                }
-            )
+            # Avec la nouvelle architecture, les valeurs par défaut sont dans la structure elle-même
+            structures_rows.append({
+                "RP_STRUCTURE_ID": insper,
+                "RP_STRUCTURE_NAME": st.structure_name,
+                "TYPE_OF_PARTICIPATION": st.type_of_participation,
+                "RP_STRUCTURE_ID_PREDECESSOR": st.predecessor_title,
+                "CLAIMS_BASIS": st.claim_basis,
+                "EFFECTIVE_DATE": st.inception_date,
+                "EXPIRY_DATE": st.expiry_date,
+                "LIMIT_100": st.limit,
+                "ATTACHMENT_POINT_100": st.attachment,
+                "CESSION_PCT": st.cession_pct,
+                "SIGNED_SHARE_PCT": st.signed_share,
+            })
             for c in st.conditions:
                 d = c.to_dict()
                 row = {
-                    "INSPER_ID_PRE": insper,
-                    "CESSION_PCT": d.get("CESSION_PCT"),
-                    "LIMIT_100": d.get("LIMIT_100"),
-                    "ATTACHMENT_POINT_100": d.get("ATTACHMENT_POINT_100"),
-                    "SIGNED_SHARE_PCT": d.get("SIGNED_SHARE_PCT"),
+                    "RP_CONDITION_ID": condition_id,
                     "INCLUDES_HULL": d.get("INCLUDES_HULL"),
                     "INCLUDES_LIABILITY": d.get("INCLUDES_LIABILITY"),
                 }
@@ -186,6 +261,11 @@ class ProgramSerializer:
                         snowflake_col = mapping
                     row[snowflake_col] = d.get(dim)
                 conditions_rows.append(row)
+                
+                # Créer les liens RP_STRUCTURE_FIELD_LINK pour les overrides
+                self._create_field_links(field_links_rows, condition_id, insper, c, st)
+                
+                condition_id += 1
             insper += 1
 
         exclusions_df = self._exclusions_to_df(program)
@@ -194,24 +274,55 @@ class ProgramSerializer:
             "structures": pd.DataFrame(structures_rows),
             "conditions": pd.DataFrame(conditions_rows),
             "exclusions": exclusions_df,
+            "field_links": pd.DataFrame(field_links_rows),
         }
 
+    def _create_field_links(self, field_links_rows: list, condition_id: int, structure_id: int, condition, structure):
+        """Créer les liens RP_STRUCTURE_FIELD_LINK pour les overrides de valeurs financières."""
+        condition_data = condition.to_dict()
+        
+        # Champs financiers qui peuvent être overridés
+        financial_fields = {
+            "CESSION_PCT": condition_data.get("CESSION_PCT"),
+            "LIMIT_100": condition_data.get("LIMIT_100"),
+            "ATTACHMENT_POINT_100": condition_data.get("ATTACHMENT_POINT_100"),
+            "SIGNED_SHARE_PCT": condition_data.get("SIGNED_SHARE_PCT"),
+        }
+        # Mapping explicite champ → attribut Structure
+        attr_by_field = {
+            "CESSION_PCT": "cession_pct",
+            "LIMIT_100": "limit",
+            "ATTACHMENT_POINT_100": "attachment",
+            "SIGNED_SHARE_PCT": "signed_share",
+        }
+
+        # Créer un lien pour chaque champ financier qui diffère de la valeur par défaut de la structure
+        for field_name, condition_value in financial_fields.items():
+            if condition_value is not None:
+                structure_attr = attr_by_field.get(field_name)
+                structure_value = getattr(structure, structure_attr, None) if structure_attr else None
+                
+                # Si la valeur de la condition diffère de la valeur par défaut, créer un lien
+                if condition_value != structure_value:
+                    field_links_rows.append({
+                        "RP_CONDITION_ID": condition_id,
+                        "RP_STRUCTURE_ID": structure_id,
+                        "FIELD_NAME": field_name,
+                        "NEW_VALUE": condition_value,
+                    })
+
     def _exclusions_to_df(self, program: Program) -> pd.DataFrame:
+        from .codecs import MULTI_VALUE_SEPARATOR
+
+        prog_dims_builder = list(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
+
         if not program.exclusions:
-            # Colonnes par défaut avec mapping Snowflake
-            default_cols = [
-                "EXCLUSION_NAME",
-                "EXCL_EFFECTIVE_DATE", 
-                "EXCL_EXPIRY_DATE",
-            ]
-            for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys():
-                if d == "BUSCL_ENTITY_NAME_CED":
-                    default_cols.append("ENTITY_NAME_CED")
-                elif d == "POL_RISK_NAME_CED":
-                    default_cols.append("RISK_NAME")
-                else:
-                    default_cols.append(d)
-            return pd.DataFrame(columns=default_cols)
+            cols = ["EXCLUSION_NAME", "EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE"]
+            # colonnes Snowflake
+            for d in prog_dims_builder:
+                cols.append(_builder_to_snowflake(d, program.underwriting_department))
+            return pd.DataFrame(columns=cols)
+
         rows = []
         for e in program.exclusions:
             row = {
@@ -219,14 +330,9 @@ class ProgramSerializer:
                 "EXCL_EFFECTIVE_DATE": e.effective_date,
                 "EXCL_EXPIRY_DATE": e.expiry_date,
             }
-            for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys():
+            for d in prog_dims_builder:
+                snow = _builder_to_snowflake(d, program.underwriting_department)
                 vals = e.values_by_dimension.get(d)
-                # Mapping pour les exclusions vers les noms Snowflake
-                if d == "BUSCL_ENTITY_NAME_CED":
-                    row["ENTITY_NAME_CED"] = MULTI_VALUE_SEPARATOR.join(vals) if vals else None
-                elif d == "POL_RISK_NAME_CED":
-                    row["RISK_NAME"] = MULTI_VALUE_SEPARATOR.join(vals) if vals else None
-                else:
-                    row[d] = MULTI_VALUE_SEPARATOR.join(vals) if vals else None
+                row[snow] = MULTI_VALUE_SEPARATOR.join(vals) if vals else None
             rows.append(row)
         return pd.DataFrame(rows)

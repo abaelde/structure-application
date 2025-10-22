@@ -97,15 +97,19 @@ class StructureProcessor:
         components = self._components_set(matched)  # vide = "total"
         filtered_exposure = bundle_scaled.select(components if components else None)
 
-        # Si pas de condition → rapport "skipped" mais avec input_exposure explicite
+        # Si pas de condition → utiliser les valeurs par défaut de la structure
         if matched is None:
-            return self._report_skipped(
-                structure,
-                reason="no_matching_condition",
-                input_exposure=filtered_exposure,
-                scope_components=components,
-                matching_details=matching_details,
-            )
+            matched = structure.create_default_condition()
+            # Mettre à jour les détails de matching pour indiquer qu'on utilise les valeurs par défaut
+            matching_details["matched_condition"] = matched
+            matching_details["matching_score"] = 0.0
+            matching_details["using_default_values"] = True
+        else:
+            # Vérifier si la condition matchée est équivalente aux valeurs par défaut
+            # (pas de contraintes spécifiques sur les dimensions)
+            is_equivalent_to_default = self._is_condition_equivalent_to_default(matched, structure)
+            if is_equivalent_to_default:
+                matching_details["using_default_values"] = True
 
         # 5) Rescaling éventuel (XL après QS)
         condition_to_apply, rescaling_info = self._rescale_if_needed(matched, structure)
@@ -267,3 +271,33 @@ class StructureProcessor:
             matching_details=matching_details,
             metrics={},
         )
+
+    def _is_condition_equivalent_to_default(self, condition: Condition, structure: Structure) -> bool:
+        """
+        Détermine si une condition est équivalente aux valeurs par défaut de la structure.
+        Une condition est considérée comme équivalente aux valeurs par défaut si :
+        1. Elle n'a aucune contrainte sur les dimensions (toutes les dimensions sont None)
+        2. ET elle a les mêmes valeurs que les valeurs par défaut de la structure
+        """
+        # Vérifier qu'aucune dimension n'est contrainte
+        for dimension in self.dimension_columns:
+            if condition.has_dimension(dimension):
+                return False  # Cette condition a des contraintes spécifiques
+        
+        # Vérifier que les valeurs correspondent aux valeurs par défaut de la structure
+        if structure.type_of_participation == PRODUCT.QUOTA_SHARE:
+            # Pour quota share, comparer cession_pct et signed_share
+            if condition.cession_pct != structure.cession_pct:
+                return False
+            if condition.signed_share != structure.signed_share:
+                return False
+        elif structure.type_of_participation == PRODUCT.EXCESS_OF_LOSS:
+            # Pour excess of loss, comparer attachment et limit
+            if condition.attachment != structure.attachment:
+                return False
+            if condition.limit != structure.limit:
+                return False
+            if condition.signed_share != structure.signed_share:
+                return False
+        
+        return True

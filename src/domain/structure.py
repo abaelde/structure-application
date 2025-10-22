@@ -14,10 +14,21 @@ class Structure:
         claim_basis: str = None,
         inception_date: str = None,
         expiry_date: str = None,
+        # Valeurs par défaut (nouvelle architecture)
+        cession_pct: Optional[float] = None,
+        limit: Optional[float] = None,
+        attachment: Optional[float] = None,
+        signed_share: Optional[float] = None,
     ):
         self.structure_name = structure_name
         self.type_of_participation = type_of_participation
         self.predecessor_title = predecessor_title
+        
+        # Valeurs par défaut (nouvelle architecture)
+        self.cession_pct = cession_pct
+        self.limit = limit
+        self.attachment = attachment
+        self.signed_share = signed_share
 
         # --- validation claim basis obligatoire
         basis = (claim_basis or "").strip().lower()
@@ -74,6 +85,11 @@ class Structure:
             claim_basis=structure_row.get(structure_cols.CLAIM_BASIS),
             inception_date=structure_row.get(structure_cols.INCEPTION),
             expiry_date=structure_row.get(structure_cols.EXPIRY),
+            # Valeurs par défaut de la structure
+            cession_pct=structure_row.get("CESSION_PCT"),
+            limit=structure_row.get("LIMIT_100"),
+            attachment=structure_row.get("ATTACHMENT_POINT_100"),
+            signed_share=structure_row.get("SIGNED_SHARE_PCT"),
         )
 
     def get(self, key: str, default=None):
@@ -108,6 +124,25 @@ class Structure:
         if self.is_quota_share() and matched_condition.has_cession_pct():
             return 1.0 - matched_condition.cession_pct
         return 1.0
+
+    def create_default_condition(self) -> Condition:
+        """Créer une condition par défaut avec les valeurs de la structure."""
+        from .condition import Condition
+        
+        # Créer un dictionnaire avec les valeurs par défaut de la structure
+        # SIGNED_SHARE_PCT est requis, donc on utilise 1.0 par défaut si None
+        signed_share = self.signed_share if self.signed_share is not None else 1.0
+        
+        default_data = {
+            "CESSION_PCT": self.cession_pct,
+            "LIMIT_100": self.limit,
+            "ATTACHMENT_POINT_100": self.attachment,
+            "SIGNED_SHARE_PCT": signed_share,
+            "INCLUDES_HULL": None,
+            "INCLUDES_LIABILITY": None,
+        }
+        
+        return Condition.from_dict(default_data)
 
     # ─── Sélection temporelle RA/LO multi-année (sans LossDate) ───────────
     def _in_range(self, dt: Optional[pd.Timestamp]) -> bool:
@@ -162,24 +197,39 @@ class Structure:
         if self.expiry_date and pd.notna(self.expiry_date):
             lines.append(f"   Expiry date: {self.expiry_date}")
 
-        # Group conditions by their core parameters (excluding dimension values)
-        condition_groups = self._group_similar_conditions()
+        # Afficher les valeurs par défaut de la structure
+        lines.append("   Default values (applies to all policies not matching specific conditions):")
+        if self.type_of_participation == PRODUCT.QUOTA_SHARE:
+            if self.cession_pct is not None:
+                lines.append(f"      Cession rate: {self.cession_pct:.1%} ({self.cession_pct * 100:.1f}%)")
+            if self.signed_share is not None:
+                lines.append(f"      Reinsurer share: {self.signed_share:.2%} ({self.signed_share * 100:.2f}%)")
+        elif self.type_of_participation == PRODUCT.EXCESS_OF_LOSS:
+            if self.attachment is not None and self.limit is not None:
+                lines.append(f"      Coverage: {self.limit:,.2f}M xs {self.attachment:,.2f}M")
+                lines.append(f"      Range: {self.attachment:,.2f}M to {self.attachment + self.limit:,.2f}M")
 
-        if len(condition_groups) == 1:
-            group = condition_groups[0]
-            lines.append("   Single condition group:")
-            lines.append(
-                self._describe_condition_group(group, dimension_columns, "      ")
-            )
-        else:
-            lines.append("   Condition groups:")
-            for j, group in enumerate(condition_groups, 1):
-                lines.append(f"      Group {j}:")
+        # Afficher les conditions spécifiques
+        if self.conditions:
+            lines.append("   Specific conditions:")
+            # Group conditions by their core parameters (excluding dimension values)
+            condition_groups = self._group_similar_conditions()
+
+            if len(condition_groups) == 1:
+                group = condition_groups[0]
                 lines.append(
-                    self._describe_condition_group(
-                        group, dimension_columns, "         "
-                    )
+                    self._describe_condition_group(group, dimension_columns, "      ")
                 )
+            else:
+                for j, group in enumerate(condition_groups, 1):
+                    lines.append(f"      Group {j}:")
+                    lines.append(
+                        self._describe_condition_group(
+                            group, dimension_columns, "         "
+                        )
+                    )
+        else:
+            lines.append("   No specific conditions (only default values apply)")
 
         return "\n".join(lines)
 

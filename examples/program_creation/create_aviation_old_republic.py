@@ -35,21 +35,13 @@ REINSURER_SHARE_VALUES = {
     "XOL_3": 0.0979,
 }
 
-COUNTRIES = ["United States", "Canada"]
-
 xol_1 = build_excess_of_loss(
     name="XOL_1",
-    conditions_config=[
-        {
-            "attachment": 3_000_000,
-            "limit": 8_750_000,
-            "signed_share": REINSURER_SHARE_VALUES["XOL_1"],
-            "country_cd": country,
-            "includes_hull": True,
-            "includes_liability": True,
-        }
-        for country in COUNTRIES
-    ],
+    # Valeurs par défaut de la structure (s'appliquent à tous les pays)
+    attachment=3_000_000,
+    limit=8_750_000,
+    signed_share=REINSURER_SHARE_VALUES["XOL_1"],
+    # Aucune condition spéciale - les mêmes valeurs s'appliquent partout
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
     expiry_date="2025-01-01",
@@ -57,17 +49,11 @@ xol_1 = build_excess_of_loss(
 
 xol_2 = build_excess_of_loss(
     name="XOL_2",
-    conditions_config=[
-        {
-            "attachment": 11_750_000,
-            "limit": 10_000_000,
-            "signed_share": REINSURER_SHARE_VALUES["XOL_2"],
-            "country_cd": country,
-            "includes_hull": True,
-            "includes_liability": True,
-        }
-        for country in COUNTRIES
-    ],
+    # Valeurs par défaut de la structure (s'appliquent à tous les pays)
+    attachment=11_750_000,
+    limit=10_000_000,
+    signed_share=REINSURER_SHARE_VALUES["XOL_2"],
+    # Aucune condition spéciale - les mêmes valeurs s'appliquent partout
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
     expiry_date="2025-01-01",
@@ -75,17 +61,11 @@ xol_2 = build_excess_of_loss(
 
 xol_3 = build_excess_of_loss(
     name="XOL_3",
-    conditions_config=[
-        {
-            "attachment": 21_750_000,
-            "limit": 23_250_000,
-            "signed_share": REINSURER_SHARE_VALUES["XOL_3"],
-            "country_cd": country,
-            "includes_hull": True,
-            "includes_liability": True,
-        }
-        for country in COUNTRIES
-    ],
+    # Valeurs par défaut de la structure (s'appliquent à tous les pays)
+    attachment=21_750_000,
+    limit=23_250_000,
+    signed_share=REINSURER_SHARE_VALUES["XOL_3"],
+    # Aucune condition spéciale - les mêmes valeurs s'appliquent partout
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
     expiry_date="2025-01-01",

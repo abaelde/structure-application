@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Callable, Dict, Set, Optional, Literal, List
+from typing import Callable, Dict, Set, Optional, Literal, List, Union
 
 ColumnKind = Literal["dimension", "exposure", "meta"]
 
@@ -113,14 +113,14 @@ def exposure_rules_for_lob(lob: str) -> Dict[str, str]:
 
 
 # ——— Mapping Program -> Bordereau (source de vérité unique) ———
-PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, object] = {
-    # identiques
+# Mapping "clés builder" -> "colonne Snowflake" (ou map par LOB)
+# Les clés builder correspondent aux champs produits par build_condition(...)
+PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, Union[str, Dict[str, str]]] = {
     "BUSCL_COUNTRY_CD": "COUNTRY_ID",
     "BUSCL_REGION": "REGION_ID",
-    "PRODUCT_TYPE_LEVEL_1": "PRODUCT_TYPE_LEVEL_1",
-    "PRODUCT_TYPE_LEVEL_2": "PRODUCT_TYPE_LEVEL_2",
-    "PRODUCT_TYPE_LEVEL_3": "PRODUCT_TYPE_LEVEL_3",
-    # currency logique unique -> dépend du LOB
+    "BUSCL_CLASS_OF_BUSINESS_1": "PRODUCT_TYPE_LEVEL_1",
+    "BUSCL_CLASS_OF_BUSINESS_2": "PRODUCT_TYPE_LEVEL_2",
+    "BUSCL_CLASS_OF_BUSINESS_3": "PRODUCT_TYPE_LEVEL_3",
     "BUSCL_LIMIT_CURRENCY_CD": {
         "aviation": "CURRENCY_ID",
         "casualty": "CURRENCY_ID",

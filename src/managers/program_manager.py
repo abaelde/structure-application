@@ -102,16 +102,17 @@ class ProgramManager:
             except:
                 pass  # Si l'extraction échoue, on continue sans program_title
 
-        # Passer program_title si disponible
+        # Séparer les paramètres de connexion des autres paramètres
+        connection_params = io_kwargs or {}
         if program_title and self.backend == "snowflake":
-            io_kwargs = io_kwargs or {}
-            io_kwargs["program_title"] = program_title
+            # Retirer program_title des paramètres de connexion
+            connection_params = {k: v for k, v in connection_params.items() if k != "program_title"}
 
-        program_df, structures_df, conditions_df, exclusions_df = self.io.read(
-            source, **(io_kwargs or {})
+        program_df, structures_df, conditions_df, exclusions_df, field_links_df = self.io.read(
+            source, connection_params=connection_params, program_title=program_title
         )
         self._loaded_program = self.serializer.dataframes_to_program(
-            program_df, structures_df, conditions_df, exclusions_df
+            program_df, structures_df, conditions_df, exclusions_df, field_links_df
         )
         self._loaded_source = source
         return self._loaded_program
@@ -134,5 +135,6 @@ class ProgramManager:
             dfs["structures"],
             dfs["conditions"],
             dfs["exclusions"],
+            dfs["field_links"],
             **(io_kwargs or {}),
         )
