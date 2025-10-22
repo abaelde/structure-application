@@ -6,9 +6,9 @@
 from __future__ import annotations
 from typing import Tuple, Optional, Dict, Any, List
 import pandas as pd
-import snowflake.connector
 from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
 from src.serialization.program_frames import ProgramFrames, condition_dims_in
+from src.io.snowflake_db import parse_db_schema, connect as sf_connect, insert_df
 
 
 class SnowflakeProgramIO:
@@ -26,32 +26,6 @@ class SnowflakeProgramIO:
                 out[c] = None
         return out[cols]
 
-    def _parse_dsn(self, source: str) -> Tuple[str, str, Dict[str, str]]:
-        from urllib.parse import urlparse, parse_qsl
-        
-        p = urlparse(source)
-        if p.scheme.lower() != "snowflake":
-            raise ValueError("Invalid Snowflake DSN")
-        
-        # Handle both formats: snowflake://DB.SCHEMA and snowflake://host/DB.SCHEMA
-        if p.path and p.path != "/":
-            # Format: snowflake://host/DB.SCHEMA
-            path_without_slash = p.path.lstrip("/")
-            if path_without_slash.count(".") != 1:
-                raise ValueError("DSN must be snowflake://DB.SCHEMA?...")
-            db, schema = path_without_slash.split(".")
-        else:
-            # Format: snowflake://DB.SCHEMA
-            if not p.netloc or p.netloc.count(".") != 1:
-                raise ValueError("DSN must be snowflake://DB.SCHEMA?...")
-            db, schema = p.netloc.split(".")
-        
-        params = dict(parse_qsl(p.query))
-        return db, schema, params
-
-    def _connect(self, connection_params: Dict[str, Any]):
-        return snowflake.connector.connect(**connection_params)
-
     def _program_id_by_title(
         self, cnx, db: str, schema: str, title: str
     ) -> Optional[int]:
@@ -66,21 +40,6 @@ class SnowflakeProgramIO:
         finally:
             cur.close()
 
-    def _clean_values_for_sql(self, values: List[Any]) -> List[Any]:
-        """Nettoie les valeurs pour l'insertion SQL (conversion des timestamps, listes, etc.)"""
-        cleaned = []
-        for v in values:
-            if pd.isna(v):
-                cleaned.append(None)
-            elif isinstance(v, pd.Timestamp):
-                cleaned.append(v.strftime("%Y-%m-%d %H:%M:%S"))
-            elif isinstance(v, list):
-                # Convertir les listes en strings avec séparateur
-                cleaned.append(";".join(str(item) for item in v) if v else None)
-            else:
-                cleaned.append(v)
-        return cleaned
-
     def read(
         self,
         source: str,
@@ -91,9 +50,8 @@ class SnowflakeProgramIO:
         Lit un programme depuis Snowflake.
         Retourne (program_df, structures_df, conditions_df, exclusions_df, field_links_df)
         """
-        db, schema, params = self._parse_dsn(source)
-
-        cnx = self._connect(connection_params)
+        db, schema, params = parse_db_schema(source)
+        cnx = sf_connect(connection_params)
         cur = cnx.cursor()
         try:
             # 1. Lire le programme
@@ -241,12 +199,12 @@ class SnowflakeProgramIO:
         connection_params: Dict[str, Any],
         if_exists: str = "append",
     ) -> None:
-        db, schema, params = self._parse_dsn(dest)
+        db, schema, params = parse_db_schema(dest)
         program_title = params.get("program_title")
         if not program_title:
             raise ValueError("DSN must specify program_title parameter")
 
-        cnx = self._connect(connection_params)
+        cnx = sf_connect(connection_params)
         try:
             cur = cnx.cursor()
             try:
@@ -292,15 +250,8 @@ class SnowflakeProgramIO:
                             (existing,),
                         )
 
-                # 1) Insert/ensure PROGRAMS row (SQL direct pour éviter les problèmes write_pandas)
-                for _, row in program_df.iterrows():
-                    columns = list(row.index)
-                    values = list(row.values)
-                    cleaned_values = self._clean_values_for_sql(values)
-                    placeholders = ", ".join(["%s"] * len(cleaned_values))
-                    columns_str = ", ".join([f'"{col}"' for col in columns])
-                    insert_sql = f'INSERT INTO "{db}"."{schema}"."{self.PROGRAMS}" ({columns_str}) VALUES ({placeholders})'
-                    cur.execute(insert_sql, cleaned_values)
+                # 1) Insert/ensure PROGRAMS row (INSERT batch via util)
+                insert_df(cur, db=db, schema=schema, table=self.PROGRAMS, df=program_df)
 
                 # 2) Récupérer PROGRAM_ID
                 program_id = self._program_id_by_title(cnx, db, schema, program_title)
@@ -312,19 +263,6 @@ class SnowflakeProgramIO:
                 # 3) Préparer CONDITIONS/STRUCTURES/EXCLUSIONS via helpers communs
                 dims = condition_dims_in(conditions_df)
 
-                condition_defining_cols = [
-                    "CESSION_PCT",
-                    "LIMIT_100",
-                    "ATTACHMENT_POINT_100",
-                    "SIGNED_SHARE_PCT",
-                    "INCLUDES_HULL",
-                    "INCLUDES_LIABILITY",
-                ]
-                # Garder seulement les colonnes qui existent ET qui ont des valeurs non-nulles
-                group_cols = []
-                for c in condition_defining_cols:
-                    if c in conditions_df.columns and not conditions_df[c].isna().all():
-                        group_cols.append(c)
                 # Ne pas compacter les conditions pour préserver INSPER_ID_PRE
                 conditions_compact = conditions_df.copy()
 
@@ -344,88 +282,15 @@ class SnowflakeProgramIO:
                 # Les conditions n'ont plus RP_ID, elles sont liées via INSPER_ID_PRE
                 exclusions_out["RP_ID"] = program_id
 
-                # d) Garantir le jeu de colonnes attendu par les tables (ordre inclus)
-                structures_cols = [
-                    "RP_ID",
-                    "RP_STRUCTURE_NAME",
-                    "TYPE_OF_PARTICIPATION",
-                    "CLAIMS_BASIS",
-                    "EFFECTIVE_DATE",
-                    "EXPIRY_DATE",
-                    "RP_STRUCTURE_ID_PREDECESSOR",
-                    "T_NUMBER",
-                    "LAYER_NUMBER",
-                    "INSURED_PERIOD_TYPE",
-                    "CLASS_OF_BUSINESS",
-                    "MAIN_CURRENCY",
-                    "UW_YEAR",
-                    "COMMENT",
-                    # Champs financiers par défaut
-                    "LIMIT_100",
-                    "ATTACHMENT_POINT_100",
-                    "CESSION_PCT",
-                    "RETENTION_PCT",
-                    "SUPI_100",
-                    "BUSCL_PREMIUM_CURRENCY_CD",
-                    "BUSCL_PREMIUM_GROSS_NET_CD",
-                    "PREMIUM_RATE_PCT",
-                    "PREMIUM_DEPOSIT_100",
-                    "PREMIUM_MIN_100",
-                    "BUSCL_LIABILITY_1_LINE_100",
-                    "MAX_COVER_PCT",
-                    "MIN_EXCESS_PCT",
-                    "SIGNED_SHARE_PCT",
-                    "AVERAGE_LINE_SLAV_CED",
-                    "PML_DEFAULT_PCT",
-                    "LIMIT_EVENT",
-                    "NO_OF_REINSTATEMENTS",
-                ]
-                conditions_cols = [
-                    "RP_CONDITION_ID",
-                    "RP_ID",
-                    "COUNTRY_ID",
-                    "REGION_ID",
-                    "PRODUCT_TYPE_LEVEL_1",
-                    "PRODUCT_TYPE_LEVEL_2",
-                    "PRODUCT_TYPE_LEVEL_3",
-                    "CURRENCY_ID",
-                    "INCLUDES_HULL",
-                    "INCLUDES_LIABILITY",
-                ]
-                field_links_cols = [
-                    "RP_CONDITION_ID",
-                    "RP_STRUCTURE_ID",
-                    "FIELD_NAME",
-                    "NEW_VALUE",
-                ]
-                exclusions_cols = [
-                    "RP_ID",
-                    "EXCLUSION_NAME",
-                    "EXCL_EFFECTIVE_DATE",
-                    "EXCL_EXPIRY_DATE",
-                    *[
-                        d
-                        for d in PROGRAM_TO_BORDEREAU_DIMENSIONS.keys()
-                        if d in exclusions_out.columns
-                    ],
-                ]
-
-                # Ne pas réorganiser les colonnes - garder l'ordre naturel du DataFrame
-                # structures_out = self._ensure_columns(structures_out, structures_cols)
-                # conditions_out = self._ensure_columns(conditions_out, conditions_cols)
-                # exclusions_out = self._ensure_columns(exclusions_out, exclusions_cols)
-
                 # e) Écriture en 3 étapes : STRUCTURES -> mapping -> CONDITIONS -> EXCLUSIONS
 
                 # (1) Insérer les STRUCTURES en laissant Snowflake générer RP_STRUCTURE_ID (AUTOINCREMENT)
-                #     => on N'INSÈRE PAS la colonne "RP_STRUCTURE_ID"
                 if not structures_out.empty:
-                    # Sanity: on s'appuie sur l'unicité du nom dans un programme pour remapper ensuite
                     if structures_out["RP_STRUCTURE_NAME"].duplicated().any():
                         raise ValueError(
                             "RP_STRUCTURE_NAME must be unique within a program to remap generated IDs."
                         )
-                    # On garde un mapping local_id -> name avant drop
+                    # Mapping local_id -> name (avant drop)
                     local_to_name = dict(
                         zip(
                             structures_out.get("RP_STRUCTURE_ID", pd.Series(range(1, len(structures_out)+1))),
@@ -435,17 +300,8 @@ class SnowflakeProgramIO:
                     structures_for_insert = structures_out.drop(
                         columns=["RP_STRUCTURE_ID"], errors="ignore"
                     )
-                    for _, row in structures_for_insert.iterrows():
-                        columns = list(row.index)
-                        values = list(row.values)
-                        cleaned_values = self._clean_values_for_sql(values)
-                        placeholders = ", ".join(["%s"] * len(cleaned_values))
-                        columns_str = ", ".join([f'"{col}"' for col in columns])
-                        insert_sql = (
-                            f'INSERT INTO "{db}"."{schema}"."{self.STRUCTURES}" '
-                            f'({columns_str}) VALUES ({placeholders})'
-                        )
-                        cur.execute(insert_sql, cleaned_values)
+                    # INSERT batch
+                    insert_df(cur, db=db, schema=schema, table=self.STRUCTURES, df=structures_for_insert)
 
                     # Récupérer les IDs générés : name -> RP_STRUCTURE_ID pour ce programme
                     cur.execute(
@@ -492,18 +348,10 @@ class SnowflakeProgramIO:
                             r = row.copy()
                             r["RP_CONDITION_ID"] = new_id
                             rows_to_insert.append(r)
-                        # Insert
-                        for r in rows_to_insert:
-                            columns = list(r.index)
-                            values = list(r.values)
-                            cleaned_values = self._clean_values_for_sql(values)
-                            placeholders = ", ".join(["%s"] * len(cleaned_values))
-                            columns_str = ", ".join([f'"{col}"' for col in columns])
-                            insert_sql = (
-                                f'INSERT INTO "{db}"."{schema}"."{self.CONDITIONS}" '
-                                f'({columns_str}) VALUES ({placeholders})'
-                            )
-                            cur.execute(insert_sql, cleaned_values)
+                        # INSERT batch
+                        if rows_to_insert:
+                            conditions_to_insert = pd.DataFrame(rows_to_insert)
+                            insert_df(cur, db=db, schema=schema, table=self.CONDITIONS, df=conditions_to_insert)
 
                         # Remapper les FIELD_LINKS sur les nouveaux RP_CONDITION_ID
                         if not field_links_out.empty:
@@ -515,17 +363,7 @@ class SnowflakeProgramIO:
 
                     # (3) Insérer les RP_STRUCTURE_FIELD_LINK pour les overrides
                     if not (field_links_out is None or field_links_out.empty):
-                        for _, row in field_links_out.iterrows():
-                            columns = list(row.index)
-                            values = list(row.values)
-                            cleaned_values = self._clean_values_for_sql(values)
-                            placeholders = ", ".join(["%s"] * len(cleaned_values))
-                            columns_str = ", ".join([f'"{col}"' for col in columns])
-                            insert_sql = (
-                                f'INSERT INTO "{db}"."{schema}"."RP_STRUCTURE_FIELD_LINK" '
-                                f'({columns_str}) VALUES ({placeholders})'
-                            )
-                            cur.execute(insert_sql, cleaned_values)
+                        insert_df(cur, db=db, schema=schema, table="RP_STRUCTURE_FIELD_LINK", df=field_links_out)
                 else:
                     # Pas de structure -> pas de condition
                     if not conditions_out.empty:
@@ -533,17 +371,8 @@ class SnowflakeProgramIO:
 
                 # (3) Insérer les EXCLUSIONS (liées au RP_ID)
                 if not exclusions_out.empty:
-                    for _, row in exclusions_out.iterrows():
-                        columns = list(row.index)
-                        values = list(row.values)
-                        cleaned_values = self._clean_values_for_sql(values)
-                        placeholders = ", ".join(["%s"] * len(cleaned_values))
-                        columns_str = ", ".join([f'"{col}"' for col in columns])
-                        insert_sql = (
-                            f'INSERT INTO "{db}"."{schema}"."{self.EXCLUSIONS}" '
-                            f'({columns_str}) VALUES ({placeholders})'
-                        )
-                        cur.execute(insert_sql, cleaned_values)
+                    insert_df(cur, db=db, schema=schema, table=self.EXCLUSIONS, df=exclusions_out)
+
             finally:
                 cur.close()
         finally:

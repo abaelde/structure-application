@@ -7,6 +7,7 @@ from src.io.program_snowflake_adapter import SnowflakeProgramIO
 from src.io.program_csv_folder_adapter import CsvProgramFolderIO
 from src.serialization.program_serializer import ProgramSerializer
 from src.domain.program import Program
+from src.io.snowflake_db import parse_db_schema  # ⬅️ nouveau import
 
 # Backends supportés par ProgramManager
 Backend = Literal["snowflake", "csv_folder"]
@@ -95,22 +96,23 @@ class ProgramManager:
         program_title = None
         if source.lower().startswith("snowflake://"):
             try:
-                from src.io.program_snowflake_adapter import SnowflakeProgramIO
-
-                _, _, params = SnowflakeProgramIO()._parse_dsn(source)
+                _, _, params = parse_db_schema(source)
                 program_title = params.get("program_title")
-            except:
-                pass  # Si l'extraction échoue, on continue sans program_title
+            except Exception:
+                pass  # si l'extraction échoue, on continue sans program_title
 
-        # Séparer les paramètres de connexion des autres paramètres
-        connection_params = io_kwargs or {}
-        if program_title and self.backend == "snowflake":
-            # Retirer program_title des paramètres de connexion
-            connection_params = {k: v for k, v in connection_params.items() if k != "program_title"}
-
-        program_df, structures_df, conditions_df, exclusions_df, field_links_df = self.io.read(
-            source, connection_params=connection_params, program_title=program_title
-        )
+        # Préparer les paramètres selon le backend
+        if self.backend == "snowflake":
+            connection_params = io_kwargs or {}
+            if program_title:
+                # Retirer program_title des paramètres de connexion
+                connection_params = {k: v for k, v in connection_params.items() if k != "program_title"}
+            program_df, structures_df, conditions_df, exclusions_df, field_links_df = self.io.read(
+                source, connection_params=connection_params, program_title=program_title
+            )
+        else:
+            # Pour les autres backends (CSV), pas de paramètres spéciaux
+            program_df, structures_df, conditions_df, exclusions_df, field_links_df = self.io.read(source)
         self._loaded_program = self.serializer.dataframes_to_program(
             program_df, structures_df, conditions_df, exclusions_df, field_links_df
         )
