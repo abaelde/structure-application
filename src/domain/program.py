@@ -33,6 +33,28 @@ class Program:
             conditions.extend(structure.conditions)
         return conditions
 
+    def _sort_structures_logically(self) -> List[Structure]:
+        """Trier les structures par ordre logique métier :
+        1. Quota Share en premier (point d'entrée)
+        2. XOL par ordre d'attachment croissant
+        """
+        quota_shares = []
+        excess_of_loss = []
+        
+        for structure in self.structures:
+            if structure.type_of_participation == "quota_share":
+                quota_shares.append(structure)
+            elif structure.type_of_participation == "excess_of_loss":
+                excess_of_loss.append(structure)
+            else:
+                # Autres types de structures (pour l'avenir)
+                excess_of_loss.append(structure)
+        
+        # Trier les XOL par attachment croissant (ou par nom si attachment identique)
+        excess_of_loss.sort(key=lambda s: (s.attachment or 0, s.structure_name))
+        
+        return quota_shares + excess_of_loss
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "name": self.name,
@@ -77,7 +99,10 @@ class Program:
         lines.append("STRUCTURE DETAILS")
         lines.append("-" * 80)
 
-        for i, structure in enumerate(self.structures, 1):
+        # Trier les structures par ordre logique métier
+        sorted_structures = self._sort_structures_logically()
+        
+        for i, structure in enumerate(sorted_structures, 1):
             lines.append(structure.describe(self.dimension_columns, i))
 
         lines.append("\n" + "=" * 80)

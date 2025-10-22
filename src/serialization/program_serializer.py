@@ -8,6 +8,7 @@ from src.domain.exclusion import ExclusionRule
 from src.domain.constants import (
     PROGRAM_COLS,
     STRUCTURE_COLS,
+    CONDITION_COLS,
     CLAIM_BASIS_VALUES,
 )
 from src.domain.schema import (
@@ -153,10 +154,16 @@ class ProgramSerializer:
             if structure_id in field_links_by_structure:
                 for condition_id, overrides in field_links_by_structure[structure_id].items():
                     if condition_id in conditions_by_id:
-                        # Créer une condition avec les overrides appliqués
+                        # Créer une condition avec les valeurs par défaut de la structure
                         condition = conditions_by_id[condition_id].copy()
                         
-                        # Appliquer les overrides financiers
+                        # Appliquer les valeurs par défaut de la structure d'abord
+                        condition[CONDITION_COLS.CESSION_PCT] = s.get("CESSION_PCT")
+                        condition[CONDITION_COLS.ATTACHMENT] = s.get("ATTACHMENT_POINT_100")
+                        condition[CONDITION_COLS.LIMIT] = s.get("LIMIT_100")
+                        condition[CONDITION_COLS.SIGNED_SHARE] = s.get("SIGNED_SHARE_PCT")
+                        
+                        # Puis appliquer les overrides financiers
                         for field_name, new_value in overrides.items():
                             condition[field_name] = new_value
                         

@@ -24,7 +24,8 @@ class StructureProcessor:
     ):
         self.policy = policy
         self.program = program
-        self.structures = program.structures
+        # Utiliser l'ordre logique des structures (QS en premier, puis XOL par attachment croissant)
+        self.structures = program._sort_structures_logically()
         self.dimension_columns = program.dimension_columns
         self.calculation_date = calculation_date
 
