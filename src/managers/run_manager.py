@@ -32,10 +32,6 @@ class RunManager:
             return RunSnowflakeIO()
         raise ValueError(f"Unknown run backend: {backend}")
 
-    def switch_backend(self, backend: Backend) -> None:
-        self.backend = backend
-        self.io = self._make_io(backend)
-
     def save(
         self,
         run_meta: RunMeta,
