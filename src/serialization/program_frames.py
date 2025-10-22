@@ -3,34 +3,17 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Set
 import pandas as pd
-from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
+from src.domain.schema import dims_in
 
-DIM_FLAGS = {"INCLUDES_HULL", "INCLUDES_LIABILITY"}
-
-
-def _snowflake_dim_names() -> Set[str]:
-    names: Set[str] = set()
-    for v in PROGRAM_TO_BORDEREAU_DIMENSIONS.values():
-        if isinstance(v, dict):
-            names.update(v.values())
-        else:
-            names.add(v)
-    return names - DIM_FLAGS
-
-
+# Wrappers pour compatibilité (ou on peut appeler dims_in directement)
 def condition_dims_in(df: pd.DataFrame) -> List[str]:
     """Colonnes de dimensions présentes dans un DF 'conditions' (noms Snowflake)."""
-    if df is None or df.empty:
-        return []
-    snow_cols = _snowflake_dim_names()
-    return [c for c in df.columns if c in snow_cols]
+    return dims_in(df)
 
 
 def exclusion_dims_in(df: pd.DataFrame) -> List[str]:
-    if df is None or df.empty:
-        return []
-    snow_cols = _snowflake_dim_names()
-    return [c for c in df.columns if c in snow_cols]
+    """Colonnes de dimensions présentes dans un DF 'exclusions' (noms Snowflake)."""
+    return dims_in(df)
 
 
 @dataclass

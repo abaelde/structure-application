@@ -64,16 +64,14 @@ REINSURER_SHARE_QS = 0.0165  # 1.65%
 # Construction du Quota Share
 qs = build_quota_share(
     name="QS_1",
-    conditions_config=[
+    cession_pct=CESSION_RATE_QS,
+    signed_share=REINSURER_SHARE_QS,
+    special_conditions=[
         {
-            "cession_pct": CESSION_RATE_QS,
-            "limit": 575_000_000,
-            "signed_share": REINSURER_SHARE_QS,
-            "currency_cd": currency,
+            "currency_cd": CURRENCIES_COMMON + CURRENCIES_GBP,  # Liste de toutes les devises
             "includes_hull": True,
             "includes_liability": True,
         }
-        for currency in CURRENCIES_COMMON + CURRENCIES_GBP
     ],
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
@@ -87,40 +85,38 @@ for i, (layer_name, (limit_common, priority_common)) in enumerate(
 ):
     limit_gbp, priority_gbp = LAYER_VALUES_GBP[layer_name]
 
-    conditions_config = []
+    special_conditions = []
 
-    # Conditions pour USD, CAD, EUR, AUD
-    for currency in CURRENCIES_COMMON:
-        conditions_config.append(
-            {
-                "limit": limit_common,
-                "attachment": priority_common,
-                "currency_cd": currency,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        )
+    # Condition pour USD, CAD, EUR, AUD (valeurs communes)
+    special_conditions.append(
+        {
+            "currency_cd": CURRENCIES_COMMON,  # Liste de devises
+            "includes_hull": True,
+            "includes_liability": True,
+        }
+    )
 
-    # Conditions pour GBP
-    for currency in CURRENCIES_GBP:
-        conditions_config.append(
-            {
-                "limit": limit_gbp,
-                "attachment": priority_gbp,
-                "currency_cd": currency,
-                "includes_hull": True,
-                "includes_liability": True,
-            }
-        )
+    # Condition pour GBP (avec valeurs spécifiques)
+    special_conditions.append(
+        {
+            "currency_cd": CURRENCIES_GBP,  # Liste de devises
+            "ATTACHMENT_POINT_100": priority_gbp,  # Valeur spécifique pour GBP
+            "LIMIT_100": limit_gbp,                # Valeur spécifique pour GBP
+            "includes_hull": True,
+            "includes_liability": True,
+        }
+    )
 
     xol = build_excess_of_loss(
         name=layer_name,
-        conditions_config=conditions_config,
+        attachment=priority_common,  # Valeur par défaut pour les devises communes
+        limit=limit_common,          # Valeur par défaut pour les devises communes
+        signed_share=0.05,           # 5% signed share pour les excess of loss
+        special_conditions=special_conditions,
         claim_basis="risk_attaching",
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
         predecessor_title="QS_1",
-        signed_share=0.05,  # 5% signed share pour les excess of loss
     )
     xol_layers.append(xol)
 
@@ -139,8 +135,23 @@ program = build_program(
 # =============================================================================
 
 if __name__ == "__main__":
+    # Vérification de la création du programme avec describe
+    print("\n" + "=" * 80)
+    print("VÉRIFICATION DE LA CRÉATION DU PROGRAMME")
+    print("=" * 80)
+    
+    print(f"✓ Programme créé en mémoire: {program.name}")
+    print(f"✓ Nombre de structures: {len(program.structures)}")
+    print(f"✓ Département: {program.underwriting_department}")
+    print(f"✓ Dimensions de matching: {len(program.dimension_columns)}")
+    
     # Sauvegarde avec l'utilitaire partagé
-    output_path = save_program(program, BACKEND, program_name)
+    try:
+        output_path = save_program(program, BACKEND, program_name)
+        print(f"✓ Programme sauvegardé avec succès: {output_path}")
+    except Exception as e:
+        print(f"❌ Erreur lors de la sauvegarde: {e}")
+        print("Le programme a été construit correctement mais la sauvegarde a échoué.")
 
 # =============================================================================
 # AFFICHAGE
@@ -150,32 +161,7 @@ print("\n" + "=" * 80)
 print("PROGRAMME AVIATION AXA XL 2024")
 print("=" * 80)
 
+# Utilisation de l'API simple de describe()
 program.describe()
-
-print("\n" + "=" * 80)
-print("RÉSUMÉ DU PROGRAMME")
-print("=" * 80)
-
-print(
-    f"""
-Programme: Aviation AXA XL 2024
-Devises: USD, CAD, EUR, AUD, GBP
-Backend: {BACKEND}
-
-Structures (empilées selon l'ordre):
-"""
-)
-
-print("0. QS_1:")
-print(
-    f"   - Toutes devises: Quota Share {CESSION_RATE_QS:.1%} cédé avec limite de 575M, {REINSURER_SHARE_QS:.2%} reinsurer share"
-)
-
-for i, layer in enumerate(["XOL_1", "XOL_2", "XOL_3", "XOL_4", "XOL_5", "XOL_6"], 1):
-    limit_common, priority_common = LAYER_VALUES_COMMON[layer]
-    limit_gbp, priority_gbp = LAYER_VALUES_GBP[layer]
-    print(f"{i}. {layer}:")
-    print(f"   - USD/CAD/EUR/AUD: {limit_common:,.0f} xs {priority_common:,.0f}")
-    print(f"   - GBP: {limit_gbp:,.0f} xs {priority_gbp:,.0f}")
 
 print(f"\n✓ Le programme Aviation AXA XL 2024 est prêt et sauvegardé en {BACKEND} !")

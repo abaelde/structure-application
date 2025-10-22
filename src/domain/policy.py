@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, List
 import pandas as pd
 
 from src.domain.exposure_bundle import ExposureBundle
-from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
+from src.domain.schema import resolve_bordereau_column
 
 
 @dataclass
@@ -70,21 +70,10 @@ class Policy:
         if dimension in self.raw:
             return self.raw.get(dimension)
         
-        # Sinon, essayer le mapping via PROGRAM_TO_BORDEREAU_DIMENSIONS
-        if dimension in PROGRAM_TO_BORDEREAU_DIMENSIONS:
-            mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS[dimension]
-            
-            if isinstance(mapping, str):
-                # Mapping direct
-                return self.raw.get(mapping)
-            elif isinstance(mapping, dict) and self.uw_dept:
-                # Mapping par LOB
-                if self.uw_dept.lower() in mapping:
-                    bordereau_column = mapping[self.uw_dept.lower()]
-                    return self.raw.get(bordereau_column)
-                else:
-                    # LOB inconnu, lever une erreur
-                    raise ValueError(f"Unknown underwriting department '{self.uw_dept}' for dimension '{dimension}'")
+        # Sinon, essayer le mapping via resolve_bordereau_column
+        col = resolve_bordereau_column(dimension, self.uw_dept)
+        if col is not None:
+            return self.raw.get(col)
         
         # Si la dimension n'est pas dans le mapping, lever une erreur
         raise ValueError(f"Unknown dimension '{dimension}'")
