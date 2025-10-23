@@ -74,6 +74,12 @@ def test_write_aviation_program_snowpark():
                 return False
             print("   ✅ Département cohérent")
             
+            # Vérifier la devise principale
+            if program.main_currency != loaded_program.main_currency:
+                print(f"   ❌ Devise principale différente: original='{program.main_currency}', chargé='{loaded_program.main_currency}'")
+                return False
+            print("   ✅ Devise principale cohérente")
+            
             # Vérifier le nombre de structures
             if len(program.structures) != len(loaded_program.structures):
                 print(f"   ❌ Nombre de structures différent: original={len(program.structures)}, chargé={len(loaded_program.structures)}")
@@ -144,7 +150,7 @@ def create_aviation_program():
         signed_share=REINSURER_SHARE_QS,
         special_conditions=[
             {
-                "currency_cd": CURRENCIES_COMMON + CURRENCIES_GBP,  # Liste de toutes les devises
+                "CURRENCY": CURRENCIES_COMMON + CURRENCIES_GBP,  # Liste de toutes les devises
                 "includes_hull": True,
                 "includes_liability": True,
             }
@@ -166,7 +172,7 @@ def create_aviation_program():
         # Condition pour USD, CAD, EUR, AUD (valeurs communes)
         special_conditions.append(
             {
-                "currency_cd": CURRENCIES_COMMON,  # Liste de devises
+                "CURRENCY": CURRENCIES_COMMON,  # Liste de devises
                 "includes_hull": True,
                 "includes_liability": True,
             }
@@ -175,7 +181,7 @@ def create_aviation_program():
         # Condition pour GBP (avec valeurs spécifiques)
         special_conditions.append(
             {
-                "currency_cd": CURRENCIES_GBP,  # Liste de devises
+                "CURRENCY": CURRENCIES_GBP,  # Liste de devises
                 "ATTACHMENT_POINT_100": priority_gbp,  # Valeur spécifique pour GBP
                 "LIMIT_100": limit_gbp,                # Valeur spécifique pour GBP
                 "includes_hull": True,
@@ -203,6 +209,7 @@ def create_aviation_program():
     program = build_program(
         name=program_name,
         structures=[qs] + xol_layers,
+        main_currency="USD",  # Devise principale du programme
         underwriting_department="aviation",
     )
     

@@ -48,6 +48,14 @@ class ProgramSerializer:
             raise ValueError(
                 f"Underwriting department is mandatory for program '{name}'."
             )
+        
+        main_currency = pandas_to_native(
+            program_df.iloc[0].get(PROGRAM_COLS.MAIN_CURRENCY)
+        )
+        if not main_currency:
+            raise ValueError(
+                f"Main currency is mandatory for program '{name}'."
+            )
 
         # flags booléens (si présents)
         for col in ("INCLUDES_HULL", "INCLUDES_LIABILITY"):
@@ -158,6 +166,7 @@ class ProgramSerializer:
             structures=structures,
             dimension_columns=prog_dims_builder,
             underwriting_department=uw_dept,
+            main_currency=main_currency,
             exclusions=exclusions,
         )
 
@@ -171,6 +180,7 @@ class ProgramSerializer:
             {
                 "TITLE": [program.name],
                 "UW_LOB_ID": [program.underwriting_department],
+                "MAIN_CURRENCY_ID": [program.main_currency],
                 "ACTIVE_IND": [True],  # Colonne requise par Snowflake
             }
         )
