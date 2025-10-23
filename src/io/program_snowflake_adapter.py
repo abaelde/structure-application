@@ -1,7 +1,7 @@
 # src/io/program_snowflake_adapter.py
 # IMPORTANT :
 # INSPER_ID_PRE / RP_STRUCTURE_ID sont des identifiants "locaux" au programme (1..n).
-# Toute lecture/suppression de RP_CONDITIONS DOIT être scopée par RP_ID via un JOIN avec RP_STRUCTURES.
+# Toute lecture/suppression de RP_CONDITIONS DOIT être scopée par REINSURANCE_PROGRAM_ID via un JOIN avec RP_STRUCTURES.
 # Ne jamais filtrer RP_CONDITIONS uniquement par INSPER_ID_PRE avec IN (...).
 from __future__ import annotations
 from typing import Tuple, Optional, Dict, Any, List
@@ -64,7 +64,7 @@ class SnowflakeProgramIO:
                 f'''
                 SELECT 
                     RP_STRUCTURE_ID,
-                    RP_ID,
+                    REINSURANCE_PROGRAM_ID,
                     RP_STRUCTURE_NAME,
                     TYPE_OF_PARTICIPATION,
                     CLAIMS_BASIS,
@@ -98,7 +98,7 @@ class SnowflakeProgramIO:
                     CAST(LIMIT_EVENT AS FLOAT) AS LIMIT_EVENT,
                     NO_OF_REINSTATEMENTS
                 FROM "{db}"."{schema}"."{self.STRUCTURES}" 
-                WHERE RP_ID=%s
+                WHERE REINSURANCE_PROGRAM_ID=%s
                 ''',
                 (program_id,),
             )
@@ -107,22 +107,22 @@ class SnowflakeProgramIO:
                 structures_rows, columns=[desc[0] for desc in cur.description]
             )
 
-            # 3. Lire les conditions (scopées par RP_ID)
+            # 3. Lire les conditions (scopées par REINSURANCE_PROGRAM_ID)
             cur.execute(
                 f'''
                 SELECT 
                     c.RP_CONDITION_ID,
-                    c.RP_ID,
-                    c.COUNTRY_ID,
-                    c.REGION_ID,
+                    c.REINSURANCE_PROGRAM_ID,
+                    c.COUNTRIES,
+                    c.REGIONS,
                     c.PRODUCT_TYPE_LEVEL_1,
                     c.PRODUCT_TYPE_LEVEL_2,
                     c.PRODUCT_TYPE_LEVEL_3,
-                    c.CURRENCY_ID,
+                    c.CURRENCIES,
                     c.INCLUDES_HULL,
                     c.INCLUDES_LIABILITY
                 FROM "{db}"."{schema}"."{self.CONDITIONS}" c
-                WHERE c.RP_ID = %s
+                WHERE c.REINSURANCE_PROGRAM_ID = %s
                 ORDER BY c.RP_CONDITION_ID
                 ''',
                 (program_id,),
@@ -149,7 +149,7 @@ class SnowflakeProgramIO:
                 FROM "{db}"."{schema}"."RP_STRUCTURE_FIELD_LINK" fl
                 JOIN "{db}"."{schema}"."{self.CONDITIONS}" c
                   ON fl.RP_CONDITION_ID = c.RP_CONDITION_ID
-                WHERE c.RP_ID = %s
+                WHERE c.REINSURANCE_PROGRAM_ID = %s
                 ORDER BY fl.RP_STRUCTURE_FIELD_LINK_ID
                 ''',
                 (program_id,),
@@ -161,7 +161,7 @@ class SnowflakeProgramIO:
 
             # 5. Lire les exclusions
             cur.execute(
-                f'SELECT * FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s',
+                f'SELECT * FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE REINSURANCE_PROGRAM_ID=%s',
                 (program_id,),
             )
             exclusions_rows = cur.fetchall()
@@ -220,16 +220,16 @@ class SnowflakeProgramIO:
                 )
                 exclusions_encoded = frames.for_csv().exclusions
 
-                # c) Injecter RP_ID et mapper les colonnes
+                # c) Injecter REINSURANCE_PROGRAM_ID et mapper les colonnes
                 structures_out = frames.structures.copy()
                 conditions_out = frames.conditions.copy()  # Garde les listes natives
                 exclusions_out = exclusions_encoded.copy()
                 
-                # Ajouter RP_ID pour les structures
-                structures_out["RP_ID"] = program_id
+                # Ajouter REINSURANCE_PROGRAM_ID pour les structures
+                structures_out["REINSURANCE_PROGRAM_ID"] = program_id
                 
-                # Les conditions n'ont plus RP_ID, elles sont liées via INSPER_ID_PRE
-                exclusions_out["RP_ID"] = program_id
+                # Les conditions n'ont plus REINSURANCE_PROGRAM_ID, elles sont liées via INSPER_ID_PRE
+                exclusions_out["REINSURANCE_PROGRAM_ID"] = program_id
 
                 # e) Écriture en 3 étapes : STRUCTURES -> mapping -> CONDITIONS -> EXCLUSIONS
 
@@ -256,7 +256,7 @@ class SnowflakeProgramIO:
                     cur.execute(
                         f'SELECT RP_STRUCTURE_ID, RP_STRUCTURE_NAME '
                         f'FROM "{db}"."{schema}"."{self.STRUCTURES}" '
-                        f'WHERE RP_ID=%s',
+                        f'WHERE REINSURANCE_PROGRAM_ID=%s',
                         (program_id,),
                     )
                     rows = cur.fetchall()
@@ -278,11 +278,11 @@ class SnowflakeProgramIO:
                         if field_links_out["RP_STRUCTURE_ID"].isna().any():
                             raise ValueError("Some FIELD_LINKS could not be mapped to generated RP_STRUCTURE_IDs")
 
-                    # (2) Insérer les CONDITIONS (RP_ID + réassignation d'un ID global unique)
+                    # (2) Insérer les CONDITIONS (REINSURANCE_PROGRAM_ID + réassignation d'un ID global unique)
                     if not conditions_out.empty:
                         conditions_out = conditions_out.copy()
-                        # Ajouter RP_ID aux conditions
-                        conditions_out["RP_ID"] = program_id
+                        # Ajouter REINSURANCE_PROGRAM_ID aux conditions
+                        conditions_out["REINSURANCE_PROGRAM_ID"] = program_id
                         # Réassigner RP_CONDITION_ID pour éviter toute collision globale
                         cur.execute(
                             f'SELECT COALESCE(MAX(RP_CONDITION_ID), 0) FROM "{db}"."{schema}"."{self.CONDITIONS}"'
@@ -318,7 +318,7 @@ class SnowflakeProgramIO:
                     if not conditions_out.empty:
                         raise ValueError("Conditions provided but no structures to attach to.")
 
-                # (3) Insérer les EXCLUSIONS (liées au RP_ID)
+                # (3) Insérer les EXCLUSIONS (liées au REINSURANCE_PROGRAM_ID)
                 if not exclusions_out.empty:
                     insert_df(cur, db=db, schema=schema, table=self.EXCLUSIONS, df=exclusions_out)
 
