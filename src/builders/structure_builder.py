@@ -78,7 +78,7 @@ def build_quota_share(
     conditions = _build_specials(
         {"cession_pct": cession_pct, "signed_share": signed_share},
         special_conditions,
-        keys_for_dims=["country_cd", "region", "currency_cd", "class_of_business_1", "class_of_business_2", "class_of_business_3"],
+        keys_for_dims=["country_cd", "region", "currency_cd", "class_of_business_1", "class_of_business_2", "class_of_business_3", "includes_hull", "includes_liability"],
     )
 
     # Defaults obligatoires pour passer la validation (claim_basis + période)
@@ -162,7 +162,7 @@ def build_excess_of_loss(
     conditions = _build_specials(
         {"attachment": attachment, "limit": limit, "signed_share": signed_share},
         special_conditions,
-        keys_for_dims=["country_cd", "region", "currency_cd", "class_of_business_1", "class_of_business_2", "class_of_business_3"],
+        keys_for_dims=["country_cd", "region", "currency_cd", "class_of_business_1", "class_of_business_2", "class_of_business_3", "includes_hull", "includes_liability"],
     )
 
     if claim_basis is None:

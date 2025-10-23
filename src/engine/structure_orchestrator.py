@@ -204,11 +204,11 @@ class StructureProcessor:
         if matched is None:
             return {"hull", "liability"}
 
-        # Ici, on exige des bool explicites (serializer les garantit)
+        # Comportement explicite basé sur les valeurs booléennes
         include = set()
-        if matched.includes_hull:
+        if matched.includes_hull is True:  # Seulement si explicitement True
             include.add("hull")
-        if matched.includes_liability:
+        if matched.includes_liability is True:  # Seulement si explicitement True
             include.add("liability")
         return include
 
