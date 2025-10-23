@@ -84,7 +84,7 @@ xol_special_conditions = []
 
 for currency, config in XOL_CONDITIONS.items():
     condition = {
-        "ORIGINAL_CURRENCY": [currency],  # Utiliser une liste comme attendu par le système
+        "CURRENCY": [currency],  # Utiliser le paramètre CURRENCY du builder
         "attachment": config["attachment"],
         "limit": config["limit"],
         "signed_share": config["signed_share"],
@@ -139,7 +139,7 @@ program = build_program(
     underwriting_department="casualty",
     exclusions=exclusions,
     # Spécifier explicitement les dimensions utilisées dans les conditions
-    dimension_columns=["COUNTRY", "ORIGINAL_CURRENCY", "PRODUCT_TYPE_LEVEL_1", "PRODUCT_TYPE_LEVEL_2", "PRODUCT_TYPE_LEVEL_3", "REGION"],
+    dimension_columns=["COUNTRY", "CURRENCY", "PRODUCT_TYPE_LEVEL_1", "PRODUCT_TYPE_LEVEL_2", "PRODUCT_TYPE_LEVEL_3", "REGION"],
 )
 
 # Sauvegarde avec l'utilitaire Snowpark

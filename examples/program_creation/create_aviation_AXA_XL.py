@@ -124,7 +124,7 @@ program_name = f"AVIATION_AXA_XL_2024_{timestamp}"
 program = build_program(
     name=program_name,
     structures=[qs] + xol_layers,
-    main_currency="EUR", underwriting_department="aviation",
+    main_currency="USD", underwriting_department="aviation",
 )
 
 # =============================================================================

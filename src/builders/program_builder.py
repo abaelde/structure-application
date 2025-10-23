@@ -22,7 +22,6 @@ def build_program(
         main_currency: Main currency of the program (required). Validates
             that policies match this currency unless a specific condition allows otherwise.
         dimension_columns: List of dimension column names.
-            If None, uses the default dimensions from PROGRAM_TO_SNOWFLAKE_COLUMNS.
         underwriting_department: Underwriting department (defaults to "test" for tests)
         exclusions: List of ExclusionRule objects for program-level exclusions
 

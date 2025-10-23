@@ -21,8 +21,8 @@ def _build_specials(defaults: dict, specials: list[dict] | None, *, keys_for_dim
     """
     out = []
     if not specials:
-        # Si pas de conditions spéciales, créer une condition par défaut
-        out.append(build_condition(**defaults))
+        # Si pas de conditions spéciales, retourner une liste vide
+        # La structure utilisera ses valeurs par défaut via create_default_condition()
         return out
     for i, sc in enumerate(specials):
         data = {**defaults, **sc}

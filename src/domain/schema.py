@@ -1,6 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable, Dict, Set, Optional, Literal, List, Union
+from typing import Optional, Dict, List, Set, Literal, Iterable, Union
+import pandas as pd
 
 ColumnKind = Literal["dimension", "exposure", "meta"]
 
@@ -119,16 +121,15 @@ PROGRAM_TO_SNOWFLAKE_COLUMNS: Dict[str, Union[str, Dict[str, str]]] = {
     "PRODUCT_TYPE_LEVEL_2": "PRODUCT_TYPE_LEVEL_2",
     "PRODUCT_TYPE_LEVEL_3": "PRODUCT_TYPE_LEVEL_3",
     "CURRENCY": {
-        "aviation": "CURRENCIES",
+        "aviation": "HULL_CURRENCY",
         "casualty": "CURRENCIES",
-        "test": "ORIGINAL_CURRENCY"
+        "test": "CURRENCIES"
     },
 }
 
 
 # --- Dimension mapping utilities --------------------------
-from typing import Optional, Dict, List, Set, Literal, Iterable, Union
-import pandas as pd
+
 
 # Certains "flags" se baladent avec les dimensions côté conditions
 DIM_FLAGS: Set[str] = {"INCLUDES_HULL", "INCLUDES_LIABILITY"}
