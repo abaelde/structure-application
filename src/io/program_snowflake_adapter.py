@@ -26,55 +26,33 @@ class SnowflakeProgramIO:
                 out[c] = None
         return out[cols]
 
-    def _program_id_by_title(
-        self, cnx, db: str, schema: str, title: str
-    ) -> Optional[int]:
-        cur = cnx.cursor()
-        try:
-            cur.execute(
-                f'SELECT REINSURANCE_PROGRAM_ID FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s',
-                (title,),
-            )
-            row = cur.fetchone()
-            return None if not row else row[0]
-        finally:
-            cur.close()
 
     def read(
         self,
         source: str,
         connection_params: Dict[str, Any],
-        program_title: Optional[str] = None,
         program_id: Optional[int] = None,
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
-        Lit un programme depuis Snowflake.
+        Lit un programme depuis Snowflake par son ID.
         Retourne (program_df, structures_df, conditions_df, exclusions_df, field_links_df)
         """
+        if not program_id:
+            raise ValueError("program_id is required for Snowflake program loading")
+            
         db, schema, params = parse_db_schema(source)
         cnx = sf_connect(connection_params)
         cur = cnx.cursor()
         try:
-            # 1. Lire le programme
-            if program_id:
-                cur.execute(
-                    f'SELECT * FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE REINSURANCE_PROGRAM_ID=%s',
-                    (program_id,),
-                )
-            elif program_title:
-                cur.execute(
-                    f'SELECT * FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s',
-                    (program_title,),
-                )
-            else:
-                cur.execute(f'SELECT * FROM "{db}"."{schema}"."{self.PROGRAMS}"')
+            # 1. Lire le programme par ID
+            cur.execute(
+                f'SELECT * FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE REINSURANCE_PROGRAM_ID=%s',
+                (program_id,),
+            )
 
             program_rows = cur.fetchall()
             if not program_rows:
-                if program_id:
-                    raise ValueError(f"Program with ID {program_id} not found")
-                else:
-                    raise ValueError(f"Program '{program_title}' not found")
+                raise ValueError(f"Program with ID {program_id} not found")
 
             program_df = pd.DataFrame(
                 program_rows, columns=[desc[0] for desc in cur.description]

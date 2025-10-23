@@ -3,18 +3,21 @@ Module Snowflake Utils - Configuration et utilitaires pour l'intégration Snowfl
 
 Ce module centralise toute la configuration et les utilitaires liés à Snowflake :
 - Configuration de connexion
-- Utilitaires de sauvegarde
+- Utilitaires de sauvegarde et chargement de programmes
 - Gestion des tables
 - Scripts de maintenance
 
 Usage:
-    from snowflake_utils import SnowflakeConfig, save_program
+    from snowflake_utils import SnowflakeConfig, save_program, load_program_by_id
 
     # Configuration automatique
     config = SnowflakeConfig.load()
 
     # Sauvegarde d'un programme
-    save_program(program, "MY_PROGRAM_2024")
+    save_program(program, "snowflake", "MY_PROGRAM_2024")
+    
+    # Chargement d'un programme par ID
+    dsn = load_program_by_id(1)
 """
 
 from .config import SnowflakeConfig

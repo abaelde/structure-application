@@ -16,12 +16,12 @@ def get_save_config(
     backend: str, program_name: str, output_dir: str = "../programs"
 ) -> Tuple[str, Optional[Dict[str, Any]]]:
     """
-    Retourne la configuration de sauvegarde selon le backend choisi.
+    Retourne la configuration de sauvegarde pour Snowflake.
 
     Args:
-        backend: "csv_folder" ou "snowflake"
-        program_name: Nom du programme (pour Snowflake)
-        output_dir: Dossier de sortie pour CSV (par défaut "../programs")
+        backend: "snowflake" uniquement
+        program_name: Nom du programme
+        output_dir: Non utilisé (gardé pour compatibilité)
 
     Returns:
         Tuple: (output_path, io_kwargs)
@@ -29,13 +29,7 @@ def get_save_config(
     Raises:
         ValueError: Si le backend n'est pas supporté
     """
-    if backend == "csv_folder":
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = f"{output_dir}/{program_name.lower()}"
-        io_kwargs = None
-        return output_path, io_kwargs
-
-    elif backend == "snowflake":
+    if backend == "snowflake":
         config = SnowflakeConfig.load()
         output_path = config.get_dsn(program_name)
         io_kwargs = {"connection_params": config.to_dict()}
@@ -43,7 +37,7 @@ def get_save_config(
 
     else:
         raise ValueError(
-            f"Backend non supporté: {backend}. Utilisez 'csv_folder' ou 'snowflake'"
+            f"Backend non supporté: {backend}. Seul 'snowflake' est supporté"
         )
 
 
@@ -51,13 +45,13 @@ def save_program(
     program, backend: str, program_name: str, output_dir: str = "../programs"
 ) -> str:
     """
-    Sauvegarde un programme avec la configuration appropriée.
+    Sauvegarde un programme dans Snowflake.
 
     Args:
         program: Objet Program à sauvegarder
-        backend: "snowflake" ou "csv_folder"
+        backend: "snowflake" uniquement
         program_name: Nom du programme
-        output_dir: Dossier de sortie pour CSV (par défaut "../programs")
+        output_dir: Non utilisé (gardé pour compatibilité)
 
     Returns:
         str: Chemin de destination utilisé pour la sauvegarde

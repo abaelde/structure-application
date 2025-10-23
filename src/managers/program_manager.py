@@ -4,67 +4,48 @@ from pathlib import Path
 import pandas as pd
 from typing import Literal, Optional
 from src.io.program_snowflake_adapter import SnowflakeProgramIO
-from src.io.program_csv_folder_adapter import CsvProgramFolderIO
 from src.serialization.program_serializer import ProgramSerializer
 from src.domain.program import Program
 from src.io.snowflake_db import parse_db_schema  # ⬅️ nouveau import
 
 # Backends supportés par ProgramManager
-Backend = Literal["snowflake", "csv_folder"]
+Backend = Literal["snowflake"]
 
 
 class ProgramManager:
     """
-    Unified Program Manager that handles import/export for multiple backends.
+    Unified Program Manager that handles import/export for Snowflake backend.
 
-    This is the main entry point for all program operations (load, save) across
-    different backends (Snowflake, CSV folder, etc.).
+    This is the main entry point for all program operations (load, save) with Snowflake.
 
     Features:
-    - Load programs from Snowflake or CSV folder
-    - Save programs to Snowflake or CSV folder
-    - Switch backends dynamically
-    - Consistent API across all backends
+    - Load programs from Snowflake by ID
+    - Save programs to Snowflake
     - State management (track loaded program and source)
-    - Auto-detection of backend from source path
 
         Examples:
-        # CSV folder (default)
-        manager = ProgramManager()  # ou backend="csv_folder"
-        program = manager.load("path/to/my_program_folder")  # contient 3 CSV
-        manager.save(program, "path/to/another_folder")
-
         # Snowflake
         manager = ProgramManager(backend="snowflake")
-        program = manager.load("snowflake://database.schema.table")
-        manager.save(program, "snowflake://database.schema.output_table")
+        program = manager.load("snowflake://database.schema?program_id=1")
+        manager.save(program, "snowflake://database.schema?program_title=MY_PROGRAM")
     """
 
     @staticmethod
     def detect_backend(source: str) -> Backend:
-        """Heuristique simple:
-        - 'snowflake://...' -> snowflake
-        - dossier existant -> csv_folder
-        - fichier .xlsx/.xls -> erreur (Excel non supporté)
-        """
+        """Détection du backend Snowflake uniquement."""
         if source.lower().startswith("snowflake://"):
             return "snowflake"
-        p = Path(source)
-        if p.exists() and p.is_dir():
-            return "csv_folder"
-        if p.suffix.lower() in {".xlsx", ".xls"}:
+        else:
             raise ValueError(
-                f"Excel files (.xlsx/.xls) are no longer supported. Please use CSV folder format instead. File: {source}"
+                f"Only Snowflake backend is supported. Source must start with 'snowflake://'. Got: {source}"
             )
-        # défaut: si le chemin n'existe pas encore mais ressemble à un dossier (sans suffixe) -> csv_folder
-        return "csv_folder"
 
-    def __init__(self, backend: Backend = "csv_folder"):
+    def __init__(self, backend: Backend = "snowflake"):
         """
         Initialize the program manager.
 
         Args:
-            backend: Default backend to use ("snowflake" or "csv_folder")
+            backend: Backend to use (only "snowflake" supported)
         """
         self.backend = backend
         self.serializer = ProgramSerializer()
@@ -76,8 +57,6 @@ class ProgramManager:
         """Create the appropriate I/O adapter for the backend."""
         if backend == "snowflake":
             return SnowflakeProgramIO()
-        elif backend == "csv_folder":
-            return CsvProgramFolderIO()
         else:
             raise ValueError(f"Unknown backend: {backend}")
 
@@ -92,34 +71,25 @@ class ProgramManager:
         Returns:
             The loaded Program object
         """
-        # Extraire program_title et program_id de la DSN Snowflake si présent
-        program_title = None
+        # Extraire program_id de la DSN Snowflake si présent
         program_id = None
         if source.lower().startswith("snowflake://"):
             try:
                 _, _, params = parse_db_schema(source)
-                program_title = params.get("program_title")
                 program_id = params.get("program_id")
                 if program_id:
                     program_id = int(program_id)
             except Exception:
                 pass  # si l'extraction échoue, on continue sans paramètres
 
-        # Préparer les paramètres selon le backend
-        if self.backend == "snowflake":
-            connection_params = io_kwargs or {}
-            if program_title:
-                # Retirer program_title des paramètres de connexion
-                connection_params = {k: v for k, v in connection_params.items() if k != "program_title"}
-            if program_id:
-                # Retirer program_id des paramètres de connexion
-                connection_params = {k: v for k, v in connection_params.items() if k != "program_id"}
-            program_df, structures_df, conditions_df, exclusions_df, field_links_df = self.io.read(
-                source, connection_params=connection_params, program_title=program_title, program_id=program_id
-            )
-        else:
-            # Pour les autres backends (CSV), pas de paramètres spéciaux
-            program_df, structures_df, conditions_df, exclusions_df, field_links_df = self.io.read(source)
+        # Préparer les paramètres pour Snowflake
+        connection_params = io_kwargs or {}
+        if program_id:
+            # Retirer program_id des paramètres de connexion
+            connection_params = {k: v for k, v in connection_params.items() if k != "program_id"}
+        program_df, structures_df, conditions_df, exclusions_df, field_links_df = self.io.read(
+            source, connection_params=connection_params, program_id=program_id
+        )
         self._loaded_program = self.serializer.dataframes_to_program(
             program_df, structures_df, conditions_df, exclusions_df, field_links_df
         )

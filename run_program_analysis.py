@@ -11,13 +11,16 @@ from src.presentation import generate_detailed_report
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Apply reinsurance program to bordereau and generate analysis reports"
-    )
-    parser.add_argument(
-        "--program",
-        "-p",
-        required=True,
-        help="Path to the program CSV folder or Snowflake DSN (snowflake://DB.SCHEMA?program_title=NAME)",
+        description="Apply reinsurance program to bordereau and generate analysis reports",
+        epilog="""
+Examples:
+  # Load program from Snowflake by ID
+  python run_program_analysis.py --program-id 1 -b bordereau.csv
+  
+  # Load program from Snowflake by ID with simplified export
+  python run_program_analysis.py --program-id 1 -b bordereau.csv --simple
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
         "--bordereau", "-b", required=True, help="Path to the bordereau CSV file"
@@ -34,8 +37,15 @@ def main():
         action="store_true",
         help="Use simplified export (exposure per policy only)",
     )
+    parser.add_argument(
+        "--program-id",
+        type=int,
+        required=True,
+        help="Load program by ID from Snowflake",
+    )
 
     args = parser.parse_args()
+
 
     print("=" * 80)
     print("REINSURANCE PROGRAM ANALYSIS")
@@ -46,7 +56,10 @@ def main():
     output_dir.mkdir(exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    program_name = Path(args.program).stem
+    
+    # Nom du programme basé sur l'ID
+    program_name = f"program_id_{args.program_id}"
+    
     bordereau_name = Path(args.bordereau).stem
 
     analysis_subdir = output_dir / f"{program_name}_{bordereau_name}_{timestamp}"
@@ -55,26 +68,32 @@ def main():
     print(f"📁 Output directory: {analysis_subdir}")
     print()
 
-    # 1. Charger d'abord le programme (on en a besoin pour valider le bordereau)
+    # 1. Charger le programme depuis Snowflake par ID
     print("1. Loading program configuration...")
     started_at = datetime.now().isoformat()
-    p_backend = ProgramManager.detect_backend(args.program)
-    p_manager = ProgramManager(backend=p_backend)
-
-    # Si c'est Snowflake, charger la configuration
-    io_kwargs = {}
-    if p_backend == "snowflake":
-        try:
-            from snowflake_utils import SnowflakeConfig
-
-            config = SnowflakeConfig.load()
-            io_kwargs = config.to_dict()
-            print(f"   ✓ Snowflake config loaded: {config.account}")
-        except Exception as e:
-            print(f"   ❌ Failed to load Snowflake config: {e}")
+    
+    try:
+        from snowflake_utils import SnowflakeConfig, load_program_by_id
+        
+        print(f"   🔍 Loading program by ID: {args.program_id}")
+        config = SnowflakeConfig.load()
+        if not config.validate():
+            print(f"   ❌ Invalid Snowflake configuration")
             sys.exit(1)
+        
+        # Utiliser la fonction utilitaire pour charger par ID
+        program_dsn = load_program_by_id(args.program_id)
+        print(f"   ✓ Program DSN generated: {program_dsn}")
+        
+        p_backend = "snowflake"
+        p_manager = ProgramManager(backend=p_backend)
+        io_kwargs = config.to_dict()
+        
+    except Exception as e:
+        print(f"   ❌ Failed to load program by ID {args.program_id}: {e}")
+        sys.exit(1)
 
-    program = p_manager.load(args.program, io_kwargs=io_kwargs)
+    program = p_manager.load(program_dsn, io_kwargs=io_kwargs)
     print(f"   ✓ Program loaded: {program.name}")
     print(f"   ✓ Number of structures: {len(program.structures)}\n")
 
@@ -133,12 +152,15 @@ def main():
         ended_at = datetime.now().isoformat()
 
         run_id = f"{program_name}_{bordereau_name}_{timestamp}"  # lisible & unique (ou utilise uuid)
+        # Source du programme pour les métadonnées
+        source_program = f"snowflake://program_id={args.program_id}"
+
         run_meta = RunMeta(
             run_id=run_id,
             program_name=program.name,
             uw_dept=program.underwriting_department,
             calculation_date=calculation_date,
-            source_program=args.program,
+            source_program=source_program,
             source_bordereau=args.bordereau,
             program_fingerprint=None,  # tu peux injecter un hash du programme si tu veux
             started_at=started_at,
