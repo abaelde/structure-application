@@ -127,7 +127,6 @@ class SnowparkProgramIO:
 
     def write(
         self,
-        dest: str,
         program_df: pd.DataFrame,
         structures_df: pd.DataFrame,
         conditions_df: pd.DataFrame,
@@ -140,9 +139,9 @@ class SnowparkProgramIO:
         
         Cette méthode implémente la même logique que SnowflakeProgramIO.write()
         mais en utilisant Snowpark au lieu de snowflake.connector.
+        La session Snowpark est déjà configurée avec la base de données et le schéma.
         
         Args:
-            dest: DSN de destination (format: "snowflake://database.schema")
             program_df: DataFrame du programme
             structures_df: DataFrame des structures
             conditions_df: DataFrame des conditions
@@ -155,7 +154,6 @@ class SnowparkProgramIO:
         """
         try:
             print(f"🚀 Début de l'écriture du programme via Snowpark...")
-            print(f"   Destination: {dest}")
             
             # Utiliser la même logique que l'adapter classique avec ProgramFrames
             from src.serialization.program_frames import ProgramFrames, condition_dims_in

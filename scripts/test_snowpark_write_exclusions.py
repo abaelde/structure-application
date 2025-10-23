@@ -74,8 +74,8 @@ def test_write_quota_share_with_exclusions_snowpark():
         
         # 2. Sauvegarde via Snowpark
         print("\n2. Sauvegarde via Snowpark...")
-        dest_dsn = save_program_snowpark(program, program_name)
-        print(f"   ✅ Programme sauvegardé: {dest_dsn}")
+        success = save_program_snowpark(program, program_name)
+        print(f"   ✅ Programme sauvegardé: {success}")
         
         # 3. Vérification - Lecture du programme sauvegardé
         print("\n3. Vérification - Lecture du programme sauvegardé...")

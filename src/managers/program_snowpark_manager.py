@@ -67,16 +67,16 @@ class SnowparkProgramManager:
         except Exception as e:
             raise RuntimeError(f"Failed to load program {program_id} via Snowpark: {e}")
 
-    def save(self, program: Program, dest: str, io_kwargs: Optional[dict] = None) -> None:
+    def save(self, program: Program, io_kwargs: Optional[dict] = None) -> None:
         """
         Sauvegarde un programme via Snowpark.
         
         Cette méthode sérialise le programme en DataFrames et l'écrit dans Snowflake
-        en utilisant Snowpark, avec la même logique que ProgramManager.save().
+        en utilisant Snowpark. La session Snowpark est déjà configurée avec la base
+        de données et le schéma, donc aucun paramètre de destination n'est nécessaire.
         
         Args:
             program: Programme à sauvegarder
-            dest: DSN de destination (format: "snowflake://database.schema")
             io_kwargs: Paramètres supplémentaires (non utilisés avec Snowpark)
             
         Raises:
@@ -84,7 +84,6 @@ class SnowparkProgramManager:
         """
         try:
             print(f"💾 Sauvegarde du programme '{program.name}' via Snowpark...")
-            print(f"   Destination: {dest}")
             
             # Sérialiser le programme en DataFrames (même logique que l'ancien système)
             program_dataframes = self.serializer.program_to_dataframes(program)
@@ -104,7 +103,6 @@ class SnowparkProgramManager:
             
             # Écrire via l'adapter Snowpark
             self.io.write(
-                dest=dest,
                 program_df=program_df,
                 structures_df=structures_df,
                 conditions_df=conditions_df,

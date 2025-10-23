@@ -33,13 +33,15 @@ Usage Snowpark:
 from .config import SnowflakeConfig
 from .utils import (
     save_program,
-    save_program_snowpark,
     get_save_config,
     test_connection,
     list_programs,
     load_program_by_id,
     reset_all_tables,
     truncate_all_tables,
+)
+from .utils_snowpark import (
+    save_program_snowpark,
 )
 
 # Imports Snowpark

@@ -34,8 +34,8 @@ def test_write_aviation_program_snowpark():
         # 2. Sauvegarder via Snowpark
         print("\n2. Sauvegarde via Snowpark...")
         program_name = program.name
-        dest_dsn = save_program_snowpark(program, program_name)
-        print(f"   ✅ Programme sauvegardé: {dest_dsn}")
+        success = save_program_snowpark(program, program_name)
+        print(f"   ✅ Programme sauvegardé: {success}")
         
         # 3. Relire le programme pour vérifier
         print("\n3. Vérification - Lecture du programme sauvegardé...")
