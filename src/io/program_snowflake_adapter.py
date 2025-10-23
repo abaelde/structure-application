@@ -45,6 +45,7 @@ class SnowflakeProgramIO:
         source: str,
         connection_params: Dict[str, Any],
         program_title: Optional[str] = None,
+        program_id: Optional[int] = None,
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Lit un programme depuis Snowflake.
@@ -55,7 +56,12 @@ class SnowflakeProgramIO:
         cur = cnx.cursor()
         try:
             # 1. Lire le programme
-            if program_title:
+            if program_id:
+                cur.execute(
+                    f'SELECT * FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE REINSURANCE_PROGRAM_ID=%s',
+                    (program_id,),
+                )
+            elif program_title:
                 cur.execute(
                     f'SELECT * FROM "{db}"."{schema}"."{self.PROGRAMS}" WHERE TITLE=%s',
                     (program_title,),
@@ -65,7 +71,10 @@ class SnowflakeProgramIO:
 
             program_rows = cur.fetchall()
             if not program_rows:
-                raise ValueError(f"Program '{program_title}' not found")
+                if program_id:
+                    raise ValueError(f"Program with ID {program_id} not found")
+                else:
+                    raise ValueError(f"Program '{program_title}' not found")
 
             program_df = pd.DataFrame(
                 program_rows, columns=[desc[0] for desc in cur.description]

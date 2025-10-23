@@ -92,14 +92,18 @@ class ProgramManager:
         Returns:
             The loaded Program object
         """
-        # Extraire program_title de la DSN Snowflake si présent
+        # Extraire program_title et program_id de la DSN Snowflake si présent
         program_title = None
+        program_id = None
         if source.lower().startswith("snowflake://"):
             try:
                 _, _, params = parse_db_schema(source)
                 program_title = params.get("program_title")
+                program_id = params.get("program_id")
+                if program_id:
+                    program_id = int(program_id)
             except Exception:
-                pass  # si l'extraction échoue, on continue sans program_title
+                pass  # si l'extraction échoue, on continue sans paramètres
 
         # Préparer les paramètres selon le backend
         if self.backend == "snowflake":
@@ -107,8 +111,11 @@ class ProgramManager:
             if program_title:
                 # Retirer program_title des paramètres de connexion
                 connection_params = {k: v for k, v in connection_params.items() if k != "program_title"}
+            if program_id:
+                # Retirer program_id des paramètres de connexion
+                connection_params = {k: v for k, v in connection_params.items() if k != "program_id"}
             program_df, structures_df, conditions_df, exclusions_df, field_links_df = self.io.read(
-                source, connection_params=connection_params, program_title=program_title
+                source, connection_params=connection_params, program_title=program_title, program_id=program_id
             )
         else:
             # Pour les autres backends (CSV), pas de paramètres spéciaux

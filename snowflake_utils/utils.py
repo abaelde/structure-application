@@ -276,6 +276,55 @@ def reset_all_tables() -> bool:
         return False
 
 
+def load_program_by_id(program_id: int) -> str:
+    """
+    Charge un programme depuis Snowflake en utilisant son ID.
+
+    Args:
+        program_id: ID du programme à charger
+
+    Returns:
+        str: DSN Snowflake pour charger le programme
+
+    Raises:
+        ValueError: Si le programme n'existe pas
+    """
+    try:
+        import snowflake.connector
+
+        config = SnowflakeConfig.load()
+        if not config.validate():
+            raise ValueError("Configuration Snowflake invalide")
+
+        print(f"🔍 Recherche du programme avec ID: {program_id}")
+
+        cnx = snowflake.connector.connect(**config.to_dict())
+        cur = cnx.cursor()
+
+        # Vérifier que le programme existe
+        cur.execute(
+            f'SELECT TITLE FROM "{config.database}"."{config.schema}"."REINSURANCE_PROGRAM" WHERE REINSURANCE_PROGRAM_ID=%s',
+            (program_id,),
+        )
+        row = cur.fetchone()
+
+        cur.close()
+        cnx.close()
+
+        if not row:
+            raise ValueError(f"Programme avec ID {program_id} non trouvé")
+
+        program_title = row[0]
+        print(f"✅ Programme trouvé: '{program_title}' (ID: {program_id})")
+
+        # Retourner la DSN pour le chargement
+        return f"snowflake://{config.database}.{config.schema}?program_id={program_id}"
+
+    except Exception as e:
+        print(f"❌ Erreur lors du chargement du programme {program_id}: {e}")
+        raise
+
+
 def truncate_all_tables() -> bool:
     """
     Vide toutes les tables Snowflake (supprime les données mais garde les tables).
