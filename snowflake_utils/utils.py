@@ -31,7 +31,10 @@ def get_save_config(
     """
     if backend == "snowflake":
         config = SnowflakeConfig.load()
-        output_path = config.get_dsn(program_name)
+        
+        # Pour la sauvegarde, on utilise juste la base DSN sans ID
+        # L'ID sera généré automatiquement par Snowflake
+        output_path = f"snowflake://{config.database}.{config.schema}"
         io_kwargs = {"connection_params": config.to_dict()}
         return output_path, io_kwargs
 

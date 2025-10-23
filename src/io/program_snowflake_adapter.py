@@ -184,68 +184,30 @@ class SnowflakeProgramIO:
         exclusions_df: pd.DataFrame,
         field_links_df: pd.DataFrame,
         connection_params: Dict[str, Any],
-        if_exists: str = "append",
     ) -> None:
         db, schema, params = parse_db_schema(dest)
-        program_title = params.get("program_title")
-        if not program_title:
-            raise ValueError("DSN must specify program_title parameter")
 
         cnx = sf_connect(connection_params)
         try:
             cur = cnx.cursor()
             try:
-                if if_exists == "truncate_all":
-                    for t in [
-                        self.EXCLUSIONS,
-                        self.CONDITIONS,
-                        self.STRUCTURES,
-                        self.PROGRAMS,
-                    ]:
-                        cur.execute(f'TRUNCATE TABLE "{db}"."{schema}"."{t}"')
-                elif if_exists == "replace_program":
-                    existing = self._program_id_by_title(cnx, db, schema, program_title)
-                    if existing is not None:
-                        # 0) Supprimer d'abord les FIELD_LINKs (FK sur structures/conditions)
-                        cur.execute(
-                            f'''
-                            DELETE FROM "{db}"."{schema}"."RP_STRUCTURE_FIELD_LINK"
-                            WHERE RP_STRUCTURE_ID IN (
-                                SELECT RP_STRUCTURE_ID FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s
-                            )
-                               OR RP_CONDITION_ID IN (
-                                SELECT RP_CONDITION_ID FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE RP_ID=%s
-                            )
-                            ''',
-                            (existing, existing),
-                        )
-                        cur.execute(
-                            f'DELETE FROM "{db}"."{schema}"."{self.EXCLUSIONS}" WHERE RP_ID=%s',
-                            (existing,),
-                        )
-                        # Conditions désormais scopées par RP_ID
-                        cur.execute(
-                            f'DELETE FROM "{db}"."{schema}"."{self.CONDITIONS}" WHERE RP_ID=%s',
-                            (existing,),
-                        )
-                        cur.execute(
-                            f'DELETE FROM "{db}"."{schema}"."{self.STRUCTURES}" WHERE RP_ID=%s',
-                            (existing,),
-                        )
-                        cur.execute(
-                            f'DELETE FROM "{db}"."{schema}"."{self.PROGRAMS}"   WHERE REINSURANCE_PROGRAM_ID=%s',
-                            (existing,),
-                        )
+                # 1) Insérer le nouveau programme (toujours un nouveau programme)
+                # Supprimer l'ID du DataFrame pour laisser Snowflake le générer
+                program_df_for_insert = program_df.copy()
+                if 'REINSURANCE_PROGRAM_ID' in program_df_for_insert.columns:
+                    program_df_for_insert = program_df_for_insert.drop(columns=['REINSURANCE_PROGRAM_ID'])
+                
+                insert_df(cur, db=db, schema=schema, table=self.PROGRAMS, df=program_df_for_insert)
 
-                # 1) Insert/ensure PROGRAMS row (INSERT batch via util)
-                insert_df(cur, db=db, schema=schema, table=self.PROGRAMS, df=program_df)
-
-                # 2) Récupérer PROGRAM_ID
-                program_id = self._program_id_by_title(cnx, db, schema, program_title)
-                if program_id is None:
-                    raise ValueError(
-                        f"Program '{program_title}' not found after insert"
-                    )
+                # 2) Récupérer l'ID généré par Snowflake
+                # Récupérer le dernier ID inséré
+                cur.execute(
+                    f'SELECT MAX(REINSURANCE_PROGRAM_ID) FROM "{db}"."{schema}"."{self.PROGRAMS}"'
+                )
+                result = cur.fetchone()
+                if result is None or result[0] is None:
+                    raise ValueError("No program ID found after insert")
+                program_id = result[0]
 
                 # 3) Préparer CONDITIONS/STRUCTURES/EXCLUSIONS via helpers communs
                 dims = condition_dims_in(conditions_df)

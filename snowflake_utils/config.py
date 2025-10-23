@@ -170,7 +170,7 @@ class SnowflakeConfig:
 
     def get_dsn(self, program_title: str) -> str:
         """
-        Retourne le DSN pour un programme spécifique.
+        Retourne le DSN pour un programme spécifique (legacy).
 
         Args:
             program_title: Titre du programme
@@ -180,6 +180,20 @@ class SnowflakeConfig:
         """
         return (
             f"snowflake://{self.database}.{self.schema}?program_title={program_title}"
+        )
+
+    def get_dsn_by_id(self, program_id: int) -> str:
+        """
+        Retourne le DSN pour un programme spécifique par ID.
+
+        Args:
+            program_id: ID du programme
+
+        Returns:
+            DSN formaté pour le programme
+        """
+        return (
+            f"snowflake://{self.database}.{self.schema}?program_id={program_id}"
         )
 
     def __repr__(self) -> str:
