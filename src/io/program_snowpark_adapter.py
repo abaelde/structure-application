@@ -11,7 +11,6 @@ import pandas as pd
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col, lit
 
-from .snowflake_db import parse_db_schema
 
 
 class SnowparkProgramIO:
@@ -22,6 +21,7 @@ class SnowparkProgramIO:
     et retourne des DataFrames pandas dans le format attendu par ProgramSerializer.
     """
     
+    # Noms de tables hardcodés
     PROGRAMS = "REINSURANCE_PROGRAM"
     STRUCTURES = "RP_STRUCTURES"
     CONDITIONS = "RP_CONDITIONS"
@@ -37,56 +37,43 @@ class SnowparkProgramIO:
         """
         self.session = session
 
-    def read(
-        self,
-        source: str,
-        connection_params: Dict[str, Any],
-        program_id: Optional[int] = None,
-    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def read(self, program_id: int) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Lit un programme depuis Snowflake par son ID.
         
         Args:
-            source: DSN Snowflake (format: snowflake://database.schema)
-            connection_params: Paramètres de connexion (non utilisés avec Snowpark)
             program_id: ID du programme à lire
             
         Returns:
             Tuple: (program_df, structures_df, conditions_df, exclusions_df, field_links_df)
             
         Raises:
-            ValueError: Si program_id n'est pas fourni ou si le programme n'existe pas
+            ValueError: Si le programme n'existe pas
         """
-        if not program_id:
-            raise ValueError("program_id is required for Snowpark program loading")
-        
-        # Parser la DSN pour obtenir database et schema
-        db, schema, params = parse_db_schema(source)
-        
         try:
             # 1. Lire le programme principal
-            program_df = self._read_program(db, schema, program_id)
+            program_df = self._read_program(program_id)
             
             # 2. Lire les structures
-            structures_df = self._read_structures(db, schema, program_id)
+            structures_df = self._read_structures(program_id)
             
             # 3. Lire les conditions
-            conditions_df = self._read_conditions(db, schema, program_id)
+            conditions_df = self._read_conditions(program_id)
             
             # 4. Lire les exclusions
-            exclusions_df = self._read_exclusions(db, schema, program_id)
+            exclusions_df = self._read_exclusions(program_id)
             
             # 5. Lire les field links (overrides)
-            field_links_df = self._read_field_links(db, schema, program_id)
+            field_links_df = self._read_field_links(program_id)
             
             return program_df, structures_df, conditions_df, exclusions_df, field_links_df
             
         except Exception as e:
             raise RuntimeError(f"Error reading program {program_id} from Snowflake: {e}")
 
-    def _read_program(self, db: str, schema: str, program_id: int) -> pd.DataFrame:
+    def _read_program(self, program_id: int) -> pd.DataFrame:
         """Lit les données du programme principal."""
-        program_df = self.session.table(f'"{db}"."{schema}"."{self.PROGRAMS}"').filter(
+        program_df = self.session.table(self.PROGRAMS).filter(
             col("REINSURANCE_PROGRAM_ID") == lit(program_id)
         ).to_pandas()
         
@@ -95,31 +82,31 @@ class SnowparkProgramIO:
         
         return program_df
 
-    def _read_structures(self, db: str, schema: str, program_id: int) -> pd.DataFrame:
+    def _read_structures(self, program_id: int) -> pd.DataFrame:
         """Lit les structures du programme."""
-        structures_df = self.session.table(f'"{db}"."{schema}"."{self.STRUCTURES}"').filter(
+        structures_df = self.session.table(self.STRUCTURES).filter(
             col("REINSURANCE_PROGRAM_ID") == lit(program_id)
         ).to_pandas()
         
         return structures_df
 
-    def _read_conditions(self, db: str, schema: str, program_id: int) -> pd.DataFrame:
+    def _read_conditions(self, program_id: int) -> pd.DataFrame:
         """Lit les conditions du programme."""
-        conditions_df = self.session.table(f'"{db}"."{schema}"."{self.CONDITIONS}"').filter(
+        conditions_df = self.session.table(self.CONDITIONS).filter(
             col("REINSURANCE_PROGRAM_ID") == lit(program_id)
         ).to_pandas()
         
         return conditions_df
 
-    def _read_exclusions(self, db: str, schema: str, program_id: int) -> pd.DataFrame:
+    def _read_exclusions(self, program_id: int) -> pd.DataFrame:
         """Lit les exclusions du programme."""
-        exclusions_df = self.session.table(f'"{db}"."{schema}"."{self.EXCLUSIONS}"').filter(
+        exclusions_df = self.session.table(self.EXCLUSIONS).filter(
             col("REINSURANCE_PROGRAM_ID") == lit(program_id)
         ).to_pandas()
         
         return exclusions_df
 
-    def _read_field_links(self, db: str, schema: str, program_id: int) -> pd.DataFrame:
+    def _read_field_links(self, program_id: int) -> pd.DataFrame:
         """Lit les field links (overrides) du programme."""
         # Requête SQL pour joindre les field links avec les conditions
         field_links_df = self.session.sql(f"""
@@ -129,8 +116,8 @@ class SnowparkProgramIO:
                 fl.RP_STRUCTURE_ID,
                 fl.FIELD_NAME,
                 fl.NEW_VALUE
-            FROM "{db}"."{schema}"."{self.FIELD_LINKS}" fl
-            JOIN "{db}"."{schema}"."{self.CONDITIONS}" c 
+            FROM {self.FIELD_LINKS} fl
+            JOIN {self.CONDITIONS} c 
                 ON fl.RP_CONDITION_ID = c.RP_CONDITION_ID
             WHERE c.REINSURANCE_PROGRAM_ID = {program_id}
             ORDER BY fl.RP_STRUCTURE_FIELD_LINK_ID

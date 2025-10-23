@@ -36,9 +36,8 @@ def test_snowpark_program_loading():
         # 3. Charger un programme par ID
         print("\n3. Chargement du programme...")
         program_id = 1
-        source = f"snowflake://SNOWFLAKE_LEARNING_DB.MYSCHEMA?program_id={program_id}"
         
-        program = manager.load(source)
+        program = manager.load(program_id)
         print(f"   ✅ Programme chargé: {program.name}")
         print(f"   ✅ Département: {program.underwriting_department}")
         print(f"   ✅ Nombre de structures: {len(program.structures)}")
@@ -68,7 +67,7 @@ def test_snowpark_program_loading():
         print(f"   ✅ Nom du programme: {program.name}")
         print(f"   ✅ Département UW: {program.underwriting_department}")
         print(f"   ✅ Colonnes de dimensions: {program.dimension_columns}")
-        print(f"   ✅ Programme chargé depuis: {manager.get_loaded_source()}")
+        print(f"   ✅ Programme chargé avec ID: {manager.get_loaded_program_id()}")
         
         print("\n✅ Test d'intégration réussi !")
         print("   Le programme a été chargé via Snowpark et converti en objet Program")
@@ -98,8 +97,7 @@ def test_program_serialization():
         
         # Charger le programme
         program_id = 1
-        source = f"snowflake://SNOWFLAKE_LEARNING_DB.MYSCHEMA?program_id={program_id}"
-        program = manager.load(source)
+        program = manager.load(program_id)
         
         # Tester la sérialisation en DataFrames
         print("1. Test de sérialisation en DataFrames...")

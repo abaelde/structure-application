@@ -34,34 +34,24 @@ class SnowparkProgramManager:
         self.serializer = ProgramSerializer()
         self.io = SnowparkProgramIO(session)
         self._loaded_program: Optional[Program] = None
-        self._loaded_source: Optional[str] = None
+        self._loaded_program_id: Optional[int] = None
 
-    def load(self, source: str, io_kwargs: Optional[dict] = None) -> Program:
+    def load(self, program_id: int) -> Program:
         """
         Charge un programme depuis Snowflake en utilisant Snowpark.
         
         Args:
-            source: DSN Snowflake (format: snowflake://database.schema?program_id=X)
-            io_kwargs: Paramètres supplémentaires (non utilisés avec Snowpark)
+            program_id: ID du programme à charger
             
         Returns:
             Objet Program chargé en mémoire
             
         Raises:
-            ValueError: Si le program_id n'est pas fourni dans la DSN
             RuntimeError: Si le chargement échoue
         """
-        # Extraire program_id de la DSN
-        program_id = self._extract_program_id(source)
-        
-        if not program_id:
-            raise ValueError("program_id is required in the DSN for Snowpark loading")
-        
         try:
             # Lire les DataFrames depuis Snowflake via Snowpark
-            program_df, structures_df, conditions_df, exclusions_df, field_links_df = self.io.read(
-                source, connection_params={}, program_id=program_id
-            )
+            program_df, structures_df, conditions_df, exclusions_df, field_links_df = self.io.read(program_id)
             
             # Convertir les DataFrames en objet Program via le serializer
             program = self.serializer.dataframes_to_program(
@@ -70,7 +60,7 @@ class SnowparkProgramManager:
             
             # Sauvegarder l'état
             self._loaded_program = program
-            self._loaded_source = source
+            self._loaded_program_id = program_id
             
             return program
             
@@ -88,30 +78,6 @@ class SnowparkProgramManager:
         """
         raise NotImplementedError("Save functionality not yet implemented for Snowpark manager")
 
-    def _extract_program_id(self, source: str) -> Optional[int]:
-        """
-        Extrait le program_id de la DSN Snowflake.
-        
-        Args:
-            source: DSN au format snowflake://database.schema?program_id=X
-            
-        Returns:
-            ID du programme ou None si non trouvé
-        """
-        try:
-            from urllib.parse import urlparse, parse_qsl
-            
-            parsed = urlparse(source)
-            if parsed.scheme.lower() != "snowflake":
-                return None
-            
-            params = dict(parse_qsl(parsed.query))
-            program_id = params.get("program_id")
-            
-            return int(program_id) if program_id else None
-            
-        except (ValueError, AttributeError):
-            return None
 
     def get_loaded_program(self) -> Optional[Program]:
         """
@@ -122,11 +88,11 @@ class SnowparkProgramManager:
         """
         return self._loaded_program
 
-    def get_loaded_source(self) -> Optional[str]:
+    def get_loaded_program_id(self) -> Optional[int]:
         """
-        Retourne la source du programme actuellement chargé.
+        Retourne l'ID du programme actuellement chargé.
         
         Returns:
-            Source du programme ou None
+            ID du programme ou None
         """
-        return self._loaded_source
+        return self._loaded_program_id
