@@ -20,9 +20,9 @@ class ExposureCalculator(ABC):
 class AviationExposureCalculator(ExposureCalculator):
     def bundle(self, policy_data: Dict[str, Any]) -> ExposureBundle:
         hull_limit = policy_data.get("HULL_LIMIT")
-        liability_limit = policy_data.get("LIABILITY_LIMIT")
+        liability_limit = policy_data.get("LIAB_LIMIT")
         hull_share = policy_data.get("HULL_SHARE")
-        liability_share = policy_data.get("LIABILITY_SHARE")
+        liability_share = policy_data.get("LIAB_SHARE")
 
         has_hull = hull_limit is not None
         has_liability = liability_limit is not None
@@ -46,8 +46,8 @@ class AviationExposureCalculator(ExposureCalculator):
         if has_liability:
             if liability_share is None:
                 raise ExposureCalculationError(
-                    f"Missing LIABILITY_SHARE value for this policy. "
-                    f"LIABILITY_LIMIT={liability_limit}, LIABILITY_SHARE={liability_share}"
+                    f"Missing LIAB_SHARE value for this policy. "
+                    f"LIAB_LIMIT={liability_limit}, LIAB_SHARE={liability_share}"
                 )
             try:
                 liability_exposure = float(liability_limit) * float(liability_share)
@@ -67,13 +67,13 @@ class AviationExposureCalculator(ExposureCalculator):
 
 class CasualtyExposureCalculator(ExposureCalculator):
     def calculate(self, policy_data: Dict[str, Any]) -> float:
-        limit = policy_data.get("LIMIT")
+        limit = policy_data.get("OCCURRENCE_LIMIT_100_ORIG")
         cedent_share = policy_data.get("CEDENT_SHARE")
 
         if limit is None or cedent_share is None:
             raise ExposureCalculationError(
                 f"Missing exposure value for this policy. "
-                f"LIMIT={limit}, CEDENT_SHARE={cedent_share}"
+                f"OCCURRENCE_LIMIT_100_ORIG={limit}, CEDENT_SHARE={cedent_share}"
             )
 
         try:

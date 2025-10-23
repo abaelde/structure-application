@@ -67,7 +67,7 @@ class TestPolicyDimensionValue:
         """Test that aviation currency inconsistency uses HULL_CURRENCY."""
         policy_data = {
             "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "EUR",  # Different from HULL
+            "LIAB_CURRENCY": "EUR",  # Different from HULL
         }
 
         policy = Policy(raw=policy_data, uw_dept="aviation")
@@ -96,7 +96,7 @@ class TestGetAllMappableDimensions:
 
     def test_aviation_mappable_dimensions(self):
         """Test getting mappable dimensions for aviation."""
-        bordereau_columns = ["COUNTRY", "HULL_CURRENCY", "LIABILITY_CURRENCY"]
+        bordereau_columns = ["COUNTRY", "HULL_CURRENCY", "LIAB_CURRENCY"]
 
         mappable = get_all_mappable_dimensions(bordereau_columns, "aviation")
 
@@ -156,9 +156,9 @@ class TestIntegrationScenarios:
             "COUNTRY": "France",
             "REGION": "Europe",
             "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "USD",
+            "LIAB_CURRENCY": "USD",
             "HULL_LIMIT": 250000000,
-            "LIABILITY_LIMIT": 1000000000,
+            "LIAB_LIMIT": 1000000000,
         }
 
         # Test all dimension mappings
@@ -178,7 +178,7 @@ class TestIntegrationScenarios:
             "COUNTRY": "France",
             "REGION": "Europe",
             "CURRENCY": "EUR",
-            "LIMIT": 8500000,
+            "OCCURRENCE_LIMIT_100_ORIG": 8500000,
         }
 
         # Test all dimension mappings

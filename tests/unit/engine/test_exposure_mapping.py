@@ -14,8 +14,8 @@ def test_exposure_mapping_success_aviation():
     - Structure: Quota Share 30%
 
     BORDEREAU:
-    - Colonnes d'exposition: HULL_LIMIT, LIABILITY_LIMIT, HULL_SHARE, LIABILITY_SHARE
-    - Exposition calculée = (HULL_LIMIT × HULL_SHARE) + (LIABILITY_LIMIT × LIABILITY_SHARE)
+    - Colonnes d'exposition: HULL_LIMIT, LIAB_LIMIT, HULL_SHARE, LIAB_SHARE
+    - Exposition calculée = (HULL_LIMIT × HULL_SHARE) + (LIAB_LIMIT × LIAB_SHARE)
 
     RÉSULTAT ATTENDU:
     - L'exposition est calculée correctement
@@ -38,9 +38,9 @@ def test_exposure_mapping_success_aviation():
         {
             "INSURED_NAME": ["TEST COMPANY"],
             "HULL_LIMIT": [10_000_000],
-            "LIABILITY_LIMIT": [50_000_000],
+            "LIAB_LIMIT": [50_000_000],
             "HULL_SHARE": [0.20],
-            "LIABILITY_SHARE": [0.10],
+            "LIAB_SHARE": [0.10],
             "INCEPTION_DT": ["2024-01-01"],
             "EXPIRE_DT": ["2025-01-01"],
         }
@@ -65,10 +65,10 @@ def test_exposure_mapping_failure_wrong_column():
 
     PROGRAMME:
     - Underwriting department: aviation
-    - Attend: Au moins HULL_LIMIT ou LIABILITY_LIMIT (avec leur SHARE correspondant)
+    - Attend: Au moins HULL_LIMIT ou LIAB_LIMIT (avec leur SHARE correspondant)
 
     BORDEREAU:
-    - Colonne d'exposition: LIMIT (valide pour casualty, pas aviation)
+    - Colonne d'exposition: OCCURRENCE_LIMIT_100_ORIG (valide pour casualty, pas aviation)
 
     RÉSULTAT ATTENDU:
     - ExposureMappingError est levée
@@ -89,7 +89,7 @@ def test_exposure_mapping_failure_wrong_column():
     bordereau_df = pd.DataFrame(
         {
             "INSURED_NAME": ["TEST COMPANY"],
-            "LIMIT": [1_000_000],
+            "OCCURRENCE_LIMIT_100_ORIG": [1_000_000],
             "INCEPTION_DT": ["2024-01-01"],
             "EXPIRE_DT": ["2025-01-01"],
         }
@@ -102,5 +102,5 @@ def test_exposure_mapping_failure_wrong_column():
     error_message = str(exc_info.value)
     assert "at least one of" in error_message.lower()
     assert "HULL_LIMIT" in error_message
-    assert "LIABILITY_LIMIT" in error_message
+    assert "LIAB_LIMIT" in error_message
     assert "aviation" in error_message.lower()

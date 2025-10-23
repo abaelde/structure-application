@@ -20,9 +20,9 @@ class TestAviationExposureCalculator:
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 50_000_000,
-            "LIABILITY_LIMIT": 300_000_000,
+            "LIAB_LIMIT": 300_000_000,
             "HULL_SHARE": 0.15,
-            "LIABILITY_SHARE": 0.10,
+            "LIAB_SHARE": 0.10,
         }
 
         result = calculator.calculate(policy_data)
@@ -45,9 +45,9 @@ class TestAviationExposureCalculator:
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": "50000000",
-            "LIABILITY_LIMIT": "300000000",
+            "LIAB_LIMIT": "300000000",
             "HULL_SHARE": "0.15",
-            "LIABILITY_SHARE": "0.10",
+            "LIAB_SHARE": "0.10",
         }
 
         result = calculator.calculate(policy_data)
@@ -67,8 +67,8 @@ class TestAviationExposureCalculator:
         """
         calculator = AviationExposureCalculator()
         policy_data = {
-            "LIABILITY_LIMIT": 300_000_000,
-            "LIABILITY_SHARE": 0.10,
+            "LIAB_LIMIT": 300_000_000,
+            "LIAB_SHARE": 0.10,
         }
 
         result = calculator.calculate(policy_data)
@@ -112,8 +112,8 @@ class TestAviationExposureCalculator:
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 50_000_000,
-            "LIABILITY_LIMIT": 300_000_000,
-            "LIABILITY_SHARE": 0.10,
+            "LIAB_LIMIT": 300_000_000,
+            "LIAB_SHARE": 0.10,
         }
 
         with pytest.raises(ExposureCalculationError) as exc_info:
@@ -124,11 +124,11 @@ class TestAviationExposureCalculator:
 
     def test_calculate_missing_liability_share(self):
         """
-        Test d'erreur quand LIABILITY_SHARE est manquant
+        Test d'erreur quand LIAB_SHARE est manquant
 
         DONNÉES:
         - Hull: 50M × 15% = 7.5M
-        - Liability: 300M (sans LIABILITY_SHARE)
+        - Liability: 300M (sans LIAB_SHARE)
 
         ATTENDU:
         - Exception ExposureCalculationError
@@ -136,15 +136,15 @@ class TestAviationExposureCalculator:
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 50_000_000,
-            "LIABILITY_LIMIT": 300_000_000,
+            "LIAB_LIMIT": 300_000_000,
             "HULL_SHARE": 0.15,
         }
 
         with pytest.raises(ExposureCalculationError) as exc_info:
             calculator.calculate(policy_data)
 
-        assert "Missing LIABILITY_SHARE value" in str(exc_info.value)
-        assert "LIABILITY_SHARE" in str(exc_info.value)
+        assert "Missing LIAB_SHARE value" in str(exc_info.value)
+        assert "LIAB_SHARE" in str(exc_info.value)
 
     def test_calculate_invalid_numeric_value(self):
         """
@@ -160,9 +160,9 @@ class TestAviationExposureCalculator:
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": "not_a_number",
-            "LIABILITY_LIMIT": 300_000_000,
+            "LIAB_LIMIT": 300_000_000,
             "HULL_SHARE": 0.15,
-            "LIABILITY_SHARE": 0.10,
+            "LIAB_SHARE": 0.10,
         }
 
         with pytest.raises(ExposureCalculationError) as exc_info:
@@ -184,9 +184,9 @@ class TestAviationExposureCalculator:
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 250_000_000,
-            "LIABILITY_LIMIT": 1_000_000_000,
+            "LIAB_LIMIT": 1_000_000_000,
             "HULL_SHARE": 0.15,
-            "LIABILITY_SHARE": 0.10,
+            "LIAB_SHARE": 0.10,
         }
 
         result = calculator.calculate(policy_data)
@@ -214,9 +214,9 @@ class TestAviationExposureCalculator:
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": None,
-            "LIABILITY_LIMIT": None,
+            "LIAB_LIMIT": None,
             "HULL_SHARE": 0.15,
-            "LIABILITY_SHARE": 0.10,
+            "LIAB_SHARE": 0.10,
         }
 
         result = calculator.calculate(policy_data)
@@ -235,9 +235,9 @@ class TestAviationExposureCalculator:
         """
         calculator = AviationExposureCalculator()
         policy_data = {
-            "LIABILITY_LIMIT": 300_000_000,
+            "LIAB_LIMIT": 300_000_000,
             "HULL_SHARE": 0.15,
-            "LIABILITY_SHARE": 0.10,
+            "LIAB_SHARE": 0.10,
         }
 
         result = calculator.calculate(policy_data)
@@ -247,11 +247,11 @@ class TestAviationExposureCalculator:
 
     def test_calculate_liability_share_without_liability_limit(self):
         """
-        Test avec LIABILITY_SHARE mais sans LIABILITY_LIMIT (seulement Hull)
+        Test avec LIAB_SHARE mais sans LIAB_LIMIT (seulement Hull)
 
         DONNÉES:
         - Hull: 50M × 15% = 7.5M
-        - Liability: LIABILITY_SHARE présent mais LIABILITY_LIMIT manquant
+        - Liability: LIAB_SHARE présent mais LIAB_LIMIT manquant
 
         ATTENDU:
         - Total: 7.5M
@@ -260,7 +260,7 @@ class TestAviationExposureCalculator:
         policy_data = {
             "HULL_LIMIT": 50_000_000,
             "HULL_SHARE": 0.15,
-            "LIABILITY_SHARE": 0.10,
+            "LIAB_SHARE": 0.10,
         }
 
         result = calculator.calculate(policy_data)
@@ -284,9 +284,9 @@ class TestAviationExposureCalculator:
         calculator = AviationExposureCalculator()
         policy_data = {
             "HULL_LIMIT": 100_000_000,
-            "LIABILITY_LIMIT": 500_000_000,
+            "LIAB_LIMIT": 500_000_000,
             "HULL_SHARE": 0.15,
-            "LIABILITY_SHARE": 0.10,
+            "LIAB_SHARE": 0.10,
         }
 
         bundle = calculator.bundle(policy_data)
@@ -335,8 +335,8 @@ class TestAviationExposureCalculator:
         """
         calculator = AviationExposureCalculator()
         policy_data = {
-            "LIABILITY_LIMIT": 500_000_000,
-            "LIABILITY_SHARE": 0.10,
+            "LIAB_LIMIT": 500_000_000,
+            "LIAB_SHARE": 0.10,
         }
 
         bundle = calculator.bundle(policy_data)

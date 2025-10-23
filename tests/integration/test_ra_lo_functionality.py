@@ -55,9 +55,9 @@ def test_risk_attaching_based_on_policy_inception():
         "INCEPTION_DT": pd.Timestamp("2024-03-01"),
         "EXPIRE_DT": pd.Timestamp("2025-03-01"),
         "HULL_LIMIT": 100_000_000,
-        "LIABILITY_LIMIT": 500_000_000,
+        "LIAB_LIMIT": 500_000_000,
         "HULL_SHARE": 0.15,
-        "LIABILITY_SHARE": 0.10,
+        "LIAB_SHARE": 0.10,
     }
     policy_a = Policy(policy_a_data)
 
@@ -67,9 +67,9 @@ def test_risk_attaching_based_on_policy_inception():
         "INCEPTION_DT": pd.Timestamp("2025-03-01"),
         "EXPIRE_DT": pd.Timestamp("2026-03-01"),
         "HULL_LIMIT": 100_000_000,
-        "LIABILITY_LIMIT": 500_000_000,
+        "LIAB_LIMIT": 500_000_000,
         "HULL_SHARE": 0.15,
-        "LIABILITY_SHARE": 0.10,
+        "LIAB_SHARE": 0.10,
     }
     policy_b = Policy(policy_b_data)
 
@@ -144,9 +144,9 @@ def test_loss_occurring_based_on_calculation_date():
         "INCEPTION_DT": pd.Timestamp("2024-03-01"),
         "EXPIRE_DT": pd.Timestamp("2025-03-01"),
         "HULL_LIMIT": 100_000_000,
-        "LIABILITY_LIMIT": 500_000_000,
+        "LIAB_LIMIT": 500_000_000,
         "HULL_SHARE": 0.15,
-        "LIABILITY_SHARE": 0.10,
+        "LIAB_SHARE": 0.10,
     }
     policy = Policy(policy_data)
 

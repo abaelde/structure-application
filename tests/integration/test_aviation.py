@@ -101,9 +101,9 @@ def test_hull_liability_filtering_aviation():
         "policy_id": ["POL-001"],
         "INSURED_NAME": ["AIR FRANCE"],
         "HULL_LIMIT": [100_000_000],
-        "LIABILITY_LIMIT": [500_000_000],
+        "LIAB_LIMIT": [500_000_000],
         "HULL_SHARE": [0.15],
-        "LIABILITY_SHARE": [0.10],
+        "LIAB_SHARE": [0.10],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-12-31"],
         "COUNTRY": [None],
@@ -226,9 +226,9 @@ def test_hull_only_structure():
         "policy_id": ["POL-001"],
         "INSURED_NAME": ["LUFTHANSA"],
         "HULL_LIMIT": [100_000_000],
-        "LIABILITY_LIMIT": [500_000_000],
+        "LIAB_LIMIT": [500_000_000],
         "HULL_SHARE": [0.15],
-        "LIABILITY_SHARE": [0.10],
+        "LIAB_SHARE": [0.10],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-12-31"],
         "COUNTRY": [None],
@@ -306,9 +306,9 @@ def test_liability_only_structure():
         "policy_id": ["POL-001"],
         "INSURED_NAME": ["EMIRATES"],
         "HULL_LIMIT": [100_000_000],
-        "LIABILITY_LIMIT": [500_000_000],
+        "LIAB_LIMIT": [500_000_000],
         "HULL_SHARE": [0.15],
-        "LIABILITY_SHARE": [0.10],
+        "LIAB_SHARE": [0.10],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-12-31"],
         "COUNTRY": [None],
@@ -352,7 +352,7 @@ def test_casualty_unaffected_by_hull_liability_flags():
     - QS_30: Quota Share 30% (flags Hull/Liability non pertinents)
 
     BORDEREAU Casualty:
-    - Une police avec LIMIT × CEDENT_SHARE
+    - Une police avec OCCURRENCE_LIMIT_100_ORIG × CEDENT_SHARE
 
     RÉSULTAT ATTENDU:
     - Le programme fonctionne normalement (pas d'impact des flags)
@@ -373,7 +373,7 @@ def test_casualty_unaffected_by_hull_liability_flags():
     bordereau_data = {
         "policy_id": ["CAS-001"],
         "INSURED_NAME": ["COMPANY A"],
-        "LIMIT": [10_000_000],
+        "OCCURRENCE_LIMIT_100_ORIG": [10_000_000],
         "CEDENT_SHARE": [0.75],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-12-31"],

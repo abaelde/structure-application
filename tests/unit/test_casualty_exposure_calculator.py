@@ -21,7 +21,7 @@ class TestCasualtyExposureCalculator:
         """
         calculator = CasualtyExposureCalculator()
         policy_data = {
-            "LIMIT": 1_000_000,
+            "OCCURRENCE_LIMIT_100_ORIG": 1_000_000,
             "CEDENT_SHARE": 0.75,
         }
 
@@ -42,7 +42,7 @@ class TestCasualtyExposureCalculator:
         """
         calculator = CasualtyExposureCalculator()
         policy_data = {
-            "LIMIT": "1000000",
+            "OCCURRENCE_LIMIT_100_ORIG": "1000000",
             "CEDENT_SHARE": "0.75",
         }
 
@@ -52,7 +52,7 @@ class TestCasualtyExposureCalculator:
 
     def test_calculate_missing_limit(self):
         """
-        Test d'erreur quand LIMIT est manquant
+        Test d'erreur quand OCCURRENCE_LIMIT_100_ORIG est manquant
 
         DONNÉES:
         - Limit: manquant
@@ -70,7 +70,7 @@ class TestCasualtyExposureCalculator:
             calculator.calculate(policy_data)
 
         assert "Missing exposure value" in str(exc_info.value)
-        assert "LIMIT" in str(exc_info.value)
+        assert "OCCURRENCE_LIMIT_100_ORIG" in str(exc_info.value)
 
     def test_calculate_missing_cedent_share(self):
         """
@@ -85,7 +85,7 @@ class TestCasualtyExposureCalculator:
         """
         calculator = CasualtyExposureCalculator()
         policy_data = {
-            "LIMIT": 1_000_000,
+            "OCCURRENCE_LIMIT_100_ORIG": 1_000_000,
         }
 
         with pytest.raises(ExposureCalculationError) as exc_info:
@@ -107,7 +107,7 @@ class TestCasualtyExposureCalculator:
         """
         calculator = CasualtyExposureCalculator()
         policy_data = {
-            "LIMIT": "invalid",
+            "OCCURRENCE_LIMIT_100_ORIG": "invalid",
             "CEDENT_SHARE": 0.75,
         }
 

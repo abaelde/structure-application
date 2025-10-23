@@ -209,7 +209,7 @@ Le module `engine` supporte maintenant le filtrage sélectif des composantes Hul
 
 En aviation, l'exposition totale d'une police se décompose en :
 - **Hull** : `HULL_LIMIT × HULL_SHARE`
-- **Liability** : `LIABILITY_LIMIT × LIABILITY_SHARE`
+- **Liability** : `LIAB_LIMIT × LIAB_SHARE`
 
 Certaines structures de réassurance peuvent ne couvrir que :
 - Hull uniquement (ex: protection spécifique sur les appareils)
@@ -291,9 +291,9 @@ from src.domain.exposure import AviationExposureCalculator
 calculator = AviationExposureCalculator()
 policy_data = {
     "HULL_LIMIT": 100_000_000,
-    "LIABILITY_LIMIT": 500_000_000,
+    "LIAB_LIMIT": 500_000_000,
     "HULL_SHARE": 0.15,
-    "LIABILITY_SHARE": 0.10,
+    "LIAB_SHARE": 0.10,
 }
 
 total = calculator.calculate(policy_data)  # 65_000_000

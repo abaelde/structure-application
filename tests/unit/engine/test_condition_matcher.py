@@ -14,7 +14,7 @@ class TestCurrencyMapping:
         """Test aviation mapping returns HULL_CURRENCY"""
         policy_data = {
             "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "EUR",
+            "LIAB_CURRENCY": "EUR",
         }
         uw_departement = "aviation"
 
@@ -77,7 +77,7 @@ class TestMatchConditionWithCurrencyMapping:
         # Policy with HULL_CURRENCY=USD (should match)
         policy_data = {
             "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "EUR",
+            "LIAB_CURRENCY": "EUR",
             "COUNTRY": "France",
         }
 
@@ -103,7 +103,7 @@ class TestMatchConditionWithCurrencyMapping:
         # Policy with different currencies (should not match)
         policy_data = {
             "HULL_CURRENCY": "EUR",
-            "LIABILITY_CURRENCY": "EUR",
+            "LIAB_CURRENCY": "EUR",
             "COUNTRY": ["France"],
         }
 
@@ -177,7 +177,7 @@ class TestMatchConditionWithCurrencyMapping:
         # Any policy should match
         policy_data = {
             "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "EUR",
+            "LIAB_CURRENCY": "EUR",
             "COUNTRY": "France",
         }
 
@@ -212,7 +212,7 @@ class TestMatchConditionWithCurrencyMapping:
 
         policy_data = {
             "HULL_CURRENCY": "USD",
-            "LIABILITY_CURRENCY": "USD",
+            "LIAB_CURRENCY": "USD",
             "COUNTRY": "France",
         }
 

@@ -44,8 +44,8 @@ Ces colonnes sont utilisées pour le **matching avancé** des conditions dans le
 | **Class of Business 1** | `PRODUCT_TYPE_LEVEL_1` | String | Classe de business niveau 1 |
 | **Class of Business 2** | `PRODUCT_TYPE_LEVEL_2` | String | Classe de business niveau 2 |
 | **Class of Business 3** | `PRODUCT_TYPE_LEVEL_3` | String | Classe de business niveau 3 |
-| **Currency (Aviation)** | `HULL_CURRENCY`, `LIABILITY_CURRENCY` | String | Code devise Hull/Liability (ISO 4217) |
-| **Currency (Casualty)** | `CURRENCY` | String | Code devise (ISO 4217) |
+| **Currency (Aviation)** | `HULL_CURRENCY`, `LIAB_CURRENCY` | String | Code devise Hull/Liability (ISO 4217) |
+| **Currency (Casualty)** | `ORIGINAL_CURRENCY` | String | Code devise (ISO 4217) |
 | **Industry** | `industry` | String | Secteur industriel |
 | **SIC Code** | `sic_code` | String/Numeric | Code SIC (Standard Industrial Classification) |
 | **Include** | `include` | String/Boolean | Indicateur d'inclusion/exclusion |
@@ -58,7 +58,7 @@ Pour les bordereaux situés dans `bordereaux/aviation/` :
 
 **Colonnes de devises obligatoires** :
 - `HULL_CURRENCY` : Devise pour les limites Hull (obligatoire)
-- `LIABILITY_CURRENCY` : Devise pour les limites Liability (obligatoire)
+- `LIAB_CURRENCY` : Devise pour les limites Liability (obligatoire)
 
 **Colonnes additionnelles recommandées** :
 - `industry` : Généralement "Transportation"
@@ -74,7 +74,7 @@ Pour les bordereaux situés dans `bordereaux/aviation/` :
 Pour les bordereaux situés dans `bordereaux/casualty/` :
 
 **Colonnes de devises obligatoires** :
-- `CURRENCY` : Devise pour les limites (obligatoire)
+- `ORIGINAL_CURRENCY` : Devise pour les limites (obligatoire)
 
 **Colonnes additionnelles recommandées** :
 - `industry` : Secteur d'activité (Retail, Manufacturing, Services, etc.)
@@ -171,9 +171,9 @@ bordereaux/
 ### Exemple Aviation (avec policy_id optionnel)
 
 ```csv
-policy_id,INSURED_NAME,COUNTRY,line_of_business,HULL_CURRENCY,LIABILITY_CURRENCY,exposure,INCEPTION_DT,EXPIRE_DT
-AVI-2024-001,AIR FRANCE-KLM,France,Aviation,USD,USD,25000000,2024-01-01,2024-12-31
-AVI-2024-002,LUFTHANSA GROUP,Germany,Aviation,USD,USD,30000000,2024-02-15,2025-02-14
+policy_id,INSURED_NAME,COUNTRY,line_of_business,HULL_CURRENCY,LIAB_CURRENCY,HULL_LIMIT,LIAB_LIMIT,HULL_SHARE,LIAB_SHARE,INCEPTION_DT,EXPIRE_DT
+AVI-2024-001,AIR FRANCE-KLM,France,Aviation,USD,USD,25000000,100000000,0.15,0.10,2024-01-01,2024-12-31
+AVI-2024-002,LUFTHANSA GROUP,Germany,Aviation,USD,USD,30000000,500000000,0.12,0.08,2024-02-15,2025-02-14
 ```
 
 ### Exemple Casualty (avec policy_id optionnel)
@@ -208,8 +208,8 @@ Le système valide automatiquement :
 - Date d'expiration > date de début
 - Cohérence entre la ligne de business et le dossier
 - **Validation des devises** :
-  - Aviation : Au moins `HULL_CURRENCY` ou `LIABILITY_CURRENCY` doit être présent
-  - Casualty : `CURRENCY` doit être présent
+  - Aviation : Au moins `HULL_CURRENCY` ou `LIAB_CURRENCY` doit être présent
+  - Casualty : `ORIGINAL_CURRENCY` doit être présent
 
 ❌ **Erreurs bloquantes** :
 - Colonnes requises manquantes
@@ -218,8 +218,8 @@ Le système valide automatiquement :
 - `insured_name` non en majuscules
 - Colonnes inconnues
 - **Colonnes de devises manquantes ou incorrectes** :
-  - Aviation : Absence de `HULL_CURRENCY` et `LIABILITY_CURRENCY`
-  - Casualty : Absence de `CURRENCY`
+  - Aviation : Absence de `HULL_CURRENCY` et `LIAB_CURRENCY`
+  - Casualty : Absence de `ORIGINAL_CURRENCY`
 
 ## Relation Bordereau-Programme
 

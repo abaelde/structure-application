@@ -61,12 +61,12 @@ COLUMNS: Dict[str, ColumnSpec] = {
     "BUSCL_ENTITY_NAME_CED": ColumnSpec("BUSCL_ENTITY_NAME_CED", "dimension"),
     "POL_RISK_NAME_CED": ColumnSpec("POL_RISK_NAME_CED", "dimension"),
     # currency (dimension logique unique ; représentation selon LOB)
-    "CURRENCY": ColumnSpec("CURRENCY", "dimension"),
+    "ORIGINAL_CURRENCY": ColumnSpec("ORIGINAL_CURRENCY", "dimension"),
     "HULL_CURRENCY": ColumnSpec("HULL_CURRENCY", "dimension"),
-    "LIABILITY_CURRENCY": ColumnSpec("LIABILITY_CURRENCY", "dimension"),
+    "LIAB_CURRENCY": ColumnSpec("LIAB_CURRENCY", "dimension"),
     # EXPOSURE — Casualty
-    "LIMIT": ColumnSpec(
-        "LIMIT", "exposure", required_by_lob={"casualty": True}, coerce=_to_float
+    "OCCURRENCE_LIMIT_100_ORIG": ColumnSpec(
+        "OCCURRENCE_LIMIT_100_ORIG", "exposure", required_by_lob={"casualty": True}, coerce=_to_float
     ),
     "CEDENT_SHARE": ColumnSpec(
         "CEDENT_SHARE", "exposure", required_by_lob={"casualty": True}, coerce=_to_float
@@ -78,14 +78,14 @@ COLUMNS: Dict[str, ColumnSpec] = {
     "HULL_SHARE": ColumnSpec(
         "HULL_SHARE", "exposure", required_by_lob={"aviation": False}, coerce=_to_float
     ),
-    "LIABILITY_LIMIT": ColumnSpec(
-        "LIABILITY_LIMIT",
+    "LIAB_LIMIT": ColumnSpec(
+        "LIAB_LIMIT",
         "exposure",
         required_by_lob={"aviation": False},
         coerce=_to_float,
     ),
-    "LIABILITY_SHARE": ColumnSpec(
-        "LIABILITY_SHARE",
+    "LIAB_SHARE": ColumnSpec(
+        "LIAB_SHARE",
         "exposure",
         required_by_lob={"aviation": False},
         coerce=_to_float,
@@ -104,8 +104,8 @@ def exposure_rules_for_lob(lob: str) -> Dict[str, str]:
     lob = lob.lower()
     if lob == "aviation":
         return {
-            "at_least_one_of": "HULL_LIMIT|LIABILITY_LIMIT",
-            "pairs": "HULL_LIMIT<->HULL_SHARE;LIABILITY_LIMIT<->LIABILITY_SHARE",
+            "at_least_one_of": "HULL_LIMIT|LIAB_LIMIT",
+            "pairs": "HULL_LIMIT<->HULL_SHARE;LIAB_LIMIT<->LIAB_SHARE",
         }
     if lob in ("casualty", "test"):
         return {}
@@ -123,7 +123,7 @@ PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, Union[str, Dict[str, str]]] = {
     "PRODUCT_TYPE_LEVEL_3": "PRODUCT_TYPE_LEVEL_3",
     "CURRENCY": {
         "aviation": "HULL_CURRENCY",
-        "casualty": "CURRENCY"
+        "casualty": "ORIGINAL_CURRENCY"
     },
 }
 

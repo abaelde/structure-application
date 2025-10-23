@@ -8,9 +8,9 @@ def test_policy_exposure_bundle_aviation():
     """
     policy_data = {
         "HULL_LIMIT": 100_000_000,
-        "LIABILITY_LIMIT": 500_000_000,
+        "LIAB_LIMIT": 500_000_000,
         "HULL_SHARE": 0.15,
-        "LIABILITY_SHARE": 0.10,
+        "LIAB_SHARE": 0.10,
     }
 
     policy = Policy(raw=policy_data, uw_dept="aviation")
@@ -28,7 +28,7 @@ def test_policy_exposure_bundle_casualty():
     Test exposure_bundle() pour casualty (pas de composantes)
     """
     policy_data = {
-        "LIMIT": 100_000_000,
+        "OCCURRENCE_LIMIT_100_ORIG": 100_000_000,
         "CEDENT_SHARE": 0.5,
     }
 
@@ -64,9 +64,9 @@ def test_policy_exposure_bundle_caching():
     """
     policy_data = {
         "HULL_LIMIT": 100_000_000,
-        "LIABILITY_LIMIT": 500_000_000,
+        "LIAB_LIMIT": 500_000_000,
         "HULL_SHARE": 0.15,
-        "LIABILITY_SHARE": 0.10,
+        "LIAB_SHARE": 0.10,
     }
 
     policy = Policy(raw=policy_data, uw_dept="aviation")
