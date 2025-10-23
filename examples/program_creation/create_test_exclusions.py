@@ -40,7 +40,7 @@ exclusions = [
     ExclusionRule(
         name="Cyber_Exclusion",
         values_by_dimension={
-            "BUSCL_COUNTRY_CD": ["US", "CA", "UK", "DE"],
+            "COUNTRY": ["US", "CA", "UK", "DE"],
             "PRODUCT_TYPE_LEVEL_1": ["Cyber", "Technology"],
         },
         effective_date="2024-01-01",
@@ -50,7 +50,7 @@ exclusions = [
     ExclusionRule(
         name="War_Exclusion",
         values_by_dimension={
-            "BUSCL_REGION": ["Middle East", "Africa", "Asia"],
+            "REGION": ["Middle East", "Africa", "Asia"],
             "PRODUCT_TYPE_LEVEL_1": ["War", "Terrorism"],
             "PRODUCT_TYPE_LEVEL_2": ["Marine", "Aviation"],
         },

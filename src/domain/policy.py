@@ -63,7 +63,7 @@ class Policy:
         """
         Récupère la valeur de dimension avec mapping intelligent.
         
-        Pour les dimensions de programme (comme BUSCL_LIMIT_CURRENCY_CD),
+        Pour les dimensions de programme,
         fait le mapping vers les colonnes de bordereau appropriées selon le LOB.
         """
         # Si la dimension existe directement dans raw, la retourner

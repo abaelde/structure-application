@@ -38,7 +38,7 @@ def create_quota_share_with_exclusions_program():
     # Créer les exclusions - Test de compaction multi-valeurs
     exclusions = [
         ExclusionRule(
-            values_by_dimension={"BUSCL_COUNTRY_CD": ["Iran", "Russia"]},
+            values_by_dimension={"COUNTRY": ["Iran", "Russia"]},
             name="Sanctions Countries",
         ),
     ]
@@ -140,8 +140,8 @@ def test_write_quota_share_with_exclusions_snowpark():
                 print(f"   ℹ️  Nom d'exclusion chargé: '{loaded_exclusion.name}' (attendu: None)")
                 
                 # Vérifier les valeurs d'exclusion (ce qui est vraiment important)
-                original_values = original_exclusion.values_by_dimension.get("BUSCL_COUNTRY_CD", [])
-                loaded_values = loaded_exclusion.values_by_dimension.get("BUSCL_COUNTRY_CD", [])
+                original_values = original_exclusion.values_by_dimension.get("COUNTRY", [])
+                loaded_values = loaded_exclusion.values_by_dimension.get("COUNTRY", [])
                 
                 if set(original_values) == set(loaded_values):
                     print("   ✅ Valeurs d'exclusion cohérentes")

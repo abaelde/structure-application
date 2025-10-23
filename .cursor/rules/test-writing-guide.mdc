@@ -130,15 +130,11 @@ test_data = {
     "EXPIRE_DT": [...],
     
     # Dimensions (peuvent être None)
-    "BUSCL_EXCLUDE_CD": [...],
-    "BUSCL_ENTITY_NAME_CED": [...],
-    "POL_RISK_NAME_CED": [...],
-    "BUSCL_COUNTRY_CD": [...],
-    "BUSCL_REGION": [...],
-    "BUSCL_CLASS_OF_BUSINESS_1": [...],
-    "BUSCL_CLASS_OF_BUSINESS_2": [...],
-    "BUSCL_CLASS_OF_BUSINESS_3": [...],
-    "BUSCL_LIMIT_CURRENCY_CD": [...],
+    "COUNTRY": [...],
+    "REGION": [...],
+    "PRODUCT_TYPE_LEVEL_1": [...],
+    "PRODUCT_TYPE_LEVEL_2": [...],
+    "PRODUCT_TYPE_LEVEL_3": [...],
 }
 ```
 

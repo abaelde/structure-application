@@ -63,15 +63,14 @@ Chaque programme doit être un dossier CSV avec **3 fichiers obligatoires** :
 > **Note** : Les exclusions sont maintenant gérées au niveau programme via la table `exclusions.csv` (voir section "Exclusions globales de programme").
 
 #### Dimensions Géographiques et Produits
-- **BUSCL_COUNTRY_CD** : VARCHAR(255), code pays (peut être NULL = pas de condition)
+- **COUNTRY** : VARCHAR(255), code pays (peut être NULL = pas de condition)
 - **BUSCL_COUNTRY** : VARCHAR(255), nom du pays (peut être NULL)
-- **BUSCL_REGION** : VARCHAR(255), région (peut être NULL = pas de condition)
-- **BUSCL_CLASS_OF_BUSINESS_1** : VARCHAR(255), classe de business niveau 1 (peut être NULL = pas de condition)
-- **BUSCL_CLASS_OF_BUSINESS_2** : VARCHAR(255), classe de business niveau 2 (peut être NULL = pas de condition)
-- **BUSCL_CLASS_OF_BUSINESS_3** : VARCHAR(255), classe de business niveau 3 (peut être NULL = pas de condition)
+- **REGION** : VARCHAR(255), région (peut être NULL = pas de condition)
+- **PRODUCT_TYPE_LEVEL_1** : VARCHAR(255), classe de business niveau 1 (peut être NULL = pas de condition)
+- **PRODUCT_TYPE_LEVEL_2** : VARCHAR(255), classe de business niveau 2 (peut être NULL = pas de condition)
+- **PRODUCT_TYPE_LEVEL_3** : VARCHAR(255), classe de business niveau 3 (peut être NULL = pas de condition)
 
 #### Devise et Limites
-- **BUSCL_LIMIT_CURRENCY_CD** : VARCHAR(255), devise des limites (peut être NULL = pas de condition)
 - **AAD_100** : DECIMAL, AAD (Annual Aggregate Deductible) en valeur absolue (peut être NULL)
 - **LIMIT_100** : DECIMAL, limite générale en valeur absolue (peut être NULL)
 - **LIMIT_FLOATER_100** : DECIMAL, limite flottante en valeur absolue (peut être NULL)
@@ -167,34 +166,34 @@ Depuis la migration, les exclusions sont gérées au niveau programme via une ta
 | **EXCLUSION_NAME** | VARCHAR(255) | Nom de l'exclusion (optionnel) |
 | **EXCL_EFFECTIVE_DATE** | DATE | Date d'effet de l'exclusion (optionnel) |
 | **EXCL_EXPIRY_DATE** | DATE | Date d'expiration de l'exclusion (optionnel) |
-| **BUSCL_COUNTRY_CD** | VARCHAR(255) | Pays à exclure (valeurs multiples séparées par `;`) |
-| **BUSCL_REGION** | VARCHAR(255) | Région à exclure (valeurs multiples séparées par `;`) |
-| **BUSCL_CLASS_OF_BUSINESS_1** | VARCHAR(255) | Classe de business à exclure (valeurs multiples séparées par `;`) |
-| **BUSCL_CLASS_OF_BUSINESS_2** | VARCHAR(255) | Classe de business niveau 2 à exclure (valeurs multiples séparées par `;`) |
-| **BUSCL_CLASS_OF_BUSINESS_3** | VARCHAR(255) | Classe de business niveau 3 à exclure (valeurs multiples séparées par `;`) |
+| **COUNTRY** | VARCHAR(255) | Pays à exclure (valeurs multiples séparées par `;`) |
+| **REGION** | VARCHAR(255) | Région à exclure (valeurs multiples séparées par `;`) |
+| **PRODUCT_TYPE_LEVEL_1** | VARCHAR(255) | Classe de business à exclure (valeurs multiples séparées par `;`) |
+| **PRODUCT_TYPE_LEVEL_2** | VARCHAR(255) | Classe de business niveau 2 à exclure (valeurs multiples séparées par `;`) |
+| **PRODUCT_TYPE_LEVEL_3** | VARCHAR(255) | Classe de business niveau 3 à exclure (valeurs multiples séparées par `;`) |
 | **BUSCL_ENTITY_NAME_CED** | VARCHAR(255) | Entité cédante à exclure (valeurs multiples séparées par `;`) |
 | **POL_RISK_NAME_CED** | VARCHAR(255) | Risque de police à exclure (valeurs multiples séparées par `;`) |
-| **BUSCL_LIMIT_CURRENCY_CD** | VARCHAR(255) | Devise à exclure (valeurs multiples séparées par `;`) |
+| **CURRENCIES** | VARCHAR(255) | Devise à exclure (valeurs multiples séparées par `;`) |
 
 ### Exemples d'exclusions
 
 #### Exclusions simples par pays
 ```csv
-EXCLUSION_NAME,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_REGION,BUSCL_CLASS_OF_BUSINESS_1
+EXCLUSION_NAME,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,COUNTRY,REGION,PRODUCT_TYPE_LEVEL_1
 "Sanctions Iran",,,Iran,,,
 "Sanctions Russia",,,Russia,,,
 ```
 
 #### Exclusions avec dates
 ```csv
-EXCLUSION_NAME,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_CLASS_OF_BUSINESS_1
+EXCLUSION_NAME,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,COUNTRY,PRODUCT_TYPE_LEVEL_1
 "Temporary sanctions",2024-06-01,2024-12-31,Iran,,
 "Scope Aviation 2025",2025-01-01,2026-01-01,,AVIATION
 ```
 
 #### Exclusions multiples
 ```csv
-EXCLUSION_NAME,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,BUSCL_COUNTRY_CD,BUSCL_CLASS_OF_BUSINESS_1
+EXCLUSION_NAME,EXCL_EFFECTIVE_DATE,EXCL_EXPIRY_DATE,COUNTRY,PRODUCT_TYPE_LEVEL_1
 "Multiple sanctions",,,Iran;Russia;Syria,,
 ```
 
@@ -391,7 +390,7 @@ program = build_program(name="QS_EXCL_2024", structures=[qs], underwriting_depar
 # Ajouter les exclusions au niveau programme
 exclusions = [
     ExclusionRule(
-        values_by_dimension={'BUSCL_COUNTRY_CD': ['Iran']},
+        values_by_dimension={'COUNTRY': ['Iran']},
         reason='Sanctions Iran'
     ),
 ]

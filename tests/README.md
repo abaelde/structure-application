@@ -126,8 +126,8 @@ Résultats:
 **Objectif:** Tester le mécanisme d'exclusion par dimensions
 
 **Ce qui est testé:**
-- ✅ Exclusion de polices par pays (BUSCL_COUNTRY_CD)
-- ✅ Exclusion de polices par région (BUSCL_REGION)
+- ✅ Exclusion de polices par pays (COUNTRY)
+- ✅ Exclusion de polices par région (REGION)
 - ✅ Matching de conditions avec exclusions
 - ✅ Calcul de cession = 0 pour polices exclues
 - ✅ Statut d'exclusion dans les résultats

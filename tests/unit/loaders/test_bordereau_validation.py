@@ -28,8 +28,8 @@ def test_bordereau_with_warnings():
         {
             "policy_id": ["POL-001", "POL-002", "POL-001"],
             "INSURED_NAME": ["COMPANY A", "COMPANY B", "COMPANY C"],
-            "BUSCL_COUNTRY_CD": ["US", "FR", "UK"],
-            "BUSCL_REGION": ["NA", "EU", "EU"],
+            "COUNTRY": ["US", "FR", "UK"],
+            "REGION": ["NA", "EU", "EU"],
             "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
             "line_of_business": ["Aviation", "Property", "Aviation"],
             "exposure": [0, 25.5, 30.0],
@@ -205,7 +205,7 @@ def test_null_dimension_columns():
         {
             "policy_id": ["POL-001", "POL-002"],
             "INSURED_NAME": ["COMPANY A", "COMPANY B"],
-            "BUSCL_COUNTRY_CD": [None, "US"],
+            "COUNTRY": [None, "US"],
             "BUSCL_LIMIT_CURRENCY_CD": [None, "USD"],
             "line_of_business": ["Test", "Test"],
             "exposure": [25.5, 30.0],

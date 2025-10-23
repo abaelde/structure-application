@@ -33,7 +33,7 @@ class TestFinancialTerms:
         assert terms.cession_pct is None
         assert terms.attachment is None
         assert terms.limit is None
-        assert terms.signed_share == 1.0  # valeur par défaut
+        assert terms.signed_share is None  # pas de valeur par défaut
 
     def test_merge_with_overrides(self):
         """Test de fusion avec des overrides"""
@@ -141,7 +141,7 @@ class TestStructureFinancialMethods:
         assert default_terms.signed_share == 0.9
 
     def test_default_terms_with_none_signed_share(self):
-        """Test de default_terms avec signed_share None (doit utiliser 1.0)"""
+        """Test de default_terms avec signed_share None (doit rester None)"""
         structure = Structure(
             structure_name="Test",
             type_of_participation="QUOTA_SHARE",
@@ -153,7 +153,7 @@ class TestStructureFinancialMethods:
         )
         
         default_terms = structure.default_terms
-        assert default_terms.signed_share == 1.0
+        assert default_terms.signed_share is None
 
     def test_resolve_condition(self, sample_structure):
         """Test de résolution de condition avec overrides"""

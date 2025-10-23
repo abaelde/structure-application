@@ -1,64 +1,64 @@
-@pytest.fixture(scope="session")
+# @pytest.fixture(scope="session")
 
-def snowpark_session(request):
+# def snowpark_session(request):
 
-    """Create Snowpark session for the entire test session"""
+#     """Create Snowpark session for the entire test session"""
 
-    connection_name = request.config.getoption("--snw-connection") or ""
+#     connection_name = request.config.getoption("--snw-connection") or ""
 
-    if connection_name is None:
+#     if connection_name is None:
 
-        raise ValueError(
+#         raise ValueError(
 
-            "No connection name specified. You must launch the tests with --snw-connection arg. Alternatively use make test"
+#             "No connection name specified. You must launch the tests with --snw-connection arg. Alternatively use make test"
 
-        )
+#         )
  
-    session = None
+#     session = None
 
-    try:
+#     try:
 
-        session = Session.builder.config("connection_name", connection_name).create()
+#         session = Session.builder.config("connection_name", connection_name).create()
 
-        yield session
+#         yield session
 
-    except Exception as e:
+#     except Exception as e:
 
-        error_message = f"""Can not create the snowpark session. 
+#         error_message = f"""Can not create the snowpark session. 
 
-Make sure the {connection_name} credentials are available. 
+# Make sure the {connection_name} credentials are available. 
 
-For ex, you can create the following file: $HOME/.config/snowflake/connections.toml 
+# For ex, you can create the following file: $HOME/.config/snowflake/connections.toml 
 
--------
+# -------
 
-    [{connection_name}]
+#     [{connection_name}]
 
-    account = "WBIAPMC-PARTNERRE"
+#     account = "WBIAPMC-PARTNERRE"
 
-    user = "<YOUR_PARTNERRE_EMAIL>"
+#     user = "<YOUR_PARTNERRE_EMAIL>"
 
-    database = "<YOUR_DB>"
+#     database = "<YOUR_DB>"
 
-    schema = "PUBLIC"
+#     schema = "PUBLIC"
 
-    warehouse = "<YOUR_WAREHOUSE>"
+#     warehouse = "<YOUR_WAREHOUSE>"
 
-    role = "<YOUR_ROLE>"
+#     role = "<YOUR_ROLE>"
 
-    authenticator = "externalbrowser"
+#     authenticator = "externalbrowser"
 
------
+# -----
 
-Note that we use  for now but we will migrate to another db later. 
+# Note that we use  for now but we will migrate to another db later. 
 
-    """
+#     """
 
-        raise ValueError(error_message) from e
+#         raise ValueError(error_message) from e
 
-    finally:
+#     finally:
 
-        if session:
+#         if session:
 
-            session.close()
+#             session.close()
  

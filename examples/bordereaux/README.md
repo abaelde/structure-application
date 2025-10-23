@@ -39,11 +39,11 @@ Ces colonnes sont utilisées pour le **matching avancé** des conditions dans le
 
 | Colonne | Nom Exact | Type | Description |
 |---------|-----------|------|-------------|
-| **Country** | `BUSCL_COUNTRY_CD` | String | Code pays (ISO) |
-| **Region** | `BUSCL_REGION` | String | Région géographique |
-| **Class of Business 1** | `BUSCL_CLASS_OF_BUSINESS_1` | String | Classe de business niveau 1 |
-| **Class of Business 2** | `BUSCL_CLASS_OF_BUSINESS_2` | String | Classe de business niveau 2 |
-| **Class of Business 3** | `BUSCL_CLASS_OF_BUSINESS_3` | String | Classe de business niveau 3 |
+| **Country** | `COUNTRY` | String | Code pays (ISO) |
+| **Region** | `REGION` | String | Région géographique |
+| **Class of Business 1** | `PRODUCT_TYPE_LEVEL_1` | String | Classe de business niveau 1 |
+| **Class of Business 2** | `PRODUCT_TYPE_LEVEL_2` | String | Classe de business niveau 2 |
+| **Class of Business 3** | `PRODUCT_TYPE_LEVEL_3` | String | Classe de business niveau 3 |
 | **Currency (Aviation)** | `HULL_CURRENCY`, `LIABILITY_CURRENCY` | String | Code devise Hull/Liability (ISO 4217) |
 | **Currency (Casualty)** | `CURRENCY` | String | Code devise (ISO 4217) |
 | **Industry** | `industry` | String | Secteur industriel |
@@ -63,7 +63,7 @@ Pour les bordereaux situés dans `bordereaux/aviation/` :
 **Colonnes additionnelles recommandées** :
 - `industry` : Généralement "Transportation"
 - `sic_code` : Généralement 4512 (Air Transportation)
-- `BUSCL_REGION` : Important pour la segmentation géographique
+- `REGION` : Important pour la segmentation géographique
 
 **Valeurs typiques** :
 - `line_of_business` : "Aviation"
@@ -79,7 +79,7 @@ Pour les bordereaux situés dans `bordereaux/casualty/` :
 **Colonnes additionnelles recommandées** :
 - `industry` : Secteur d'activité (Retail, Manufacturing, Services, etc.)
 - `sic_code` : Code SIC spécifique au secteur
-- `BUSCL_COUNTRY_CD` : Pays de l'entreprise assurée
+- `COUNTRY` : Pays de l'entreprise assurée
 
 **Valeurs typiques** :
 - `line_of_business` : "Casualty"
@@ -90,8 +90,8 @@ Pour les bordereaux situés dans `bordereaux/casualty/` :
 Pour les bordereaux situés dans `bordereaux/property/` :
 
 **Colonnes additionnelles recommandées** :
-- `BUSCL_REGION` : Région pour l'analyse de risque géographique
-- `BUSCL_COUNTRY_CD` : Pays de localisation du bien
+- `REGION` : Région pour l'analyse de risque géographique
+- `COUNTRY` : Pays de localisation du bien
 
 **Valeurs typiques** :
 - `line_of_business` : "Property"
@@ -171,7 +171,7 @@ bordereaux/
 ### Exemple Aviation (avec policy_id optionnel)
 
 ```csv
-policy_id,INSURED_NAME,BUSCL_COUNTRY_CD,line_of_business,HULL_CURRENCY,LIABILITY_CURRENCY,exposure,INCEPTION_DT,EXPIRE_DT
+policy_id,INSURED_NAME,COUNTRY,line_of_business,HULL_CURRENCY,LIABILITY_CURRENCY,exposure,INCEPTION_DT,EXPIRE_DT
 AVI-2024-001,AIR FRANCE-KLM,France,Aviation,USD,USD,25000000,2024-01-01,2024-12-31
 AVI-2024-002,LUFTHANSA GROUP,Germany,Aviation,USD,USD,30000000,2024-02-15,2025-02-14
 ```
@@ -179,7 +179,7 @@ AVI-2024-002,LUFTHANSA GROUP,Germany,Aviation,USD,USD,30000000,2024-02-15,2025-0
 ### Exemple Casualty (avec policy_id optionnel)
 
 ```csv
-policy_id,INSURED_NAME,BUSCL_COUNTRY_CD,line_of_business,CURRENCY,exposure,INCEPTION_DT,EXPIRE_DT
+policy_id,INSURED_NAME,COUNTRY,line_of_business,CURRENCY,exposure,INCEPTION_DT,EXPIRE_DT
 CAS-2024-001,CARREFOUR SA,France,Casualty,EUR,8500000,2024-01-01,2024-12-31
 CAS-2024-002,MICHELIN GROUP,France,Casualty,EUR,15000000,2024-02-01,2025-01-31
 ```
@@ -187,7 +187,7 @@ CAS-2024-002,MICHELIN GROUP,France,Casualty,EUR,15000000,2024-02-01,2025-01-31
 ### Exemple Property (sans policy_id)
 
 ```csv
-INSURED_NAME,BUSCL_REGION,line_of_business,exposure,INCEPTION_DT,EXPIRE_DT
+INSURED_NAME,REGION,line_of_business,exposure,INCEPTION_DT,EXPIRE_DT
 ENTREPRISE DUPONT SAS,EMEA,Property,500000,2024-01-01,2024-12-31
 GLOBAL CORP LTD,APAC,Property,1200000,2024-03-01,2025-02-28
 ```
@@ -220,7 +220,6 @@ Le système valide automatiquement :
 - **Colonnes de devises manquantes ou incorrectes** :
   - Aviation : Absence de `HULL_CURRENCY` et `LIABILITY_CURRENCY`
   - Casualty : Absence de `CURRENCY`
-  - Utilisation d'anciennes colonnes (`BUSCL_LIMIT_CURRENCY_CD`)
 
 ## Relation Bordereau-Programme
 

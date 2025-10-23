@@ -22,7 +22,7 @@ class FinancialTerms:
     cession_pct: Optional[float] = None
     attachment: Optional[float] = None
     limit: Optional[float] = None
-    signed_share: float = 1.0
+    signed_share: Optional[float] = None
 
     def merge(self, **overrides) -> "FinancialTerms":
         """

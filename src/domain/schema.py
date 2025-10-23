@@ -53,8 +53,8 @@ COLUMNS: Dict[str, ColumnSpec] = {
     "EXPIRE_DT": ColumnSpec("EXPIRE_DT", "meta", required=True, coerce=_to_date),
     "line_of_business": ColumnSpec("line_of_business", "meta"),
     # Dimension mappings
-    "BUSCL_COUNTRY_CD": ColumnSpec("COUNTRIES", "dimension"),
-    "BUSCL_REGION": ColumnSpec("BUSCL_REGION", "dimension"),
+    "COUNTRY": ColumnSpec("COUNTRIES", "dimension"),
+    "REGION": ColumnSpec("REGION", "dimension"),
     "PRODUCT_TYPE_LEVEL_1": ColumnSpec("PRODUCT_TYPE_LEVEL_1", "dimension"),
     "PRODUCT_TYPE_LEVEL_2": ColumnSpec("PRODUCT_TYPE_LEVEL_2", "dimension"),
     "PRODUCT_TYPE_LEVEL_3": ColumnSpec("PRODUCT_TYPE_LEVEL_3", "dimension"),
@@ -116,15 +116,15 @@ def exposure_rules_for_lob(lob: str) -> Dict[str, str]:
 # Mapping "clés builder" -> "colonne Snowflake" (ou map par LOB)
 # Les clés builder correspondent aux champs produits par build_condition(...)
 PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, Union[str, Dict[str, str]]] = {
-    "BUSCL_COUNTRY_CD": "COUNTRIES",
-    "BUSCL_REGION": "REGIONS",
+    "COUNTRY": "COUNTRY",
+    "REGION": "REGION",
     "PRODUCT_TYPE_LEVEL_1": "PRODUCT_TYPE_LEVEL_1",
     "PRODUCT_TYPE_LEVEL_2": "PRODUCT_TYPE_LEVEL_2",
     "PRODUCT_TYPE_LEVEL_3": "PRODUCT_TYPE_LEVEL_3",
-    "BUSCL_CLASS_OF_BUSINESS_1": "PRODUCT_TYPE_LEVEL_1",
-    "BUSCL_CLASS_OF_BUSINESS_2": "PRODUCT_TYPE_LEVEL_2",
-    "BUSCL_CLASS_OF_BUSINESS_3": "PRODUCT_TYPE_LEVEL_3",
-    "BUSCL_LIMIT_CURRENCY_CD": "CURRENCIES",
+    "CURRENCY": {
+        "aviation": "HULL_CURRENCY",
+        "casualty": "CURRENCY"
+    },
 }
 
 

@@ -44,10 +44,10 @@ def test_exclusion_mechanism():
     # Créer les exclusions au niveau programme
     exclusions = [
         ExclusionRule(
-            values_by_dimension={"BUSCL_COUNTRY_CD": ["Iran"]}, name="Sanctions Iran"
+            values_by_dimension={"COUNTRY": ["Iran"]}, name="Sanctions Iran"
         ),
         ExclusionRule(
-            values_by_dimension={"BUSCL_COUNTRY_CD": ["Russia"]},
+            values_by_dimension={"COUNTRY": ["Russia"]},
             name="Sanctions Russia",
         ),
     ]
@@ -70,7 +70,7 @@ def test_exclusion_mechanism():
             "SANCTIONED AIRLINE",
             "BRITISH AIRWAYS",
         ],
-        "BUSCL_COUNTRY_CD": [
+        "COUNTRY": [
             "France",
             "Iran",
             "Germany",

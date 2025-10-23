@@ -260,7 +260,7 @@ print("✓ Le programme New Line 2024 simplifié est prêt !")
 print("\nNotes importantes:")
 print("- Les LOB sont maintenant groupées par liste dans chaque sous-condition")
 print(
-    "- Layer 1 utilise BUSCL_CLASS_OF_BUSINESS_1 avec des listes pour distinguer les sous-conditions"
+    "- Layer 1 utilise PRODUCT_TYPE_LEVEL_1 avec des listes pour distinguer les sous-conditions"
 )
 print("- Toutes les structures sont des entry points (pas d'inuring)")
 print(

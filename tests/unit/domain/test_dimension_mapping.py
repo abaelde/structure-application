@@ -18,21 +18,21 @@ class TestPolicyDimensionValue:
     def test_direct_mapping(self):
         """Test direct string mapping for standard dimensions."""
         policy_data = {
-            "BUSCL_COUNTRY_CD": "France",
-            "BUSCL_REGION": "Europe",
+            "COUNTRY": "France",
+            "REGION": "Europe",
             "CURRENCY": "EUR",
         }
 
         policy = Policy(raw=policy_data)
-        assert policy.get_dimension_value("BUSCL_COUNTRY_CD") == "France"
-        assert policy.get_dimension_value("BUSCL_REGION") == "Europe"
+        assert policy.get_dimension_value("COUNTRY") == "France"
+        assert policy.get_dimension_value("REGION") == "Europe"
 
     def test_currency_mapping_aviation(self):
         """Test currency mapping for aviation line of business."""
-        policy_data = {"HULL_CURRENCY": "USD", "LIABILITY_CURRENCY": "USD"}
+        policy_data = {"CURRENCY": "USD"}
 
         policy = Policy(raw=policy_data, uw_dept="aviation")
-        result = policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
+        result = policy.get_dimension_value("CURRENCY")
         assert result == "USD"
 
     def test_currency_mapping_casualty(self):
@@ -40,7 +40,7 @@ class TestPolicyDimensionValue:
         policy_data = {"CURRENCY": "EUR"}
 
         policy = Policy(raw=policy_data, uw_dept="casualty")
-        result = policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
+        result = policy.get_dimension_value("CURRENCY")
         assert result == "EUR"
 
     def test_missing_dimension_returns_none(self):
@@ -48,11 +48,11 @@ class TestPolicyDimensionValue:
         policy_data = {"POLICY_ID": "TEST-001"}
 
         policy = Policy(raw=policy_data)
-        result = policy.get_dimension_value("BUSCL_COUNTRY_CD")
+        result = policy.get_dimension_value("COUNTRY")
         assert result is None
 
         policy_aviation = Policy(raw=policy_data, uw_dept="aviation")
-        result = policy_aviation.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
+        result = policy_aviation.get_dimension_value("CURRENCY")
         assert result is None
 
     def test_unknown_dimension_raises_error(self):
@@ -71,7 +71,7 @@ class TestPolicyDimensionValue:
         }
 
         policy = Policy(raw=policy_data, uw_dept="aviation")
-        result = policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD")
+        result = policy.get_dimension_value("CURRENCY")
         assert result == "USD"  # Should take HULL_CURRENCY
 
 
@@ -81,28 +81,28 @@ class TestGetAllMappableDimensions:
     def test_casualty_mappable_dimensions(self):
         """Test getting mappable dimensions for casualty."""
         bordereau_columns = [
-            "BUSCL_COUNTRY_CD",
-            "BUSCL_REGION",
+            "COUNTRY",
+            "REGION",
             "CURRENCY",
             "POLICY_ID",  # Not in mapping
         ]
 
         mappable = get_all_mappable_dimensions(bordereau_columns, "casualty")
 
-        assert "BUSCL_COUNTRY_CD" in mappable
-        assert "BUSCL_REGION" in mappable
-        assert "BUSCL_LIMIT_CURRENCY_CD" in mappable
-        assert mappable["BUSCL_LIMIT_CURRENCY_CD"] == "CURRENCY"
+        assert "COUNTRY" in mappable
+        assert "REGION" in mappable
+        assert "CURRENCY" in mappable
+        assert mappable["CURRENCY"] == "CURRENCY"
 
     def test_aviation_mappable_dimensions(self):
         """Test getting mappable dimensions for aviation."""
-        bordereau_columns = ["BUSCL_COUNTRY_CD", "HULL_CURRENCY", "LIABILITY_CURRENCY"]
+        bordereau_columns = ["COUNTRY", "HULL_CURRENCY", "LIABILITY_CURRENCY"]
 
         mappable = get_all_mappable_dimensions(bordereau_columns, "aviation")
 
-        assert "BUSCL_COUNTRY_CD" in mappable
-        assert "BUSCL_LIMIT_CURRENCY_CD" in mappable
-        assert mappable["BUSCL_LIMIT_CURRENCY_CD"] == "HULL_CURRENCY"
+        assert "COUNTRY" in mappable
+        assert "CURRENCY" in mappable
+        assert mappable["CURRENCY"] == "HULL_CURRENCY"
 
     def test_no_mappable_dimensions(self):
         """Test when no dimensions are mappable."""
@@ -121,11 +121,11 @@ class TestDimensionMappingConfiguration:
         assert isinstance(PROGRAM_TO_BORDEREAU_DIMENSIONS, dict)
 
         # Test direct mappings
-        assert PROGRAM_TO_BORDEREAU_DIMENSIONS["BUSCL_COUNTRY_CD"] == "BUSCL_COUNTRY_CD"
-        assert PROGRAM_TO_BORDEREAU_DIMENSIONS["BUSCL_REGION"] == "BUSCL_REGION"
+        assert PROGRAM_TO_BORDEREAU_DIMENSIONS["COUNTRY"] == "COUNTRY"
+        assert PROGRAM_TO_BORDEREAU_DIMENSIONS["REGION"] == "REGION"
 
         # Test complex mappings
-        currency_mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS["BUSCL_LIMIT_CURRENCY_CD"]
+        currency_mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS["CURRENCY"]
         assert isinstance(currency_mapping, dict)
         assert currency_mapping["aviation"] == "HULL_CURRENCY"
         assert currency_mapping["casualty"] == "CURRENCY"
@@ -133,14 +133,12 @@ class TestDimensionMappingConfiguration:
     def test_all_expected_dimensions_present(self):
         """Test that all expected dimensions are present in the mapping."""
         expected_dimensions = [
-            "BUSCL_COUNTRY_CD",
-            "BUSCL_REGION",
+            "COUNTRY",
+            "REGION",
             "PRODUCT_TYPE_LEVEL_1",
             "PRODUCT_TYPE_LEVEL_2",
             "PRODUCT_TYPE_LEVEL_3",
-            "BUSCL_ENTITY_NAME_CED",
-            "POL_RISK_NAME_CED",
-            "BUSCL_LIMIT_CURRENCY_CD",
+            "CURRENCY",
         ]
 
         for dimension in expected_dimensions:
@@ -155,8 +153,8 @@ class TestIntegrationScenarios:
         policy_data = {
             "POLICY_ID": "AVI-2024-001",
             "INSURED_NAME": "AIR FRANCE-KLM",
-            "BUSCL_COUNTRY_CD": "France",
-            "BUSCL_REGION": "Europe",
+            "COUNTRY": "France",
+            "REGION": "Europe",
             "HULL_CURRENCY": "USD",
             "LIABILITY_CURRENCY": "USD",
             "HULL_LIMIT": 250000000,
@@ -165,32 +163,32 @@ class TestIntegrationScenarios:
 
         # Test all dimension mappings
         policy = Policy(raw=policy_data, uw_dept="aviation")
-        assert policy.get_dimension_value("BUSCL_COUNTRY_CD") == "France"
-        assert policy.get_dimension_value("BUSCL_REGION") == "Europe"
-        assert policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD") == "USD"
+        assert policy.get_dimension_value("COUNTRY") == "France"
+        assert policy.get_dimension_value("REGION") == "Europe"
+        assert policy.get_dimension_value("CURRENCY") == "USD"
 
         # Test missing optional dimension
-        assert policy.get_dimension_value("BUSCL_ENTITY_NAME_CED") is None
+        assert policy.get_dimension_value("PRODUCT_TYPE_LEVEL_1") is None
 
     def test_casualty_bordereau_scenario(self):
         """Test realistic casualty bordereau scenario."""
         policy_data = {
             "POLICY_ID": "CAS-2024-001",
             "INSURED_NAME": "CARREFOUR SA",
-            "BUSCL_COUNTRY_CD": "France",
-            "BUSCL_REGION": "Europe",
+            "COUNTRY": "France",
+            "REGION": "Europe",
             "CURRENCY": "EUR",
             "LIMIT": 8500000,
         }
 
         # Test all dimension mappings
         policy = Policy(raw=policy_data, uw_dept="casualty")
-        assert policy.get_dimension_value("BUSCL_COUNTRY_CD") == "France"
-        assert policy.get_dimension_value("BUSCL_REGION") == "Europe"
-        assert policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD") == "EUR"
+        assert policy.get_dimension_value("COUNTRY") == "France"
+        assert policy.get_dimension_value("REGION") == "Europe"
+        assert policy.get_dimension_value("CURRENCY") == "EUR"
 
         # Test missing optional dimension
-        assert policy.get_dimension_value("BUSCL_ENTITY_NAME_CED") is None
+        assert policy.get_dimension_value("PRODUCT_TYPE_LEVEL_1") is None
 
     def test_minimal_bordereau_scenario(self):
         """Test minimal bordereau with only essential columns."""
@@ -198,6 +196,6 @@ class TestIntegrationScenarios:
 
         # All dimensions should return None except currency
         policy = Policy(raw=policy_data, uw_dept="casualty")
-        assert policy.get_dimension_value("BUSCL_COUNTRY_CD") is None
-        assert policy.get_dimension_value("BUSCL_REGION") is None
-        assert policy.get_dimension_value("BUSCL_LIMIT_CURRENCY_CD") == "USD"
+        assert policy.get_dimension_value("COUNTRY") is None
+        assert policy.get_dimension_value("REGION") is None
+        assert policy.get_dimension_value("CURRENCY") == "USD"

@@ -18,9 +18,9 @@ def sample_valid_bordereau_data():
         {
             "policy_id": ["POL-001", "POL-002", "POL-003"],
             "INSURED_NAME": ["COMPANY A", "COMPANY B", "COMPANY C"],
-            "BUSCL_COUNTRY_CD": ["US", "FR", "UK"],
-            "BUSCL_REGION": ["NA", "EU", "EU"],
-            "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR", "GBP"],
+            "COUNTRY": ["US", "FR", "UK"],
+            "REGION": ["NA", "EU", "EU"],
+            "CURRENCY": ["USD", "EUR", "GBP"],
             "line_of_business": ["Aviation", "Property", "Aviation"],
             "exposure": [100.5, 25.5, 30.0],
             "INCEPTION_DT": ["2024-01-01", "2024-02-01", "2024-03-01"],

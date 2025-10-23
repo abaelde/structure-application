@@ -394,8 +394,7 @@ def test_full_workflow():
         "exposure": [1_000_000, 2_000_000],
         "INCEPTION_DT": ["2024-01-01", "2024-01-01"],
         "EXPIRE_DT": ["2025-01-01", "2025-01-01"],
-        "BUSCL_COUNTRY_CD": ["US", "FR"],
-        "BUSCL_LIMIT_CURRENCY_CD": ["USD", "EUR"],
+        "COUNTRY": ["US", "FR"],
         # ... autres colonnes requises
     })
     

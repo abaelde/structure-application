@@ -47,7 +47,7 @@ qs = build_quota_share(
 # Créer les exclusions - Test de compaction multi-valeurs
 exclusions = [
     ExclusionRule(
-        values_by_dimension={"BUSCL_COUNTRY_CD": ["Iran", "Russia"]},
+        values_by_dimension={"COUNTRY": ["Iran", "Russia"]},
         name="Sanctions Countries",
     ),
 ]

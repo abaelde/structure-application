@@ -16,8 +16,6 @@ def build_condition(
     attachment: Optional[float] = None,
     limit: Optional[float] = None,
     signed_share: float = 1.0,
-    entity_name_ced: Optional[str] = None,
-    pol_risk_name_ced: Optional[str] = None,
     country_cd: Optional[str | list[str]] = None,
     region: Optional[str | list[str]] = None,
     class_of_business_1: Optional[str | list[str]] = None,
@@ -36,8 +34,6 @@ def build_condition(
         attachment: Attachment point (for excess of loss)
         limit: Limit (for excess of loss)
         signed_share: Reinsurer share (default 1.0 = 100%)
-        entity_name_ced: Entity name
-        pol_risk_name_ced: Policy risk name
         country_cd: Country code (string or list of strings for multi-value conditions)
         region: Region (string or list of strings for multi-value conditions)
         class_of_business_1: Class of business level 1 (string or list of strings for multi-value conditions)
@@ -56,14 +52,12 @@ def build_condition(
         "ATTACHMENT_POINT_100": attachment,
         "LIMIT_100": limit,
         "SIGNED_SHARE_PCT": signed_share,
-        "BUSCL_ENTITY_NAME_CED": _as_list(entity_name_ced),
-        "POL_RISK_NAME_CED": _as_list(pol_risk_name_ced),
-        "BUSCL_COUNTRY_CD": _as_list(country_cd),
-        "BUSCL_REGION": _as_list(region),
-        "BUSCL_CLASS_OF_BUSINESS_1": _as_list(class_of_business_1),
-        "BUSCL_CLASS_OF_BUSINESS_2": _as_list(class_of_business_2),
-        "BUSCL_CLASS_OF_BUSINESS_3": _as_list(class_of_business_3),
-        "BUSCL_LIMIT_CURRENCY_CD": _as_list(currency_cd),
+        "COUNTRY": _as_list(country_cd),
+        "REGION": _as_list(region),
+        "PRODUCT_TYPE_LEVEL_1": _as_list(class_of_business_1),
+        "PRODUCT_TYPE_LEVEL_2": _as_list(class_of_business_2),
+        "PRODUCT_TYPE_LEVEL_3": _as_list(class_of_business_3),
+        "CURRENCY": _as_list(currency_cd),
         "INCLUDES_HULL": includes_hull,
         "INCLUDES_LIABILITY": includes_liability,
     }

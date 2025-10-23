@@ -88,8 +88,8 @@ def test_hull_liability_filtering_aviation():
         "LIABILITY_SHARE": [0.10],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-12-31"],
-        "BUSCL_COUNTRY_CD": [None],
-        "BUSCL_REGION": [None],
+        "COUNTRY": [None],
+        "REGION": [None],
     }
 
     bordereau_df = pd.DataFrame(bordereau_data)
@@ -207,11 +207,11 @@ def test_hull_only_structure():
         "LIABILITY_SHARE": [0.10],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-12-31"],
-        "BUSCL_COUNTRY_CD": [None],
-        "BUSCL_REGION": [None],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None],
+        "COUNTRY": [None],
+        "REGION": [None],
+        "PRODUCT_TYPE_LEVEL_1": [None],
+        "PRODUCT_TYPE_LEVEL_2": [None],
+        "PRODUCT_TYPE_LEVEL_3": [None],
         "BUSCL_LIMIT_CURRENCY_CD": [None],
     }
 
@@ -281,11 +281,11 @@ def test_liability_only_structure():
         "LIABILITY_SHARE": [0.10],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-12-31"],
-        "BUSCL_COUNTRY_CD": [None],
-        "BUSCL_REGION": [None],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None],
+        "COUNTRY": [None],
+        "REGION": [None],
+        "PRODUCT_TYPE_LEVEL_1": [None],
+        "PRODUCT_TYPE_LEVEL_2": [None],
+        "PRODUCT_TYPE_LEVEL_3": [None],
         "BUSCL_LIMIT_CURRENCY_CD": [None],
     }
 
@@ -347,11 +347,11 @@ def test_casualty_unaffected_by_hull_liability_flags():
         "CEDENT_SHARE": [0.75],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-12-31"],
-        "BUSCL_COUNTRY_CD": [None],
-        "BUSCL_REGION": [None],
-        "BUSCL_CLASS_OF_BUSINESS_1": [None],
-        "BUSCL_CLASS_OF_BUSINESS_2": [None],
-        "BUSCL_CLASS_OF_BUSINESS_3": [None],
+        "COUNTRY": [None],
+        "REGION": [None],
+        "PRODUCT_TYPE_LEVEL_1": [None],
+        "PRODUCT_TYPE_LEVEL_2": [None],
+        "PRODUCT_TYPE_LEVEL_3": [None],
         "BUSCL_LIMIT_CURRENCY_CD": [None],
     }
 

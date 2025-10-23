@@ -72,9 +72,9 @@ Fichier CSV contenant les polices d'assurance avec :
 
 **Colonnes optionnelles (pour matching de conditions) :**
 - `policy_id` : Identifiant unique (optionnel, pour tracking/reporting)
-- `BUSCL_COUNTRY_CD` : Code pays
-- `BUSCL_REGION` : Région (APAC, EMEA, Americas, etc.)
-- `BUSCL_CLASS_OF_BUSINESS_1`, `BUSCL_CLASS_OF_BUSINESS_2`, `BUSCL_CLASS_OF_BUSINESS_3` : Hiérarchie des classes de business
+- `COUNTRY` : Code pays
+- `REGION` : Région (APAC, EMEA, Americas, etc.)
+- `PRODUCT_TYPE_LEVEL_1`, `PRODUCT_TYPE_LEVEL_2`, `PRODUCT_TYPE_LEVEL_3` : Hiérarchie des classes de business
 - `BUSCL_LIMIT_CURRENCY_CD` : Code devise
 - `industry` : Industrie
 - `sic_code` : Code SIC

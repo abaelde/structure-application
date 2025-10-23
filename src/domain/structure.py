@@ -19,7 +19,7 @@ class Structure:
         cession_pct: Optional[float] = None,
         limit: Optional[float] = None,
         attachment: Optional[float] = None,
-        signed_share: float = 1.0,
+        signed_share: Optional[float] = None,
     ):
         self.structure_name = structure_name
         self.type_of_participation = type_of_participation

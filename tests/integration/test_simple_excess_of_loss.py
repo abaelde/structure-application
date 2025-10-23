@@ -78,8 +78,8 @@ def test_single_line_excess_of_loss_by_country():
 
     STRUCTURE DU PROGRAMME:
     - XL_BY_COUNTRY : Deux conditions XL différentes selon le pays
-      - US: 20M xs 5M (pour BUSCL_COUNTRY_CD = US)
-      - FR: 15M xs 10M (pour BUSCL_COUNTRY_CD = FR)
+      - US: 20M xs 5M (pour COUNTRY = US)
+      - FR: 15M xs 10M (pour COUNTRY = FR)
 
     BORDEREAU:
     - Police US avec 30,000,000 d'exposure
@@ -127,7 +127,7 @@ def test_single_line_excess_of_loss_by_country():
         "exposure": [30_000_000, 25_000_000],
         "INCEPTION_DT": ["2024-01-01", "2024-01-01"],
         "EXPIRE_DT": ["2025-01-01", "2025-01-01"],
-        "BUSCL_COUNTRY_CD": ["US", "FR"],
+        "COUNTRY": ["US", "FR"],
     }
 
     bordereau_df = pd.DataFrame(test_data)
