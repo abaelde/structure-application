@@ -7,17 +7,18 @@ from src.managers import ProgramManager, BordereauManager, RunManager
 from src.serialization.run_serializer import RunMeta
 from src.engine import apply_program_to_bordereau, apply_program_to_bordereau_simple
 from src.presentation import generate_detailed_report
-
+from snowflake_utils import SnowflakeConfig, get_snowpark_session, close_snowpark_session
+from src.managers.program_snowpark_manager import SnowparkProgramManager
 
 def main():
     parser = argparse.ArgumentParser(
         description="Apply reinsurance program to bordereau and generate analysis reports",
         epilog="""
 Examples:
-  # Load program from Snowflake by ID
+  # Load program from Snowflake by ID via Snowpark
   python run_program_analysis.py --program-id 1 -b bordereau.csv
   
-  # Load program from Snowflake by ID with simplified export
+  # Load program from Snowflake by ID via Snowpark with simplified export
   python run_program_analysis.py --program-id 1 -b bordereau.csv --simple
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter
@@ -41,7 +42,7 @@ Examples:
         "--program-id",
         type=int,
         required=True,
-        help="Load program by ID from Snowflake",
+        help="Load program by ID from Snowflake via Snowpark",
     )
 
     args = parser.parse_args()
@@ -68,33 +69,33 @@ Examples:
     print(f"📁 Output directory: {analysis_subdir}")
     print()
 
-    # 1. Charger le programme depuis Snowflake par ID
-    print("1. Loading program configuration...")
+    # 1. Charger le programme depuis Snowflake par ID via Snowpark
+    print("1. Loading program configuration via Snowpark...")
     started_at = datetime.now().isoformat()
     
     try:
-        from snowflake_utils import SnowflakeConfig, load_program_by_id
-        
         print(f"   🔍 Loading program by ID: {args.program_id}")
         config = SnowflakeConfig.load()
         if not config.validate():
             print(f"   ❌ Invalid Snowflake configuration")
             sys.exit(1)
         
-        # Utiliser la fonction utilitaire pour charger par ID
-        program_dsn = load_program_by_id(args.program_id)
-        print(f"   ✓ Program DSN generated: {program_dsn}")
+        # Obtenir une session Snowpark
+        session = get_snowpark_session()
         
-        p_backend = "snowflake"
-        p_manager = ProgramManager(backend=p_backend)
-        io_kwargs = config.to_dict()
+        try:
+            p_manager = SnowparkProgramManager(session)
+            program = p_manager.load(args.program_id)
+            print(f"   ✓ Program loaded via Snowpark: {program.name}")
+            
+        finally:
+            # Fermer la session Snowpark
+            close_snowpark_session()
         
     except Exception as e:
-        print(f"   ❌ Failed to load program by ID {args.program_id}: {e}")
+        print(f"   ❌ Failed to load program by ID {args.program_id} via Snowpark: {e}")
         sys.exit(1)
-
-    program = p_manager.load(program_dsn, io_kwargs=io_kwargs)
-    print(f"   ✓ Program loaded: {program.name}")
+    
     print(f"   ✓ Number of structures: {len(program.structures)}\n")
 
     # 2. Charger + valider le bordereau via le manager (backend auto)
