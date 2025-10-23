@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Dict, Set, Optional, Literal, List, Union
 from typing import Optional, Dict, List, Set, Literal, Iterable, Union
 import pandas as pd
+import warnings
 
 ColumnKind = Literal["dimension", "exposure", "meta"]
 
@@ -161,7 +162,16 @@ def snowflake_to_program_map(uw_dept: Optional[str]) -> Dict[str, str]:
 
 
 def resolve_bordereau_column(dim_key: str, uw_dept: Optional[str]) -> Optional[str]:
-    """Donne la colonne de bordereau (physique) qui correspond à une dimension logique."""
+    """
+    DEPRECATED: Use src.schema.bordereau_mapping.columns_for_dimension instead.
+    
+    Donne la colonne de bordereau (physique) qui correspond à une dimension logique.
+    """
+    warnings.warn(
+        "resolve_bordereau_column is deprecated. Use src.schema.bordereau_mapping.columns_for_dimension instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     return program_to_snowflake_map(uw_dept).get(dim_key)
 
 
@@ -190,9 +200,16 @@ def present_bordereau_mapping(
     bordereau_columns: Iterable[str], uw_dept: Optional[str]
 ) -> Dict[str, str]:
     """
+    DEPRECATED: Use src.schema.bordereau_mapping.present_mapping instead.
+    
     {program_dimension -> snowflake_column} pour les dimensions VRAIMENT présentes
     dans un bordereau donné.
     """
+    warnings.warn(
+        "present_bordereau_mapping is deprecated. Use src.schema.bordereau_mapping.present_mapping instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     cols = set(bordereau_columns)
     mp = program_to_snowflake_map(uw_dept)
     return {k: v for k, v in mp.items() if v in cols}
@@ -202,4 +219,12 @@ def present_bordereau_mapping(
 def get_all_mappable_dimensions(
     bordereau_columns: List[str], uw_dept: Optional[str]
 ) -> Dict[str, str]:
+    """
+    DEPRECATED: Use src.schema.bordereau_mapping.present_mapping instead.
+    """
+    warnings.warn(
+        "get_all_mappable_dimensions is deprecated. Use src.schema.bordereau_mapping.present_mapping instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     return present_bordereau_mapping(bordereau_columns, uw_dept)

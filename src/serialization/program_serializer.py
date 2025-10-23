@@ -11,10 +11,10 @@ from src.domain.constants import (
     CONDITION_COLS,
     CLAIM_BASIS_VALUES,
 )
-from src.domain.schema import (
+from src.schema.snowflake_schema import (
     PROGRAM_TO_SNOWFLAKE_COLUMNS,
-    program_to_snowflake_map,
-    snowflake_to_program_map,
+    domain_to_snowflake_map,
+    snowflake_to_domain_map,
     dims_in,
 )
 from .codecs import to_bool, split_multi, pandas_to_native
@@ -79,7 +79,7 @@ class ProgramSerializer:
             conditions_df[col] = conditions_df[col].map(split_multi, na_action="ignore")
 
         # 2) renommer Snowflake → program pour construire le domaine
-        inv_map = snowflake_to_program_map(uw_dept)
+        inv_map = snowflake_to_domain_map(uw_dept)
         conditions_df = conditions_df.rename(columns={k: v for k, v in inv_map.items() if k in conditions_df.columns})
 
         # Structures: présence & valeurs minimales
@@ -224,7 +224,7 @@ class ProgramSerializer:
                 "SIGNED_SHARE_PCT": st.signed_share,
             })
 
-            phys_map = program_to_snowflake_map(program.underwriting_department)
+            phys_map = domain_to_snowflake_map(program.underwriting_department)
 
             # 2) Conditions rattachées à cette structure (réutilisées via pool)
             for c in st.conditions:
@@ -266,7 +266,7 @@ class ProgramSerializer:
         if not program.exclusions:
             cols = ["EXCLUSION_NAME", "EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE"]
             # colonnes Snowflake
-            phys_map = program_to_snowflake_map(program.underwriting_department)
+            phys_map = domain_to_snowflake_map(program.underwriting_department)
             for d in prog_dims_builder:
                 cols.append(phys_map.get(d, d))
             return pd.DataFrame(columns=cols)
@@ -278,7 +278,7 @@ class ProgramSerializer:
                 "EXCL_EFFECTIVE_DATE": e.effective_date,
                 "EXCL_EXPIRY_DATE": e.expiry_date,
             }
-            phys_map = program_to_snowflake_map(program.underwriting_department)
+            phys_map = domain_to_snowflake_map(program.underwriting_department)
             for d in prog_dims_builder:
                 snow = phys_map.get(d, d)
                 vals = e.values_by_dimension.get(d)

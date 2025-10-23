@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, List
 import pandas as pd
 
 from src.domain.exposure_bundle import ExposureBundle
-from src.domain.schema import resolve_bordereau_column
+from src.schema.bordereau_mapping import read_dimension_values
 
 
 @dataclass
@@ -65,18 +65,21 @@ class Policy:
         
         Pour les dimensions de programme,
         fait le mapping vers les colonnes de bordereau appropriées selon le LOB.
+        
+        Returns:
+            None, str, or list[str] - For aviation CURRENCY, returns a list of currencies
         """
         # Si la dimension existe directement dans raw, la retourner
         if dimension in self.raw:
             return self.raw.get(dimension)
         
-        # Sinon, essayer le mapping via resolve_bordereau_column
-        col = resolve_bordereau_column(dimension, self.uw_dept)
-        if col is not None:
-            return self.raw.get(col)
+        # Utiliser le nouveau bordereau mapping pour lire les valeurs
+        vals = read_dimension_values(self.raw, dimension, self.uw_dept)
+        if not vals:
+            return None
         
-        # Si la dimension n'est pas dans le mapping, lever une erreur
-        raise ValueError(f"Unknown dimension '{dimension}'")
+        # Backward compatibility: si 1 seule valeur, retourner le scalaire (comme avant)
+        return vals[0] if len(vals) == 1 else vals
 
     # --- Exposition (et composants) ---
     def exposure_bundle(self, uw_dept: str) -> ExposureBundle:

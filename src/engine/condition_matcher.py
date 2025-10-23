@@ -8,11 +8,16 @@ def _values_match(condition_values: list[str] | None, policy_value) -> bool:
     if condition_values is None:
         return True  # dimension non contrainte
 
-    # Policy value must be a string (no automatic conversion from scalars)
+    # Policy value can be None, string, or list of strings (for aviation CURRENCY)
     if policy_value is None or (
         isinstance(policy_value, float) and pd.isna(policy_value)
     ):
         return False  # condition impose un ensemble, mais la police n'a pas de valeur
+
+    # Handle list of policy values (e.g., aviation CURRENCY)
+    if isinstance(policy_value, (list, tuple, set)):
+        # At least one policy value must match the condition
+        return any(_values_match(condition_values, pv) for pv in policy_value)
 
     if not isinstance(policy_value, str):
         return False  # Strict: policy value must be a string

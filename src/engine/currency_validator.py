@@ -36,24 +36,30 @@ class CurrencyValidator:
         if not policy_currency:
             return False, f"Policy has no currency but program requires '{program.main_currency}'"
         
-        # Cas 2: Devise de police = devise principale du programme → OK
-        if policy_currency == program.main_currency:
+        # Handle list of currencies (aviation case)
+        if isinstance(policy_currency, (list, tuple, set)):
+            policy_currencies = set(policy_currency)
+        else:
+            policy_currencies = {policy_currency}
+        
+        # Cas 2: Devise principale du programme dans les devises de police → OK
+        if program.main_currency in policy_currencies:
             return True, None
             
-        # Cas 3: Condition spécifique autorise cette devise → OK
-        if matched_condition and CurrencyValidator._condition_allows_currency(
-            matched_condition, policy_currency
+        # Cas 3: Condition spécifique autorise au moins une devise de police → OK
+        if matched_condition and CurrencyValidator._condition_allows_any_currency(
+            matched_condition, policy_currencies
         ):
             return True, None
             
-        # Cas 4: Vérifier si une condition du programme autorise cette devise
-        if CurrencyValidator._any_condition_allows_currency(program, policy_currency):
+        # Cas 4: Vérifier si une condition du programme autorise au moins une devise de police
+        if CurrencyValidator._any_condition_allows_any_currency(program, policy_currencies):
             return True, None
             
         # Cas 5: Mismatch → erreur
         return False, (
-            f"Policy currency '{policy_currency}' does not match program main currency "
-            f"'{program.main_currency}' and no condition allows this currency"
+            f"Policy currencies {list(policy_currencies)} do not match program main currency "
+            f"'{program.main_currency}' and no condition allows any of these currencies"
         )
     
     @staticmethod
@@ -74,6 +80,23 @@ class CurrencyValidator:
         return currency in condition_currencies
     
     @staticmethod
+    def _condition_allows_any_currency(condition: Condition, currencies: set[str]) -> bool:
+        """
+        Vérifie si une condition autorise au moins une devise d'un ensemble.
+        
+        Args:
+            condition: Condition à vérifier
+            currencies: Ensemble de devises à vérifier
+        
+        Returns:
+            True si la condition autorise au moins une de ces devises
+        """
+        condition_currencies = condition.get_values("CURRENCY")
+        if not condition_currencies:
+            return False  # Condition sans contrainte de devise
+        return any(currency in condition_currencies for currency in currencies)
+    
+    @staticmethod
     def _any_condition_allows_currency(program: Program, currency: str) -> bool:
         """
         Vérifie si une condition du programme autorise une devise spécifique.
@@ -88,6 +111,24 @@ class CurrencyValidator:
         for structure in program.structures:
             for condition in structure.conditions:
                 if CurrencyValidator._condition_allows_currency(condition, currency):
+                    return True
+        return False
+    
+    @staticmethod
+    def _any_condition_allows_any_currency(program: Program, currencies: set[str]) -> bool:
+        """
+        Vérifie si une condition du programme autorise au moins une devise d'un ensemble.
+        
+        Args:
+            program: Programme à vérifier
+            currencies: Ensemble de devises à vérifier
+        
+        Returns:
+            True si une condition autorise au moins une de ces devises
+        """
+        for structure in program.structures:
+            for condition in structure.conditions:
+                if CurrencyValidator._condition_allows_any_currency(condition, currencies):
                     return True
         return False
     

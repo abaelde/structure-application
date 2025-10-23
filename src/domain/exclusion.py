@@ -62,6 +62,10 @@ class ExclusionRule:
                 return False
 
         # Dimension matching
+        # Si aucune dimension n'est spécifiée, ne rien exclure
+        if not self.values_by_dimension:
+            return False
+            
         for dim, cond_values in self.values_by_dimension.items():
             policy_val = policy.get_dimension_value(dim)
             if policy_val is None or not isinstance(policy_val, str):

@@ -6,9 +6,7 @@ from typing import Dict, Iterable, List, Optional, Union
 import pandas as pd
 
 from src.domain.schema import COLUMNS, exposure_rules_for_lob
-from src.domain.schema import (
-    get_all_mappable_dimensions,
-)
+from src.schema.bordereau_mapping import present_mapping
 from src.domain import Program
 from src.domain.policy import Policy  # ⬅️ nouveau
 
@@ -236,12 +234,16 @@ class Bordereau:
     # ──────────────────────────────────────────────────────────────────────
     # Exposition des dimensions
     # ──────────────────────────────────────────────────────────────────────
-    def dimension_mapping(self) -> Dict[str, str]:
+    def dimension_mapping(self) -> Dict[str, Union[str, List[str]]]:
         """
         Retourne {dimension_programme -> colonne_bordereau} pour les dimensions présentes.
-        Utilise le mapping centralisé (dimension_mapping.py).
+        Utilise le nouveau bordereau mapping (séparé de Snowflake).
+        
+        Returns:
+            Dict mapping domain dimensions to available bordereau columns.
+            For aviation CURRENCY, returns a list of columns.
         """
-        return get_all_mappable_dimensions(self.columns, self.uw_dept)
+        return present_mapping(self.columns, self.uw_dept)
 
     def dimension_columns(self) -> List[str]:
         """
