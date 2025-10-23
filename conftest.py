@@ -4,7 +4,7 @@ def snowpark_session(request):
 
     """Create Snowpark session for the entire test session"""
 
-    connection_name = request.config.getoption("--snw-connection") or "devdhmat1_owner"
+    connection_name = request.config.getoption("--snw-connection") or ""
 
     if connection_name is None:
 
@@ -50,7 +50,7 @@ For ex, you can create the following file: $HOME/.config/snowflake/connections.t
 
 -----
 
-Note that we use DEVDHMAT1 for now but we will migrate to another db later. 
+Note that we use  for now but we will migrate to another db later. 
 
     """
 
