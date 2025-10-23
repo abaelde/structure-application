@@ -33,6 +33,7 @@ Usage Snowpark:
 from .config import SnowflakeConfig
 from .utils import (
     save_program,
+    save_program_snowpark,
     get_save_config,
     test_connection,
     list_programs,
@@ -51,6 +52,7 @@ from .snowpark_config import (
 )
 from .procedures import (
     read_program_simple,
+    write_program_simple,
     list_programs_simple,
     program_exists_simple,
     test_simple_procedures,
@@ -60,6 +62,7 @@ __all__ = [
     # Configuration classique
     "SnowflakeConfig",
     "save_program",
+    "save_program_snowpark",
     "get_save_config",
     "test_connection",
     "list_programs",
@@ -74,6 +77,7 @@ __all__ = [
     "close_snowpark_session",
     "test_snowpark_connection",
     "read_program_simple",
+    "write_program_simple",
     "list_programs_simple",
     "program_exists_simple",
     "test_simple_procedures",

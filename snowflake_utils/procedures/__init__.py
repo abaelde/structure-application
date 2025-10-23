@@ -9,6 +9,7 @@ Ce module contient toutes les procédures Snowpark organisées par fonctionnalit
 """
 
 from .read_program import read_program_simple
+from .write_program import write_program_simple
 from .list_programs import list_programs_simple
 from .program_exists import program_exists_simple
 
@@ -19,6 +20,9 @@ from .test_procedures import (
 __all__ = [
     # Lecture de programmes
     "read_program_simple",
+    
+    # Écriture de programmes
+    "write_program_simple",
     
     # Liste des programmes
     "list_programs_simple", 

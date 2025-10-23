@@ -69,14 +69,56 @@ class SnowparkProgramManager:
 
     def save(self, program: Program, dest: str, io_kwargs: Optional[dict] = None) -> None:
         """
-        Sauvegarde un programme (non implémenté pour l'instant).
+        Sauvegarde un programme via Snowpark.
+        
+        Cette méthode sérialise le programme en DataFrames et l'écrit dans Snowflake
+        en utilisant Snowpark, avec la même logique que ProgramManager.save().
         
         Args:
             program: Programme à sauvegarder
-            dest: Destination
-            io_kwargs: Paramètres supplémentaires
+            dest: DSN de destination (format: "snowflake://database.schema")
+            io_kwargs: Paramètres supplémentaires (non utilisés avec Snowpark)
+            
+        Raises:
+            RuntimeError: Si la sauvegarde échoue
         """
-        raise NotImplementedError("Save functionality not yet implemented for Snowpark manager")
+        try:
+            print(f"💾 Sauvegarde du programme '{program.name}' via Snowpark...")
+            print(f"   Destination: {dest}")
+            
+            # Sérialiser le programme en DataFrames (même logique que l'ancien système)
+            program_dataframes = self.serializer.program_to_dataframes(program)
+            
+            program_df = program_dataframes['program']
+            structures_df = program_dataframes['structures']
+            conditions_df = program_dataframes['conditions']
+            exclusions_df = program_dataframes['exclusions']
+            field_links_df = program_dataframes['field_links']
+            
+            print(f"✅ Programme sérialisé:")
+            print(f"   - Programme: {len(program_df)} ligne(s)")
+            print(f"   - Structures: {len(structures_df)} ligne(s)")
+            print(f"   - Conditions: {len(conditions_df)} ligne(s)")
+            print(f"   - Exclusions: {len(exclusions_df)} ligne(s)")
+            print(f"   - Field Links: {len(field_links_df)} ligne(s)")
+            
+            # Écrire via l'adapter Snowpark
+            self.io.write(
+                dest=dest,
+                program_df=program_df,
+                structures_df=structures_df,
+                conditions_df=conditions_df,
+                exclusions_df=exclusions_df,
+                field_links_df=field_links_df,
+                connection_params={},  # Non utilisé avec Snowpark
+            )
+            
+            print(f"🎉 Programme '{program.name}' sauvegardé avec succès via Snowpark !")
+            
+        except Exception as e:
+            error_msg = f"Failed to save program '{program.name}' via Snowpark: {str(e)}"
+            print(f"❌ {error_msg}")
+            raise RuntimeError(error_msg) from e
 
 
     def get_loaded_program(self) -> Optional[Program]:
