@@ -6,7 +6,8 @@ pour vérifier la logique de compaction dans Snowflake.
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
-BACKEND = "snowflake"
+# Ce script utilise Snowpark pour la sauvegarde des programmes
+# La configuration Snowflake est chargée depuis le fichier snowflake_config.env
 
 # =============================================================================
 # SCRIPT
@@ -20,10 +21,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.builders import build_quota_share, build_program
 from src.domain.exclusion import ExclusionRule
-from snowflake_utils import save_program
+from snowflake_utils.utils_snowpark import save_program_snowpark
 
 print("Création du programme de test avec exclusions multi-valeurs...")
-print(f"Backend de sauvegarde: {BACKEND}")
+print("Backend de sauvegarde: Snowpark")
 
 # Construction d'un Quota Share simple
 qs = build_quota_share(
@@ -85,8 +86,16 @@ program = build_program(
 # =============================================================================
 
 if __name__ == "__main__":
-    # Sauvegarde avec l'utilitaire partagé
-    output_path = save_program(program, BACKEND, program_name)
+    # Sauvegarde avec l'utilitaire Snowpark
+    try:
+        success = save_program_snowpark(program, program_name)
+        if success:
+            print(f"✓ Programme sauvegardé avec succès via Snowpark: {program_name}")
+        else:
+            print(f"❌ Échec de la sauvegarde du programme: {program_name}")
+    except Exception as e:
+        print(f"❌ Erreur lors de la sauvegarde: {e}")
+        print("Le programme a été construit correctement mais la sauvegarde a échoué.")
 
 # =============================================================================
 # AFFICHAGE
@@ -105,7 +114,7 @@ print("=" * 80)
 print(
     f"""
 Programme: Test Exclusions 2024
-Backend: {BACKEND}
+Backend: Snowpark
 
 Structures:
 - QS_TEST: Quota Share 30% cédé
@@ -117,4 +126,4 @@ Exclusions:
 """
 )
 
-print(f"\n✓ Le programme Test Exclusions 2024 est prêt et sauvegardé en {BACKEND} !")
+print(f"\n✓ Le programme Test Exclusions 2024 est prêt et sauvegardé via Snowpark !")

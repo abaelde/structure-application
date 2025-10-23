@@ -13,8 +13,8 @@ Programme: Quota Share + XOL Multi-Currency with Exclusion
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
-# Ce script ne sauvegarde pas les programmes, il les affiche seulement
-# pour vérifier que le builder fonctionne correctement
+# Ce script utilise Snowpark pour la sauvegarde des programmes
+# La configuration Snowflake est chargée depuis le fichier snowflake_config.env
 
 # =============================================================================
 # SCRIPT
@@ -28,8 +28,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.builders import build_quota_share, build_excess_of_loss, build_program
 from src.domain.exclusion import ExclusionRule
+from snowflake_utils.utils_snowpark import save_program_snowpark
 
 print("Création du programme Quota Share + XOL Multi-Currency with Exclusion...")
+print("Backend de sauvegarde: Snowpark")
 
 # =============================================================================
 # CONFIGURATION DES STRUCTURES
@@ -140,7 +142,16 @@ program = build_program(
     dimension_columns=["COUNTRY", "ORIGINAL_CURRENCY", "PRODUCT_TYPE_LEVEL_1", "PRODUCT_TYPE_LEVEL_2", "PRODUCT_TYPE_LEVEL_3", "REGION"],
 )
 
-print(f"✓ Programme créé: {program_name}")
+# Sauvegarde avec l'utilitaire Snowpark
+try:
+    success = save_program_snowpark(program, program_name)
+    if success:
+        print(f"✓ Programme sauvegardé avec succès via Snowpark: {program_name}")
+    else:
+        print(f"❌ Échec de la sauvegarde du programme: {program_name}")
+except Exception as e:
+    print(f"❌ Erreur lors de la sauvegarde: {e}")
+    print("Le programme a été construit correctement mais la sauvegarde a échoué.")
 
 # =============================================================================
 # AFFICHAGE

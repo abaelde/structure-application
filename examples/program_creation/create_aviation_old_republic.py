@@ -10,8 +10,8 @@ Programme risk attaching avec 3 structures excess of loss pour United States et 
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
-# Choisir le backend de sauvegarde : "snowflake" ou "csv_folder"
-BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
+# Ce script utilise Snowpark pour la sauvegarde des programmes
+# La configuration Snowflake est chargée depuis le fichier snowflake_config.env
 
 # =============================================================================
 # SCRIPT
@@ -24,10 +24,10 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.builders import build_excess_of_loss, build_program
-from snowflake_utils import save_program
+from snowflake_utils.utils_snowpark import save_program_snowpark
 
 print("Création du programme Aviation Old Republic 2024...")
-print(f"Backend de sauvegarde: {BACKEND}")
+print("Backend de sauvegarde: Snowpark")
 
 REINSURER_SHARE_VALUES = {
     "XOL_1": 0.1,
@@ -85,10 +85,16 @@ program = build_program(
 # SAUVEGARDE
 # =============================================================================
 
-# Sauvegarde avec l'utilitaire partagé
-output_path = save_program(program, BACKEND, program_name)
-
-print(f"✓ Programme créé: {output_path}")
+# Sauvegarde avec l'utilitaire Snowpark
+try:
+    success = save_program_snowpark(program, program_name)
+    if success:
+        print(f"✓ Programme sauvegardé avec succès via Snowpark: {program_name}")
+    else:
+        print(f"❌ Échec de la sauvegarde du programme: {program_name}")
+except Exception as e:
+    print(f"❌ Erreur lors de la sauvegarde: {e}")
+    print("Le programme a été construit correctement mais la sauvegarde a échoué.")
 
 print("\n" + "=" * 80)
 print("PROGRAMME AVIATION OLD REPUBLIC 2024")

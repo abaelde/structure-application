@@ -15,11 +15,8 @@ Structure:
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
-# Choisir le backend de sauvegarde : "snowflake" ou "csv_folder"
-BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
-
-# Configuration Snowflake (utilisée seulement si BACKEND = "snowflake")
-# Les paramètres sont chargés depuis le fichier snowflake_config.env
+# Ce script utilise Snowpark pour la sauvegarde des programmes
+# La configuration Snowflake est chargée depuis le fichier snowflake_config.env
 
 # =============================================================================
 # SCRIPT
@@ -32,10 +29,10 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.builders import build_quota_share, build_excess_of_loss, build_program
-from snowflake_utils import save_program
+from snowflake_utils.utils_snowpark import save_program_snowpark
 
 print("Création du programme Aviation Complex Multi-Currency...")
-print(f"Backend de sauvegarde: {BACKEND}")
+print("Backend de sauvegarde: Snowpark")
 
 LAYER_VALUES_COMMON = {
     "XOL_1": (65_000_000, 35_000_000),
@@ -145,10 +142,13 @@ if __name__ == "__main__":
     print(f"✓ Département: {program.underwriting_department}")
     print(f"✓ Dimensions de matching: {len(program.dimension_columns)}")
     
-    # Sauvegarde avec l'utilitaire partagé
+    # Sauvegarde avec l'utilitaire Snowpark
     try:
-        output_path = save_program(program, BACKEND, program_name)
-        print(f"✓ Programme sauvegardé avec succès: {output_path}")
+        success = save_program_snowpark(program, program_name)
+        if success:
+            print(f"✓ Programme sauvegardé avec succès via Snowpark: {program_name}")
+        else:
+            print(f"❌ Échec de la sauvegarde du programme: {program_name}")
     except Exception as e:
         print(f"❌ Erreur lors de la sauvegarde: {e}")
         print("Le programme a été construit correctement mais la sauvegarde a échoué.")
@@ -164,4 +164,4 @@ print("=" * 80)
 # Utilisation de l'API simple de describe()
 program.describe()
 
-print(f"\n✓ Le programme Aviation AXA XL 2024 est prêt et sauvegardé en {BACKEND} !")
+print(f"\n✓ Le programme Aviation AXA XL 2024 est prêt et sauvegardé via Snowpark !")
