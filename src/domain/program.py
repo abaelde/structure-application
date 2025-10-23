@@ -12,12 +12,14 @@ class Program:
         structures: List[Structure],
         dimension_columns: List[str],
         underwriting_department: Literal["aviation", "casualty", "test"],
+        main_currency: str,
         exclusions: Optional[List[ExclusionRule]] = None,
     ):
         self.name = name
         self.dimension_columns = dimension_columns
         self.structures = structures
         self.underwriting_department = underwriting_department
+        self.main_currency = main_currency 
         self.exclusions = exclusions or []
 
     def __getitem__(self, key: str):
@@ -61,6 +63,7 @@ class Program:
             "structures": [s.to_dict() for s in self.structures],
             "dimension_columns": self.dimension_columns,
             "underwriting_department": self.underwriting_department,
+            "main_currency": self.main_currency,
             "exclusions": [
                 {
                     "values_by_dimension": e.values_by_dimension,
@@ -87,6 +90,7 @@ class Program:
         lines.append("=" * 80)
         lines.append(f"Program name: {self.name}")
         lines.append(f"Underwriting department: {self.underwriting_department}")
+        lines.append(f"Main currency: {self.main_currency or 'Not specified'}")
         lines.append(f"Number of structures: {len(self.structures)}")
         lines.append(f"Matching dimensions: {len(self.dimension_columns)}")
 

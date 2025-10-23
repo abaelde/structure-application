@@ -76,7 +76,7 @@ program_name = f"TEST_EXCLUSIONS_2024_{timestamp}"
 program = build_program(
     name=program_name,
     structures=[qs],
-    underwriting_department="casualty",
+    main_currency="EUR", underwriting_department="casualty",
     exclusions=exclusions,
 )
 

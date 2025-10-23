@@ -26,10 +26,12 @@ def test_single_line_quota_share_basic():
         inception_date="2024-01-01",
         expiry_date="2025-01-01",
     )
+    
 
     program = build_program(
         name="SINGLE_QUOTA_SHARE_2024",
         structures=[qs_structure],
+        main_currency="EUR",
         underwriting_department="test",
     )
 
@@ -38,6 +40,7 @@ def test_single_line_quota_share_basic():
         "exposure": [1_000_000],
         "INCEPTION_DT": ["2024-01-01"],
         "EXPIRE_DT": ["2025-01-01"],
+        "ORIGINAL_CURRENCY": ["EUR"],
     }
 
     bordereau_df = pd.DataFrame(test_data)
@@ -49,6 +52,12 @@ def test_single_line_quota_share_basic():
 
     result = results_df.iloc[0]
     structures_detail = result["structures_detail"]
+
+    # Debug: afficher les résultats
+    print(f"Exposure: {result['exposure']}")
+    print(f"Cession to layer 100pct: {result['cession_to_layer_100pct']}")
+    print(f"Retained by cedant: {result['retained_by_cedant']}")
+    print(f"Structures detail: {structures_detail}")
 
     exposure = 1_000_000
     expected_cession_rate = 0.30
@@ -95,11 +104,11 @@ def test_single_line_quota_share_with_currency_matching():
         cession_pct=0.30,  # Valeur par défaut
         special_conditions=[
             {
-                "currency_cd": "USD",
+                "ORIGINAL_CURRENCY": "USD",
                 "cession_pct": 0.25,
             },
             {
-                "currency_cd": "EUR",
+                "ORIGINAL_CURRENCY": "EUR",
                 "cession_pct": 0.35,
             },
         ],
@@ -111,6 +120,7 @@ def test_single_line_quota_share_with_currency_matching():
     program = build_program(
         name="QS_BY_CURRENCY_2024",
         structures=[qs_structure],
+        main_currency="EUR",
         underwriting_department="test",
     )
 

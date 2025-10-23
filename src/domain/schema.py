@@ -58,8 +58,6 @@ COLUMNS: Dict[str, ColumnSpec] = {
     "PRODUCT_TYPE_LEVEL_1": ColumnSpec("PRODUCT_TYPE_LEVEL_1", "dimension"),
     "PRODUCT_TYPE_LEVEL_2": ColumnSpec("PRODUCT_TYPE_LEVEL_2", "dimension"),
     "PRODUCT_TYPE_LEVEL_3": ColumnSpec("PRODUCT_TYPE_LEVEL_3", "dimension"),
-    "BUSCL_ENTITY_NAME_CED": ColumnSpec("BUSCL_ENTITY_NAME_CED", "dimension"),
-    "POL_RISK_NAME_CED": ColumnSpec("POL_RISK_NAME_CED", "dimension"),
     # currency (dimension logique unique ; représentation selon LOB)
     "ORIGINAL_CURRENCY": ColumnSpec("ORIGINAL_CURRENCY", "dimension"),
     "HULL_CURRENCY": ColumnSpec("HULL_CURRENCY", "dimension"),
@@ -112,29 +110,25 @@ def exposure_rules_for_lob(lob: str) -> Dict[str, str]:
     return {}
 
 
-# ——— Mapping Program -> Bordereau (source de vérité unique) ———
-# Mapping "clés builder" -> "colonne Snowflake" (ou map par LOB)
-# Les clés builder correspondent aux champs produits par build_condition(...)
-PROGRAM_TO_BORDEREAU_DIMENSIONS: Dict[str, Union[str, Dict[str, str]]] = {
-    "COUNTRY": "COUNTRY",
-    "REGION": "REGION",
+# ——— Mapping Program -> Snowflake (source de vérité unique) ———
+# Mapping "dimensions du programme" -> "colonnes Snowflake" (avec support par LOB)
+PROGRAM_TO_SNOWFLAKE_COLUMNS: Dict[str, Union[str, Dict[str, str]]] = {
+    "COUNTRY": "COUNTRIES",
+    "REGION": "REGIONS",
     "PRODUCT_TYPE_LEVEL_1": "PRODUCT_TYPE_LEVEL_1",
     "PRODUCT_TYPE_LEVEL_2": "PRODUCT_TYPE_LEVEL_2",
     "PRODUCT_TYPE_LEVEL_3": "PRODUCT_TYPE_LEVEL_3",
     "CURRENCY": {
-        "aviation": "HULL_CURRENCY",
-        "casualty": "ORIGINAL_CURRENCY"
+        "aviation": "CURRENCIES",
+        "casualty": "CURRENCIES",
+        "test": "ORIGINAL_CURRENCY"
     },
 }
 
 
-# --- Dimension mapping hub (single source of truth) --------------------------
+# --- Dimension mapping utilities --------------------------
 from typing import Optional, Dict, List, Set, Literal, Iterable, Union
 import pandas as pd
-
-# Alias sémantique: on garde PROGRAM_TO_BORDEREAU_DIMENSIONS comme mapping canonique
-# builder_key -> colonne physique (string) OU dict par LOB
-DIMENSION_REGISTRY: Dict[str, Union[str, Dict[str, str]]] = PROGRAM_TO_BORDEREAU_DIMENSIONS
 
 # Certains "flags" se baladent avec les dimensions côté conditions
 DIM_FLAGS: Set[str] = {"INCLUDES_HULL", "INCLUDES_LIABILITY"}
@@ -151,40 +145,29 @@ def _choose_for_lob(val: Union[str, Dict[str, str]], uw_dept: Optional[str]) -> 
     return next(iter(val.values()))
 
 
-def builder_to_physical_map(
-    uw_dept: Optional[str],
-    *,
-    target: Literal["snowflake", "bordereau"] = "snowflake",
-) -> Dict[str, str]:
-    """
-    Map {dimension_builder -> nom_de_colonne_physique} pour un LOB.
-    Aujourd'hui snowflake == bordereau côté noms physiques; 'target' est là pour évoluer.
-    """
+def program_to_snowflake_map(uw_dept: Optional[str]) -> Dict[str, str]:
+    """Map {program_dimension -> snowflake_column} pour un LOB."""
     out: Dict[str, str] = {}
-    for k, v in DIMENSION_REGISTRY.items():
+    for k, v in PROGRAM_TO_SNOWFLAKE_COLUMNS.items():
         out[k] = _choose_for_lob(v, uw_dept)
     return out
 
 
-def physical_to_builder_map(
-    uw_dept: Optional[str],
-    *,
-    target: Literal["snowflake", "bordereau"] = "snowflake",
-) -> Dict[str, str]:
-    """Inverse de builder_to_physical_map: {col_physique -> dimension_builder}."""
-    fwd = builder_to_physical_map(uw_dept, target=target)
-    return {phys: builder for builder, phys in fwd.items()}
+def snowflake_to_program_map(uw_dept: Optional[str]) -> Dict[str, str]:
+    """Inverse de program_to_snowflake_map: {snowflake_column -> program_dimension}."""
+    fwd = program_to_snowflake_map(uw_dept)
+    return {snowflake: program for program, snowflake in fwd.items()}
 
 
 def resolve_bordereau_column(dim_key: str, uw_dept: Optional[str]) -> Optional[str]:
     """Donne la colonne de bordereau (physique) qui correspond à une dimension logique."""
-    return builder_to_physical_map(uw_dept, target="bordereau").get(dim_key)
+    return program_to_snowflake_map(uw_dept).get(dim_key)
 
 
 def physical_dim_names(*, include_flags: bool = False) -> Set[str]:
-    """Ensemble des noms de colonnes 'physiques' possibles (tous LOB confondus)."""
+    """Ensemble des noms de colonnes Snowflake possibles (tous LOB confondus)."""
     names: Set[str] = set()
-    for v in DIMENSION_REGISTRY.values():
+    for v in PROGRAM_TO_SNOWFLAKE_COLUMNS.values():
         if isinstance(v, dict):
             names.update(v.values())
         else:
@@ -206,11 +189,11 @@ def present_bordereau_mapping(
     bordereau_columns: Iterable[str], uw_dept: Optional[str]
 ) -> Dict[str, str]:
     """
-    {dimension_builder -> colonne_bordereau_physique} pour les dimensions VRAIMENT présentes
+    {program_dimension -> snowflake_column} pour les dimensions VRAIMENT présentes
     dans un bordereau donné.
     """
     cols = set(bordereau_columns)
-    mp = builder_to_physical_map(uw_dept, target="bordereau")
+    mp = program_to_snowflake_map(uw_dept)
     return {k: v for k, v in mp.items() if v in cols}
 
 

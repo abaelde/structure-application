@@ -15,14 +15,26 @@ def _build_specials(defaults: dict, specials: list[dict] | None, *, keys_for_dim
         
     Returns:
         Liste des conditions construites
+        
+    Raises:
+        ValueError: Si une condition spéciale n'a pas de dimension de matching
     """
     out = []
     if not specials:
+        # Si pas de conditions spéciales, créer une condition par défaut
+        out.append(build_condition(**defaults))
         return out
-    for sc in specials:
+    for i, sc in enumerate(specials):
         data = {**defaults, **sc}
-        if any(k in data and data[k] is not None for k in keys_for_dims):
-            out.append(build_condition(**data))
+        # Vérifier qu'il y a au moins une dimension de matching
+        has_matching_dimension = any(k in data and data[k] is not None for k in keys_for_dims)
+        if not has_matching_dimension:
+            raise ValueError(
+                f"Condition spéciale {i+1} n'a aucune dimension de matching. "
+                f"Une condition spéciale doit avoir au moins une de ces dimensions: {keys_for_dims}. "
+                f"Condition fournie: {sc}"
+            )
+        out.append(build_condition(**data))
     return out
 
 
@@ -78,7 +90,7 @@ def build_quota_share(
     conditions = _build_specials(
         {"cession_pct": cession_pct, "signed_share": signed_share},
         special_conditions,
-        keys_for_dims=["country_cd", "region", "currency_cd", "class_of_business_1", "class_of_business_2", "class_of_business_3", "includes_hull", "includes_liability"],
+        keys_for_dims=["COUNTRIES", "REGION", "CURRENCY", "PRODUCT_TYPE_LEVEL_1", "PRODUCT_TYPE_LEVEL_2", "PRODUCT_TYPE_LEVEL_3", "INCLUDES_HULL", "INCLUDES_LIABILITY"],
     )
 
     # Defaults obligatoires pour passer la validation (claim_basis + période)
@@ -162,7 +174,7 @@ def build_excess_of_loss(
     conditions = _build_specials(
         {"attachment": attachment, "limit": limit, "signed_share": signed_share},
         special_conditions,
-        keys_for_dims=["country_cd", "region", "currency_cd", "class_of_business_1", "class_of_business_2", "class_of_business_3", "includes_hull", "includes_liability"],
+        keys_for_dims=["COUNTRIES", "REGION", "CURRENCY", "PRODUCT_TYPE_LEVEL_1", "PRODUCT_TYPE_LEVEL_2", "PRODUCT_TYPE_LEVEL_3", "INCLUDES_HULL", "INCLUDES_LIABILITY"],
     )
 
     if claim_basis is None:

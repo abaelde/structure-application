@@ -35,11 +35,10 @@ print(f"Backend de sauvegarde: {BACKEND}")
 
 qs_all = build_quota_share(
     name="QS_ALL",
-    conditions_config=[
+    cession_pct=0.25,
+    signed_share=0.0165,
+    special_conditions=[
         {
-            "cession_pct": 0.25,
-            "limit": 575_000_000,
-            "signed_share": 0.0165,
             "includes_hull": True,
             "includes_liability": True,
         }
@@ -51,11 +50,11 @@ qs_all = build_quota_share(
 
 xol_hull = build_excess_of_loss(
     name="XOL_HULL",
-    conditions_config=[
+    attachment=5_000_000,
+    limit=10_000_000,
+    signed_share=0.05,
+    special_conditions=[
         {
-            "attachment": 5_000_000,
-            "limit": 10_000_000,
-            "signed_share": 0.05,
             "includes_hull": True,
             "includes_liability": False,
         }
@@ -68,11 +67,11 @@ xol_hull = build_excess_of_loss(
 
 xol_liability = build_excess_of_loss(
     name="XOL_LIABILITY",
-    conditions_config=[
+    attachment=10_000_000,
+    limit=40_000_000,
+    signed_share=0.05,
+    special_conditions=[
         {
-            "attachment": 10_000_000,
-            "limit": 40_000_000,
-            "signed_share": 0.05,
             "includes_hull": False,
             "includes_liability": True,
         }
@@ -90,7 +89,7 @@ program_name = f"AVIATION_HULL_LIABILITY_SPLIT_{timestamp}"
 program = build_program(
     name=program_name,
     structures=[qs_all, xol_hull, xol_liability],
-    underwriting_department="aviation",
+    main_currency="EUR", underwriting_department="aviation",
 )
 
 # =============================================================================

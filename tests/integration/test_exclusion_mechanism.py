@@ -53,7 +53,7 @@ def test_exclusion_mechanism():
     ]
 
     program = build_program(
-        name="QS_WITH_EXCLUSIONS", structures=[qs], underwriting_department="test"
+        name="QS_WITH_EXCLUSIONS", structures=[qs], main_currency="EUR", underwriting_department="test"
     )
 
     # Ajouter les exclusions au programme

@@ -8,6 +8,35 @@ Ce module permet de créer des objets `Program`, `Structure` et `condition` dire
 - Tests de **logique métier** → utilisent les builders (rapides, en mémoire)
 - Tests de **chargement de fichiers** → utilisent `ProgramManager` (testent l'I/O)
 
+## ⚠️ Validation des conditions spéciales
+
+**IMPORTANT** : Chaque condition spéciale doit avoir **au moins une dimension de matching** pour être valide.
+
+### ✅ Conditions valides
+```python
+# Avec dimension de matching
+{"PRODUCT_TYPE_LEVEL_1": ["Cyber"], "limit": 10_000_000}
+{"ORIGINAL_CURRENCY": ["USD"], "cession_pct": 0.25}
+{"COUNTRIES": ["US", "CA"], "signed_share": 0.8}
+```
+
+### ❌ Conditions invalides
+```python
+# Sans dimension de matching - REJETÉE
+{"limit": 25_000_000}  # ❌ Pas de dimension !
+
+# Avec ancien nom de colonne - REJETÉE  
+{"currency_cd": ["USD"], "limit": 10_000_000}  # ❌ Utilisez ORIGINAL_CURRENCY
+```
+
+### Dimensions supportées
+- `COUNTRIES` - Pays
+- `REGION` - Région
+- `ORIGINAL_CURRENCY` - Devise originale
+- `PRODUCT_TYPE_LEVEL_1/2/3` - Types de produits
+- `INCLUDES_HULL` - Inclut hull
+- `INCLUDES_LIABILITY` - Inclut liability
+
 ## 📦 Modules disponibles
 
 ### `condition_builder.py`
@@ -43,12 +72,13 @@ qs = build_quota_share(
     cession_pct=0.30
 )
 
-# Quota Share avec plusieurs conditions (par currency)
+# Quota Share avec conditions spéciales (par currency)
 qs = build_quota_share(
     name="QS_BY_CURRENCY",
-    conditions_config=[
-        {"currency_cd": "USD", "cession_pct": 0.25},
-        {"currency_cd": "EUR", "cession_pct": 0.35},
+    cession_pct=0.30,  # Valeur par défaut
+    special_conditions=[
+        {"ORIGINAL_CURRENCY": ["USD"], "cession_pct": 0.25},  # Override pour USD
+        {"ORIGINAL_CURRENCY": ["EUR"], "cession_pct": 0.35},  # Override pour EUR
     ]
 )
 

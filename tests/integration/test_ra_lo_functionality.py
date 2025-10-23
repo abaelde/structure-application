@@ -47,6 +47,7 @@ def test_risk_attaching_based_on_policy_inception():
         underwriting_department="aviation",
         structures=[structure_ra],
         dimension_columns=[],
+        main_currency="USD",
     )
 
     # Police A : inception dans la période RA
@@ -136,6 +137,7 @@ def test_loss_occurring_based_on_calculation_date():
         underwriting_department="aviation",
         structures=[structure_lo],
         dimension_columns=[],
+        main_currency="USD",
     )
 
     # Police avec inception dans la période

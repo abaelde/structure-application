@@ -12,9 +12,9 @@ from src.domain.constants import (
     CLAIM_BASIS_VALUES,
 )
 from src.domain.schema import (
-    PROGRAM_TO_BORDEREAU_DIMENSIONS,
-    builder_to_physical_map,
-    physical_to_builder_map,
+    PROGRAM_TO_SNOWFLAKE_COLUMNS,
+    program_to_snowflake_map,
+    snowflake_to_program_map,
     dims_in,
 )
 from .codecs import to_bool, split_multi, pandas_to_native
@@ -70,8 +70,8 @@ class ProgramSerializer:
         for col in snow_dims:
             conditions_df[col] = conditions_df[col].map(split_multi, na_action="ignore")
 
-        # 2) renommer Snowflake → builder pour construire le domaine
-        inv_map = physical_to_builder_map(uw_dept)
+        # 2) renommer Snowflake → program pour construire le domaine
+        inv_map = snowflake_to_program_map(uw_dept)
         conditions_df = conditions_df.rename(columns={k: v for k, v in inv_map.items() if k in conditions_df.columns})
 
         # Structures: présence & valeurs minimales
@@ -136,7 +136,7 @@ class ProgramSerializer:
 
         # Exclusions
         exclusions: List[ExclusionRule] = []
-        prog_dims_builder = list(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
+        prog_dims_builder = list(PROGRAM_TO_SNOWFLAKE_COLUMNS.keys())
         if exclusions_df is not None and not exclusions_df.empty:
             ex_df = exclusions_df.copy()
 
@@ -214,7 +214,7 @@ class ProgramSerializer:
                 "SIGNED_SHARE_PCT": st.signed_share,
             })
 
-            phys_map = builder_to_physical_map(program.underwriting_department)
+            phys_map = program_to_snowflake_map(program.underwriting_department)
 
             # 2) Conditions rattachées à cette structure (réutilisées via pool)
             for c in st.conditions:
@@ -251,12 +251,12 @@ class ProgramSerializer:
     def _exclusions_to_df(self, program: Program) -> pd.DataFrame:
         from .codecs import MULTI_VALUE_SEPARATOR
 
-        prog_dims_builder = list(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
+        prog_dims_builder = list(PROGRAM_TO_SNOWFLAKE_COLUMNS.keys())
 
         if not program.exclusions:
             cols = ["EXCLUSION_NAME", "EXCL_EFFECTIVE_DATE", "EXCL_EXPIRY_DATE"]
             # colonnes Snowflake
-            phys_map = builder_to_physical_map(program.underwriting_department)
+            phys_map = program_to_snowflake_map(program.underwriting_department)
             for d in prog_dims_builder:
                 cols.append(phys_map.get(d, d))
             return pd.DataFrame(columns=cols)
@@ -268,7 +268,7 @@ class ProgramSerializer:
                 "EXCL_EFFECTIVE_DATE": e.effective_date,
                 "EXCL_EXPIRY_DATE": e.expiry_date,
             }
-            phys_map = builder_to_physical_map(program.underwriting_department)
+            phys_map = program_to_snowflake_map(program.underwriting_department)
             for d in prog_dims_builder:
                 snow = phys_map.get(d, d)
                 vals = e.values_by_dimension.get(d)

@@ -9,7 +9,7 @@ from src.domain.schema import (
     get_all_mappable_dimensions,
 )
 from src.domain.policy import Policy
-from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
+from src.domain.schema import PROGRAM_TO_SNOWFLAKE_COLUMNS
 
 
 class TestPolicyDimensionValue:
@@ -118,17 +118,17 @@ class TestDimensionMappingConfiguration:
 
     def test_mapping_structure(self):
         """Test that the mapping configuration has the expected structure."""
-        assert isinstance(PROGRAM_TO_BORDEREAU_DIMENSIONS, dict)
+        assert isinstance(PROGRAM_TO_SNOWFLAKE_COLUMNS, dict)
 
         # Test direct mappings
-        assert PROGRAM_TO_BORDEREAU_DIMENSIONS["COUNTRY"] == "COUNTRY"
-        assert PROGRAM_TO_BORDEREAU_DIMENSIONS["REGION"] == "REGION"
+        assert PROGRAM_TO_SNOWFLAKE_COLUMNS["COUNTRY"] == "COUNTRIES"
+        assert PROGRAM_TO_SNOWFLAKE_COLUMNS["REGION"] == "REGIONS"
 
         # Test complex mappings
-        currency_mapping = PROGRAM_TO_BORDEREAU_DIMENSIONS["CURRENCY"]
+        currency_mapping = PROGRAM_TO_SNOWFLAKE_COLUMNS["CURRENCY"]
         assert isinstance(currency_mapping, dict)
-        assert currency_mapping["aviation"] == "HULL_CURRENCY"
-        assert currency_mapping["casualty"] == "CURRENCY"
+        assert currency_mapping["aviation"] == "CURRENCIES"
+        assert currency_mapping["casualty"] == "CURRENCIES"
 
     def test_all_expected_dimensions_present(self):
         """Test that all expected dimensions are present in the mapping."""
@@ -142,7 +142,7 @@ class TestDimensionMappingConfiguration:
         ]
 
         for dimension in expected_dimensions:
-            assert dimension in PROGRAM_TO_BORDEREAU_DIMENSIONS
+            assert dimension in PROGRAM_TO_SNOWFLAKE_COLUMNS
 
 
 class TestIntegrationScenarios:

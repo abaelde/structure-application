@@ -122,7 +122,7 @@ layer_1_conditions = layer_1_sub_a_conditions + layer_1_sub_b_conditions
 
 layer_1 = build_excess_of_loss(
     name="LAYER_1",
-    conditions_config=layer_1_conditions,
+    special_conditions=layer_1_conditions,
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
     expiry_date="2025-01-01",
@@ -143,7 +143,7 @@ for currency in CURRENCIES:
 
 layer_2 = build_excess_of_loss(
     name="LAYER_2",
-    conditions_config=layer_2_conditions,
+    special_conditions=layer_2_conditions,
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
     expiry_date="2025-01-01",
@@ -164,7 +164,7 @@ for currency in CURRENCIES:
 
 layer_3 = build_excess_of_loss(
     name="LAYER_3",
-    conditions_config=layer_3_conditions,
+    special_conditions=layer_3_conditions,
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
     expiry_date="2025-01-01",
@@ -177,7 +177,7 @@ program_name = f"NEW_LINE_2024_{timestamp}"
 program = build_program(
     name=program_name,
     structures=[layer_1, layer_2, layer_3],
-    underwriting_department="casualty",
+    main_currency="EUR", underwriting_department="casualty",
 )
 
 # =============================================================================

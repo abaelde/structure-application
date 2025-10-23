@@ -3,6 +3,7 @@ from src.domain import PRODUCT, Structure, Condition, Program
 from src.domain.policy import Policy
 from .condition_matcher import match_condition, match_condition_with_details
 from .cession_calculator import apply_condition
+from .currency_validator import CurrencyValidator
 from src.engine.results import (
     ProgramRunResult,
     RunTotals,
@@ -111,6 +112,16 @@ class StructureProcessor:
             is_equivalent_to_default = self._is_condition_equivalent_to_default(matched, structure)
             if is_equivalent_to_default:
                 matching_details["using_default_values"] = True
+
+        # Validation de devise avec la condition matchée
+        if matched:
+            is_currency_valid, currency_error = CurrencyValidator.validate_policy_currency(
+                self.policy, self.program, matched
+            )
+            if not is_currency_valid:
+                return self._report_currency_mismatch(
+                    structure, currency_error, filtered_exposure
+                )
 
         # 5) Rescaling éventuel (XL après QS)
         condition_to_apply, rescaling_info = self._rescale_if_needed(matched, structure)
@@ -302,3 +313,31 @@ class StructureProcessor:
                 return False
         
         return True
+
+    def _report_currency_mismatch(
+        self,
+        structure: Structure,
+        error_reason: str,
+        input_exposure: float,
+    ) -> StructureRun:
+        """Rapporte un mismatch de devise pour une structure"""
+        return StructureRun(
+            structure_name=structure.structure_name,
+            type_of_participation=structure.type_of_participation,
+            predecessor_title=structure.predecessor_title,
+            claim_basis=structure.claim_basis,
+            period_start=str(structure.inception_date),
+            period_end=str(structure.expiry_date),
+            applied=False,
+            reason="currency_mismatch",
+            scope_components=set(),
+            input_exposure=input_exposure,
+            matched_condition=None,
+            terms=create_empty_terms(structure.type_of_participation),
+            rescaling=None,
+            ceded_to_layer_100pct=0.0,
+            ceded_to_reinsurer=0.0,
+            retained_after=input_exposure,
+            matching_details={"currency_error": error_reason},
+            metrics={},
+        )

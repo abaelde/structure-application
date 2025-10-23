@@ -9,7 +9,13 @@ from .results import ProgramRunResult, RunTotals
 def create_non_covered_result(
     policy: Policy, program: Program, exclusion_status: str, exclusion_reason: str
 ) -> ProgramRunResult:
-    exposure = policy.exposure_bundle(program.underwriting_department).total
+    # Pour les polices avec currency mismatch, on ne peut pas calculer l'exposition
+    # car elle dépend du LOB et des colonnes spécifiques : # AURE je n'aime pas ça
+    try:
+        exposure = policy.exposure_bundle(program.underwriting_department).total
+    except Exception:
+        # Si on ne peut pas calculer l'exposition (currency mismatch, etc.), on met 0
+        exposure = 0.0
 
     # Créer un ProgramRunResult vide avec les métadonnées d'exclusion
     run_result = ProgramRunResult()
@@ -37,4 +43,13 @@ def create_inactive_result(
 def create_excluded_result(policy: Policy, program: Program) -> ProgramRunResult:
     return create_non_covered_result(
         policy, program, "excluded", "Matched exclusion rule"
+    )
+
+
+def create_currency_mismatch_result(
+    policy: Policy, program: Program, error_reason: str
+) -> ProgramRunResult:
+    """Crée un résultat pour une police avec mismatch de devise"""
+    return create_non_covered_result(
+        policy, program, "currency_mismatch", error_reason
     )

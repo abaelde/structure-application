@@ -2,12 +2,13 @@ from typing import List, Optional
 from src.domain.program import Program
 from src.domain.structure import Structure
 from src.domain.exclusion import ExclusionRule
-from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
+# Plus besoin d'importer le mapping Snowflake pour la construction en mémoire
 
 
 def build_program(
     name: str,
     structures: List[Structure],
+    main_currency: str,
     dimension_columns: Optional[List[str]] = None,
     underwriting_department: str = "test",
     exclusions: Optional[List[ExclusionRule]] = None,
@@ -18,8 +19,10 @@ def build_program(
     Args:
         name: Program name
         structures: List of Structure objects
+        main_currency: Main currency of the program (required). Validates
+            that policies match this currency unless a specific condition allows otherwise.
         dimension_columns: List of dimension column names.
-            If None, uses the default dimensions from PROGRAM_TO_BORDEREAU_DIMENSIONS.
+            If None, uses the default dimensions from PROGRAM_TO_SNOWFLAKE_COLUMNS.
         underwriting_department: Underwriting department (defaults to "test" for tests)
         exclusions: List of ExclusionRule objects for program-level exclusions
 
@@ -37,18 +40,27 @@ def build_program(
         program = build_program(
             name="SINGLE_QS_2024",
             structures=[qs],
+            main_currency="EUR",
             underwriting_department="aviation",
             exclusions=exclusions
         )
     """
     if dimension_columns is None:
-        # Utilise uniquement le schéma comme source de vérité pour les dimensions
-        dimension_columns = sorted(PROGRAM_TO_BORDEREAU_DIMENSIONS.keys())
+        # Utilise les dimensions standard utilisées dans les conditions
+        dimension_columns = [
+            "COUNTRIES",
+            "REGIONS", 
+            "CURRENCY",
+            "PRODUCT_TYPE_LEVEL_1",
+            "PRODUCT_TYPE_LEVEL_2",
+            "PRODUCT_TYPE_LEVEL_3"
+        ]
 
     return Program(
         name=name,
         structures=structures,
         dimension_columns=dimension_columns,
         underwriting_department=underwriting_department,
+        main_currency=main_currency,
         exclusions=exclusions or [],
     )

@@ -34,11 +34,11 @@ print(f"Backend de sauvegarde: {BACKEND}")
 qs = build_quota_share(
     name="QS_30_with_France_50",
     cession_pct=0.30,  # Valeur par défaut : 30%
-    conditions_config=[
+    signed_share=1.0,
+    special_conditions=[
         {
-            "country_cd": "France",  # Condition spécifique pour la France
+            "COUNTRY": "France",  # Condition spécifique pour la France
             "cession_pct": 0.50,     # 50% de cession pour la France
-            "signed_share": 1.0,
         }
     ],
     claim_basis="risk_attaching",
@@ -51,7 +51,7 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 program_name = f"QUOTA_SHARE_WITH_FRANCE_CONDITION_{timestamp}"
 
 program = build_program(
-    name=program_name, structures=[qs], underwriting_department="test"
+    name=program_name, structures=[qs], main_currency="EUR", underwriting_department="test"
 )
 
 # =============================================================================

@@ -68,7 +68,7 @@ qs = build_quota_share(
     signed_share=REINSURER_SHARE_QS,
     special_conditions=[
         {
-            "currency_cd": CURRENCIES_COMMON + CURRENCIES_GBP,  # Liste de toutes les devises
+            "CURRENCY": CURRENCIES_COMMON + CURRENCIES_GBP,  # Liste de toutes les devises
             "includes_hull": True,
             "includes_liability": True,
         }
@@ -90,7 +90,7 @@ for i, (layer_name, (limit_common, priority_common)) in enumerate(
     # Condition pour USD, CAD, EUR, AUD (valeurs communes)
     special_conditions.append(
         {
-            "currency_cd": CURRENCIES_COMMON,  # Liste de devises
+            "CURRENCY": CURRENCIES_COMMON,  # Liste de devises
             "includes_hull": True,
             "includes_liability": True,
         }
@@ -99,7 +99,7 @@ for i, (layer_name, (limit_common, priority_common)) in enumerate(
     # Condition pour GBP (avec valeurs spécifiques)
     special_conditions.append(
         {
-            "currency_cd": CURRENCIES_GBP,  # Liste de devises
+            "CURRENCY": CURRENCIES_GBP,  # Liste de devises
             "ATTACHMENT_POINT_100": priority_gbp,  # Valeur spécifique pour GBP
             "LIMIT_100": limit_gbp,                # Valeur spécifique pour GBP
             "includes_hull": True,
@@ -127,7 +127,7 @@ program_name = f"AVIATION_AXA_XL_2024_{timestamp}"
 program = build_program(
     name=program_name,
     structures=[qs] + xol_layers,
-    underwriting_department="aviation",
+    main_currency="EUR", underwriting_department="aviation",
 )
 
 # =============================================================================

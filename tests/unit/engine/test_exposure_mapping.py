@@ -31,7 +31,7 @@ def test_exposure_mapping_success_aviation():
         expiry_date="2025-01-01",
     )
     program = build_program(
-        name="TEST_AVIATION", structures=[qs], underwriting_department="aviation"
+        name="TEST_AVIATION", structures=[qs], main_currency="USD", underwriting_department="aviation"
     )
 
     bordereau_df = pd.DataFrame(
@@ -83,7 +83,7 @@ def test_exposure_mapping_failure_wrong_column():
         expiry_date="2025-01-01",
     )
     program = build_program(
-        name="TEST_AVIATION", structures=[qs], underwriting_department="aviation"
+        name="TEST_AVIATION", structures=[qs], main_currency="USD", underwriting_department="aviation"
     )
 
     bordereau_df = pd.DataFrame(

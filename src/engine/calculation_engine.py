@@ -7,9 +7,11 @@ from .exclusion_matcher import check_program_exclusions
 from .policy_lifecycle import (
     create_inactive_result,
     create_excluded_result,
+    create_currency_mismatch_result,
 )
 from .structure_orchestrator import StructureProcessor
 from .results import ProgramRunResult
+from .currency_validator import CurrencyValidator
 
 
 def apply_program(
@@ -21,6 +23,13 @@ def apply_program(
     is_policy_active, inactive_reason = policy.is_active(calculation_date)
     if not is_policy_active:
         return create_inactive_result(policy, program, inactive_reason)
+
+    # Validation de devise AVANT les exclusions
+    is_currency_valid, currency_error = CurrencyValidator.validate_policy_currency(
+        policy, program
+    )
+    if not is_currency_valid:
+        return create_currency_mismatch_result(policy, program, currency_error)
 
     is_excl, reason = check_program_exclusions(
         policy, program, calculation_date=calculation_date

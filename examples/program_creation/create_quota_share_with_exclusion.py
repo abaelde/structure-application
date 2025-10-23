@@ -32,13 +32,8 @@ print(f"Backend de sauvegarde: {BACKEND}")
 # Créer un quota share avec condition normale uniquement
 qs = build_quota_share(
     name="QS Casualty 25%",
-    conditions_config=[
-        {
-            "country_cd": None,
-            "cession_pct": 0.25,
-            "signed_share": 1.0,
-        },
-    ],
+    cession_pct=0.25,
+    signed_share=1.0,
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
     expiry_date="2024-12-31",
@@ -59,7 +54,7 @@ program_name = f"Quota_Share_with_Exclusions_Test_{timestamp}"
 program = build_program(
     name=program_name,
     structures=[qs],
-    underwriting_department="casualty",
+    main_currency="EUR", underwriting_department="casualty",
     exclusions=exclusions,
 )
 

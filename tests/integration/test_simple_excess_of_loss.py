@@ -33,6 +33,7 @@ def test_single_line_excess_of_loss_basic():
     program = build_program(
         name="SINGLE_EXCESS_OF_LOSS_2024",
         structures=[xl_structure],
+        main_currency="EUR",
         underwriting_department="test",
     )
 
@@ -101,12 +102,12 @@ def test_single_line_excess_of_loss_by_country():
         limit=15_000_000,       # Valeur par défaut
         special_conditions=[
             {
-                "country_cd": "US",
+                "COUNTRIES": "US",
                 "attachment": 5_000_000,
                 "limit": 20_000_000,
             },
             {
-                "country_cd": "FR",
+                "COUNTRIES": "FR",
                 "attachment": 10_000_000,
                 "limit": 15_000_000,
             },
@@ -119,6 +120,7 @@ def test_single_line_excess_of_loss_by_country():
     program = build_program(
         name="XL_BY_COUNTRY_2024",
         structures=[xl_structure],
+        main_currency="EUR",
         underwriting_department="test",
     )
 

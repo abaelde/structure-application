@@ -3,7 +3,7 @@ Création du programme Casualty AIG 2024
 
 Programme casualty avec 1 structure Quota Share avec 2 conditions:
 1. condition générale: Quota Share 100% avec limite de 25M
-2. condition cyber: Quota Share 100% avec limite de 10M sur le risque cyber
+2. condition cyber: Quota Share 100% avec limite de 10M sur le produit Cyber
 
 Programme risk attaching avec réassureur share à 10% (à déterminer)
 """
@@ -12,7 +12,7 @@ Programme risk attaching avec réassureur share à 10% (à déterminer)
 # CONFIGURATION
 # =============================================================================
 # Choisir le backend de sauvegarde : "snowflake" ou "csv_folder"
-BACKEND = "snowflake"  # Changez cette valeur selon vos besoins
+BACKEND = "csv_folder"  # Changez cette valeur selon vos besoins
 
 # =============================================================================
 # SCRIPT
@@ -35,17 +35,12 @@ REINSURER_SHARE = 0.10
 
 qs = build_quota_share(
     name="QS_1",
-    conditions_config=[
+    cession_pct=CESSION_RATE,
+    signed_share=REINSURER_SHARE,
+    special_conditions=[
         {
-            "cession_pct": CESSION_RATE,
-            "limit": 25_000_000,
-            "signed_share": REINSURER_SHARE,
-        },
-        {
-            "cession_pct": CESSION_RATE,
             "limit": 10_000_000,
-            "signed_share": REINSURER_SHARE,
-            "pol_risk_name_ced": "cyber",
+            "PRODUCT_TYPE_LEVEL_1": ["Cyber"],  # Condition sur le type de produit (liste)
         },
     ],
     claim_basis="risk_attaching",
@@ -58,7 +53,7 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 program_name = f"CASUALTY_AIG_2024_{timestamp}"
 
 program = build_program(
-    name=program_name, structures=[qs], underwriting_department="casualty"
+    name=program_name, structures=[qs], main_currency="EUR", underwriting_department="casualty"
 )
 
 # =============================================================================

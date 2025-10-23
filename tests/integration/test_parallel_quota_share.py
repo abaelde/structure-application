@@ -45,6 +45,7 @@ def test_double_quota_share_parallel():
     program = build_program(
         name="DOUBLE_QUOTA_SHARE_2024",
         structures=[qs_10, qs_15],
+        main_currency="EUR",
         underwriting_department="test",
     )
 

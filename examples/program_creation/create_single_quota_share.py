@@ -32,11 +32,7 @@ print(f"Backend de sauvegarde: {BACKEND}")
 
 qs = build_quota_share(
     name="QS_30",
-    conditions_config=[
-        {
-            "cession_pct": 0.30,
-        }
-    ],
+    cession_pct=0.30,
     claim_basis="risk_attaching",
     inception_date="2024-01-01",
     expiry_date="2025-01-01",
@@ -47,7 +43,10 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 program_name = f"SINGLE_QUOTA_SHARE_2024_{timestamp}"
 
 program = build_program(
-    name=program_name, structures=[qs], underwriting_department="test"
+    name=program_name, 
+    structures=[qs], 
+    main_currency="EUR",
+    underwriting_department="test"
 )
 
 # =============================================================================

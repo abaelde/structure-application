@@ -19,6 +19,7 @@ def test_program_describe_generates_text():
     program = build_program(
         name="Test Program",
         structures=[qs_structure],
+        main_currency="EUR",
         dimension_columns=[],
         underwriting_department="test",
     )

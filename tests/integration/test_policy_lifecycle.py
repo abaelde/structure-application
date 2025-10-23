@@ -27,7 +27,7 @@ def test_policy_expiry_mechanism():
         expiry_date="2027-01-01",
     )
     program = build_program(
-        name="TEST_LIFECYCLE", structures=[qs], underwriting_department="test"
+        name="TEST_LIFECYCLE", structures=[qs], main_currency="EUR", underwriting_department="test"
     )
 
     test_data = {

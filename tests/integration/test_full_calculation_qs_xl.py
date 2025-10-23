@@ -62,7 +62,7 @@ def test_quota_share_then_excess_of_loss_without_rescaling():
     )
 
     program = build_program(
-        name="TEST_QS_XL", structures=[qs, xl], underwriting_department="test"
+        name="TEST_QS_XL", structures=[qs, xl], main_currency="EUR", underwriting_department="test"
     )
 
     # 2. Créer le bordereau de test

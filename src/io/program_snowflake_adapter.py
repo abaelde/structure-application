@@ -6,7 +6,7 @@
 from __future__ import annotations
 from typing import Tuple, Optional, Dict, Any, List
 import pandas as pd
-from src.domain.schema import PROGRAM_TO_BORDEREAU_DIMENSIONS
+from src.domain.schema import PROGRAM_TO_SNOWFLAKE_COLUMNS
 from src.serialization.program_frames import ProgramFrames, condition_dims_in
 from src.io.snowflake_db import parse_db_schema, connect as sf_connect, insert_df
 

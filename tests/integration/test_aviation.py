@@ -51,8 +51,8 @@ def test_hull_liability_filtering_aviation():
         expiry_date="2025-01-01",
         special_conditions=[
             {
-                "includes_hull": True,
-                "includes_liability": True,
+                "INCLUDES_HULL": True,
+                "INCLUDES_LIABILITY": True,
             }
         ],
     )
@@ -68,8 +68,8 @@ def test_hull_liability_filtering_aviation():
         expiry_date="2025-01-01",
         special_conditions=[
             {
-                "includes_hull": True,
-                "includes_liability": False,
+                "INCLUDES_HULL": True,
+                "INCLUDES_LIABILITY": False,
             }
         ],
     )
@@ -85,8 +85,8 @@ def test_hull_liability_filtering_aviation():
         expiry_date="2025-01-01",
         special_conditions=[
             {
-                "includes_hull": False,
-                "includes_liability": True,
+                "INCLUDES_HULL": False,
+                "INCLUDES_LIABILITY": True,
             }
         ],
     )
@@ -94,6 +94,7 @@ def test_hull_liability_filtering_aviation():
     program = build_program(
         name="AVIATION_HULL_LIABILITY_SPLIT",
         structures=[qs_all, xol_hull, xol_liability],
+        main_currency="USD",
         underwriting_department="aviation",
     )
 
@@ -210,8 +211,8 @@ def test_hull_only_structure():
         expiry_date="2025-01-01",
         special_conditions=[
             {
-                "includes_hull": True,
-                "includes_liability": False,
+                "INCLUDES_HULL": True,
+                "INCLUDES_LIABILITY": False,
             }
         ],
     )
@@ -219,6 +220,7 @@ def test_hull_only_structure():
     program = build_program(
         name="HULL_ONLY_PROGRAM",
         structures=[qs_hull],
+        main_currency="USD",
         underwriting_department="aviation",
     )
 
@@ -290,8 +292,8 @@ def test_liability_only_structure():
         expiry_date="2025-01-01",
         special_conditions=[
             {
-                "includes_hull": False,
-                "includes_liability": True,
+                "INCLUDES_HULL": False,
+                "INCLUDES_LIABILITY": True,
             }
         ],
     )
@@ -299,6 +301,7 @@ def test_liability_only_structure():
     program = build_program(
         name="LIABILITY_ONLY_PROGRAM",
         structures=[qs_liability],
+        main_currency="USD",
         underwriting_department="aviation",
     )
 
@@ -367,7 +370,7 @@ def test_casualty_unaffected_by_hull_liability_flags():
     )
 
     program = build_program(
-        name="CASUALTY_PROGRAM", structures=[qs_30], underwriting_department="casualty"
+        name="CASUALTY_PROGRAM", structures=[qs_30], main_currency="EUR", underwriting_department="casualty"
     )
 
     bordereau_data = {

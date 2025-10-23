@@ -78,7 +78,7 @@ program_name = f"AVIATION_OLD_REPUBLIC_2024_{timestamp}"
 program = build_program(
     name=program_name,
     structures=[xol_1, xol_2, xol_3],
-    underwriting_department="aviation",
+    main_currency="EUR", underwriting_department="aviation",
 )
 
 # =============================================================================
