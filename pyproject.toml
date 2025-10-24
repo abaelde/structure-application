@@ -9,8 +9,9 @@ dependencies = [
     "streamlit>=1.50.0",
     "plotly>=6.3.1",
     "networkx>=3.5",
-    "snowflake-connector-python>=3.14.0,<4.0.0",
-    "snowflake-snowpark-python>=1.29.0",
+    "snowflake-snowpark-python>=1.25.0",
+    "snowflake-connector-python[pandas]>=3.18.0",
+   
 ]
 
 [tool.black]

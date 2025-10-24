@@ -1384,6 +1384,12 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/9d/38/ea46bbe910bd44ce52aaeea2fefe072392c7c6f3c04bfd0aea3f8fdd5e3a/snowflake_connector_python-3.18.0-cp313-cp313-win_amd64.whl", hash = "sha256:aeeb181a156333480f60b5f8ddbb3d087e288b4509adbef7993236defe4d7570", size = 1160453, upload-time = "2025-10-06T12:15:58.405Z" },
 ]
 
+[package.optional-dependencies]
+pandas = [
+    { name = "pandas" },
+    { name = "pyarrow" },
+]
+
 [[package]]
 name = "snowflake-snowpark-python"
 version = "1.40.0"
@@ -1450,7 +1456,7 @@ dependencies = [
     { name = "networkx" },
     { name = "pandas" },
     { name = "plotly" },
-    { name = "snowflake-connector-python" },
+    { name = "snowflake-connector-python", extra = ["pandas"] },
     { name = "snowflake-snowpark-python" },
     { name = "streamlit" },
 ]
@@ -1467,8 +1473,8 @@ requires-dist = [
     { name = "networkx", specifier = ">=3.5" },
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "plotly", specifier = ">=6.3.1" },
-    { name = "snowflake-connector-python", specifier = ">=3.14.0,<4.0.0" },
-    { name = "snowflake-snowpark-python", specifier = ">=1.29.0" },
+    { name = "snowflake-connector-python", extras = ["pandas"], specifier = ">=3.18.0" },
+    { name = "snowflake-snowpark-python", specifier = ">=1.25.0" },
     { name = "streamlit", specifier = ">=1.50.0" },
 ]
 
