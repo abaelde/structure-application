@@ -27,13 +27,17 @@ class SnowparkSessionManager:
         if self._session is None:
             self._config = SnowflakeConfig.load()
             
-            if not self._config.validate():
-                raise RuntimeError("Configuration Snowflake invalide pour Snowpark")
+            print(self._config.validate())
             
             print(f"🔗 Création de la session Snowpark: {self._config.account}")
             
             # Créer la session Snowpark
-            self._session = Session.builder.configs(self._config.to_dict()).create()
+            IF_PERSO = True
+            if IF_PERSO:
+                self._session = Session.builder.configs(self._config.to_dict()).create()
+            else:
+                self._session = Session.builder.config("connection_name", "").create()
+            # Add PRE VERSION HERE
             
             print(f"✅ Session Snowpark créée avec succès")
         
@@ -53,19 +57,15 @@ class SnowparkSessionManager:
     
     def test_connection(self) -> bool:
 
-        try:
-            session = self.get_session()
+        session = self.get_session()
+        
+        # Test simple avec une requête
+        result = session.sql("SELECT CURRENT_VERSION()").collect()
+        version = result[0][0]
+        
+        print(f"✅ Connexion Snowpark réussie ! Version: {version}")
+        return True
             
-            # Test simple avec une requête
-            result = session.sql("SELECT CURRENT_VERSION()").collect()
-            version = result[0][0]
-            
-            print(f"✅ Connexion Snowpark réussie ! Version: {version}")
-            return True
-            
-        except Exception as e:
-            print(f"❌ Échec de la connexion Snowpark: {e}")
-            return False
     
     def get_config(self) -> SnowflakeConfig:
 

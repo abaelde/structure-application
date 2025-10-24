@@ -372,12 +372,12 @@ class SnowparkProgramIO:
                 elif col == "ACTIVE_IND":
                     # Boolean - True par défaut
                     out[col] = True
-                elif col == "CEDENT_ID":
+                elif col == "REF_CEDENT_ID":
                     # ID du cédant - utiliser une valeur par défaut
                     out[col] = 1
                 elif col == "UW_DEPARTMENT_ID":
-                    # ID du département - utiliser le même que UW_LOB_ID
-                    out[col] = out.get("UW_LOB_ID", "aviation")
+                    # ID du département - utiliser le même que REF_REF_ID
+                    out[col] = out.get("REF_REF_ID", "aviation")
                 else:
                     # Autres colonnes - NULL par défaut
                     out[col] = None

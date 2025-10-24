@@ -113,7 +113,7 @@ def test_program_serialization():
         print("\n2. Aperçu des DataFrames:")
         print("   Program:")
         print(f"     - TITLE: {dfs['program']['TITLE'].iloc[0]}")
-        print(f"     - UW_LOB_ID: {dfs['program']['UW_LOB_ID'].iloc[0]}")
+        print(f"     - REF_REF_ID: {dfs['program']['REF_REF_ID'].iloc[0]}")
         
         print("   Structures:")
         if not dfs['structures'].empty:

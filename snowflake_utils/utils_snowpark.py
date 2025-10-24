@@ -13,49 +13,26 @@ from src.managers.program_snowpark_manager import SnowparkProgramManager
 
 
 def save_program_snowpark(program, program_name: str) -> bool:
-    """
-    Sauvegarde un programme dans Snowflake en utilisant Snowpark.
 
-    Args:
-        program: Objet Program à sauvegarder
-        program_name: Nom du programme
-
-    Returns:
-        bool: True si la sauvegarde réussit
-
-    Raises:
-        ValueError: Si la configuration Snowflake est invalide
-        RuntimeError: Si la sauvegarde échoue
-    """
+    print(f"💾 Sauvegarde du programme '{program_name}' via Snowpark...")
     
-
-    try:
-        print(f"💾 Sauvegarde du programme '{program_name}' via Snowpark...")
-        
-        # Obtenir la configuration Snowflake
-        config = SnowflakeConfig.load()
-        if not config.validate():
-            raise ValueError("Configuration Snowflake invalide")
+    # Obtenir la configuration Snowflake
+    config = SnowflakeConfig.load()
+    print(config.validate())
     
         
-        # Obtenir une session Snowpark
-        session = get_snowpark_session()
-        
-        try:
-            # Créer le manager Snowpark
-            manager = SnowparkProgramManager(session)
+    # Obtenir une session Snowpark
+    session = get_snowpark_session()
+    
+    # Créer le manager Snowpark
+    manager = SnowparkProgramManager(session)
+    
+    # Sauvegarder le programme (pas besoin de passer la destination)
+    manager.save(program)
+    
+    print(f"✅ Programme '{program_name}' sauvegardé avec succès via Snowpark !")
+    return True
+    
+    # Fermer la session Snowpark
+    close_snowpark_session()
             
-            # Sauvegarder le programme (pas besoin de passer la destination)
-            manager.save(program)
-            
-            print(f"✅ Programme '{program_name}' sauvegardé avec succès via Snowpark !")
-            return True
-            
-        finally:
-            # Fermer la session Snowpark
-            close_snowpark_session()
-            
-    except Exception as e:
-        error_msg = f"Échec de la sauvegarde du programme '{program_name}' via Snowpark: {e}"
-        print(f"❌ {error_msg}")
-        raise RuntimeError(error_msg) from e

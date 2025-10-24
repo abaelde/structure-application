@@ -45,7 +45,7 @@ SHEETS = (
 
 PROGRAM_COLS = SimpleNamespace(
     TITLE="TITLE",
-    UW_DEPARTMENT_CODE="UW_LOB_ID", # AURE : pas certains si c'est le bon nom de colonne
+    UW_DEPARTMENT_CODE="REF_REF_ID", # AURE : pas certains si c'est le bon nom de colonne
     MAIN_CURRENCY="MAIN_CURRENCY_ID",
 )
 

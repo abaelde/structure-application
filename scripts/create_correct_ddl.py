@@ -10,10 +10,6 @@ from pathlib import Path
 def create_correct_ddl():
     """Crée le DDL correct avec auto-increment"""
 
-    # Lire l'analyse des CSV
-    analysis_file = Path(__file__).parent / "csv_structure_analysis.json"
-    with open(analysis_file, "r") as f:
-        analysis = json.load(f)
 
     ddl_content = """-- DDL corrigé avec auto-increment
 -- Date: 2025-10-21
@@ -23,11 +19,11 @@ CREATE TABLE REINSURANCE_PROGRAM (
   REINSURANCE_PROGRAM_ID                     NUMBER(38,0)    AUTOINCREMENT PRIMARY KEY,
   ID_PRE                  VARCHAR,
   TITLE                   VARCHAR          NOT NULL,
-  CEDENT_ID                     NUMBER(38,0),
+  REF_CEDENT_ID                     NUMBER(38,0),
   ACTIVE_IND              BOOLEAN         NOT NULL,
   ADDITIONAL_INFO                 VARCHAR,
   UW_DEPARTMENT_ID        VARCHAR,
-  UW_LOB_ID   VARCHAR          NOT NULL,
+  REF_REF_ID   VARCHAR          NOT NULL,
   BUSPAR_CED_REG_CLASS_CD        VARCHAR,
   MAIN_CURRENCY_ID        VARCHAR,
   CREATED_AT               TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP(),

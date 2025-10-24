@@ -179,7 +179,7 @@ class ProgramSerializer:
         program_df = pd.DataFrame(
             {
                 "TITLE": [program.name],
-                "UW_LOB_ID": [program.underwriting_department],
+                "REF_REF_ID": [program.underwriting_department],
                 "MAIN_CURRENCY_ID": [program.main_currency],
                 "ACTIVE_IND": [True],  # Colonne requise par Snowflake
             }
